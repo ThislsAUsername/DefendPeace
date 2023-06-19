@@ -9,7 +9,6 @@ import Engine.*;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.Combat.CombatContext.CalcType;
-import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitActionLifecycles.BattleLifecycle.BattleAction;
 import Engine.UnitActionLifecycles.CaptureLifecycle.CaptureAction;
 import Engine.UnitActionLifecycles.WaitLifecycle;
@@ -100,6 +99,7 @@ public class WallyAI extends ModularAI
     ActionPlan toAchieve; // TODO: Harvest these and put them in the right order somehow - via eviction?
   }
   private UnitPrediction[][] mapPlan; // TODO: Invalidate if any unit gets trapped/ends up not where we expect - cache unit+destination on offer action
+  public PredictionMap predMap; // Owns a reference to the above, to expose its contents to Utils
   private HashSet<Unit> plannedUnits;
   private static class TileThreat
   {
@@ -181,6 +181,7 @@ public class WallyAI extends ModularAI
     allThreats = new ArrayList<Unit>();
     capPhase = new CapPhaseAnalyzer(map, myArmy);
     mapPlan = new UnitPrediction[map.mapWidth][map.mapHeight];
+    predMap = new PredictionMap(myArmy, mapPlan);
     plannedUnits = new HashSet<>();
     threatMap = new ArrayList[map.mapWidth][map.mapHeight];
     for( int x = 0; x < map.mapWidth; ++x )
@@ -457,7 +458,7 @@ public class WallyAI extends ModularAI
       // Find the possible destination.
       XYCoord coord = new XYCoord(unit.x, unit.y);
 
-      if( AIUtils.isFriendlyProduction(gameMap, myArmy, coord) || !unit.model.hasImmobileWeapon() )
+      if( AIUtils.isFriendlyProduction(ai.predMap, myArmy, coord) || !unit.model.hasImmobileWeapon() )
         return null;
       UnitContext resident = ai.mapPlan[coord.xCoord][coord.yCoord].identity;
       // If we've already made plans here, skip evaluation
@@ -469,7 +470,7 @@ public class WallyAI extends ModularAI
       GamePath movePath = GamePath.stayPut(unit);
 
       // Figure out what I can do here.
-      ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
+      ArrayList<GameActionSet> actionSets = unit.getPossibleActions(ai.predMap, movePath);
       double bestDamage = 0;
       for( GameActionSet actionSet : actionSets )
       {
@@ -533,7 +534,7 @@ public class WallyAI extends ModularAI
 
       HashSet<XYCoord> industryBlockers = new HashSet<XYCoord>();
       for( XYCoord coord : industries )
-        industryBlockers.addAll(Utils.findLocationsInRange(gameMap, coord, 0, 1));
+        industryBlockers.addAll(Utils.findLocationsInRange(ai.predMap, coord, 0, 1));
 
       for( XYCoord coord : industryBlockers )
       {
@@ -555,7 +556,7 @@ public class WallyAI extends ModularAI
         }
 
         targetLoc = coord;
-        Map<XYCoord, Unit> neededAttacks = AICombatUtils.findMultiHitKill(gameMap, target.unit, attackerOptions, industries);
+        Map<XYCoord, Unit> neededAttacks = AICombatUtils.findMultiHitKill(ai.predMap, target.unit, attackerOptions, industries);
         if( null == neededAttacks )
           continue;
 
@@ -571,16 +572,16 @@ public class WallyAI extends ModularAI
             continue;
           }
 
-          final GamePath movePath = Utils.findShortestPath(unit, xyc, gameMap);
+          final GamePath movePath = Utils.findShortestPath(unit, xyc, ai.predMap);
           final UnitContext attacker = new UnitContext(gameMap, unit);
           attacker.setPath(movePath);
 
-          BattleSummary results = CombatEngine.simulateBattleResults(attacker, target, gameMap, CALC);
+          BattleSummary results = CombatEngine.simulateBattleResults(attacker, target, ai.predMap, CALC);
           final int targetHP = results.defender.after.getHP();
           ai.log(String.format("    %s brings the HP total to %s", unit.toStringWithLocation(), targetHP));
 
           boolean isAttack = true;
-          final BattleAction attack = new BattleAction(gameMap, unit, movePath, targetLoc.xCoord, targetLoc.yCoord);
+          final BattleAction attack = new BattleAction(ai.predMap, unit, movePath, targetLoc.xCoord, targetLoc.yCoord);
 
           ai.updatePlan(this, unit, attack, isAttack, targetHP);
           attackerOptions.remove(unit);
@@ -736,12 +737,12 @@ public class WallyAI extends ModularAI
     {
       XYCoord position = new XYCoord(unit.x, unit.y);
 
-      PathCalcParams pcp = new PathCalcParams(unit, gameMap);
+      PathCalcParams pcp = new PathCalcParams(unit, ai.predMap);
       pcp.includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
       ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
       if( mustMove )
         destinations.remove(new XYCoord(unit.x, unit.y));
-      destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, co.army, destinations, !avoidProduction));
+      destinations.removeAll(AIUtils.findAlliedIndustries(ai.predMap, co.army, destinations, !avoidProduction));
       // sort by furthest away, good for capturing
       Utils.sortLocationsByDistance(position, destinations);
       Collections.reverse(destinations);
@@ -764,7 +765,7 @@ public class WallyAI extends ModularAI
         // Also, don't mess with canceling attacks that clear tiles, at least for now
 
         // Figure out what I can do here.
-        ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, pcp.includeOccupiedSpaces);
+        ArrayList<GameActionSet> actionSets = unit.getPossibleActions(ai.predMap, movePath, pcp.includeOccupiedSpaces);
         for( GameActionSet actionSet : actionSets )
         {
           // See if we can bag enough damage to be worth sacrificing the unit
@@ -779,7 +780,7 @@ public class WallyAI extends ModularAI
 
               // Difference in estimation conditions could end up with oscillation between two attacks on the same target
               // Just... be aware, future me, in case that's a problem
-              final AttackValue results = new AttackValue(ai, actor, target, gameMap);
+              final AttackValue results = new AttackValue(ai, actor, target, ai.predMap);
               final int fundsDelta = results.fundsDelta;
               if( fundsDelta <= bestFundsDelta )
                 continue;
@@ -906,21 +907,21 @@ public class WallyAI extends ModularAI
     ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
 
     ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
-    Utils.sortLocationsByTravelTime(unit, stations, gameMap);
+    Utils.sortLocationsByTravelTime(unit, stations, predMap);
 
     boolean shouldResupply = false;
     GamePath toClosestStation = null;
     boolean canResupply = stations.size() > 0;
     if( canResupply )
     {
-      toClosestStation = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(stations.get(0));
+      toClosestStation = new PathCalcParams(unit, predMap).setTheoretical().findShortestPath(stations.get(0));
       canResupply &= null != toClosestStation;
     }
     if( canResupply )
     {
       shouldResupply = unit.getHealth() <= UNIT_HEAL_THRESHOLD;
       shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHOLD
-          * toClosestStation.getFuelCost(unit, gameMap);
+          * toClosestStation.getFuelCost(unit, predMap);
       shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHOLD;
     }
 
@@ -929,11 +930,12 @@ public class WallyAI extends ModularAI
       log(String.format("  %s needs supplies.", unit.toStringWithLocation()));
       goals.addAll(stations);
       if( avoidProduction )
-        goals.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, goals, !avoidProduction));
+        goals.removeAll(AIUtils.findAlliedIndustries(predMap, myArmy, goals, !avoidProduction));
     }
     else if( uc.actionTypes.contains(UnitActionFactory.CAPTURE) )
     {
       for( XYCoord xyc : futureCapTargets )
+        // predMap shouldn't meaningfully diverge from reality here, I think
         if( !AIUtils.isCapturing(gameMap, myArmy.cos[0], xyc) )
           goals.add(xyc);
     }
@@ -966,7 +968,7 @@ public class WallyAI extends ModularAI
       UnitModel model = target.model;
       XYCoord targetCoord = new XYCoord(target.x, target.y);
       double effectiveness = findEffectiveness(um.um, target.model);
-      if (0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), targetCoord, gameMap).getPathLength() &&
+      if (0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), targetCoord, predMap).getPathLength() &&
           AGGRO_EFFECT_THRESHOLD < effectiveness)
       {
         valueMap.put(model, effectiveness*target.getCost());
@@ -997,7 +999,7 @@ public class WallyAI extends ModularAI
         MapLocation loc = gameMap.getLocation(coord);
         if( um.co.unitProductionByTerrain.containsKey(loc.getEnvironment().terrainType)
             && myArmy.isEnemy(loc.getOwner())
-            && 0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), coord, gameMap).getPathLength() )
+            && 0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), coord, predMap).getPathLength() )
         {
           goals.add(coord);
         }
@@ -1019,7 +1021,7 @@ public class WallyAI extends ModularAI
   {
     boolean ignoreResident = true;
     // Find the possible destinations.
-    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
+    PathCalcParams pcp = new PathCalcParams(unit, predMap);
     pcp.includeOccupiedSpaces = ignoreResident;
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
     destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, destinations, !avoidProduction));
@@ -1028,7 +1030,7 @@ public class WallyAI extends ModularAI
 
     XYCoord goal = null;
     GamePath path = null;
-    ArrayList<XYCoord> validTargets = findTravelDestinations(gameMap, allThreats, threatMap, unit, avoidProduction);
+    ArrayList<XYCoord> validTargets = findTravelDestinations(predMap, allThreats, threatMap, unit, avoidProduction);
     if( mustMove ) // If we *must* travel, make sure we do actually move.
     {
       destinations.remove(new XYCoord(unit.x, unit.y));
@@ -1037,7 +1039,7 @@ public class WallyAI extends ModularAI
 
     for( XYCoord target : validTargets )
     {
-      path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(target);
+      path = new PathCalcParams(unit, predMap).setTheoretical().findShortestPath(target);
       if( path != null ) // We can reach it.
       {
         goal = target;
@@ -1050,7 +1052,7 @@ public class WallyAI extends ModularAI
     // Choose the point on the path just out of our range as our 'goal', and try to move there.
     // This will allow us to navigate around large obstacles that require us to move away
     // from our intended long-term goal.
-    path.snip(unit.getMovePower(gameMap) + 1); // Trim the path approximately down to size.
+    path.snip(unit.getMovePower(predMap) + 1); // Trim the path approximately down to size.
     XYCoord pathPoint = path.getEndCoord(); // Set the last location as our goal.
 
     // Sort my currently-reachable move locations by distance from the goal,
@@ -1068,7 +1070,7 @@ public class WallyAI extends ModularAI
     for( Utils.SearchNode xyc : destinations )
     {
 //      log(String.format("    is it safe to go to %s?", xyc));
-      if( !ignoreSafety && !canWallHere(gameMap, threatMap, unit, xyc) )
+      if( !ignoreSafety && !canWallHere(predMap, threatMap, unit, xyc) )
         continue;
 
       UnitContext resident = mapPlan[xyc.xCoord][xyc.yCoord].identity;
@@ -1082,7 +1084,7 @@ public class WallyAI extends ModularAI
 //      log(String.format("    Yes"));
 
       GamePath movePath = xyc.getMyPath();
-      ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, ignoreResident);
+      ArrayList<GameActionSet> actionSets = unit.getPossibleActions(predMap, movePath, ignoreResident);
       if( actionSets.size() > 0 )
       {
         // Since we're moving anyway, might as well try shooting the scenery
@@ -1092,7 +1094,7 @@ public class WallyAI extends ModularAI
           {
             for( GameAction attack : actionSet.getGameActions() )
             {
-              double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
+              double damageValue = AICombatUtils.scoreAttackAction(unit, attack, predMap,
                   (results) -> {
                     int loss   = Math.min(unit                 .getHealth(), (int)results.attacker.getPreciseHealthDamage());
                     int damage = Math.min(results.defender.unit.getHealth(), (int)results.defender.getPreciseHealthDamage());
@@ -1157,7 +1159,7 @@ public class WallyAI extends ModularAI
 
     // TODO: Determine whether the ally actually needs a wall there. Mechs walling for Tanks vs inf is... silly.
     // if we'd be a nice wall for a worthy ally, we can pretend we're safe there also
-    ArrayList<XYCoord> adjacentCoords = Utils.findLocationsInRange(gameMap, xyc, 1);
+    ArrayList<XYCoord> adjacentCoords = Utils.findLocationsInRange(predMap, xyc, 1);
     for( XYCoord coord : adjacentCoords )
     {
       MapLocation loc = gameMap.getLocation(coord);
@@ -1243,7 +1245,7 @@ public class WallyAI extends ModularAI
       if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
       {
         // If we can get to a target...
-        if( 0 < findCombatUnitDestinations(gameMap, allThreats, loc.getCoordinates(), new ModelForCO(loc.getOwner(), model))
+        if( 0 < findCombatUnitDestinations(predMap, allThreats, loc.getCoordinates(), new ModelForCO(loc.getOwner(), model))
             .size() )
           candidates.add(loc.getCoordinates());
       }
@@ -1289,7 +1291,7 @@ public class WallyAI extends ModularAI
     final int infCost = infModel.costBase;
 
     // Get a count of enemy forces.
-    Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, gameMap);
+    Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, predMap);
     Map<UnitModel, Double> enemyUnitCounts = new HashMap<UnitModel, Double>();
     for( Commander co : unitLists.keySet() )
     {
@@ -1569,5 +1571,46 @@ public class WallyAI extends ModularAI
     if( apType == UnitActionFactory.WAIT )
       opportunityCost = 0;
     return opportunityCost;
+  }
+
+  /**
+   * This is probably some kind of sin against design
+   * <p>But it provides a way to get Utils to assume the map state is what I think it will be, so it seems legit
+   * <p>Overrides/implements the base methods for the unit-in-tile fetching behavior
+   */
+  public static class PredictionMap extends MapPerspective
+  {
+    private static final long serialVersionUID = 1L;
+    private UnitPrediction[][] mapPlan;
+    public PredictionMap(Army pViewer, UnitPrediction[][] mapPlan)
+    {
+      super(pViewer.myView, pViewer);
+      this.mapPlan = mapPlan;
+    }
+    @Override
+    public MapLocation getLocation(int x, int y)
+    {
+      XYCoord coord = new XYCoord(x, y);
+      MapLocation masterLoc = master.getLocation(coord);
+      MapLocation returnLoc = new MapLocation(masterLoc.getEnvironment(), coord);
+      returnLoc.setOwner(masterLoc.getOwner());
+      UnitContext resSource = mapPlan[x][y].identity;
+
+      if( null == resSource )
+        return returnLoc;
+
+      Unit resident = resSource.unit;
+      if( null == resident )
+        // If we've planned a unit that doesn't exist, make stuff up
+        resident = new Unit(resSource.CO, resSource.model);
+      returnLoc.setResident(resident);
+      return returnLoc;
+    }
+    @Override
+    public boolean isLocationEmpty(Unit unit, int x, int y)
+    {
+      Unit resident = getLocation(x, y).getResident();
+      return null == resident || resident == unit;
+    }
   }
 }
