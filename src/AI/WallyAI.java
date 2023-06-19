@@ -259,6 +259,7 @@ public class WallyAI extends ModularAI
 
     mapPlan[dest.xCoord][dest.yCoord].toAchieve = new ActionPlan(whodunit, action);
     mapPlan[dest.xCoord][dest.yCoord].identity = uc;
+    uc.coord = dest;
     if( null != uc.unit )
       plannedUnits.add(uc.unit);
     if( isAttack )
