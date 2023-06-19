@@ -69,9 +69,8 @@ public class TestAIBehavior extends TestCase
       testPassed &= validate(testClearAttackRoute(ai), "  "+ai.getName()+" failed route clearing test.");
       testPassed &= validate(testWalkInLine(ai), "  "+ai.getName()+" failed line walking test.");
       testPassed &= validate(testInfWadeThroughTanks(ai), "  "+ai.getName()+" failed Infantry move priority test.");
+      testPassed &= validate(testTankWadeThroughInfs(ai), "  "+ai.getName()+" failed Tank move priority test.");
     }
-    testPassed &= validate(testTankWadeThroughInfs(Muriel.info), "  Tank move priority test failed.");
-    // TODO: Consider making Wally pass the above
     testPassed &= validate(testProductionClearing(WallyAI.info), "  Free up industry test failed.");
 
     return testPassed;

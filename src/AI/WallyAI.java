@@ -61,7 +61,7 @@ public class WallyAI extends ModularAI
   private static final double UNIT_REARM_THRESHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
   private static final double AGGRO_EFFECT_THRESHOLD = 0.42; // How effective do I need to be against a unit to target it?
   private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
-  private static final double AGGRO_CHEAPER_WEIGHT = 0.1; // Multiplier on the score penalty for using expensive units to blow up stragglers
+  private static final double AGGRO_CHEAPER_WEIGHT = 0.01; // Multiplier on the score penalty for using expensive units to blow up stragglers
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
   private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges
@@ -85,6 +85,7 @@ public class WallyAI extends ModularAI
   private static class ActionPlan
   {
     final GameAction action;
+    final XYCoord startPos;
     final AIModule whodunit;
     ArrayList<Unit> killPrereqs = new ArrayList<>();
     XYCoord clearTile; // The tile we expect to have emptied with our attack, if any.
@@ -93,13 +94,17 @@ public class WallyAI extends ModularAI
     {
       this.whodunit = whodunit;
       this.action = action;
+      if( null != action.getActor() )
+        startPos = new XYCoord(action.getActor());
+      else
+        startPos = action.getTargetLocation();
     }
     @Override
     public String toString()
     {
       if( null == clearTile )
-        return whodunit.toString() + "\n\t" + action.toString();
-      return whodunit.toString() + "\n\t" + String.format("%s\n\tclearing %s", action, clearTile);
+        return whodunit.toString() + "\n\t" + action.toString() + "\n";
+      return whodunit.toString() + "\n\t" + String.format("%s\n\tclearing %s", action, clearTile) + "\n";
     }
   }
   public ActionPlan lastAction;
@@ -177,9 +182,9 @@ public class WallyAI extends ModularAI
             new FreeRealEstate(army, this, false, false), // prioritize non-eviction
             new FreeRealEstate(army, this, true,  false), // evict if necessary
             new BuildStuff(army, this),
-            new Travel(army, this, false),
+            new Travel(army, this, false), // High value travel
             new FreeRealEstate(army, this, true,  true), // step on industries we're not using
-            new Travel(army, this, true),
+            new Eviction(army, this), // Getting dudes out of the way
 
             new FillActionQueue(army, this),
             new PowerActivator(army, CommanderAbility.PHASE_TURN_END)
@@ -298,8 +303,13 @@ public class WallyAI extends ModularAI
     {
       final GameAction action = lastAction.action;
       final Unit actor = action.getActor();
-      if( null != actor && actor != gameMap.getResident(action.getMoveLocation()) )
-        theUnexpected = true;
+      if( null != actor ) // Make sure only our unit is in the start and end position
+      {
+        if( !gameMap.isLocationEmpty(actor, lastAction.startPos) )
+          theUnexpected = true;
+        if( actor != gameMap.getResident(action.getMoveLocation()) )
+          theUnexpected = true;
+      }
       final XYCoord clearTile = lastAction.clearTile;
       if( null != clearTile && null != gameMap.getResident(clearTile) )
         theUnexpected = true;
@@ -369,12 +379,13 @@ public class WallyAI extends ModularAI
           ActionPlan plan = ai.mapPlan[x][y].toAchieve;
           if( null == plan )
             continue; // Nothing to do here
+          final Unit unit = plan.action.getActor();
+          if( null != unit && unit.isTurnOver )
+            continue; // Nothing to do here
 
           final XYCoord movexyc = new XYCoord(x, y);
-          Unit resident = map.getResident(x, y);
           if( vacatedTiles.contains(movexyc)
-              || null == resident
-              || plan.action.getActor() == resident
+              || map.isLocationEmpty(unit, movexyc)
           )
             queuePlan(vacatedTiles, plan);
           else
@@ -739,7 +750,8 @@ public class WallyAI extends ModularAI
       if( ai.plannedUnits.contains(unit) )
         return null;
 
-      boolean mustMove = false;
+      final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
+      boolean mustMove = null != evicter && unit != evicter.unit;
       planValueAction(this, unit.CO, ai, unit, gameMap, mustMove, !canStepOnProduction, canEvict);
 
       return null;
@@ -795,6 +807,8 @@ public class WallyAI extends ModularAI
 
               // Difference in estimation conditions could end up with oscillation between two attacks on the same target
               // Just... be aware, future me, in case that's a problem
+              actor.setWeapon(null);
+              target.setWeapon(null);
               final AttackValue results = new AttackValue(ai, actor, target, ai.predMap);
               final int fundsDelta = results.fundsDelta;
               if( fundsDelta <= bestFundsDelta )
@@ -843,6 +857,34 @@ public class WallyAI extends ModularAI
     } // ~planValueAction
   } // ~FreeRealEstate
 
+  private static final int EVICTION_DEPTH = 7;
+  private HashSet<Unit> evictionStack = new HashSet<>(EVICTION_DEPTH);
+  public static class Eviction extends UnitActionFinder<WallyAI>
+  {
+    private static final long serialVersionUID = 1L;
+    public Eviction(Army co, WallyAI ai)
+    {
+      super(co, ai);
+    }
+
+    @Override
+    public GameAction getUnitAction(Unit unit, GameMap gameMap)
+    {
+      if( ai.plannedUnits.contains(unit) )
+        return null;
+      final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
+      if( null == evicter )
+        return null;
+
+      ai.log(String.format("Evaluating eviction for %s.", unit.toStringWithLocation()));
+      boolean mustMove = true;
+      boolean avoidProduction = false;
+      boolean ignoreSafety = false;
+      ai.planTravelAction(this, gameMap, unit, ignoreSafety, mustMove, avoidProduction, true, EVICTION_DEPTH);
+
+      return null;
+    }
+  }
   // If no attack/capture actions are available now, just move around
   public static class Travel extends UnitActionFinder<WallyAI>
   {
@@ -865,9 +907,14 @@ public class WallyAI extends ModularAI
       boolean mustMove = null != evicter && unit != evicter.unit;
       boolean avoidProduction = false;
       boolean ignoreSafety = false;
-      ai.planTravelAction(this, gameMap, ai.allThreats, ai.threatMap, unit, ignoreSafety, mustMove, avoidProduction, shouldWander);
+      ai.planTravelAction(this, gameMap, unit, ignoreSafety, mustMove, avoidProduction, shouldWander, EVICTION_DEPTH);
 
       return null;
+    }
+    @Override
+    public String toString()
+    {
+      return String.format("WallyTravel(wander=%s)", shouldWander);
     }
   }
 
@@ -951,16 +998,21 @@ public class WallyAI extends ModularAI
       if( !goals.isEmpty() )
         travelPurpose = TravelPurpose.SUPPLIES;
     }
-    else if( uc.actionTypes.contains(UnitActionFactory.CAPTURE) )
+    if( goals.isEmpty() && uc.actionTypes.contains(UnitActionFactory.CAPTURE) )
     {
       for( XYCoord xyc : futureCapTargets )
+      {
         // predMap shouldn't meaningfully diverge from reality here, I think
-        if( !AIUtils.isCapturing(gameMap, myArmy.cos[0], xyc) )
+        boolean validCapDest = !AIUtils.isCapturing(gameMap, myArmy.cos[0], xyc);
+        // If the turf is taken by someone else, it's a KILL objective
+        validCapDest &= null == predMap.getResident(xyc) || myArmy == predMap.getResident(xyc).CO.army;
+        if( validCapDest )
           goals.add(xyc);
+      }
       if( !goals.isEmpty() )
         travelPurpose = TravelPurpose.CONQUER;
     }
-    else if( uc.actionTypes.contains(UnitActionFactory.ATTACK) )
+    if( goals.isEmpty() && uc.actionTypes.contains(UnitActionFactory.ATTACK) )
     {
       goals.addAll(findCombatUnitDestinations(gameMap, allThreats, unit));
       if( !goals.isEmpty() )
@@ -1035,13 +1087,17 @@ public class WallyAI extends ModularAI
   /**
    * Find a good long-term objective for the given unit, and pursue it (with consideration for life-preservation optional)
    */
-  private void planTravelAction(
+  private boolean planTravelAction(
                         AIModule whodunit, GameMap gameMap,
-                        ArrayList<Unit> allThreats, ArrayList<TileThreat>[][] threatMap,
                         Unit unit,
                         boolean ignoreSafety, boolean mustMove,
-                        boolean avoidProduction, boolean shouldWander )
+                        boolean avoidProduction, boolean shouldWander,
+                        int recurseDepth)
   {
+    if( evictionStack.contains(unit) )
+      return false;
+
+    boolean success = false;
     boolean ignoreResident = true;
     // Find the possible destinations.
     PathCalcParams pcp = new PathCalcParams(unit, predMap);
@@ -1057,7 +1113,7 @@ public class WallyAI extends ModularAI
     TravelPurpose travelPurpose = fillTravelDestinations(predMap, validTargets, unit, avoidProduction);
 
     if( !mustMove && !shouldWander && travelPurpose == TravelPurpose.WANDER )
-      return; // Don't clutter the queue with pointless movements
+      return success; // Don't clutter the queue with pointless movements
 
     if( mustMove ) // If we *must* travel, make sure we do actually move.
     {
@@ -1082,7 +1138,7 @@ public class WallyAI extends ModularAI
       }
     }
 
-    if( null == goal ) return;
+    if( null == goal ) return success;
 
     // Choose the point on the path just out of our range as our 'goal', and try to move there.
     // This will allow us to navigate around large obstacles that require us to move away
@@ -1108,16 +1164,35 @@ public class WallyAI extends ModularAI
       if( !ignoreSafety && !canWallHere(predMap, threatMap, unit, xyc) )
         continue;
 
-      UnitContext resident = mapPlan[xyc.xCoord][xyc.yCoord].identity;
+      UnitContext plannedResident = mapPlan[xyc.xCoord][xyc.yCoord].identity;
       ActionPlan  ap       = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
       // Figure out how to get here.
-      boolean spaceFree = null == resident;
+      boolean spaceFree = null == plannedResident;
       if( !spaceFree &&
-          ( null == ap || null != ap.clearTile || ap.purpose.priority >= travelPurpose.priority) )
+          ( null == ap || null != ap.clearTile || ap.purpose.priority > travelPurpose.priority) )
         continue; // Bail if:
       // There's no other action to evaluate against ours
       // The other action clears a tile
       // The other action is travel for an equal or greater purpose than ours
+
+      // If whatever's in our landing pad has no plans yet, poke and see if some can be made
+      Unit currentResident = gameMap.getResident(xyc);
+      if( plannedUnits.contains(currentResident) || evictionStack.contains(currentResident) )
+        continue;
+
+      boolean evicted = false;
+      if( null != currentResident && recurseDepth > 0 )
+      {
+        // Prevent reflexive eviction
+        evictionStack.add(unit);
+        evicted = planTravelAction(whodunit, gameMap, currentResident,
+                                           ignoreSafety, true, // Always move
+                                           avoidProduction, true, // Always enable wandering
+                                           recurseDepth-1);
+        evictionStack.remove(unit);
+        if( !evicted )
+          continue;
+      }
 //      log(String.format("    Yes"));
 
       GamePath movePath = xyc.getMyPath();
@@ -1169,7 +1244,10 @@ public class WallyAI extends ModularAI
       XYCoord xyc = bestAction.getMoveLocation();
       ActionPlan travelAP = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
       travelAP.purpose = travelPurpose;
+      success = true;
     }
+
+    return success;
   }
 
   private boolean isSafe(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc)
