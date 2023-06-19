@@ -10,6 +10,8 @@ import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.Combat.CombatContext.CalcType;
 import Engine.UnitActionLifecycles.BattleLifecycle;
+import Engine.UnitActionLifecycles.BattleLifecycle.BattleAction;
+import Engine.UnitActionLifecycles.CaptureLifecycle.CaptureAction;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.*;
 import Units.*;
@@ -60,6 +62,7 @@ public class WallyAI extends ModularAI
   private static final double UNIT_REARM_THRESHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
   private static final double AGGRO_EFFECT_THRESHOLD = 0.42; // How effective do I need to be against a unit to target it?
   private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
+  private static final double AGGRO_CHEAPER_WEIGHT = 0.1; // Multiplier on the score penalty for using expensive units to blow up stragglers
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
   private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges
@@ -74,6 +77,7 @@ public class WallyAI extends ModularAI
   {
     final GameAction action;
     final AIModule whodunit;
+    ArrayList<Unit> killPrereqs = new ArrayList<>();
     XYCoord clearTile; // The tile we expect to have emptied with our attack, if any.
     ActionPlan(AIModule whodunit, GameAction action)
     {
@@ -233,6 +237,25 @@ public class WallyAI extends ModularAI
     if( null == action )
       return;
     XYCoord dest = action.getMoveLocation();
+    ActionPlan canceled = mapPlan[dest.xCoord][dest.yCoord].toAchieve;
+    if( null != canceled )
+    {
+      if( null != canceled.action.getActor() )
+        plannedUnits.remove(canceled.action.getActor());
+      // Assume only one attack vs any given target - this is not always true, but I don't care
+      if( canceled.action.getType() == UnitActionFactory.ATTACK )
+      {
+        final XYCoord ctt = canceled.action.getTargetLocation();
+        UnitContext cuc = mapPlan[ctt.xCoord][ctt.yCoord].identity;
+        cuc.setHP(cuc.unit.getHP());
+      }
+      // Don't mess with canceling attacks that clear tiles, at least for now
+//      final XYCoord cct = canceled.clearTile;
+//      if( null != cct )
+//        mapPlan[cct.xCoord][cct.yCoord].identity =
+      // Don't chain cancellations - if Wally is dumb enough to cause that, he can recalculate :P
+    }
+
     mapPlan[dest.xCoord][dest.yCoord].toAchieve = new ActionPlan(whodunit, action);
     mapPlan[dest.xCoord][dest.yCoord].identity = uc;
     if( null != uc.unit )
@@ -292,7 +315,7 @@ public class WallyAI extends ModularAI
 
       ActionPlan ae = ai.queuedActions.poll();
       // Check if it's an attack and has been invalidated by RNG shenanigans
-      while (null != ae && ae.action instanceof BattleLifecycle.BattleAction
+      while (null != ae && ae.action.getType() == UnitActionFactory.ATTACK
           && null == map.getResident(ae.action.getTargetLocation()))
       {
         ai.log(String.format("  Discarding invalid attack: %s", ae.action));
@@ -557,7 +580,7 @@ public class WallyAI extends ModularAI
           ai.log(String.format("    %s brings the HP total to %s", unit.toStringWithLocation(), targetHP));
 
           boolean isAttack = true;
-          final BattleLifecycle.BattleAction attack = new BattleLifecycle.BattleAction(gameMap, unit, movePath, targetLoc.xCoord, targetLoc.yCoord);
+          final BattleAction attack = new BattleAction(gameMap, unit, movePath, targetLoc.xCoord, targetLoc.yCoord);
 
           ai.updatePlan(this, unit, attack, isAttack, targetHP);
           attackerOptions.remove(unit);
@@ -701,21 +724,17 @@ public class WallyAI extends ModularAI
         return null;
 
       boolean mustMove = false;
-      GameAction valAction = findValueAction(unit.CO, ai, unit, gameMap, mustMove, !canStepOnProduction, canEvict);
-
-      // We might give up some wallbreak knowledge here, but I just want to get this compiling
-      ai.updatePlan(this, unit, valAction);
+      planValueAction(this, unit.CO, ai, unit, gameMap, mustMove, !canStepOnProduction, canEvict);
 
       return null;
     }
 
-    public static GameAction findValueAction( Commander co, WallyAI ai,
+    public static void planValueAction( AIModule whodunit, Commander co, WallyAI ai,
                                               Unit unit, GameMap gameMap,
                                               boolean mustMove, boolean avoidProduction,
                                               boolean canEvict )
     {
       XYCoord position = new XYCoord(unit.x, unit.y);
-      MapLocation unitLoc = gameMap.getLocation(position);
 
       PathCalcParams pcp = new PathCalcParams(unit, gameMap);
       pcp.includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
@@ -727,78 +746,86 @@ public class WallyAI extends ModularAI
       Utils.sortLocationsByDistance(position, destinations);
       Collections.reverse(destinations);
 
+      UnitContext actor = new UnitContext(gameMap, unit);
+      GameAction bestAction = null;
+      int bestFundsDelta = 0;
+      boolean isAttack = false;
+      int targetHP = 42;
       for( Utils.SearchNode moveCoord : destinations )
       {
         // Figure out how to get here.
         GamePath movePath = moveCoord.getMyPath();
+        actor.setPath(movePath);
+        UnitContext resident = ai.mapPlan[moveCoord.xCoord][moveCoord.yCoord].identity;
+        ActionPlan  ap       = ai.mapPlan[moveCoord.xCoord][moveCoord.yCoord].toAchieve;
+        boolean spaceFree = null == resident;
+        if( !spaceFree && (!canEvict || null == ap || null != ap.clearTile) )
+          continue; // Bail if we can't clear the space
+        // Also, don't mess with canceling attacks that clear tiles, at least for now
 
         // Figure out what I can do here.
         ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, pcp.includeOccupiedSpaces);
         for( GameActionSet actionSet : actionSets )
         {
-          boolean spaceFree = gameMap.isLocationEmpty(unit, moveCoord);
-          Unit resident = gameMap.getLocation(moveCoord).getResident();
-          if( !spaceFree && (!canEvict || (unit.CO != resident.CO || resident.isTurnOver)) )
-            continue; // Bail if we can't clear the space
-
           // See if we can bag enough damage to be worth sacrificing the unit
           if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
           {
             for( GameAction ga : actionSet.getGameActions() )
             {
-              MapLocation targetLoc = gameMap.getLocation(ga.getTargetLocation());
-              Unit target = targetLoc.getResident();
+              XYCoord targetLoc = ga.getTargetLocation();
+              UnitContext target = ai.mapPlan[targetLoc.xCoord][targetLoc.yCoord].identity;
               if( null == target )
                 continue;
-              BattleSummary results =
-                  CombatEngine.simulateBattleResults(unit, target, gameMap, movePath, CALC);
-              double loss   = Math.min(unit  .getHealth(), (int)results.attacker.getPreciseHealthDamage());
-              double damage = Math.min(target.getHealth(), (int)results.defender.getPreciseHealthDamage());
-              
-              boolean goForIt = false;
-              if( valueUnit(target, targetLoc, false) * Math.floor(damage) * AGGRO_FUNDS_WEIGHT > valueUnit(unit, unitLoc, true) )
-              {
-                ai.log(String.format("  %s is going aggro on %s", unit.toStringWithLocation(), target.toStringWithLocation()));
-                ai.log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.getCost() * damage - unit.getCost() * unit.getHealth())/10));
-                goForIt = true;
-              }
-              else if( damage > loss
-                     && ai.canWallHere(gameMap, ai.threatMap, unit, ga.getMoveLocation()) )
-              {
-                ai.log(String.format("  %s thinks it's safe to attack %s", unit.toStringWithLocation(), target.toStringWithLocation()));
-                goForIt = true;
-              }
 
-              if( goForIt )
+              // Difference in estimation conditions could end up with oscillation between two attacks on the same target
+              // Just... be aware, future me, in case that's a problem
+              final AttackValue results = new AttackValue(ai, actor, target, gameMap);
+              final int fundsDelta = results.fundsDelta;
+              if( fundsDelta <= bestFundsDelta )
+                continue;
+
+              int opportunityCost = 0;
+              if( !spaceFree )
               {
-                if( !spaceFree )
-                {
-                  boolean ignoreSafety =
-                      valueUnit(unit, gameMap.getLocation(moveCoord), true) >= valueUnit(resident, gameMap.getLocation(moveCoord), true);
-                  return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety, avoidProduction);
-                }
-                return ga;
+                opportunityCost = valueAction(ai, gameMap, ap);
               }
+              if( fundsDelta - opportunityCost <= bestFundsDelta )
+                continue;
+
+              bestFundsDelta = fundsDelta - opportunityCost;
+              bestAction = ga;
+              isAttack = true;
+              targetHP = target.getHP() - results.hpdamage;
             }
           }
 
-          // Only consider capturing if we can sit still or go somewhere safe.
+          // Only consider capturing if we have to move or can go somewhere safe.
           if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE
-              && (moveCoord.getDistance(unit.x, unit.y) == 0 || ai.canWallHere(gameMap, ai.threatMap, unit, moveCoord)) )
+              && (mustMove || ai.canWallHere(gameMap, ai.threatMap, unit, moveCoord)) )
           {
+            GameAction ga = actionSet.getSelected();
+            final int fundsDelta = ai.valueCapture((CaptureAction) ga, gameMap);
+            if( fundsDelta <= bestFundsDelta )
+              continue;
+
+            int opportunityCost = 0;
             if( !spaceFree )
             {
-              boolean ignoreSafety =
-                  valueUnit(unit, gameMap.getLocation(moveCoord), true) >= valueUnit(resident, gameMap.getLocation(moveCoord), true);
-              return ai.evictUnit(gameMap, ai.allThreats, ai.threatMap, unit, resident, ignoreSafety, avoidProduction);
+              opportunityCost = valueAction(ai, gameMap, ap);
             }
-            return actionSet.getSelected();
+            if( fundsDelta - opportunityCost <= bestFundsDelta )
+              continue;
+
+            bestFundsDelta = fundsDelta - opportunityCost;
+            bestAction = ga;
+            isAttack = false;
           }
-        }
-      }
-      return null;
-    }
-  }
+        } // ~for action types
+      } // ~for destinations
+
+      ai.updatePlan(whodunit, unit, bestAction, isAttack, targetHP);
+    } // ~planValueAction
+  } // ~FreeRealEstate
 
   // If no attack/capture actions are available now, just move around
   public static class Travel extends UnitActionFinder<WallyAI>
@@ -820,10 +847,7 @@ public class WallyAI extends ModularAI
       boolean mustMove = null != evicter && unit != evicter.unit;
       boolean avoidProduction = false;
       boolean ignoreSafety = false;
-      GameAction valAction = ai.findTravelAction(gameMap, ai.allThreats, ai.threatMap, unit, ignoreSafety, mustMove, avoidProduction);
-
-      // We might give up some wallbreak knowledge here, but I just want to get this compiling
-      ai.updatePlan(this, unit, valAction);
+      ai.planTravelAction(this, gameMap, ai.allThreats, ai.threatMap, unit, ignoreSafety, mustMove, avoidProduction);
 
       return null;
     }
@@ -983,64 +1007,11 @@ public class WallyAI extends ModularAI
     return goals;
   }
 
-  /** Functions as working memory to prevent eviction cycles */
-  private transient Set<Unit> evictionStack;
-  private static final int    EVICTION_STACK_MAX_DEPTH = 7;
-  /**
-   * Queue the first action required to move a unit out of the way
-   * For use after unit building is complete
-   * Can recurse based on the other functions it calls.
-   */
-  private GameAction evictUnit(
-                        GameMap gameMap,
-                        ArrayList<Unit> allThreats, ArrayList<TileThreat>[][] threatMap,
-                        Unit evicter, Unit unit,
-                        boolean ignoreSafety,
-                        boolean avoidProduction )
-  {
-    boolean isBase = false;
-    if( null == evictionStack )
-    {
-      evictionStack = new HashSet<Unit>();
-      isBase = true;
-    }
-
-    String spacing = "";
-    for( int i = 0; i < evictionStack.size(); ++i ) spacing += "  ";
-    log(String.format("%sAttempting to evict %s", spacing, unit.toStringWithLocation()));
-    if( evicter != null )
-      evictionStack.add(evicter);
-
-    if( evictionStack.contains(unit) )
-    {
-      log(String.format("%s  Eviction cycle! Bailing.", spacing));
-      return null;
-    }
-    if( evictionStack.size() > EVICTION_STACK_MAX_DEPTH )
-    {
-      log(String.format("%s  Too many units blocking! Bailing.", spacing));
-      return null;
-    }
-    evictionStack.add(unit);
-
-    boolean mustMove = true, canEvict = true;
-    GameAction result = FreeRealEstate.findValueAction(unit.CO, this, unit, gameMap, mustMove, avoidProduction, canEvict);
-    if( null == result )
-    {
-      result = findTravelAction(gameMap, allThreats, threatMap, unit, ignoreSafety, mustMove, avoidProduction);
-    }
-
-    if( isBase )
-      evictionStack = null;
-    log(String.format("%s  Eviction of %s success? %s", spacing, unit.toStringWithLocation(), null != result));
-    return result;
-  }
-
   /**
    * Find a good long-term objective for the given unit, and pursue it (with consideration for life-preservation optional)
    */
-  private GameAction findTravelAction(
-                        GameMap gameMap,
+  private void planTravelAction(
+                        AIModule whodunit, GameMap gameMap,
                         ArrayList<Unit> allThreats, ArrayList<TileThreat>[][] threatMap,
                         Unit unit,
                         boolean ignoreSafety, boolean mustMove,
@@ -1074,7 +1045,7 @@ public class WallyAI extends ModularAI
       }
     }
 
-    if( null == goal ) return null;
+    if( null == goal ) return;
 
     // Choose the point on the path just out of our range as our 'goal', and try to move there.
     // This will allow us to navigate around large obstacles that require us to move away
@@ -1089,24 +1060,26 @@ public class WallyAI extends ModularAI
                           unit.toStringWithLocation(),
                           gameMap.getLocation(goal).getEnvironment().terrainType, goal,
                           pathPoint, mustMove, ignoreSafety));
+    GameAction bestAction = null;
+    // TODO: use these?
+    int bestFundsDelta = 0;
+    boolean isAttack = false;
+    int targetHP = 42;
     for( Utils.SearchNode xyc : destinations )
     {
-      log(String.format("    is it safe to go to %s?", xyc));
+//      log(String.format("    is it safe to go to %s?", xyc));
       if( !ignoreSafety && !canWallHere(gameMap, threatMap, unit, xyc) )
         continue;
 
-      GameAction action = null;
-      Unit resident = gameMap.getLocation(xyc).getResident();
-      if( null != resident && unit != resident )
-      {
-        boolean evictIgnoreSafety =
-            valueUnit(unit, gameMap.getLocation(xyc), true) >= valueUnit(resident, gameMap.getLocation(xyc), true);
-        if( unit.CO == resident.CO && !resident.isTurnOver )
-          action = evictUnit(gameMap, allThreats, threatMap, unit, resident, evictIgnoreSafety, avoidProduction);
-        if( null != action ) return action;
-        continue;
-      }
-      log(String.format("    Yes"));
+      UnitContext resident = mapPlan[xyc.xCoord][xyc.yCoord].identity;
+      ActionPlan  ap       = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
+      // Figure out how to get here.
+      boolean spaceFree = null == resident;
+      if( !spaceFree )//&& (!mustMove || null == ap || null != ap.clearTile) )
+        continue; // Bail if we can't clear the space
+      // Also, don't mess with canceling attacks that clear tiles, at least for now
+      // TODO: Eviction on travel?
+//      log(String.format("    Yes"));
 
       GamePath movePath = xyc.getMyPath();
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, ignoreResident);
@@ -1117,7 +1090,6 @@ public class WallyAI extends ModularAI
         {
           if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
           {
-            double bestDamage = 0;
             for( GameAction attack : actionSet.getGameActions() )
             {
               double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
@@ -1131,22 +1103,28 @@ public class WallyAI extends ModularAI
                     return 0;
                   }, (terrain, params) -> 1); // Attack terrain, but don't prioritize it over units
 
-              if( damageValue > bestDamage )
+              if( damageValue > bestFundsDelta )
               {
                 log(String.format("      Best en passant attack deals %s", damageValue));
-                bestDamage = damageValue;
-                action = attack;
+                bestFundsDelta = (int) damageValue;
+                bestAction = attack;
+                // TODO: is attack
               }
             }
           }
+        } // ~for action types
+
+        if( bestFundsDelta < 1 && movePath.getPathLength() > 1 ) // Just wait if we can't do anything cool
+        {
+          bestFundsDelta = 1;
+          bestAction = new WaitLifecycle.WaitAction(unit, movePath);
+          isAttack = false;
         }
 
-        if( null == action && movePath.getPathLength() > 1) // Just wait if we can't do anything cool
-          action = new WaitLifecycle.WaitAction(unit, movePath);
-        return action;
-      }
-    }
-    return null;
+      } // ~if any action type
+    } // ~for destinations
+
+    updatePlan(whodunit, unit, bestAction, isAttack, targetHP);
   }
 
   private boolean isSafe(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc)
@@ -1513,5 +1491,83 @@ public class WallyAI extends ModularAI
       counterPower = Math.max(counterPower, effectiveness);
     }
     return counterPower;
+  }
+
+  private static class AttackValue
+  {
+    final int hploss, hpdamage, loss, damage;
+    final int fundsDelta;
+
+    public AttackValue(WallyAI ai, UnitContext actor, UnitContext target, GameMap gameMap)
+    {
+      final int actorCost = actor.CO.getCost(actor.model);
+
+      BattleSummary results = CombatEngine.simulateBattleResults(actor, target, gameMap, CALC);
+      hploss   = actor .getHP() - Math.max(0, results.attacker.after.getHP());
+      hpdamage = target.getHP() - Math.max(0, results.defender.after.getHP());
+      loss     = (hploss   * actorCost                      ) / UnitModel.MAXIMUM_HP;
+      damage   = (hpdamage * target.CO.getCost(target.model)) / UnitModel.MAXIMUM_HP;
+
+      if( ai.canWallHere(gameMap, ai.threatMap, actor.unit, actor.coord) )
+      {
+        ai.log(String.format("  %s thinks it's safe to attack %s", actor, target));
+        //           funds "gained" funds lost     term to favor using cheaper units
+        fundsDelta =     damage    -   loss    - (int) (actorCost*AGGRO_CHEAPER_WEIGHT);
+      }
+      else
+      {
+        fundsDelta = (int) (damage*AGGRO_FUNDS_WEIGHT) - loss;
+        ai.log(String.format("  %s is going aggro on %s", actor, target));
+        ai.log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", hpdamage, fundsDelta));
+      }
+    }
+    public static AttackValue forPlannedAttack(WallyAI ai, BattleAction ga, GameMap gameMap)
+    {
+      XYCoord moveCoord = ga.getMoveLocation();
+      XYCoord targetXYC = ga.getTargetLocation();
+      UnitContext actor  = ai.mapPlan[moveCoord.xCoord][moveCoord.yCoord].identity;
+      UnitContext target = ai.mapPlan[targetXYC.xCoord][targetXYC.yCoord].identity;
+
+      if( null == target )
+      {
+        Unit tu = gameMap.getResident(targetXYC);
+        ai.log(String.format("  Warning: %s re-planning the murder of %s at %s", actor, tu, targetXYC));
+        target = new UnitContext(gameMap, tu);
+      }
+
+      return new AttackValue(ai, actor, target, gameMap);
+    }
+  }
+  public int valueCapture(CaptureAction ga, GameMap gameMap)
+  {
+    Unit unit = ga.getActor();
+    XYCoord moveCoord = ga.getMoveLocation();
+    int capValue = unit.getHP(); // TODO: update for capture boosts
+    boolean success = (unit.getCaptureProgress() + capValue) > gameMap.getEnvironment(moveCoord).terrainType.getCaptureThreshold();
+
+    if( success )
+      return Integer.MAX_VALUE/42; // I can't think of very many good reasons to skip finishing a capture
+
+    // Since we can't be certain of a capture, ballpark a day's income per full HP inf's worth of capping
+    return (capValue * myArmy.gameRules.incomePerCity) / UnitModel.MAXIMUM_HP;
+  }
+
+  private static int valueAction(WallyAI ai, GameMap gameMap, ActionPlan ap)
+  {
+    if( null == ap || null == ap.action )
+    {
+      // We shouldn't try to preempt a unit we didn't plan to be there?
+      return Integer.MAX_VALUE / 42;
+    }
+
+    int opportunityCost = 0;
+    final UnitActionFactory apType = ap.action.getType();
+    if( apType == UnitActionFactory.ATTACK )
+      opportunityCost = AttackValue.forPlannedAttack(ai, (BattleAction) ap.action, gameMap).fundsDelta;
+    if( apType == UnitActionFactory.CAPTURE )
+      opportunityCost = ai.valueCapture((CaptureAction) ap.action, gameMap);
+    if( apType == UnitActionFactory.WAIT )
+      opportunityCost = 0;
+    return opportunityCost;
   }
 }
