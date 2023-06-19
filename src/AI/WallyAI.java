@@ -1037,6 +1037,13 @@ public class WallyAI extends ModularAI
       destinations.remove(new XYCoord(unit.x, unit.y));
       validTargets.remove(new XYCoord(unit.x, unit.y));
     }
+    boolean attackEviction = mustMove && null != mapPlan[unit.x][unit.y].toAchieve && mapPlan[unit.x][unit.y].toAchieve.action.getType() == UnitActionFactory.ATTACK;
+    if( attackEviction ) // Don't assume we can hop into our evicter's target's space, since that won't work
+    {
+      XYCoord target = mapPlan[unit.x][unit.y].toAchieve.action.getTargetLocation();
+      destinations.remove(target);
+      validTargets.remove(target);
+    }
 
     for( XYCoord target : validTargets )
     {
