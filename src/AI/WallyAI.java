@@ -411,7 +411,9 @@ public class WallyAI extends ModularAI
       XYCoord movexyc = plan.action.getMoveLocation();
       ai.queuedActions.add(plan);
       ai.mapPlan[movexyc.xCoord][movexyc.yCoord].toAchieve = null;
-      vacatedTiles.add(movexyc);
+      final Unit unit = plan.action.getActor();
+      if( null != unit )
+        vacatedTiles.add(new XYCoord(unit));
       if( null != plan.clearTile )
         vacatedTiles.add(plan.clearTile);
     }
