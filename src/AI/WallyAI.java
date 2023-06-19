@@ -72,12 +72,23 @@ public class WallyAI extends ModularAI
 
   private static final CalcType CALC = CalcType.PESSIMISTIC;
 
+  private static enum TravelPurpose
+  {
+    // BUSINESS, PLEASURE,
+    WANDER(0), SUPPLIES(7), KILL(13), CONQUER(42), NA(99);
+    public final int priority;
+    TravelPurpose(int p)
+    {
+      priority = p;
+    }
+  }
   private static class ActionPlan
   {
     final GameAction action;
     final AIModule whodunit;
     ArrayList<Unit> killPrereqs = new ArrayList<>();
     XYCoord clearTile; // The tile we expect to have emptied with our attack, if any.
+    TravelPurpose purpose = TravelPurpose.NA;
     ActionPlan(AIModule whodunit, GameAction action)
     {
       this.whodunit = whodunit;
@@ -166,8 +177,9 @@ public class WallyAI extends ModularAI
             new FreeRealEstate(army, this, false, false), // prioritize non-eviction
             new FreeRealEstate(army, this, true,  false), // evict if necessary
             new BuildStuff(army, this),
+            new Travel(army, this, false),
             new FreeRealEstate(army, this, true,  true), // step on industries we're not using
-            new Travel(army, this),
+            new Travel(army, this, true),
 
             new FillActionQueue(army, this),
             new PowerActivator(army, CommanderAbility.PHASE_TURN_END)
@@ -835,9 +847,11 @@ public class WallyAI extends ModularAI
   public static class Travel extends UnitActionFinder<WallyAI>
   {
     private static final long serialVersionUID = 1L;
-    public Travel(Army co, WallyAI ai)
+    final boolean shouldWander;
+    public Travel(Army co, WallyAI ai, boolean shouldWander)
     {
       super(co, ai);
+      this.shouldWander = shouldWander;
     }
 
     @Override
@@ -851,7 +865,7 @@ public class WallyAI extends ModularAI
       boolean mustMove = null != evicter && unit != evicter.unit;
       boolean avoidProduction = false;
       boolean ignoreSafety = false;
-      ai.planTravelAction(this, gameMap, ai.allThreats, ai.threatMap, unit, ignoreSafety, mustMove, avoidProduction);
+      ai.planTravelAction(this, gameMap, ai.allThreats, ai.threatMap, unit, ignoreSafety, mustMove, avoidProduction, shouldWander);
 
       return null;
     }
@@ -899,15 +913,15 @@ public class WallyAI extends ModularAI
   }
 
   /** Produces a list of destinations for the unit, ordered by their relative precedence */
-  private ArrayList<XYCoord> findTravelDestinations(
+  private TravelPurpose fillTravelDestinations(
                                   GameMap gameMap,
-                                  ArrayList<Unit> allThreats, ArrayList<TileThreat>[][] threatMap,
+                                  ArrayList<XYCoord> goals,
                                   Unit unit,
                                   boolean avoidProduction )
   {
     UnitContext uc = new UnitContext(gameMap, unit);
     uc.calculateActionTypes();
-    ArrayList<XYCoord> goals = new ArrayList<XYCoord>();
+    TravelPurpose travelPurpose = TravelPurpose.WANDER;
 
     ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
     Utils.sortLocationsByTravelTime(unit, stations, predMap);
@@ -934,6 +948,8 @@ public class WallyAI extends ModularAI
       goals.addAll(stations);
       if( avoidProduction )
         goals.removeAll(AIUtils.findAlliedIndustries(predMap, myArmy, goals, !avoidProduction));
+      if( !goals.isEmpty() )
+        travelPurpose = TravelPurpose.SUPPLIES;
     }
     else if( uc.actionTypes.contains(UnitActionFactory.CAPTURE) )
     {
@@ -941,17 +957,21 @@ public class WallyAI extends ModularAI
         // predMap shouldn't meaningfully diverge from reality here, I think
         if( !AIUtils.isCapturing(gameMap, myArmy.cos[0], xyc) )
           goals.add(xyc);
+      if( !goals.isEmpty() )
+        travelPurpose = TravelPurpose.CONQUER;
     }
     else if( uc.actionTypes.contains(UnitActionFactory.ATTACK) )
     {
       goals.addAll(findCombatUnitDestinations(gameMap, allThreats, unit));
+      if( !goals.isEmpty() )
+        travelPurpose = TravelPurpose.KILL;
     }
 
     if( goals.isEmpty() ) // If there's really nothing to do, go to MY HQ
       goals.addAll(myArmy.HQLocations);
 
     Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
-    return goals;
+    return travelPurpose;
   }
 
   private ArrayList<XYCoord> findCombatUnitDestinations(GameMap gameMap, ArrayList<Unit> allThreats, Unit unit)
@@ -1020,7 +1040,7 @@ public class WallyAI extends ModularAI
                         ArrayList<Unit> allThreats, ArrayList<TileThreat>[][] threatMap,
                         Unit unit,
                         boolean ignoreSafety, boolean mustMove,
-                        boolean avoidProduction )
+                        boolean avoidProduction, boolean shouldWander )
   {
     boolean ignoreResident = true;
     // Find the possible destinations.
@@ -1033,7 +1053,12 @@ public class WallyAI extends ModularAI
 
     XYCoord goal = null;
     GamePath path = null;
-    ArrayList<XYCoord> validTargets = findTravelDestinations(predMap, allThreats, threatMap, unit, avoidProduction);
+    ArrayList<XYCoord> validTargets = new ArrayList<XYCoord>();
+    TravelPurpose travelPurpose = fillTravelDestinations(predMap, validTargets, unit, avoidProduction);
+
+    if( !mustMove && !shouldWander && travelPurpose == TravelPurpose.WANDER )
+      return; // Don't clutter the queue with pointless movements
+
     if( mustMove ) // If we *must* travel, make sure we do actually move.
     {
       destinations.remove(new XYCoord(unit.x, unit.y));
@@ -1087,10 +1112,12 @@ public class WallyAI extends ModularAI
       ActionPlan  ap       = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
       // Figure out how to get here.
       boolean spaceFree = null == resident;
-      if( !spaceFree )//&& (!mustMove || null == ap || null != ap.clearTile) )
-        continue; // Bail if we can't clear the space
-      // Also, don't mess with canceling attacks that clear tiles, at least for now
-      // TODO: Eviction on travel?
+      if( !spaceFree &&
+          ( null == ap || null != ap.clearTile || ap.purpose.priority >= travelPurpose.priority) )
+        continue; // Bail if:
+      // There's no other action to evaluate against ours
+      // The other action clears a tile
+      // The other action is travel for an equal or greater purpose than ours
 //      log(String.format("    Yes"));
 
       GamePath movePath = xyc.getMyPath();
@@ -1137,6 +1164,12 @@ public class WallyAI extends ModularAI
     } // ~for destinations
 
     updatePlan(whodunit, unit, bestAction, isAttack, targetHP);
+    if( null != bestAction )
+    {
+      XYCoord xyc = bestAction.getMoveLocation();
+      ActionPlan travelAP = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
+      travelAP.purpose = travelPurpose;
+    }
   }
 
   private boolean isSafe(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc)
