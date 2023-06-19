@@ -1532,8 +1532,8 @@ public class WallyAI extends ModularAI
 
       if( null == target )
       {
+        // TODO: Consider evaluating this as a oneshot
         Unit tu = gameMap.getResident(targetXYC);
-        ai.log(String.format("  Warning: %s re-planning the murder of %s at %s", actor, tu, targetXYC));
         target = new UnitContext(gameMap, tu);
       }
 
