@@ -346,7 +346,10 @@ public class WallyAI extends ModularAI
         ae = ai.queuedActions.poll();
       }
       if( null == ae )
+      {
+        ai.lastAction = null; // Don't be surprised when our dudes we moved last turn die
         return null;
+      }
 
       ai.log(String.format("  Action: %s", ae.action));
       ai.lastAction = ae;
