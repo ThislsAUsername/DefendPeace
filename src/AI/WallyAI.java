@@ -1170,7 +1170,7 @@ public class WallyAI extends ModularAI
         continue;
 
       UnitContext plannedResident = mapPlan[xyc.xCoord][xyc.yCoord].identity;
-      ActionPlan  ap       = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
+      ActionPlan  ap              = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
       // Figure out how to get here.
       boolean spaceFree = null == plannedResident;
       if( !spaceFree &&
@@ -1182,24 +1182,29 @@ public class WallyAI extends ModularAI
 
       // If whatever's in our landing pad has no plans yet, poke and see if some can be made
       Unit currentResident = gameMap.getResident(xyc);
-      if( plannedUnits.contains(currentResident) || evictionStack.contains(currentResident) )
-        continue;
-
-      boolean evicted = false;
-      if( null != currentResident && recurseDepth > 0 )
+      if( null != currentResident )
       {
-        if( currentResident.isTurnOver || currentResident.CO.isEnemy(myArmy) )
-          continue; // Evicting enemies involves a different process...
-        // Prevent reflexive eviction
-        evictionStack.add(unit);
-        evicted = planTravelAction(whodunit, gameMap, currentResident,
-                                           ignoreSafety, true, // Always move
-                                           avoidProduction, true, // Always enable wandering
-                                           recurseDepth-1);
-        evictionStack.remove(unit);
-        if( !evicted )
+        if( plannedUnits.contains(currentResident) || evictionStack.contains(currentResident) )
           continue;
-      }
+        boolean residentIsEvictable = !currentResident.isTurnOver && currentResident.CO.army == myArmy;
+
+        boolean evicted = false;
+        if( residentIsEvictable && recurseDepth > 0 )
+        {
+          // Prevent reflexive eviction
+          evictionStack.add(unit);
+          evicted = planTravelAction(whodunit, gameMap, currentResident,
+                                               ignoreSafety, true, // Always move
+                                               avoidProduction, true, // Always enable wandering
+                                               recurseDepth-1);
+          evictionStack.remove(unit);
+          if( !evicted )
+            continue;
+        }
+        // If nobody's there, no need to evict.
+        // If the resident is evictable, try to evict and bail if we can't.
+        // If the resident isn't evictable, we think it will be dead soon, so just keep going.
+      } // ~if resident
 //      log(String.format("    Yes"));
 
       GamePath movePath = xyc.getMyPath();
