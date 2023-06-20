@@ -1185,6 +1185,8 @@ public class WallyAI extends ModularAI
       boolean evicted = false;
       if( null != currentResident && recurseDepth > 0 )
       {
+        if( currentResident.isTurnOver || currentResident.CO.isEnemy(myArmy) )
+          continue; // Evicting enemies involves a different process...
         // Prevent reflexive eviction
         evictionStack.add(unit);
         evicted = planTravelAction(whodunit, gameMap, currentResident,
