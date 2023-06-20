@@ -829,21 +829,23 @@ public class WallyAI extends ModularAI
             }
           }
 
-          // Only consider capturing if we have to move or can go somewhere safe.
-          if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE
-              && (mustMove || ai.canWallHere(gameMap, ai.threatMap, unit, moveCoord)) )
+          if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE )
           {
             GameAction ga = actionSet.getSelected();
             final int fundsDelta = ai.valueCapture((CaptureAction) ga, gameMap);
             if( fundsDelta <= bestFundsDelta )
               continue;
 
+            final boolean safe = ai.canWallHere(gameMap, ai.threatMap, unit, moveCoord);
+            int loss = 0;
+            if( !safe )
+              loss = unit.CO.getCost(unit.model);
             int opportunityCost = 0;
             if( !spaceFree )
             {
               opportunityCost = valueAction(ai, gameMap, ap);
             }
-            if( fundsDelta - opportunityCost <= bestFundsDelta )
+            if( fundsDelta - opportunityCost - loss <= bestFundsDelta )
               continue;
 
             bestFundsDelta = fundsDelta - opportunityCost;
@@ -1639,7 +1641,7 @@ public class WallyAI extends ModularAI
       }
       else
       {
-        fundsDelta = (int) (damage*AGGRO_FUNDS_WEIGHT) - loss;
+        fundsDelta = (int) (damage*AGGRO_FUNDS_WEIGHT) - actorCost;
         ai.log(String.format("  %s is going aggro on %s", actor, target));
         ai.log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", hpdamage, fundsDelta));
       }
@@ -1666,7 +1668,7 @@ public class WallyAI extends ModularAI
     Unit unit = ga.getActor();
     XYCoord moveCoord = ga.getMoveLocation();
     int capValue = unit.getHP(); // TODO: update for capture boosts
-    boolean success = (unit.getCaptureProgress() + capValue) > gameMap.getEnvironment(moveCoord).terrainType.getCaptureThreshold();
+    boolean success = (unit.getCaptureProgress() + capValue) >= gameMap.getEnvironment(moveCoord).terrainType.getCaptureThreshold();
 
     if( success )
       return Integer.MAX_VALUE/42; // I can't think of very many good reasons to skip finishing a capture
