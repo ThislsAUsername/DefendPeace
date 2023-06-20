@@ -567,7 +567,7 @@ public class WallyAI extends ModularAI
 
       for( XYCoord coord : industryBlockers )
       {
-        Unit resident = gameMap.getResident(coord);
+        Unit resident = ai.predMap.getResident(coord);
         if( null != resident && myArmy.isEnemy(resident.CO) )
           targets.add(coord);
       }
