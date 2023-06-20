@@ -339,11 +339,12 @@ public class WallyAI extends ModularAI
 
       ActionPlan ae = ai.queuedActions.poll();
       // Check if it's an attack and has been invalidated by RNG shenanigans
-      while (null != ae && ae.action.getType() == UnitActionFactory.ATTACK
+      if (null != ae && ae.action.getType() == UnitActionFactory.ATTACK
           && null == map.getResident(ae.action.getTargetLocation()))
       {
         ai.log(String.format("  Discarding invalid attack: %s", ae.action));
-        ae = ai.queuedActions.poll();
+        ae = null;
+        ai.queuedActions.clear(); // Too bad, gotta re-plan
       }
       if( null == ae )
       {
