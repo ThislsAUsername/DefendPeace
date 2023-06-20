@@ -111,7 +111,7 @@ public class WallyAI extends ModularAI
   private Queue<ActionPlan> queuedActions = new ArrayDeque<>();
   private static class UnitPrediction
   {
-    UnitContext identity;
+    UnitContext identity; // Must be non-null if toAchieve is; UC's unit may be null.
     ActionPlan toAchieve; // TODO: Harvest these and put them in the right order somehow - via eviction?
   }
   private UnitPrediction[][] mapPlan; // TODO: Invalidate if any unit gets trapped/ends up not where we expect - cache unit+destination on offer action
@@ -374,44 +374,48 @@ public class WallyAI extends ModularAI
       ai.log(String.format("  Filling action queue from map plan"));
       HashSet<XYCoord> vacatedTiles = new HashSet<>();
       HashSet<XYCoord> revisitTiles = new HashSet<>();
+      HashMap<UnitContext, ActionPlan> actionsBooked = new HashMap<>();
+      ArrayList<ActionPlan> actionsInOrder = new ArrayList<>();
 
-      // Re-initialize our plans
       for( int x = 0; x < map.mapWidth; ++x )
         for( int y = 0; y < map.mapHeight; ++y )
         {
-          ActionPlan plan = ai.mapPlan[x][y].toAchieve;
-          if( null == plan )
-            continue; // Nothing to do here
-          final Unit unit = plan.action.getActor();
-          if( null != unit && unit.isTurnOver )
-            continue; // Nothing to do here
-
-          final XYCoord movexyc = new XYCoord(x, y);
-          if( vacatedTiles.contains(movexyc)
-              || map.isLocationEmpty(unit, movexyc)
-          )
-            queuePlan(vacatedTiles, plan);
+          ActionPlan readyPlan = fetchPlanAndVacateTiles(vacatedTiles, ai, map, x, y);
+          if( null != readyPlan )
+          {
+            final UnitContext actor = ai.mapPlan[x][y].identity;
+            if( actionsBooked.containsKey(actor) )
+              ai.log(String.format("Warning: Unit is double-booked %s:\n\t%s\n\t%s", actor, readyPlan, actionsBooked.get(actor)));
+            actionsBooked.put(actor, readyPlan);
+            actionsInOrder.add(readyPlan);
+            ai.mapPlan[x][y].toAchieve = null;
+          }
           else
-            revisitTiles.add(movexyc);
+            revisitTiles.add(new XYCoord(x, y));
         }
 
-      boolean deadlock = false;
-      while (!deadlock)
+      XYCoord actionAtCoord = new XYCoord(-1, -1);
+      while (null != actionAtCoord)
       {
-        deadlock = true;
+        actionAtCoord = null;
         for( XYCoord movexyc : revisitTiles )
         {
           int x = movexyc.xCoord, y = movexyc.yCoord;
-          ActionPlan plan = ai.mapPlan[x][y].toAchieve;
-          if( null == plan )
-            continue; // Nothing to do here
-
-          if( vacatedTiles.contains(movexyc) )
+          ActionPlan readyPlan = fetchPlanAndVacateTiles(vacatedTiles, ai, map, x, y);
+          if( null != readyPlan )
           {
-            queuePlan(vacatedTiles, plan);
-            deadlock = false;
+            final UnitContext actor = ai.mapPlan[x][y].identity;
+            if( actionsBooked.containsKey(actor) )
+              ai.log(String.format("Warning: Unit is double-booked %s:\n\t%s\n\t%s", actor, readyPlan, actionsBooked.get(actor)));
+            actionsBooked.put(actor, readyPlan);
+            actionsInOrder.add(readyPlan);
+            ai.mapPlan[x][y].toAchieve = null;
+            actionAtCoord = movexyc;
+            break;
           }
         }
+        if( null != actionAtCoord )
+          revisitTiles.remove(actionAtCoord);
       }
 
       // Clear out any stragglers to maybe re-plan
@@ -423,6 +427,7 @@ public class WallyAI extends ModularAI
       }
       ai.plannedUnits.clear();
 
+      ai.queuedActions.addAll(actionsInOrder);
       if( ai.queuedActions.isEmpty() )
         return null;
 
@@ -432,16 +437,34 @@ public class WallyAI extends ModularAI
       return action.action;
     }
 
-    private void queuePlan(HashSet<XYCoord> vacatedTiles, ActionPlan plan)
+    private static ActionPlan fetchPlanAndVacateTiles(HashSet<XYCoord> vacatedTiles,
+                                       WallyAI ai, GameMap map,
+                                       int x, int y)
     {
-      XYCoord movexyc = plan.action.getMoveLocation();
-      ai.queuedActions.add(plan);
-      ai.mapPlan[movexyc.xCoord][movexyc.yCoord].toAchieve = null;
-      final Unit unit = plan.action.getActor();
-      if( null != unit )
-        vacatedTiles.add(new XYCoord(unit));
+      UnitContext actor = ai.mapPlan[x][y].identity;
+      ActionPlan  plan  = ai.mapPlan[x][y].toAchieve;
+      if( null == plan )
+        return null; // Nothing to do here
+      final Unit unit = actor.unit;
+      if( null != unit && unit.isTurnOver )
+      {
+        ai.log(String.format("Warning: Action planned for tired unit %s:\n\t%s", unit, plan));
+        return null; // Nothing to do here
+      }
+
+      final XYCoord movexyc = new XYCoord(x, y);
+      if( !vacatedTiles.contains(movexyc)
+          && !map.isLocationEmpty(unit, movexyc)
+          )
+        return null; // Location is full and won't be emptied by our current confirmed plans
+
+      if( actor.unit != plan.action.getActor())
+        ai.log(String.format("Warning: plan/action mismatch with %s:\n\t%s\n\t!=\n\t%s", plan, actor.unit, plan.action.getActor()));
+      if( null != plan.startPos )
+        vacatedTiles.add(plan.startPos);
       if( null != plan.clearTile )
         vacatedTiles.add(plan.clearTile);
+      return plan;
     }
   }
 
@@ -614,7 +637,6 @@ public class WallyAI extends ModularAI
 
           ai.updatePlan(this, unit, attack, isAttack, targetHP);
           attackerOptions.remove(unit);
-          ai.plannedUnits.add(unit);
           if( 1 > targetHP )
             break;
         }
