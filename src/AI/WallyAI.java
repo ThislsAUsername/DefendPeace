@@ -861,7 +861,7 @@ public class WallyAI extends ModularAI
             if( fundsDelta <= bestFundsDelta )
               continue;
 
-            final boolean safe = ai.canWallHere(gameMap, ai.threatMap, unit, moveCoord);
+            final boolean safe = ai.canWallHere(gameMap, ai.threatMap, unit, moveCoord, null);
             int loss = 0;
             if( !safe )
               loss = unit.CO.getCost(unit.model);
@@ -1188,7 +1188,7 @@ public class WallyAI extends ModularAI
     for( Utils.SearchNode xyc : destinations )
     {
 //      log(String.format("    is it safe to go to %s?", xyc));
-      if( !ignoreSafety && !canWallHere(predMap, threatMap, unit, xyc) )
+      if( !ignoreSafety && !canWallHere(predMap, threatMap, unit, xyc, null) )
         continue;
 
       UnitContext plannedResident = mapPlan[xyc.xCoord][xyc.yCoord].identity;
@@ -1284,13 +1284,15 @@ public class WallyAI extends ModularAI
     return success;
   }
 
-  private boolean isSafe(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc)
+  private boolean isSafe(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
   {
     int threshhold = unit.model.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHOLD : INDIRECT_THREAT_THRESHOLD;
     double threat = 0;
     ArrayList<TileThreat> tileThreats = threatMap[xyc.xCoord][xyc.yCoord];
     for( TileThreat tt : tileThreats )
     {
+      if( target == tt.identity.unit )
+        continue; // We aren't scared of that which we're about to shoot
       for( WeaponModel wep : tt.relevantWeapons )
       {
         // Does this make sense to do a proper combat calc on?
@@ -1305,11 +1307,11 @@ public class WallyAI extends ModularAI
    * @return whether it's safe or a good place to wall
    * For use after unit building is complete
    */
-  private boolean canWallHere(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc)
+  private boolean canWallHere(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
   {
     MapLocation destination = gameMap.getLocation(xyc);
     // if we're safe, we're safe
-    if( isSafe(gameMap, threatMap, unit, xyc) )
+    if( isSafe(gameMap, threatMap, unit, xyc, target) )
       return true;
 
     // TODO: Determine whether the ally actually needs a wall there. Mechs walling for Tanks vs inf is... silly.
@@ -1665,7 +1667,7 @@ public class WallyAI extends ModularAI
       loss     = (hploss   * actorCost                      ) / UnitModel.MAXIMUM_HP;
       damage   = (hpdamage * target.CO.getCost(target.model)) / UnitModel.MAXIMUM_HP;
 
-      if( ai.canWallHere(gameMap, ai.threatMap, actor.unit, actor.coord) )
+      if( ai.canWallHere(gameMap, ai.threatMap, actor.unit, actor.coord, target.unit) )
       {
         ai.log(String.format("  %s thinks it's safe to attack %s", actor, target));
         //           funds "gained" funds lost     term to favor using cheaper units
