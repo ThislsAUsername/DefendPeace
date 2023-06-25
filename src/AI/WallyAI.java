@@ -87,7 +87,7 @@ public class WallyAI extends ModularAI
     final GameAction action;
     final XYCoord startPos;
     final AIModule whodunit;
-    ArrayList<Unit> killPrereqs = new ArrayList<>();
+    ArrayList<ActionPlan> prereqs = new ArrayList<>();
     XYCoord clearTile; // The tile we expect to have emptied with our attack, if any.
     TravelPurpose purpose = TravelPurpose.NA;
     ActionPlan(AIModule whodunit, GameAction action)
@@ -116,6 +116,7 @@ public class WallyAI extends ModularAI
   }
   private UnitPrediction[][] mapPlan; // TODO: Invalidate if any unit gets trapped/ends up not where we expect - cache unit+destination on offer action
   public PredictionMap predMap; // Owns a reference to the above, to expose its contents to Utils
+  HashMap<XYCoord, ArrayList<ActionPlan>> tileAttacks = new HashMap<>();
   private HashSet<Unit> plannedUnits;
   private static class TileThreat
   {
@@ -200,6 +201,7 @@ public class WallyAI extends ModularAI
     mapPlan = new UnitPrediction[map.mapWidth][map.mapHeight];
     predMap = new PredictionMap(myArmy, mapPlan);
     plannedUnits = new HashSet<>();
+    tileAttacks.clear();
     threatMap = new ArrayList[map.mapWidth][map.mapHeight];
     for( int x = 0; x < map.mapWidth; ++x )
       for( int y = 0; y < map.mapHeight; ++y )
@@ -266,6 +268,8 @@ public class WallyAI extends ModularAI
         final XYCoord ctt = canceled.action.getTargetLocation();
         UnitContext cuc = mapPlan[ctt.xCoord][ctt.yCoord].identity;
         cuc.setHP(cuc.unit.getHP());
+        if( tileAttacks.containsKey(ctt) )
+          tileAttacks.get(ctt).remove(canceled);
       }
       // Don't mess with canceling attacks that clear tiles, at least for now
 //      final XYCoord cct = canceled.clearTile;
@@ -274,14 +278,23 @@ public class WallyAI extends ModularAI
       // Don't chain cancellations - if Wally is dumb enough to cause that, he can recalculate :P
     }
 
-    mapPlan[dest.xCoord][dest.yCoord].toAchieve = new ActionPlan(whodunit, action);
+    final ActionPlan plan = new ActionPlan(whodunit, action);
+    mapPlan[dest.xCoord][dest.yCoord].toAchieve = plan;
     mapPlan[dest.xCoord][dest.yCoord].identity = uc;
     uc.coord = dest;
+    // Attacks on our move tile are prereqs
+    if( tileAttacks.containsKey(dest) )
+      plan.prereqs.addAll(tileAttacks.get(dest));
     if( null != uc.unit )
       plannedUnits.add(uc.unit);
     if( isAttack )
     {
       final XYCoord target = action.getTargetLocation();
+      if( !tileAttacks.containsKey(target) )
+        tileAttacks.put(target, new ArrayList<>());
+      // Attacks on our target are prereqs
+      plan.prereqs.addAll(tileAttacks.get(target));
+      tileAttacks.get(target).add(plan);
       final UnitContext targetUC = mapPlan[target.xCoord][target.yCoord].identity;
       targetUC.setHP(targetHP);
       if( 1 > targetHP )
@@ -376,7 +389,6 @@ public class WallyAI extends ModularAI
       HashSet<XYCoord> vacatedTiles = new HashSet<>();
       HashSet<XYCoord> revisitTiles = new HashSet<>();
       HashMap<UnitContext, ActionPlan> actionsBooked = new HashMap<>();
-      ArrayList<ActionPlan> actionsInOrder = new ArrayList<>();
 
       for( int x = 0; x < map.mapWidth; ++x )
         for( int y = 0; y < map.mapHeight; ++y )
@@ -388,7 +400,7 @@ public class WallyAI extends ModularAI
             if( actionsBooked.containsKey(actor) )
               ai.log(String.format("Warning: Unit is double-booked %s:\n\t%s\n\t%s", actor, readyPlan, actionsBooked.get(actor)));
             actionsBooked.put(actor, readyPlan);
-            actionsInOrder.add(readyPlan);
+            ai.queuedActions.add(readyPlan);
             ai.mapPlan[x][y].toAchieve = null;
           }
           else
@@ -409,7 +421,7 @@ public class WallyAI extends ModularAI
             if( actionsBooked.containsKey(actor) )
               ai.log(String.format("Warning: Unit is double-booked %s:\n\t%s\n\t%s", actor, readyPlan, actionsBooked.get(actor)));
             actionsBooked.put(actor, readyPlan);
-            actionsInOrder.add(readyPlan);
+            ai.queuedActions.add(readyPlan);
             ai.mapPlan[x][y].toAchieve = null;
             actionAtCoord = movexyc;
             break;
@@ -428,7 +440,6 @@ public class WallyAI extends ModularAI
       }
       ai.plannedUnits.clear();
 
-      ai.queuedActions.addAll(actionsInOrder);
       if( ai.queuedActions.isEmpty() )
         return null;
 
@@ -446,6 +457,11 @@ public class WallyAI extends ModularAI
       ActionPlan  plan  = ai.mapPlan[x][y].toAchieve;
       if( null == plan )
         return null; // Nothing to do here
+      // Make sure our prereqs are satisfied
+      for( ActionPlan prereq : plan.prereqs )
+        if( !ai.queuedActions.contains(prereq) )
+          return null;
+
       final Unit unit = actor.unit;
       if( null != unit && unit.isTurnOver )
       {
@@ -674,6 +690,7 @@ public class WallyAI extends ModularAI
         return null;
 
       // Re-initialize our plans
+      ai.tileAttacks.clear();
       for( int x = 0; x < gameMap.mapWidth; ++x )
         for( int y = 0; y < gameMap.mapHeight; ++y )
         {
