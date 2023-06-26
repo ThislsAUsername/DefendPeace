@@ -88,7 +88,6 @@ public class WallyAI extends ModularAI
     final GameAction action;
     final XYCoord startPos;
     final AIModule whodunit;
-    ArrayList<ActionPlan> prereqs = new ArrayList<>();
     GamePath path = null;
     XYCoord clearTile; // The tile we expect to have emptied with our attack, if any.
     TravelPurpose purpose = TravelPurpose.NA;
@@ -114,11 +113,11 @@ public class WallyAI extends ModularAI
   private static class UnitPrediction
   {
     UnitContext identity; // Must be non-null if toAchieve is; UC's unit may be null.
-    ActionPlan toAchieve; // TODO: Harvest these and put them in the right order somehow - via eviction?
+    HashMap<ActionPlan, Integer> damageInstances = new HashMap<>();
+    ActionPlan toAchieve;
   }
   private UnitPrediction[][] mapPlan; // TODO: Invalidate if any unit gets trapped/ends up not where we expect - cache unit+destination on offer action
   public PredictionMap predMap; // Owns a reference to the above, to expose its contents to Utils
-  HashMap<XYCoord, ArrayList<ActionPlan>> tileAttacks = new HashMap<>();
   private HashSet<Unit> plannedUnits;
   private static class TileThreat
   {
@@ -203,7 +202,6 @@ public class WallyAI extends ModularAI
     mapPlan = new UnitPrediction[map.mapWidth][map.mapHeight];
     predMap = new PredictionMap(myArmy, mapPlan);
     plannedUnits = new HashSet<>();
-    tileAttacks.clear();
     threatMap = new ArrayList[map.mapWidth][map.mapHeight];
     for( int x = 0; x < map.mapWidth; ++x )
       for( int y = 0; y < map.mapHeight; ++y )
@@ -250,16 +248,17 @@ public class WallyAI extends ModularAI
   {
     updatePlan(whodunit, uc, path, action, false, 42);
   }
-  private void updatePlan(AIModule whodunit, Unit unit, GamePath path, GameAction action, boolean isAttack, int targetHP)
+  private void updatePlan(AIModule whodunit, Unit unit, GamePath path, GameAction action, boolean isAttack, int percentDamage)
   {
-    updatePlan(whodunit, new UnitContext(unit), path, action, isAttack, targetHP);
+    updatePlan(whodunit, new UnitContext(unit), path, action, isAttack, percentDamage);
   }
-  private void updatePlan(AIModule whodunit, UnitContext uc, GamePath path, GameAction action, boolean isAttack, int targetHP)
+  private void updatePlan(AIModule whodunit, UnitContext uc, GamePath path, GameAction action, boolean isAttack, int percentDamage)
   {
     if( null == action )
       return;
     XYCoord dest = action.getMoveLocation();
-    ActionPlan canceled = mapPlan[dest.xCoord][dest.yCoord].toAchieve;
+    final UnitPrediction destPredictTile = mapPlan[dest.xCoord][dest.yCoord];
+    ActionPlan canceled = destPredictTile.toAchieve;
     if( null != canceled )
     {
       if( null != canceled.action.getActor() )
@@ -268,10 +267,7 @@ public class WallyAI extends ModularAI
       if( canceled.action.getType() == UnitActionFactory.ATTACK )
       {
         final XYCoord ctt = canceled.action.getTargetLocation();
-        UnitContext cuc = mapPlan[ctt.xCoord][ctt.yCoord].identity;
-        cuc.setHP(cuc.unit.getHP());
-        if( tileAttacks.containsKey(ctt) )
-          tileAttacks.get(ctt).remove(canceled);
+        mapPlan[ctt.xCoord][ctt.yCoord].damageInstances.remove(canceled);
       }
       // Don't mess with canceling attacks that clear tiles, at least for now
 //      final XYCoord cct = canceled.clearTile;
@@ -292,29 +288,16 @@ public class WallyAI extends ModularAI
 
     final ActionPlan plan = new ActionPlan(whodunit, action);
     plan.path = path;
-    mapPlan[dest.xCoord][dest.yCoord].toAchieve = plan;
-    mapPlan[dest.xCoord][dest.yCoord].identity = uc;
+    destPredictTile.toAchieve = plan;
+    destPredictTile.identity = uc;
     uc.coord = dest;
-    // Attacks on our move tile are prereqs
-    if( tileAttacks.containsKey(dest) )
-      plan.prereqs.addAll(tileAttacks.get(dest));
     if( null != uc.unit )
       plannedUnits.add(uc.unit);
+
     if( isAttack )
     {
       final XYCoord target = action.getTargetLocation();
-      if( !tileAttacks.containsKey(target) )
-        tileAttacks.put(target, new ArrayList<>());
-      // And we're a prereq for all attacks on it after
-      plan.prereqs.addAll(tileAttacks.get(target));
-      tileAttacks.get(target).add(plan);
-      final UnitContext targetUC = mapPlan[target.xCoord][target.yCoord].identity;
-      targetUC.setHP(targetHP);
-      if( 1 > targetHP )
-      {
-        // If the target will be dead, consider the tile cleared and remember that we expect to clear this tile
-        mapPlan[dest.xCoord][dest.yCoord].toAchieve.clearTile = target;
-      }
+      mapPlan[target.xCoord][target.yCoord].damageInstances.put(plan, percentDamage);
     }
   }
 
@@ -468,10 +451,6 @@ public class WallyAI extends ModularAI
       ActionPlan  plan  = ai.mapPlan[x][y].toAchieve;
       if( null == plan )
         return null; // Nothing to do here
-      // Make sure our prereqs are satisfied
-      for( ActionPlan prereq : plan.prereqs )
-        if( !ai.queuedActions.contains(prereq) )
-          return null;
 
       final Unit unit = actor.unit;
       if( null != unit && unit.isTurnOver )
@@ -508,8 +487,22 @@ public class WallyAI extends ModularAI
         ai.log(String.format("Warning: plan/action mismatch with %s:\n\t%s\n\t!=\n\t%s", plan, actor.unit, plan.action.getActor()));
       if( null != plan.startPos )
         vacatedTiles.add(plan.startPos);
-      if( null != plan.clearTile )
-        vacatedTiles.add(plan.clearTile);
+
+      // If we're an attack whose damage sums up to clear the target out, populate that state now.
+      if( plan.action.getType() == UnitActionFactory.ATTACK )
+      {
+        XYCoord tt = plan.action.getTargetLocation();
+        final UnitPrediction targetPredictTile = ai.mapPlan[tt.xCoord][tt.yCoord];
+        final UnitContext target = targetPredictTile.identity;
+
+        int percentDamage = targetPredictTile.damageInstances.get(plan);
+        target.damageHP(percentDamage / 10.0, true); // Destructively modifying the planning state is fine and convenient at this stage
+        if( 1 > target.getHP() )
+        {
+          plan.clearTile = tt;
+          vacatedTiles.add(tt);
+        }
+      }
       return plan;
     }
   }
@@ -565,8 +558,8 @@ public class WallyAI extends ModularAI
         return null;
 
       GameAction bestAttack = null;
-      int targetHP = 10;
-      GamePath movePath = GamePath.stayPut(unit);
+      int percentDamage = 10;
+      GamePath movePath = GamePath.stayPut(coord);
 
       // Figure out what I can do here.
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(ai.predMap, movePath);
@@ -587,7 +580,7 @@ public class WallyAI extends ModularAI
             {
               bestDamage = damage;
               bestAttack = action;
-              targetHP = results.defender.after.getHP();
+              percentDamage = (int) (10 * results.defender.getPreciseHPDamage());
             }
           }
         }
@@ -599,7 +592,7 @@ public class WallyAI extends ModularAI
       }
 
       boolean isAttack = true;
-      ai.updatePlan(this, unit, movePath, bestAttack, isAttack, targetHP);
+      ai.updatePlan(this, unit, movePath, bestAttack, isAttack, percentDamage);
 
       return null;
     }
@@ -647,12 +640,16 @@ public class WallyAI extends ModularAI
       XYCoord targetLoc = null;
       for( XYCoord coord : new ArrayList<XYCoord>(targets) )
       {
-        UnitContext target = ai.mapPlan[coord.xCoord][coord.yCoord].identity;
-        if( null == target || !myArmy.isEnemy(target.CO) )
+        Unit targetID = ai.predMap.getResident(coord);
+        if( null == targetID || !myArmy.isEnemy(targetID.CO) )
         {
-          ai.log(String.format("    Warning! NHitKO is trying to kill invalid target: %s at %s", target, coord));
+          ai.log(String.format("    Warning! NHitKO is trying to kill invalid target: %s at %s", targetID, coord));
           continue;
         }
+        UnitContext target = new UnitContext(targetID);
+        int damageTotal = 0;
+        for( int hit : ai.mapPlan[coord.xCoord][coord.yCoord].damageInstances.values() )
+          damageTotal += hit;
 
         targetLoc = coord;
         Map<XYCoord, Unit> neededAttacks = AICombatUtils.findMultiHitKill(ai.predMap, target.unit, attackerOptions, industries);
@@ -676,15 +673,16 @@ public class WallyAI extends ModularAI
           attacker.setPath(movePath);
 
           BattleSummary results = CombatEngine.simulateBattleResults(attacker, target, ai.predMap, CALC);
-          final int targetHP = results.defender.after.getHP();
-          ai.log(String.format("    %s brings the HP total to %s", unit.toStringWithLocation(), targetHP));
+          final int percentDamage = (int) (10 * results.defender.getPreciseHPDamage());
+          damageTotal += percentDamage;
+          ai.log(String.format("    %s hits for %s, total: %s", unit.toStringWithLocation(), percentDamage, target));
 
           boolean isAttack = true;
           final BattleAction attack = new BattleAction(ai.predMap, unit, movePath, targetLoc.xCoord, targetLoc.yCoord);
 
-          ai.updatePlan(this, unit, movePath, attack, isAttack, targetHP);
+          ai.updatePlan(this, unit, movePath, attack, isAttack, percentDamage);
           attackerOptions.remove(unit);
-          if( 1 > targetHP )
+          if( damageTotal >= target.getHP() * UnitModel.MAXIMUM_HP )
             break;
         }
       }
@@ -720,7 +718,6 @@ public class WallyAI extends ModularAI
         return null;
 
       // Re-initialize our plans
-      ai.tileAttacks.clear();
       for( int x = 0; x < gameMap.mapWidth; ++x )
         for( int y = 0; y < gameMap.mapHeight; ++y )
         {
@@ -728,6 +725,7 @@ public class WallyAI extends ModularAI
           ai.threatMap[x][y].clear();
           ai.mapPlan[x][y].identity = null;
           ai.mapPlan[x][y].toAchieve = null;
+          ai.mapPlan[x][y].damageInstances.clear();
           Unit resident = gameMap.getResident(x, y);
           if( null == resident )
             continue;
@@ -852,18 +850,17 @@ public class WallyAI extends ModularAI
       GameAction bestAction = null;
       int bestFundsDelta = 0;
       boolean isAttack = false;
-      int targetHP = 42;
+      int percentDamage = 0;
       for( Utils.SearchNode moveCoord : destinations )
       {
         // Figure out how to get here.
         GamePath movePath = moveCoord.getMyPath();
         actor.setPath(movePath);
-        UnitContext resident = ai.mapPlan[moveCoord.xCoord][moveCoord.yCoord].identity;
-        ActionPlan  ap       = ai.mapPlan[moveCoord.xCoord][moveCoord.yCoord].toAchieve;
+        Unit resident = ai.predMap.getResident(moveCoord);
+        ActionPlan  ap = ai.mapPlan[moveCoord.xCoord][moveCoord.yCoord].toAchieve;
         boolean spaceFree = null == resident;
-        if( !spaceFree && (!canEvict || null == ap || null != ap.clearTile) )
+        if( !spaceFree && (!canEvict || null == ap ) )
           continue; // Bail if we can't clear the space
-        // Also, don't mess with canceling attacks that clear tiles, at least for now
 
         // Figure out what I can do here.
         ArrayList<GameActionSet> actionSets = unit.getPossibleActions(ai.predMap, movePath, pcp.includeOccupiedSpaces);
@@ -900,7 +897,7 @@ public class WallyAI extends ModularAI
               bestPath = movePath;
               bestAction = ga;
               isAttack = true;
-              targetHP = target.getHP() - results.hpdamage;
+              percentDamage = results.hpdamage*10;
             }
           }
 
@@ -930,7 +927,7 @@ public class WallyAI extends ModularAI
         } // ~for action types
       } // ~for destinations
 
-      ai.updatePlan(whodunit, unit, bestPath, bestAction, isAttack, targetHP);
+      ai.updatePlan(whodunit, unit, bestPath, bestAction, isAttack, percentDamage);
     } // ~planValueAction
   } // ~FreeRealEstate
 
@@ -1235,7 +1232,7 @@ public class WallyAI extends ModularAI
     // TODO: use these?
     int bestFundsDelta = 0;
     boolean isAttack = false;
-    int targetHP = 42;
+    int percentDamage = 0;
     for( Utils.SearchNode xyc : destinations )
     {
 //      log(String.format("    is it safe to go to %s?", xyc));
@@ -1247,7 +1244,7 @@ public class WallyAI extends ModularAI
       // Figure out how to get here.
       boolean spaceFree = null == plannedResident;
       if( !spaceFree &&
-          ( null == ap || null != ap.clearTile || ap.purpose.priority > travelPurpose.priority) )
+          ( null == ap || ap.purpose.priority > travelPurpose.priority) )
         continue; // Bail if:
       // There's no other action to evaluate against ours
       // The other action clears a tile
@@ -1346,7 +1343,7 @@ public class WallyAI extends ModularAI
       } // ~if any action type
     } // ~for destinations
 
-    updatePlan(whodunit, unit, bestPath, bestAction, isAttack, targetHP);
+    updatePlan(whodunit, unit, bestPath, bestAction, isAttack, percentDamage);
     if( null != bestAction )
     {
       XYCoord xyc = bestAction.getMoveLocation();
@@ -1365,13 +1362,20 @@ public class WallyAI extends ModularAI
     ArrayList<TileThreat> tileThreats = threatMap[xyc.xCoord][xyc.yCoord];
     for( TileThreat tt : tileThreats )
     {
-      if( target == tt.identity.unit )
+      final UnitContext threatContext = tt.identity;
+      if( target == threatContext.unit )
         continue; // We aren't scared of that which we're about to shoot
       for( WeaponModel wep : tt.relevantWeapons )
       {
         // Does this make sense to do a proper combat calc on?
         // If so, will need to make a UnitContext overload for CombatEngine
-        threat = Math.max(threat, wep.getDamage(unit.model) * tt.identity.getHPFactor());
+        int damagePercent = 0;
+        final HashMap<ActionPlan, Integer> damageInstances = mapPlan[threatContext.coord.xCoord][threatContext.coord.yCoord].damageInstances;
+        for( int hit : damageInstances.values() )
+          damagePercent += hit;
+        final double hpFactor = (threatContext.getHP()*10 - damagePercent) / 10.0;
+
+        threat = Math.max(threat, wep.getDamage(unit.model) * hpFactor);
       }
     }
     return (threshhold > threat);
@@ -1829,7 +1833,11 @@ public class WallyAI extends ModularAI
 
       if( null == resSource )
         return returnLoc;
-      if( resSource.getHP() < 1 )
+
+      int damagePercent = 0;
+      for( int hit : mapPlan[x][y].damageInstances.values() )
+        damagePercent += hit;
+      if( damagePercent >= resSource.getHP() * UnitModel.MAXIMUM_HP )
         return returnLoc; // If we think it will be dead, don't report its presence
 
       Unit resident = resSource.unit;
