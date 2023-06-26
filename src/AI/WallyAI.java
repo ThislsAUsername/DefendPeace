@@ -439,7 +439,7 @@ public class WallyAI extends ModularAI
           XYCoord to   = waypoints.get( i ).GetCoordinates();
           int cost = fff.getTransitionCost(map, from, to, actor.unit, false); // Assume unit is real if it's moving
           if( cost > actor.movePower )
-            if( !vacatedTiles.contains(movexyc) )
+            if( !vacatedTiles.contains(to) )
               return null;
         }
       }
