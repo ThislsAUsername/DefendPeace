@@ -1276,7 +1276,7 @@ public class WallyAI extends ModularAI
                     int damage = Math.min(results.defender.unit.getHealth(), (int)results.defender.getPreciseHealthDamage());
 
                     if( damage > loss ) // only shoot that which you hurt more than it hurts you
-                      return damage * results.defender.unit.getCost();
+                      return damage * results.defender.unit.getCost() / 10;
 
                     return 0;
                   }, (terrain, params) -> 1); // Attack terrain, but don't prioritize it over units
@@ -1287,7 +1287,13 @@ public class WallyAI extends ModularAI
                 bestFundsDelta = (int) damageValue;
                 bestPath = movePath;
                 bestAction = attack;
-                // TODO: is attack
+                isAttack = true;
+                Unit target = gameMap.getResident(attack.getTargetLocation());
+                int defLevel = gameMap.getEnvironment(attack.getTargetLocation()).terrainType.getDefLevel();
+                int range = attack.getMoveLocation().getDistance(target);
+                boolean attackerMoved = 0 < attack.getMoveLocation().getDistance(unit);
+                double hpDamage = CombatEngine.calculateOneStrikeDamage(unit, range, target, gameMap, defLevel, attackerMoved);
+                percentDamage = (int) (hpDamage * 10);
               }
             }
           }
