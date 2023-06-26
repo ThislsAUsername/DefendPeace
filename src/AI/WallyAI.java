@@ -17,12 +17,33 @@ import Terrain.*;
 import Units.*;
 import Units.MoveTypes.MoveType;
 
-/**
- *  Wally values units based on firepower and the area they can threaten.
- *  He tries to keep units safe by keeping them out of range, but will also meatshield to protect more valuable units.
- */
 public class WallyAI extends ModularAI
 {
+  public WallyAI(Army army)
+  {
+    super(army);
+    aiPhases = new ArrayList<AIModule>(
+        Arrays.asList(
+            new PowerActivator(army, CommanderAbility.PHASE_TURN_START),
+            new DrainActionQueue(army, this),
+            new GenerateThreatMap(army, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
+
+            new WallyCapper(army, this),
+            new NHitKO(army, this),
+            new SiegeAttacks(army, this),
+            new PowerActivator(army, CommanderAbility.PHASE_BUY),
+            new FreeRealEstate(army, this, false, false), // prioritize non-eviction
+            new FreeRealEstate(army, this, true,  false), // evict if necessary
+            new BuildStuff(army, this),
+            new Travel(army, this, false), // High value travel
+            new FreeRealEstate(army, this, true,  true), // step on industries we're not using
+            new Eviction(army, this), // Getting dudes out of the way
+
+            new FillActionQueue(army, this),
+            new PowerActivator(army, CommanderAbility.PHASE_TURN_END)
+            ));
+  }
+
   private static class instantiator implements AIMaker
   {
     @Override
@@ -132,66 +153,6 @@ public class WallyAI extends ModularAI
   public ArrayList<TileThreat>[][] threatMap;
   private ArrayList<Unit> allThreats;
   private HashMap<UnitModel, Double> unitEffectiveMove = null; // How well the unit can move, on average, on this map
-  public double getEffectiveMove(UnitModel model)
-  {
-    if( unitEffectiveMove.containsKey(model) )
-      return unitEffectiveMove.get(model);
-
-    //TODO
-//    MoveType p = model.calculateMoveType();
-    MoveType p = model.baseMoveType;
-    GameMap map = myArmy.myView;
-    double totalCosts = 0;
-    int validTiles = 0;
-    double totalTiles = map.mapWidth * map.mapHeight; // to avoid integer division
-    // Iterate through the map, counting up the move costs of all valid terrain
-    for( int w = 0; w < map.mapWidth; ++w )
-    {
-      for( int h = 0; h < map.mapHeight; ++h )
-      {
-        Environment terrain = map.getLocation(w, h).getEnvironment();
-        if( p.canStandOn(terrain) )
-        {
-          validTiles++;
-          int cost = p.getMoveCost(terrain);
-          totalCosts += Math.pow(cost, TERRAIN_PENALTY_WEIGHT);
-        }
-      }
-    }
-    //             term for how fast you are   term for map coverage
-    double ratio = (validTiles / totalCosts) * (validTiles / totalTiles); // 1.0 is the max expected value
-    
-//    double effMove = model.calculateMovePower() * ratio;
-    double effMove = model.baseMovePower * ratio;
-    unitEffectiveMove.put(model, effMove);
-    return effMove;
-  }
-
-
-  public WallyAI(Army army)
-  {
-    super(army);
-    aiPhases = new ArrayList<AIModule>(
-        Arrays.asList(
-            new PowerActivator(army, CommanderAbility.PHASE_TURN_START),
-            new DrainActionQueue(army, this),
-            new GenerateThreatMap(army, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
-
-            new WallyCapper(army, this),
-            new NHitKO(army, this),
-            new SiegeAttacks(army, this),
-            new PowerActivator(army, CommanderAbility.PHASE_BUY),
-            new FreeRealEstate(army, this, false, false), // prioritize non-eviction
-            new FreeRealEstate(army, this, true,  false), // evict if necessary
-            new BuildStuff(army, this),
-            new Travel(army, this, false), // High value travel
-            new FreeRealEstate(army, this, true,  true), // step on industries we're not using
-            new Eviction(army, this), // Getting dudes out of the way
-
-            new FillActionQueue(army, this),
-            new PowerActivator(army, CommanderAbility.PHASE_TURN_END)
-            ));
-  }
 
   @SuppressWarnings("unchecked") // Java whines if I use generics and lists at the same time
   private void init(GameMap map)
@@ -1728,6 +1689,40 @@ public class WallyAI extends ModularAI
       counterPower = Math.max(counterPower, effectiveness);
     }
     return counterPower;
+  }
+  public double getEffectiveMove(UnitModel model)
+  {
+    if( unitEffectiveMove.containsKey(model) )
+      return unitEffectiveMove.get(model);
+
+    //TODO
+//    MoveType p = model.calculateMoveType();
+    MoveType p = model.baseMoveType;
+    GameMap map = myArmy.myView;
+    double totalCosts = 0;
+    int validTiles = 0;
+    double totalTiles = map.mapWidth * map.mapHeight; // to avoid integer division
+    // Iterate through the map, counting up the move costs of all valid terrain
+    for( int w = 0; w < map.mapWidth; ++w )
+    {
+      for( int h = 0; h < map.mapHeight; ++h )
+      {
+        Environment terrain = map.getLocation(w, h).getEnvironment();
+        if( p.canStandOn(terrain) )
+        {
+          validTiles++;
+          int cost = p.getMoveCost(terrain);
+          totalCosts += Math.pow(cost, TERRAIN_PENALTY_WEIGHT);
+        }
+      }
+    }
+    //             term for how fast you are   term for map coverage
+    double ratio = (validTiles / totalCosts) * (validTiles / totalTiles); // 1.0 is the max expected value
+
+//    double effMove = model.calculateMovePower() * ratio;
+    double effMove = model.baseMovePower * ratio;
+    unitEffectiveMove.put(model, effMove);
+    return effMove;
   }
 
   private static class AttackValue
