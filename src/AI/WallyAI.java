@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.*;
+import Engine.GamePath.PathNode;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.Combat.CombatContext.CalcType;
@@ -88,6 +89,7 @@ public class WallyAI extends ModularAI
     final XYCoord startPos;
     final AIModule whodunit;
     ArrayList<ActionPlan> prereqs = new ArrayList<>();
+    GamePath path = null;
     XYCoord clearTile; // The tile we expect to have emptied with our attack, if any.
     TravelPurpose purpose = TravelPurpose.NA;
     ActionPlan(AIModule whodunit, GameAction action)
@@ -240,19 +242,19 @@ public class WallyAI extends ModularAI
     log(String.format("[======== Wally ending turn %s for %s =========]", turnNum, myArmy));
   }
 
-  private void updatePlan(AIModule whodunit, Unit unit, GameAction action)
+  private void updatePlan(AIModule whodunit, Unit unit, GamePath path, GameAction action)
   {
-    updatePlan(whodunit, unit, action, false, 42);
+    updatePlan(whodunit, unit, path, action, false, 42);
   }
-  private void updatePlan(AIModule whodunit, UnitContext uc, GameAction action)
+  private void updatePlan(AIModule whodunit, UnitContext uc, GamePath path, GameAction action)
   {
-    updatePlan(whodunit, uc, action, false, 42);
+    updatePlan(whodunit, uc, path, action, false, 42);
   }
-  private void updatePlan(AIModule whodunit, Unit unit, GameAction action, boolean isAttack, int targetHP)
+  private void updatePlan(AIModule whodunit, Unit unit, GamePath path, GameAction action, boolean isAttack, int targetHP)
   {
-    updatePlan(whodunit, new UnitContext(unit), action, isAttack, targetHP);
+    updatePlan(whodunit, new UnitContext(unit), path, action, isAttack, targetHP);
   }
-  private void updatePlan(AIModule whodunit, UnitContext uc, GameAction action, boolean isAttack, int targetHP)
+  private void updatePlan(AIModule whodunit, UnitContext uc, GamePath path, GameAction action, boolean isAttack, int targetHP)
   {
     if( null == action )
       return;
@@ -278,7 +280,18 @@ public class WallyAI extends ModularAI
       // Don't chain cancellations - if Wally is dumb enough to cause that, he can recalculate :P
     }
 
+    // Assuming our path has been planned well re:terrain, running into enemies is the only obstacle
+    if( null != path )
+    {
+      if( path.getPathLength() < path.getEndCoord().getDistance(uc.unit) ) // Assume unit is real if it's moving
+      {
+        log(String.format("      %s generated bad path: %s", whodunit, path));
+        return;
+      }
+    }
+
     final ActionPlan plan = new ActionPlan(whodunit, action);
+    plan.path = path;
     mapPlan[dest.xCoord][dest.yCoord].toAchieve = plan;
     mapPlan[dest.xCoord][dest.yCoord].identity = uc;
     uc.coord = dest;
@@ -292,7 +305,7 @@ public class WallyAI extends ModularAI
       final XYCoord target = action.getTargetLocation();
       if( !tileAttacks.containsKey(target) )
         tileAttacks.put(target, new ArrayList<>());
-      // Attacks on our target are prereqs
+      // And we're a prereq for all attacks on it after
       plan.prereqs.addAll(tileAttacks.get(target));
       tileAttacks.get(target).add(plan);
       final UnitContext targetUC = mapPlan[target.xCoord][target.yCoord].identity;
@@ -301,7 +314,6 @@ public class WallyAI extends ModularAI
       {
         // If the target will be dead, consider the tile cleared and remember that we expect to clear this tile
         mapPlan[dest.xCoord][dest.yCoord].toAchieve.clearTile = target;
-        mapPlan[target.xCoord][target.yCoord].identity = null;
       }
     }
   }
@@ -365,7 +377,6 @@ public class WallyAI extends ModularAI
         return null;
       }
 
-      ai.log(String.format("  Action: %s", ae.action));
       ai.lastAction = ae;
       return ae.action;
     }
@@ -475,6 +486,24 @@ public class WallyAI extends ModularAI
           )
         return null; // Location is full and won't be emptied by our current confirmed plans
 
+      // Assuming our path has been planned well re:terrain, running into enemies is the only obstacle
+      GamePath movePath = plan.path;
+      if( null != movePath )
+      {
+        MoveType fff = actor.calculateMoveType();
+        ArrayList<PathNode> waypoints = movePath.getWaypoints();
+        // We iterate from 1 because the first waypoint is the unit's initial position.
+        for( int i = 1; i < waypoints.size(); i++)
+        {
+          XYCoord from = waypoints.get(i-1).GetCoordinates();
+          XYCoord to   = waypoints.get( i ).GetCoordinates();
+          int cost = fff.getTransitionCost(map, from, to, actor.unit, false); // Assume unit is real if it's moving
+          if( cost > actor.movePower )
+            if( !vacatedTiles.contains(movexyc) )
+              return null;
+        }
+      }
+
       if( actor.unit != plan.action.getActor())
         ai.log(String.format("Warning: plan/action mismatch with %s:\n\t%s\n\t!=\n\t%s", plan, actor.unit, plan.action.getActor()));
       if( null != plan.startPos )
@@ -505,7 +534,8 @@ public class WallyAI extends ModularAI
       if( 0 < ai.threatMap[mc.xCoord][mc.yCoord].size() )
         return null;
 
-      ai.updatePlan(this, unit, capAction);
+      // If there's path weirdness this early in the game, it's fine to freak out
+      ai.updatePlan(this, unit, null, capAction);
       return null;
     }
   }
@@ -569,7 +599,7 @@ public class WallyAI extends ModularAI
       }
 
       boolean isAttack = true;
-      ai.updatePlan(this, unit, bestAttack, isAttack, targetHP);
+      ai.updatePlan(this, unit, movePath, bestAttack, isAttack, targetHP);
 
       return null;
     }
@@ -652,7 +682,7 @@ public class WallyAI extends ModularAI
           boolean isAttack = true;
           final BattleAction attack = new BattleAction(ai.predMap, unit, movePath, targetLoc.xCoord, targetLoc.yCoord);
 
-          ai.updatePlan(this, unit, attack, isAttack, targetHP);
+          ai.updatePlan(this, unit, movePath, attack, isAttack, targetHP);
           attackerOptions.remove(unit);
           if( 1 > targetHP )
             break;
@@ -818,6 +848,7 @@ public class WallyAI extends ModularAI
       Collections.reverse(destinations);
 
       UnitContext actor = new UnitContext(gameMap, unit);
+      GamePath bestPath = null;
       GameAction bestAction = null;
       int bestFundsDelta = 0;
       boolean isAttack = false;
@@ -866,6 +897,7 @@ public class WallyAI extends ModularAI
                 continue;
 
               bestFundsDelta = fundsDelta - opportunityCost;
+              bestPath = movePath;
               bestAction = ga;
               isAttack = true;
               targetHP = target.getHP() - results.hpdamage;
@@ -898,7 +930,7 @@ public class WallyAI extends ModularAI
         } // ~for action types
       } // ~for destinations
 
-      ai.updatePlan(whodunit, unit, bestAction, isAttack, targetHP);
+      ai.updatePlan(whodunit, unit, bestPath, bestAction, isAttack, targetHP);
     } // ~planValueAction
   } // ~FreeRealEstate
 
@@ -991,7 +1023,7 @@ public class WallyAI extends ModularAI
         {
           builds.remove(coord);
           GameAction buyAction = new GameAction.UnitProductionAction(buyer, toBuy, coord);
-          ai.updatePlan(this, new UnitContext(buyer, toBuy), buyAction);
+          ai.updatePlan(this, new UnitContext(buyer, toBuy), null, buyAction);
         }
         else
         {
@@ -1198,6 +1230,7 @@ public class WallyAI extends ModularAI
                           unit.toStringWithLocation(),
                           gameMap.getLocation(goal).getEnvironment().terrainType, goal,
                           pathPoint, mustMove, ignoreSafety));
+    GamePath bestPath = null;
     GameAction bestAction = null;
     // TODO: use these?
     int bestFundsDelta = 0;
@@ -1209,8 +1242,8 @@ public class WallyAI extends ModularAI
       if( !ignoreSafety && !canWallHere(predMap, threatMap, unit, xyc, null) )
         continue;
 
-      UnitContext plannedResident = mapPlan[xyc.xCoord][xyc.yCoord].identity;
-      ActionPlan  ap              = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
+      Unit plannedResident = predMap.getResident(xyc);
+      ActionPlan  ap       = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
       // Figure out how to get here.
       boolean spaceFree = null == plannedResident;
       if( !spaceFree &&
@@ -1248,6 +1281,27 @@ public class WallyAI extends ModularAI
 //      log(String.format("    Yes"));
 
       GamePath movePath = xyc.getMyPath();
+      if( movePath.getPathLength() < xyc.getDistance(unit) )
+      {
+        log(String.format("      Wally Travel generated bad path: %s", movePath));
+        continue;
+      }
+      if( attackEviction ) // Don't assume we can move through our evicter's target's space, since that also won't work
+      {
+        XYCoord target = mapPlan[unit.x][unit.y].toAchieve.action.getTargetLocation();
+        boolean collisionDetected = false;
+        for( PathNode wp : movePath.getWaypoints() )
+        {
+          if( target.equals(wp.GetCoordinates()) )
+          {
+            collisionDetected = true;
+            break;
+          }
+        }
+        if( collisionDetected )
+          continue;
+      }
+
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(predMap, movePath, ignoreResident);
       if( actionSets.size() > 0 )
       {
@@ -1273,6 +1327,7 @@ public class WallyAI extends ModularAI
               {
                 log(String.format("      Best en passant attack deals %s", damageValue));
                 bestFundsDelta = (int) damageValue;
+                bestPath = movePath;
                 bestAction = attack;
                 // TODO: is attack
               }
@@ -1284,13 +1339,14 @@ public class WallyAI extends ModularAI
         {
           bestFundsDelta = 1;
           bestAction = new WaitLifecycle.WaitAction(unit, movePath);
+          bestPath = movePath;
           isAttack = false;
         }
 
       } // ~if any action type
     } // ~for destinations
 
-    updatePlan(whodunit, unit, bestAction, isAttack, targetHP);
+    updatePlan(whodunit, unit, bestPath, bestAction, isAttack, targetHP);
     if( null != bestAction )
     {
       XYCoord xyc = bestAction.getMoveLocation();
@@ -1773,6 +1829,8 @@ public class WallyAI extends ModularAI
 
       if( null == resSource )
         return returnLoc;
+      if( resSource.getHP() < 1 )
+        return returnLoc; // If we think it will be dead, don't report its presence
 
       Unit resident = resSource.unit;
       if( null == resident )
@@ -1784,7 +1842,7 @@ public class WallyAI extends ModularAI
     @Override
     public boolean isLocationEmpty(Unit unit, int x, int y)
     {
-      Unit resident = getLocation(x, y).getResident();
+      Unit resident = getResident(x, y);
       return null == resident || resident == unit;
     }
   }
