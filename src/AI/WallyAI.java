@@ -397,7 +397,7 @@ public class WallyAI extends ModularAI
             ai.queuedActions.add(readyPlan);
             ai.mapPlan[x][y].toAchieve = null;
           }
-          else
+          else if( null != ai.mapPlan[x][y].toAchieve )
             revisitTiles.add(new XYCoord(x, y));
         }
 
