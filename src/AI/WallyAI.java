@@ -1452,7 +1452,11 @@ public class WallyAI extends ModularAI
 
   private boolean isSafe(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
   {
-    int threshhold = unit.model.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHOLD : INDIRECT_THREAT_THRESHOLD;
+    return isSafe(gameMap, threatMap, unit.model, xyc, target);
+  }
+  private boolean isSafe(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, UnitModel type, XYCoord xyc, Unit target)
+  {
+    int threshhold = type.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHOLD : INDIRECT_THREAT_THRESHOLD;
     double threat = 0;
     ArrayList<TileThreat> tileThreats = threatMap[xyc.xCoord][xyc.yCoord];
     for( TileThreat tt : tileThreats )
@@ -1468,9 +1472,9 @@ public class WallyAI extends ModularAI
         final HashMap<ActionPlan, Integer> damageInstances = mapPlan[threatContext.coord.xCoord][threatContext.coord.yCoord].damageInstances;
         for( int hit : damageInstances.values() )
           damagePercent += hit;
-        final double hpFactor = (threatContext.getHP()*10 - damagePercent) / 10.0;
+        final double hpFactor = (threatContext.getHP()*10 - damagePercent) / 100.0;
 
-        threat = Math.max(threat, wep.getDamage(unit.model) * hpFactor);
+        threat = Math.max(threat, wep.getDamage(type) * hpFactor);
       }
     }
     return (threshhold > threat);
@@ -1574,6 +1578,8 @@ public class WallyAI extends ModularAI
     {
       if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
       {
+        if( model.hasImmobileWeapon() && !isSafe(gameMap, threatMap, model, loc.getCoordinates(), null) )
+          continue;
         // If we can get to a target...
         if( 0 < findCombatUnitDestinations(predMap, allThreats, loc.getCoordinates(), new ModelForCO(loc.getOwner(), model))
             .size() )
