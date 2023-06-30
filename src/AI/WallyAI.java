@@ -809,6 +809,12 @@ public class WallyAI extends ModularAI
       ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
       if( mustMove )
         destinations.remove(new XYCoord(unit.x, unit.y));
+      boolean attackEviction = mustMove && null != ai.mapPlan[unit.x][unit.y].toAchieve && ai.mapPlan[unit.x][unit.y].toAchieve.action.getType() == UnitActionFactory.ATTACK;
+      if( attackEviction ) // Don't assume we can hop into our evicter's target's space, since that won't work
+      {
+        XYCoord target = ai.mapPlan[unit.x][unit.y].toAchieve.action.getTargetLocation();
+        destinations.remove(target);
+      }
       destinations.removeAll(AIUtils.findAlliedIndustries(ai.predMap, co.army, destinations, !avoidProduction));
       // sort by furthest away, good for capturing
       Utils.sortLocationsByDistance(position, destinations);
