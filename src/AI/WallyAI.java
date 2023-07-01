@@ -1996,8 +1996,9 @@ public class WallyAI extends ModularAI
     if( success )
       return Integer.MAX_VALUE/42; // I can't think of very many good reasons to skip finishing a capture
 
+    double yeetFactor = valueTerrain(unit.CO, gameMap.getEnvironment(moveCoord).terrainType);
     // Since we can't be certain of a capture, ballpark a day's income per full HP inf's worth of capping
-    return (capValue * myArmy.gameRules.incomePerCity) / UnitModel.MAXIMUM_HP;
+    return (int) (capValue * yeetFactor) / UnitModel.MAXIMUM_HP;
   }
 
   private static int valueAction(WallyAI ai, GameMap gameMap, ActionPlan ap)
