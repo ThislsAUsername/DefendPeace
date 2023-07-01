@@ -843,16 +843,14 @@ public class WallyAI extends ModularAI
       if( ai.plannedUnits.contains(unit) )
         return null;
 
-      final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
-      boolean mustMove = null != evicter && unit != evicter.unit;
-      planValueAction(this, unit.CO, ai, unit, gameMap, mustMove, !canStepOnProduction, canEvict);
+      planValueAction(this, unit.CO, ai, unit, gameMap, !canStepOnProduction, canEvict);
 
       return null;
     }
 
     public static void planValueAction( AIModule whodunit, Commander co, WallyAI ai,
                                               Unit unit, GameMap gameMap,
-                                              boolean mustMove, boolean avoidProduction,
+                                              boolean avoidProduction,
                                               boolean canEvict )
     {
       XYCoord position = new XYCoord(unit.x, unit.y);
@@ -860,11 +858,10 @@ public class WallyAI extends ModularAI
       PathCalcParams pcp = new PathCalcParams(unit, ai.predMap);
       pcp.includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
       ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
-      if( mustMove )
-        destinations.remove(new XYCoord(unit.x, unit.y));
-      boolean attackEviction = mustMove && null != ai.mapPlan[unit.x][unit.y].toAchieve && ai.mapPlan[unit.x][unit.y].toAchieve.action.getType() == UnitActionFactory.ATTACK;
+      boolean attackEviction = null != ai.mapPlan[unit.x][unit.y].toAchieve && ai.mapPlan[unit.x][unit.y].toAchieve.action.getType() == UnitActionFactory.ATTACK;
       if( attackEviction ) // Don't assume we can hop into our evicter's target's space, since that won't work
       {
+        destinations.remove(new XYCoord(unit));
         XYCoord target = ai.mapPlan[unit.x][unit.y].toAchieve.action.getTargetLocation();
         destinations.remove(target);
       }
