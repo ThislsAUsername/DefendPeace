@@ -159,7 +159,7 @@ public class WallyAI extends ModularAI
    */
   public ArrayList<TileThreat>[][] threatMap;
   private ArrayList<Unit> allThreats;
-  private HashMap<UnitModel, Double> unitEffectiveMove = null; // How well the unit can move, on average, on this map
+  private HashMap<ModelForCO, Double> unitEffectiveMove = null; // How well the unit can move, on average, on this map
 
   private void init(GameMap map)
   {
@@ -183,7 +183,7 @@ public class WallyAI extends ModularAI
       {
         for( UnitModel model : co.unitModels )
         {
-          getEffectiveMove(model);
+          getEffectiveMove(new ModelForCO(co, model));
         }
       }
     }
@@ -1207,14 +1207,15 @@ public class WallyAI extends ModularAI
   private ArrayList<XYCoord> findCombatUnitDestinations(GameMap gameMap, ArrayList<Unit> allThreats, XYCoord start, ModelForCO um)
   {
     ArrayList<XYCoord> goals = new ArrayList<>();
-    Map<UnitModel, Double> valueMap = new HashMap<UnitModel, Double>();
-    Map<UnitModel, ArrayList<XYCoord>> targetMap = new HashMap<UnitModel, ArrayList<XYCoord>>();
+    Map<ModelForCO, Double> valueMap = new HashMap<>();
+    Map<ModelForCO, ArrayList<XYCoord>> targetMap = new HashMap<>();
     UnitContext uc = new UnitContext(um.co, um.um);
 
     // Categorize all enemies by type, and all types by how well we match up vs them
     for( Unit target : allThreats )
     {
       UnitModel model = target.model;
+      final ModelForCO modelKey = new ModelForCO(target);
       int range = 1;
       for( ; range < 5; range++ )
       {
@@ -1227,9 +1228,9 @@ public class WallyAI extends ModularAI
       if (0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), targetCoord, predMap).getPathLength() &&
           AGGRO_EFFECT_THRESHOLD < effectiveness)
       {
-        valueMap.put(model, effectiveness*target.getCost());
-        if (!targetMap.containsKey(model)) targetMap.put(model, new ArrayList<XYCoord>());
-        targetMap.get(model).add(targetCoord);
+        valueMap.put(modelKey, effectiveness*target.getCost());
+        if (!targetMap.containsKey(modelKey)) targetMap.put(modelKey, new ArrayList<XYCoord>());
+        targetMap.get(modelKey).add(targetCoord);
       }
     }
 
@@ -1238,13 +1239,13 @@ public class WallyAI extends ModularAI
       Utils.sortLocationsByDistance(start, targetList);
 
     // Sort all target types by how much we want to shoot them with this unit
-    Queue<Entry<UnitModel, Double>> targetTypesInOrder = 
-        new PriorityQueue<Entry<UnitModel, Double>>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
+    Queue<Entry<ModelForCO, Double>> targetTypesInOrder =
+        new PriorityQueue<>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
     targetTypesInOrder.addAll(valueMap.entrySet());
 
     while (!targetTypesInOrder.isEmpty())
     {
-      UnitModel model = targetTypesInOrder.poll().getKey(); // peel off the juiciest
+      ModelForCO model = targetTypesInOrder.poll().getKey(); // peel off the juiciest
       goals.addAll(targetMap.get(model)); // produce a list ordered by juiciness first, then distance TODO: consider a holistic "juiciness" metric that takes into account both matchup and distance?
     }
 
@@ -1708,7 +1709,7 @@ public class WallyAI extends ModularAI
 
     // Get a count of enemy forces.
     Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, predMap);
-    Map<UnitModel, Double> enemyUnitCounts = new HashMap<UnitModel, Double>();
+    Map<ModelForCO, Double> enemyUnitCounts = new HashMap<>();
     for( Commander co : unitLists.keySet() )
     {
       if( myArmy.isEnemy(co) )
@@ -1716,36 +1717,36 @@ public class WallyAI extends ModularAI
         for( Unit u : unitLists.get(co) )
         {
           // Count how many of each model of enemy units are in play.
-          if( enemyUnitCounts.containsKey(u.model) )
+          if( enemyUnitCounts.containsKey(new ModelForCO(u)) )
           {
-            enemyUnitCounts.put(u.model, enemyUnitCounts.get(u.model) + (u.getHealth() / 10));
+            enemyUnitCounts.put(new ModelForCO(u), enemyUnitCounts.get(new ModelForCO(u)) + (u.getHP() / 10));
           }
           else
           {
-            enemyUnitCounts.put(u.model, u.getHealth() / 10.0);
+            enemyUnitCounts.put(new ModelForCO(u), u.getHP() / 10.0);
           }
         }
       }
     }
 
     // Figure out how well we think we have the existing threats covered
-    Map<UnitModel, Double> myUnitCounts = new HashMap<UnitModel, Double>();
+    Map<ModelForCO, Double> myUnitCounts = new HashMap<>();
     for( Unit u : myArmy.getUnits() )
     {
       // Count how many of each model of enemy units are in play.
-      if( myUnitCounts.containsKey(u.model) )
+      if( myUnitCounts.containsKey(new ModelForCO(u)) )
       {
-        myUnitCounts.put(u.model, myUnitCounts.get(u.model) + (u.getHealth() / 10));
+        myUnitCounts.put(new ModelForCO(u), myUnitCounts.get(new ModelForCO(u)) + (u.getHP() / 10));
       }
       else
       {
-        myUnitCounts.put(u.model, u.getHealth() / 10.0);
+        myUnitCounts.put(new ModelForCO(u), u.getHP() / 10.0);
       }
     }
 
-    for( UnitModel threat : enemyUnitCounts.keySet() )
+    for( ModelForCO threat : enemyUnitCounts.keySet() )
     {
-      for( UnitModel counter : myUnitCounts.keySet() ) // Subtract how well we think we counter each enemy from their HP counts
+      for( ModelForCO counter : myUnitCounts.keySet() ) // Subtract how well we think we counter each enemy from their HP counts
       {
         double counterPower = findEffectiveness(counter, threat);
         enemyUnitCounts.put(threat, enemyUnitCounts.get(threat) - counterPower * myUnitCounts.get(counter));
@@ -1753,14 +1754,15 @@ public class WallyAI extends ModularAI
     }
 
     // change unit quantity->funds
-    for( Entry<UnitModel, Double> ent : enemyUnitCounts.entrySet() )
+    for( Entry<ModelForCO, Double> ent : enemyUnitCounts.entrySet() )
     {
+      ModelForCO tmco = ent.getKey();
       // We don't currently have any huge cost-shift COs, so this isn't a big deal at present.
-      ent.setValue(ent.getValue() * ent.getKey().costBase);
+      ent.setValue(ent.getValue() * tmco.co.getCost(tmco.um) / UnitModel.MAXIMUM_HP);
     }
 
-    Queue<Entry<UnitModel, Double>> enemyModels = 
-        new PriorityQueue<Entry<UnitModel, Double>>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
+    Queue<Entry<ModelForCO, Double>> enemyModels =
+        new PriorityQueue<>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
     enemyModels.addAll(enemyUnitCounts.entrySet());
 
     // Try to purchase units that will counter the most-represented enemies.
@@ -1768,33 +1770,33 @@ public class WallyAI extends ModularAI
     {
       // Find the first (most funds-invested) enemy UnitModel, and remove it. Even if we can't find an adequate counter,
       // there is not reason to consider it again on the next iteration.
-      UnitModel enemyToCounter = enemyModels.poll().getKey();
+      ModelForCO enemyToCounter = enemyModels.poll().getKey();
       double enemyNumber = enemyUnitCounts.get(enemyToCounter);
-      log(String.format("Need a counter for %sx%s", enemyToCounter, enemyNumber / enemyToCounter.costBase / UnitModel.MAXIMUM_HEALTH));
+      log(String.format("Need a counter for %s worth %s", enemyToCounter, enemyNumber));
       log(String.format("Remaining budget: %s", budget));
 
       // Get our possible options for countermeasures.
-      ArrayList<UnitModel> availableUnitModels = new ArrayList<>();
+      ArrayList<ModelForCO> availableUnitModels = new ArrayList<>();
       for( ModelForCO coModel : CPI.availableUnitModels )
-        availableUnitModels.add(coModel.um);
+        availableUnitModels.add(coModel);
       while (!availableUnitModels.isEmpty())
       {
         // Sort my available models by their power against this enemy type.
         Collections.sort(availableUnitModels, new UnitPowerComparator(enemyToCounter, this));
 
         // Grab the best counter.
-        UnitModel idealCounter = availableUnitModels.get(0);
+        ModelForCO idealCounter = availableUnitModels.get(0);
         availableUnitModels.remove(idealCounter); // Make sure we don't try to build two rounds of the same thing in one turn.
         // I only want combat units, since I don't understand transports
-        if( !idealCounter.weapons.isEmpty() )
+        if( !idealCounter.um.weapons.isEmpty() )
         {
           log(String.format("  buy %s?", idealCounter));
-          XYCoord coord = getLocationToBuild(gameMap, CPI, idealCounter);
+          XYCoord coord = getLocationToBuild(gameMap, CPI, idealCounter.um);
           if (null == coord)
             continue;
           MapLocation loc = gameMap.getLocation(coord);
           Commander buyer = loc.getOwner();
-          final int idealCost = buyer.getBuyCost(idealCounter, coord);
+          final int idealCost = buyer.getBuyCost(idealCounter.um, coord);
           int totalCost = idealCost;
 
           // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
@@ -1809,7 +1811,7 @@ public class WallyAI extends ModularAI
             // Go place orders.
             log(String.format("    I can build %s for a cost of %s (%s remaining, witholding %s)",
                                     idealCounter, totalCost, budget, costBuffer));
-            builds.put(coord, idealCounter);
+            builds.put(coord, idealCounter.um);
             budget -= idealCost;
             CPI.removeBuildLocation(gameMap.getLocation(coord));
             // We found a counter for this enemy UnitModel; break and go to the next type.
@@ -1847,10 +1849,10 @@ public class WallyAI extends ModularAI
   /**
    * Sort units by funds amount in descending order.
    */
-  private static class UnitModelFundsComparator implements Comparator<Entry<UnitModel, Double>>
+  private static class UnitModelFundsComparator implements Comparator<Entry<ModelForCO, Double>>
   {
     @Override
-    public int compare(Entry<UnitModel, Double> entry1, Entry<UnitModel, Double> entry2)
+    public int compare(Entry<ModelForCO, Double> entry1, Entry<ModelForCO, Double> entry2)
     {
       double diff = entry2.getValue() - entry1.getValue();
       return (int) (diff * 10); // Multiply by 10 since we return an int, but don't want to lose the decimal-level discrimination.
@@ -1860,19 +1862,19 @@ public class WallyAI extends ModularAI
   /**
    * Arrange UnitModels according to their effective damage/range against a configured UnitModel.
    */
-  private static class UnitPowerComparator implements Comparator<UnitModel>
+  private static class UnitPowerComparator implements Comparator<ModelForCO>
   {
-    UnitModel targetModel;
+    ModelForCO targetModel;
     private WallyAI wally;
 
-    public UnitPowerComparator(UnitModel targetType, WallyAI pWally)
+    public UnitPowerComparator(ModelForCO targetType, WallyAI pWally)
     {
       targetModel = targetType;
       wally = pWally;
     }
 
     @Override
-    public int compare(UnitModel model1, UnitModel model2)
+    public int compare(ModelForCO model1, ModelForCO model2)
     {
       double eff1 = wally.findEffectiveness(model1, targetModel);
       double eff2 = wally.findEffectiveness(model2, targetModel);
@@ -1882,42 +1884,50 @@ public class WallyAI extends ModularAI
   }
 
   /** Returns effective power in terms of whole kills per unit, based on respective threat areas and how much damage I deal */
-  public double findEffectiveness(UnitModel model, UnitModel target)
+  public double findEffectiveness(ModelForCO model, ModelForCO target)
   {
-    double theirRange = 0;
-    for( WeaponModel wm : target.weapons )
+    UnitContext mc = new UnitContext(model.co, model.um);
+    UnitContext tc = new UnitContext(target.co, target.um);
+    double enemyRange = 0;
+    for( WeaponModel wm : target.um.weapons )
     {
-      double range = wm.rangeMax();
-      // TODO: Fix this!
-      if( wm.canFireAfterMoving() )
+      tc.setWeapon(wm);
+      double range = tc.rangeMax;
+      if( wm.canFireAfterMoving )
         range += getEffectiveMove(target);
-      theirRange = Math.max(theirRange, range);
+      else
+        range -= (Math.pow(wm.rangeMin, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
+      enemyRange = Math.max(enemyRange, range);
     }
     double counterPower = 0;
-    for( WeaponModel wm : model.weapons )
+    for( WeaponModel wm : model.um.weapons )
     {
-      double damage = wm.getDamage(target);
+      mc.setWeapon(wm);
+      double damage = wm.getDamage(target.um);
       // Using the WeaponModel values directly for now
-      double myRange = wm.rangeMax();
-      if( wm.canFireAfterMoving() )
+      double myRange = mc.rangeMax;
+      if( wm.canFireAfterMoving )
         myRange += getEffectiveMove(model);
       else
-        myRange -= (Math.pow(wm.rangeMin(), MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
-      double rangeMod = Math.pow(myRange / theirRange, RANGE_WEIGHT);
+        myRange -= (Math.pow(wm.rangeMin, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
+
+      double rangeMod = Math.pow(myRange / enemyRange, RANGE_WEIGHT);
+      if( !wm.canFireAfterMoving && myRange > enemyRange )
+        rangeMod *= 42; // If we can nuke the target with indirect attacks from outside its range, that's a huge win
+
       // TODO: account for average terrain defense?
       double effectiveness = damage * rangeMod / 100;
       counterPower = Math.max(counterPower, effectiveness);
     }
     return counterPower;
   }
-  public double getEffectiveMove(UnitModel model)
+  public double getEffectiveMove(ModelForCO model)
   {
     if( unitEffectiveMove.containsKey(model) )
       return unitEffectiveMove.get(model);
 
-    //TODO
-//    MoveType p = model.calculateMoveType();
-    MoveType p = model.baseMoveType;
+    UnitContext uc = new UnitContext(model.co, model.um);
+    MoveType p = uc.calculateMoveType();
     GameMap map = myArmy.myView;
     double totalCosts = 0;
     int validTiles = 0;
@@ -1940,7 +1950,7 @@ public class WallyAI extends ModularAI
     double ratio = (validTiles / totalCosts) * (validTiles / totalTiles); // 1.0 is the max expected value
 
 //    double effMove = model.calculateMovePower() * ratio;
-    double effMove = model.baseMovePower * ratio;
+    double effMove = uc.calculateMovePower() * ratio;
     unitEffectiveMove.put(model, effMove);
     return effMove;
   }
