@@ -320,6 +320,18 @@ public class WallyAI extends ModularAI
       if( theUnexpected )
         ai.queuedActions.clear();
 
+      // Clear out the planning state for our last action
+      if( null != ai.lastAction )
+      {
+        XYCoord moveLoc = ai.lastAction.action.getMoveLocation();
+        if( null != moveLoc )
+        {
+          if( theUnexpected ) // Don't assume the action completed correctly
+            ai.mapPlan[moveLoc.xCoord][moveLoc.yCoord].identity = null;
+          ai.mapPlan[moveLoc.xCoord][moveLoc.yCoord].toAchieve = null;
+        }
+      }
+
       ActionPlan ae = ai.queuedActions.poll();
       // Check if it's an attack and has been invalidated by RNG shenanigans
       if (null != ae && ae.action.getType() == UnitActionFactory.ATTACK
@@ -373,7 +385,6 @@ public class WallyAI extends ModularAI
               actionsBooked.put(actor.unit, readyPlan);
             }
             ai.queuedActions.add(readyPlan);
-            ai.mapPlan[x][y].toAchieve = null;
           }
           else if( null != ai.mapPlan[x][y].toAchieve )
             revisitTiles.add(new XYCoord(x, y));
@@ -397,7 +408,6 @@ public class WallyAI extends ModularAI
               actionsBooked.put(actor.unit, readyPlan);
             }
             ai.queuedActions.add(readyPlan);
-            ai.mapPlan[x][y].toAchieve = null;
             actionAtCoord = movexyc;
             break;
           }
@@ -2009,7 +2019,9 @@ public class WallyAI extends ModularAI
     Unit unit = ga.getActor();
     XYCoord moveCoord = ga.getMoveLocation();
     int capValue = unit.getHP(); // TODO: update for capture boosts
-    boolean success = (unit.getCaptureProgress() + capValue) >= gameMap.getEnvironment(moveCoord).terrainType.getCaptureThreshold();
+    if( 0 == moveCoord.getDistance(unit) )
+      capValue += unit.getCaptureProgress();
+    boolean success = (capValue) >= gameMap.getEnvironment(moveCoord).terrainType.getCaptureThreshold();
 
     if( success )
       return Integer.MAX_VALUE/42; // I can't think of very many good reasons to skip finishing a capture
