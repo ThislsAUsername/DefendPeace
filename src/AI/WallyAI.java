@@ -36,6 +36,7 @@ public class WallyAI extends ModularAI
             new FreeRealEstate(army, this, true,  false), // evict if necessary
             new BuildStuff(army, this),
             new Travel(army, this),
+            new SiegeTravel(army, this),
             new FreeRealEstate(army, this, true,  true), // step on industries we're not using
             new Eviction(army, this), // Getting dudes out of the way
 
@@ -154,7 +155,6 @@ public class WallyAI extends ModularAI
   private ArrayList<Unit> allThreats;
   private HashMap<UnitModel, Double> unitEffectiveMove = null; // How well the unit can move, on average, on this map
 
-  @SuppressWarnings("unchecked") // Java whines if I use generics and lists at the same time
   private void init(GameMap map)
   {
     lastAction = null;
@@ -163,12 +163,10 @@ public class WallyAI extends ModularAI
     mapPlan = new UnitPrediction[map.mapWidth][map.mapHeight];
     predMap = new PredictionMap(myArmy, mapPlan);
     plannedUnits = new HashSet<>();
-    threatMap = new ArrayList[map.mapWidth][map.mapHeight];
     for( int x = 0; x < map.mapWidth; ++x )
       for( int y = 0; y < map.mapHeight; ++y )
       {
         mapPlan[x][y] = new UnitPrediction();
-        threatMap[x][y] = new ArrayList<>();
       }
 
     unitEffectiveMove = new HashMap<>();
@@ -691,7 +689,6 @@ public class WallyAI extends ModularAI
         for( int y = 0; y < gameMap.mapHeight; ++y )
         {
           // Blank out last turn's plan
-          ai.threatMap[x][y].clear();
           ai.mapPlan[x][y].identity = null;
           ai.mapPlan[x][y].toAchieve = null;
           ai.mapPlan[x][y].damageInstances.clear();
@@ -713,22 +710,51 @@ public class WallyAI extends ModularAI
         {
           for( Unit threat : unitLists.get(co) )
           {
-            // add each new threat to the existing threats
             ai.allThreats.add(threat);
-            populateTileThreats(ai.threatMap, gameMap, ai.mapPlan[threat.x][threat.y].identity);
           }
         }
       }
+      boolean ignoreFriendlyBlockers = true;
+      ai.threatMap = buildThreatMap(gameMap, unitLists, ai.mapPlan, myArmy, ignoreFriendlyBlockers);
 
       return null;
     }
   }
-  public static void populateTileThreats(ArrayList<TileThreat>[][] threatMap, GameMap gameMap, UnitContext threat)
+
+  @SuppressWarnings("unchecked") // Java whines if I use generics and lists at the same time
+  public static ArrayList<TileThreat>[][] buildThreatMap(
+                                          GameMap map, Map<Commander, ArrayList<Unit>> unitLists,
+                                          UnitPrediction[][] mapPlan, Army myArmy,
+                                          boolean ignoreFriendlyBlockers)
+  {
+    ArrayList<TileThreat>[][] threatMap = new ArrayList[map.mapWidth][map.mapHeight];
+    for( int x = 0; x < map.mapWidth; ++x )
+      for( int y = 0; y < map.mapHeight; ++y )
+      {
+        threatMap[x][y] = new ArrayList<>();
+      }
+    for( Commander co : unitLists.keySet() )
+    {
+      if( myArmy.isEnemy(co) )
+      {
+        for( Unit threat : unitLists.get(co) )
+        {
+          // Use the provided UnitContext so that it will be the same instance and receive HP updates
+          populateTileThreats(threatMap, map, mapPlan[threat.x][threat.y].identity, ignoreFriendlyBlockers);
+        }
+      }
+    }
+    return threatMap;
+  }
+  public static void populateTileThreats(
+                     ArrayList<TileThreat>[][] threatMap,
+                     GameMap gameMap, UnitContext threat,
+                     boolean ignoreFriendlyBlockers)
   {
     // Temporary cache to re-locate already-threatened tiles' Tile Threats
     Map<XYCoord, TileThreat> shootableTiles = new HashMap<>();
     // We assume the enemy knows how to manage positioning within his turn, and we don't want to recalc when we move units.
-    boolean includeOccupiedTiles = true, walkThroughEnemies = true;
+    boolean includeOccupiedTiles = true, walkThroughEnemies = ignoreFriendlyBlockers;
     final XYCoord origin = threat.coord;
     ArrayList<XYCoord> destinations = Utils.findFloodFillArea(origin,
         threat.unit, threat.calculateMoveType(), threat.calculateMovePower(),
@@ -929,7 +955,7 @@ public class WallyAI extends ModularAI
       boolean mustMove = true;
       boolean avoidProduction = false;
       boolean ignoreSafety = false;
-      ai.planTravelActions(this, gameMap, unit, ignoreSafety, mustMove, avoidProduction, true, EVICTION_DEPTH);
+      ai.planTravelActions(this, gameMap, ai.threatMap, unit, ignoreSafety, mustMove, avoidProduction, true, EVICTION_DEPTH);
 
       return null;
     }
@@ -948,6 +974,9 @@ public class WallyAI extends ModularAI
     {
       if( ai.plannedUnits.contains(unit) )
         return null;
+      boolean isSiege = unit.model.hasImmobileWeapon();
+      if( isSiege )
+        return null;
 
       ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
       final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
@@ -955,7 +984,7 @@ public class WallyAI extends ModularAI
       boolean avoidProduction = false;
       boolean ignoreSafety = false;
       boolean shouldWander = false;
-      ai.planTravelActions(this, gameMap, unit, ignoreSafety, mustMove, avoidProduction, shouldWander, EVICTION_DEPTH);
+      ai.planTravelActions(this, gameMap, ai.threatMap, unit, ignoreSafety, mustMove, avoidProduction, shouldWander, EVICTION_DEPTH);
 
       return null;
     }
@@ -963,6 +992,50 @@ public class WallyAI extends ModularAI
     public String toString()
     {
       return String.format("WallyTravel");
+    }
+  }
+  /** Plans travel for siege units on the assumption that the enemy can't break our planned wall */
+  public static class SiegeTravel extends UnitActionFinder<WallyAI>
+  {
+    private static final long serialVersionUID = 1L;
+    ArrayList<TileThreat>[][] blockedThreats;
+    public SiegeTravel(Army co, WallyAI ai)
+    {
+      super(co, ai);
+    }
+
+    @Override
+    public void initTurn(GameMap gameMap) { blockedThreats = null; }
+    @Override
+    public GameAction getUnitAction(Unit unit, GameMap gameMap)
+    {
+      if( ai.plannedUnits.contains(unit) )
+        return null;
+      boolean isSiege = unit.model.hasImmobileWeapon();
+      if( !isSiege )
+        return null;
+
+      if( null == blockedThreats )
+      {
+        Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, gameMap);
+        boolean ignoreFriendlyBlockers = false;
+        blockedThreats = buildThreatMap(ai.predMap, unitLists, ai.mapPlan, myArmy, ignoreFriendlyBlockers);
+      }
+
+      ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
+      final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
+      boolean mustMove = null != evicter && unit != evicter.unit;
+      boolean avoidProduction = false;
+      boolean ignoreSafety = false;
+      boolean shouldWander = false;
+      ai.planTravelActions(this, gameMap, blockedThreats, unit, ignoreSafety, mustMove, avoidProduction, shouldWander, EVICTION_DEPTH);
+
+      return null;
+    }
+    @Override
+    public String toString()
+    {
+      return String.format("SiegeTravel");
     }
   }
 
@@ -1137,7 +1210,7 @@ public class WallyAI extends ModularAI
    */
   private boolean planTravelActions(
                         AIModule whodunit, GameMap gameMap,
-                        Unit unit,
+                        ArrayList<TileThreat>[][] threatMap, Unit unit,
                         boolean ignoreSafety, boolean mustMove,
                         boolean avoidProduction, boolean shouldWander,
                         int recurseDepth)
@@ -1198,9 +1271,6 @@ public class WallyAI extends ModularAI
     // and build a GameAction to move to the closest one.
     Utils.sortLocationsByDistance(pathPoint, destinations);
 
-    boolean isSiege = unit.model.hasImmobileWeapon();
-    if( isSiege )
-      ignoreSafety = true; // Siege unit safety is handled via walls
     log(String.format("  %s is traveling toward %s at %s via %s  mustMove?: %s  ignoreSafety?: %s",
                           unit.toStringWithLocation(),
                           gameMap.getLocation(goal).getEnvironment().terrainType, goal,
@@ -1209,7 +1279,6 @@ public class WallyAI extends ModularAI
     // Try to take the most aggressive position where you can cover your blind spots
     GamePath bestPath = null;
     GameAction bestAction = null;
-    HashMap<XYCoord, Unit> bestWalls = new HashMap<>();
     int bestFundsDelta = 0;
     boolean isAttack = false;
     int percentDamage = 0;
@@ -1243,7 +1312,7 @@ public class WallyAI extends ModularAI
         {
           // Prevent reflexive eviction
           evictionStack.add(unit);
-          evicted = planTravelActions(whodunit, gameMap, currentResident,
+          evicted = planTravelActions(whodunit, gameMap, threatMap, currentResident,
                                                ignoreSafety, true, // Always move
                                                avoidProduction, true, // Always enable wandering
                                                recurseDepth-1);
@@ -1371,12 +1440,11 @@ public class WallyAI extends ModularAI
           }
         } // ~for action types
 
-        int walkScore = movePath.getPathLength() + siegeWallingValueOffset;
+        int walkScore = 1;
         if( bestFundsDelta < walkScore && movePath.getPathLength() > 1 ) // Just wait if we can't do anything cool
         {
           bestFundsDelta = walkScore;
           bestAction = new WaitLifecycle.WaitAction(unit, movePath);
-          bestWalls = wallSlots;
           bestPath = movePath;
           isAttack = false;
         }
@@ -1384,15 +1452,6 @@ public class WallyAI extends ModularAI
       } // ~if any action type
     } // ~for destinations
 
-
-    // Fill the walls with wait actions
-    for( XYCoord wallCoord : bestWalls.keySet() )
-    {
-      Unit wall = bestWalls.get(wallCoord);
-      GamePath movePath = Utils.findShortestPath(wall, wallCoord, predMap);
-      WaitLifecycle.WaitAction wait = new WaitLifecycle.WaitAction(wall, movePath);
-      updatePlan("WallPlanner", wall, movePath, wait);
-    }
     updatePlan(whodunit, unit, bestPath, bestAction, isAttack, percentDamage);
     if( null != bestAction )
     {
@@ -1403,51 +1462,6 @@ public class WallyAI extends ModularAI
     }
 
     return success;
-  }
-
-  public boolean findWallPlan(GameMap gameMap,
-                              Collection<Unit> wallCandidates,
-                              Map<XYCoord, Unit> wallSlots)
-  {
-    // If we've found a value for all slots, we're done
-    if( !wallSlots.containsValue(null) )
-    {
-      return true;
-    }
-
-    // Iterate through the wall spaces, and try filling all spaces recursively from each one
-    for( XYCoord xyc : wallSlots.keySet() )
-    {
-      if( null != wallSlots.get(xyc) )
-        continue;
-
-      ArrayDeque<Unit> wallUnits = new ArrayDeque<>(wallCandidates);
-      while (!wallUnits.isEmpty())
-      {
-        Unit unit = wallUnits.poll();
-        if( wallSlots.containsValue(unit) )
-          continue; // Consider each unit only once
-
-        // Figure out how to get here.
-        GamePath movePath = Utils.findShortestPath(unit, xyc, gameMap);
-
-        if( movePath.getPathLength() > 0 )
-        {
-          wallSlots.put(xyc, unit);
-
-          boolean done = findWallPlan(gameMap, wallCandidates, wallSlots);
-
-          // If we've found a value for all slots, we're done
-          if( done )
-            return true;
-          // Otherwise, remove the wall from the slot to make room for the next calculation
-          wallSlots.put(xyc, null);
-          wallCandidates.add(unit);
-        }
-      }
-    }
-
-    return false;
   }
 
   private boolean isSafe(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
