@@ -486,25 +486,29 @@ public class WallyAI extends ModularAI
         final UnitPrediction targetPredictTile = ai.mapPlan[tt.xCoord][tt.yCoord];
         final UnitContext target = targetPredictTile.identity;
 
-        int percentDamage = targetPredictTile.damageInstances.get(plan);
-        targetPredictTile.damageInstances.remove(plan);
-
-        boolean tileCleared = false;
-        // If we're already planning to put a different unit there, we can assume it's a kill
-        if( target.unit != map.getResident(tt) )
-          tileCleared = true;
-        else // If not, track state to find out if it's a kill
+        // Predict board state, if we still have the info banging around
+        if( targetPredictTile.damageInstances.containsKey(plan) )
         {
-          target.damageHP(percentDamage / 10.0, true); // Destructively modifying the planning state is fine and convenient at this stage
-          if( 1 > target.getHP() )
-            tileCleared = true; // If we're already planning to put some
-        }
+          int percentDamage = targetPredictTile.damageInstances.get(plan);
+          targetPredictTile.damageInstances.remove(plan);
 
-        // If we've run out of planned shots and we expect to clear, make it official
-        if( tileCleared && targetPredictTile.damageInstances.size() < 1 )
-        {
-          plan.clearTile = tt;
-          vacatedTiles.add(tt);
+          boolean tileCleared = false;
+          // If we're already planning to put a different unit there, we can assume it's a kill
+          if( target.unit != map.getResident(tt) )
+            tileCleared = true;
+          else // If not, track state to find out if it's a kill
+          {
+            target.damageHP(percentDamage / 10.0, true); // Destructively modifying the planning state is fine and convenient at this stage
+            if( 1 > target.getHP() )
+              tileCleared = true; // If we're already planning to put some
+          }
+
+          // If we've run out of planned shots and we expect to clear, make it official
+          if( tileCleared && targetPredictTile.damageInstances.size() < 1 )
+          {
+            plan.clearTile = tt;
+            vacatedTiles.add(tt);
+          }
         }
       }
       return plan;
