@@ -83,7 +83,7 @@ public class WallyAI extends ModularAI
   private static final int    UNIT_HEAL_THRESHOLD = 6; // HP at which units heal
   private static final double UNIT_REFUEL_THRESHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
-  private static final double AGGRO_EFFECT_THRESHOLD = 0.42; // How effective do I need to be against a unit to target it?
+  private static final double AGGRO_EFFECT_THRESHOLD = 17; // % base damage required to want to attack something
   private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
   private static final double AGGRO_CHEAPER_WEIGHT = 0.01; // Multiplier on the score penalty for using expensive units to blow up stragglers
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
@@ -1223,7 +1223,7 @@ public class WallyAI extends ModularAI
           break;
       }
       XYCoord targetCoord = new XYCoord(target.x, target.y);
-      double effectiveness = uc.weapon.getDamage(model) / 10.0;
+      double effectiveness = uc.weapon.getDamage(model);
       if (0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), targetCoord, predMap).getPathLength() &&
           AGGRO_EFFECT_THRESHOLD < effectiveness)
       {
