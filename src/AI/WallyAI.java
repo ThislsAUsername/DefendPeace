@@ -1946,12 +1946,16 @@ public class WallyAI extends ModularAI
     public AttackValue(WallyAI ai, UnitContext actor, UnitContext target, GameMap gameMap)
     {
       final int actorCost = actor.CO.getCost(actor.model);
+      int targetValue = target.unit.getCost();
+      int captureValue = 0;
+      if( target.unit.getCaptureProgress() > 0 ) // Assume we deny a turn of income
+        captureValue = actor.CO.gameRules.incomePerCity;
 
       BattleSummary results = CombatEngine.simulateBattleResults(actor, target, gameMap, CALC);
       hploss   = actor .getHP() - Math.max(0, results.attacker.after.getHP());
       hpdamage = target.getHP() - Math.max(0, results.defender.after.getHP());
-      loss     = (hploss   * actorCost                      ) / UnitModel.MAXIMUM_HP;
-      damage   = (hpdamage * target.CO.getCost(target.model)) / UnitModel.MAXIMUM_HP;
+      loss     = (hploss   * actorCost  ) / UnitModel.MAXIMUM_HP;
+      damage   = (hpdamage * targetValue) / UnitModel.MAXIMUM_HP + captureValue;
 
       if( ai.canWallHere(gameMap, ai.threatMap, actor.unit, actor.coord, target.unit) )
       {
