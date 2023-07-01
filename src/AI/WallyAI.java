@@ -38,7 +38,8 @@ public class WallyAI extends ModularAI
             new Travel(army, this),
             new SiegeTravel(army, this),
             new FreeRealEstate(army, this, true,  true), // step on industries we're not using
-            new Eviction(army, this), // Getting dudes out of the way
+            new Eviction(army, this, false), // Getting dudes out of the way
+            new Eviction(army, this, true),
 
             new FillActionQueue(army, this),
             new PowerActivator(army, CommanderAbility.PHASE_TURN_END)
@@ -107,16 +108,21 @@ public class WallyAI extends ModularAI
   }
   private static class ActionPlan
   {
+    final Object whodunit;
+    final UnitContext actor;
     final GameAction action;
     final XYCoord startPos;
-    final Object whodunit;
     GamePath path = null;
-    XYCoord clearTile; // The tile we expect to have emptied with our attack, if any.
+    boolean isAttack = false;
+    boolean fromEviction = false;
+    int percentDamage = -1; // The damage we expect to deal with our attack
+    XYCoord clearTile; // The tile we expect to have emptied with our attack, if any; populated when queueing our final action order
     TravelPurpose purpose = TravelPurpose.NA;
-    ActionPlan(Object whodunit, GameAction action)
+    ActionPlan(Object whodunit, UnitContext uc, GameAction action)
     {
       this.whodunit = whodunit;
       this.action = action;
+      this.actor = uc;
       if( null != action.getActor() )
         startPos = new XYCoord(action.getActor());
       else
@@ -217,7 +223,15 @@ public class WallyAI extends ModularAI
   {
     if( null == action )
       return;
-    XYCoord dest = action.getMoveLocation();
+    final ActionPlan plan = new ActionPlan(whodunit, uc, action);
+    plan.path = path;
+    plan.isAttack = isAttack;
+    plan.percentDamage = percentDamage;
+    updatePlan(plan);
+  }
+  private void updatePlan(ActionPlan plan)
+  {
+    XYCoord dest = plan.action.getMoveLocation();
     final UnitPrediction destPredictTile = mapPlan[dest.xCoord][dest.yCoord];
     ActionPlan canceled = destPredictTile.toAchieve;
     if( null != canceled )
@@ -238,27 +252,27 @@ public class WallyAI extends ModularAI
     }
 
     // Assuming our path has been planned well re:terrain, running into enemies is the only obstacle
+    GamePath path = plan.path;
+    final Unit actorIdentity = plan.actor.unit;
     if( null != path )
     {
-      if( path.getPathLength() < path.getEndCoord().getDistance(uc.unit) ) // Assume unit is real if it's moving
+      if( path.getPathLength() < path.getEndCoord().getDistance(actorIdentity) ) // Assume unit is real if it's moving
       {
-        log(String.format("      %s generated bad path: %s", whodunit, path));
+        log(String.format("      %s generated bad path: %s", plan.whodunit, path));
         return;
       }
     }
 
-    final ActionPlan plan = new ActionPlan(whodunit, action);
-    plan.path = path;
     destPredictTile.toAchieve = plan;
-    destPredictTile.identity = uc;
-    uc.coord = dest;
-    if( null != uc.unit )
-      plannedUnits.add(uc.unit);
+    destPredictTile.identity = plan.actor;
+    plan.actor.coord = dest;
+    if( null != actorIdentity )
+      plannedUnits.add(actorIdentity);
 
-    if( isAttack )
+    if( plan.isAttack )
     {
-      final XYCoord target = action.getTargetLocation();
-      mapPlan[target.xCoord][target.yCoord].damageInstances.put(plan, percentDamage);
+      final XYCoord target = plan.action.getTargetLocation();
+      mapPlan[target.xCoord][target.yCoord].damageInstances.put(plan, plan.percentDamage);
     }
   }
 
@@ -463,8 +477,21 @@ public class WallyAI extends ModularAI
         final UnitContext target = targetPredictTile.identity;
 
         int percentDamage = targetPredictTile.damageInstances.get(plan);
-        target.damageHP(percentDamage / 10.0, true); // Destructively modifying the planning state is fine and convenient at this stage
-        if( 1 > target.getHP() )
+        targetPredictTile.damageInstances.remove(plan);
+
+        boolean tileCleared = false;
+        // If we're already planning to put a different unit there, we can assume it's a kill
+        if( target.unit != map.getResident(tt) )
+          tileCleared = true;
+        else // If not, track state to find out if it's a kill
+        {
+          target.damageHP(percentDamage / 10.0, true); // Destructively modifying the planning state is fine and convenient at this stage
+          if( 1 > target.getHP() )
+            tileCleared = true; // If we're already planning to put some
+        }
+
+        // If we've run out of planned shots and we expect to clear, make it official
+        if( tileCleared && targetPredictTile.damageInstances.size() < 1 )
         {
           plan.clearTile = tt;
           vacatedTiles.add(tt);
@@ -937,9 +964,11 @@ public class WallyAI extends ModularAI
   public static class Eviction extends UnitActionFinder<WallyAI>
   {
     private static final long serialVersionUID = 1L;
-    public Eviction(Army co, WallyAI ai)
+    private final boolean ignoreSafety;
+    public Eviction(Army co, WallyAI ai, boolean ignoreSafety)
     {
       super(co, ai);
+      this.ignoreSafety = ignoreSafety;
     }
 
     @Override
@@ -954,9 +983,18 @@ public class WallyAI extends ModularAI
       ai.log(String.format("Evaluating eviction for %s.", unit.toStringWithLocation()));
       boolean mustMove = true;
       boolean avoidProduction = false;
-      boolean ignoreSafety = false;
-      ai.planTravelActions(this, gameMap, ai.threatMap, unit, ignoreSafety, mustMove, avoidProduction, true, EVICTION_DEPTH);
+      boolean shouldWander = true;
+      ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
+                                          this, gameMap, ai.threatMap,
+                                          unit, ignoreSafety, mustMove, avoidProduction,
+                                          shouldWander, EVICTION_DEPTH);
 
+      if( null == travelPlans )
+        return null;
+      for( ActionPlan plan : travelPlans )
+      {
+        ai.updatePlan(plan);
+      }
       return null;
     }
   }
@@ -984,8 +1022,17 @@ public class WallyAI extends ModularAI
       boolean avoidProduction = false;
       boolean ignoreSafety = false;
       boolean shouldWander = false;
-      ai.planTravelActions(this, gameMap, ai.threatMap, unit, ignoreSafety, mustMove, avoidProduction, shouldWander, EVICTION_DEPTH);
+      ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
+                                          this, gameMap, ai.threatMap,
+                                          unit, ignoreSafety, mustMove, avoidProduction,
+                                          shouldWander, EVICTION_DEPTH);
 
+      if( null == travelPlans )
+        return null;
+      for( ActionPlan plan : travelPlans )
+      {
+        ai.updatePlan(plan);
+      }
       return null;
     }
     @Override
@@ -1028,8 +1075,17 @@ public class WallyAI extends ModularAI
       boolean avoidProduction = false;
       boolean ignoreSafety = false;
       boolean shouldWander = false;
-      ai.planTravelActions(this, gameMap, blockedThreats, unit, ignoreSafety, mustMove, avoidProduction, shouldWander, EVICTION_DEPTH);
+      ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
+                                          this, gameMap, ai.threatMap,
+                                          unit, ignoreSafety, mustMove, avoidProduction,
+                                          shouldWander, EVICTION_DEPTH);
 
+      if( null == travelPlans )
+        return null;
+      for( ActionPlan plan : travelPlans )
+      {
+        ai.updatePlan(plan);
+      }
       return null;
     }
     @Override
@@ -1208,7 +1264,7 @@ public class WallyAI extends ModularAI
   /**
    * Find a good long-term objective for the given unit, and pursue it (with consideration for life-preservation optional)
    */
-  private boolean planTravelActions(
+  private ArrayList<ActionPlan> planTravelActions(
                         AIModule whodunit, GameMap gameMap,
                         ArrayList<TileThreat>[][] threatMap, Unit unit,
                         boolean ignoreSafety, boolean mustMove,
@@ -1216,7 +1272,7 @@ public class WallyAI extends ModularAI
                         int recurseDepth)
   {
     if( evictionStack.contains(unit) )
-      return false;
+      return null;
 
     boolean success = false;
     boolean ignoreResident = true;
@@ -1234,7 +1290,7 @@ public class WallyAI extends ModularAI
     TravelPurpose travelPurpose = fillTravelDestinations(predMap, validTargets, unit, avoidProduction);
 
     if( !mustMove && !shouldWander && travelPurpose == TravelPurpose.WANDER )
-      return success; // Don't clutter the queue with pointless movements
+      return null; // Don't clutter the queue with pointless movements
 
     if( mustMove ) // If we *must* travel, make sure we do actually move.
     {
@@ -1259,7 +1315,7 @@ public class WallyAI extends ModularAI
       }
     }
 
-    if( null == goal ) return success;
+    if( null == goal ) return null;
 
     // Choose the point on the path just out of our range as our 'goal', and try to move there.
     // This will allow us to navigate around large obstacles that require us to move away
@@ -1276,27 +1332,29 @@ public class WallyAI extends ModularAI
                           gameMap.getLocation(goal).getEnvironment().terrainType, goal,
                           pathPoint, mustMove, ignoreSafety));
 
-    // Try to take the most aggressive position where you can cover your blind spots
-    GamePath bestPath = null;
-    GameAction bestAction = null;
+    ArrayList<ActionPlan> bestPlans = null;
     int bestFundsDelta = 0;
-    boolean isAttack = false;
-    int percentDamage = 0;
+    if( mustMove )
+      bestFundsDelta -= 9;
+    if( ignoreSafety )
+      bestFundsDelta -= 9000;
     for( Utils.SearchNode xyc : destinations )
     {
 //      log(String.format("    is it safe to go to %s?", xyc));
       if( !ignoreSafety && !canWallHere(predMap, threatMap, unit, xyc, null) )
         continue;
+//    log(String.format("    Yes"));
+      ArrayList<ActionPlan> prereqPlans = new ArrayList<>();
 
       Unit plannedResident = predMap.getResident(xyc);
       ActionPlan  ap       = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
       // Figure out how to get here.
       boolean spaceFree = null == plannedResident;
       if( !spaceFree &&
-          ( null == ap || ap.purpose.priority > travelPurpose.priority) )
+          ( null == ap || ap.fromEviction || ap.purpose.priority > travelPurpose.priority) )
         continue; // Bail if:
       // There's no other action to evaluate against ours
-      // The other action clears a tile
+      // The other action is from an eviction
       // The other action is travel for an equal or greater purpose than ours
 
       // If whatever's in our landing pad has no plans yet, poke and see if some can be made
@@ -1307,24 +1365,25 @@ public class WallyAI extends ModularAI
           continue;
         boolean residentIsEvictable = !currentResident.isTurnOver && currentResident.CO.army == myArmy;
 
-        boolean evicted = false;
         if( residentIsEvictable && recurseDepth > 0 )
         {
           // Prevent reflexive eviction
           evictionStack.add(unit);
-          evicted = planTravelActions(whodunit, gameMap, threatMap, currentResident,
+          ArrayList<ActionPlan> evictionPlans = planTravelActions(
+                                               whodunit, gameMap, threatMap,
+                                               currentResident,
                                                ignoreSafety, true, // Always move
                                                avoidProduction, true, // Always enable wandering
                                                recurseDepth-1);
           evictionStack.remove(unit);
-          if( !evicted )
+          if( null == evictionPlans )
             continue;
+          prereqPlans.addAll(evictionPlans);
         }
         // If nobody's there, no need to evict.
         // If the resident is evictable, try to evict and bail if we can't.
         // If the resident isn't evictable, we think it will be dead soon, so just keep going.
       } // ~if resident
-//      log(String.format("    Yes"));
 
       int siegeWallingValueOffset = 0;
       HashMap<XYCoord, Unit> wallSlots = new HashMap<>();
@@ -1426,42 +1485,45 @@ public class WallyAI extends ModularAI
               {
                 log(String.format("      Best en passant attack deals %s", damageValue));
                 bestFundsDelta = (int) damageValue;
-                bestPath = movePath;
-                bestAction = attack;
-                isAttack = true;
+                ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), attack);
+                plan.path = movePath;
+                plan.purpose = travelPurpose;
+                plan.isAttack = true;
+                plan.fromEviction = mustMove;
                 Unit target = gameMap.getResident(attack.getTargetLocation());
                 int defLevel = gameMap.getEnvironment(attack.getTargetLocation()).terrainType.getDefLevel();
                 int range = attack.getMoveLocation().getDistance(target);
                 boolean attackerMoved = 0 < attack.getMoveLocation().getDistance(unit);
                 double hpDamage = CombatEngine.calculateOneStrikeDamage(unit, range, target, gameMap, defLevel, attackerMoved);
-                percentDamage = (int) (hpDamage * 10);
+                plan.percentDamage = (int) (hpDamage * 10);
+                bestPlans = new ArrayList<>();
+                bestPlans.addAll(prereqPlans);
+                bestPlans.add(plan);
               }
             }
           }
         } // ~for action types
 
-        int walkScore = 1;
+        int walkScore = movePath.getPathLength();
         if( bestFundsDelta < walkScore && movePath.getPathLength() > 1 ) // Just wait if we can't do anything cool
         {
           bestFundsDelta = walkScore;
-          bestAction = new WaitLifecycle.WaitAction(unit, movePath);
-          bestPath = movePath;
-          isAttack = false;
+          GameAction move = new WaitLifecycle.WaitAction(unit, movePath);
+          ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), move);
+          plan.path = movePath;
+          plan.purpose = travelPurpose;
+          plan.fromEviction = mustMove;
+          bestPlans = new ArrayList<>();
+          bestPlans.addAll(prereqPlans);
+          bestPlans.add(plan);
+          if( prereqPlans.size() > 0 )
+            break; // If we're gonna have to evict, may as well just go as far as possible
         }
 
       } // ~if any action type
     } // ~for destinations
 
-    updatePlan(whodunit, unit, bestPath, bestAction, isAttack, percentDamage);
-    if( null != bestAction )
-    {
-      XYCoord xyc = bestAction.getMoveLocation();
-      ActionPlan travelAP = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
-      travelAP.purpose = travelPurpose;
-      success = true;
-    }
-
-    return success;
+    return bestPlans;
   }
 
   private boolean isSafe(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
