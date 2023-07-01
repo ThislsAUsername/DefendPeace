@@ -1185,6 +1185,7 @@ public class WallyAI extends ModularAI
       }
       if( !goals.isEmpty() )
         travelPurpose = TravelPurpose.CONQUER;
+      Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
     }
     if( goals.isEmpty() && uc.actionTypes.contains(UnitActionFactory.ATTACK) )
     {
@@ -1196,7 +1197,6 @@ public class WallyAI extends ModularAI
     if( goals.isEmpty() ) // If there's really nothing to do, go to MY HQ
       goals.addAll(myArmy.HQLocations);
 
-    Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), goals);
     return travelPurpose;
   }
 
@@ -1215,8 +1215,15 @@ public class WallyAI extends ModularAI
     for( Unit target : allThreats )
     {
       UnitModel model = target.model;
+      int range = 1;
+      for( ; range < 5; range++ )
+      {
+        uc.chooseWeapon(model, range);
+        if( null != uc.weapon )
+          break;
+      }
       XYCoord targetCoord = new XYCoord(target.x, target.y);
-      double effectiveness = findEffectiveness(um.um, target.model);
+      double effectiveness = uc.weapon.getDamage(model) / 10.0;
       if (0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), targetCoord, predMap).getPathLength() &&
           AGGRO_EFFECT_THRESHOLD < effectiveness)
       {
