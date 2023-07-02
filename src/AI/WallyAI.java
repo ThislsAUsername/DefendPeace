@@ -77,9 +77,9 @@ public class WallyAI extends ModularAI
     return info;
   }
 
-  // What % damage I'll ignore when checking safety
-  private static final int INDIRECT_THREAT_THRESHOLD = 7;
-  private static final int DIRECT_THREAT_THRESHOLD = 13;
+  // What % damage I'll ignore when checking safety (currently for just builds)
+  private static final int INDIRECT_THREAT_THRESHOLD = 13;
+  private static final int DIRECT_THREAT_THRESHOLD = 60;
   private static final int    UNIT_HEAL_THRESHOLD = 6; // HP at which units heal
   private static final double UNIT_REFUEL_THRESHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
@@ -954,19 +954,17 @@ public class WallyAI extends ModularAI
             if( fundsDelta <= bestFundsDelta )
               continue;
 
-            final boolean safe = ai.canWallHere(gameMap, ai.threatMap, unit, moveCoord, null);
-            int loss = 0;
-            if( !safe )
-              loss = unit.CO.getCost(unit.model);
+            int wallValue = ai.wallFundsValue(gameMap, ai.threatMap, unit, moveCoord, null);
             int opportunityCost = 0;
             if( !spaceFree )
             {
               opportunityCost = valueAction(ai, gameMap, ap);
             }
-            if( fundsDelta - opportunityCost - loss <= bestFundsDelta )
+            final int finalCapValue = fundsDelta - opportunityCost + wallValue;
+            if( finalCapValue <= bestFundsDelta )
               continue;
 
-            bestFundsDelta = fundsDelta - opportunityCost;
+            bestFundsDelta = finalCapValue;
             bestAction = ga;
             isAttack = false;
           }
@@ -1367,8 +1365,6 @@ public class WallyAI extends ModularAI
     for( Utils.SearchNode xyc : destinations )
     {
 //      log(String.format("    is it safe to go to %s?", xyc));
-      if( !ignoreSafety && !canWallHere(predMap, threatMap, unit, xyc, null) )
-        continue;
 //    log(String.format("    Yes"));
       ArrayList<ActionPlan> prereqPlans = new ArrayList<>();
 
@@ -1486,6 +1482,7 @@ public class WallyAI extends ModularAI
           continue;
       }
 
+      int wallGain = wallFundsValue(predMap, threatMap, unit, xyc, null);
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(predMap, movePath, ignoreResident);
       if( actionSets.size() > 0 )
       {
@@ -1507,10 +1504,11 @@ public class WallyAI extends ModularAI
                     return 0;
                   }, (terrain, params) -> 1); // Attack terrain, but don't prioritize it over units
 
-              if( damageValue > bestFundsDelta )
+              final int thisDelta = (int) damageValue + wallGain;
+              if( thisDelta > bestFundsDelta )
               {
                 log(String.format("      Best en passant attack deals %s", damageValue));
-                bestFundsDelta = (int) damageValue;
+                bestFundsDelta = thisDelta;
                 ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), attack);
                 plan.path = movePath;
                 plan.purpose = travelPurpose;
@@ -1530,7 +1528,7 @@ public class WallyAI extends ModularAI
           }
         } // ~for action types
 
-        int walkScore = movePath.getPathLength();
+        int walkScore = movePath.getPathLength() + wallGain;
         if( bestFundsDelta < walkScore && movePath.getPathLength() > 1 ) // Just wait if we can't do anything cool
         {
           bestFundsDelta = walkScore;
@@ -1552,49 +1550,67 @@ public class WallyAI extends ModularAI
     return bestPlans;
   }
 
-  private boolean isSafe(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
+  /**
+   * @return The maximum expected HP loss
+   */
+  private double hpThreatAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
   {
-    return isSafe(gameMap, threatMap, unit.model, xyc, target);
+    return hpThreatAt(gameMap, threatMap, new ModelForCO(unit), xyc, target);
   }
-  private boolean isSafe(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, UnitModel type, XYCoord xyc, Unit target)
+  private double hpThreatAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, ModelForCO type, XYCoord xyc, Unit target)
   {
-    int threshhold = type.hasDirectFireWeapon() ? DIRECT_THREAT_THRESHOLD : INDIRECT_THREAT_THRESHOLD;
+    UnitContext myUnit = new UnitContext(type.co, type.um);
+    myUnit.coord = xyc;
+    myUnit.unit = new Unit(type.co, type.um); // Make stuff up so combat modifiers don't explode?
+    myUnit.unit.x = xyc.xCoord;
+    myUnit.unit.y = xyc.yCoord;
     double threat = 0;
     ArrayList<TileThreat> tileThreats = threatMap[xyc.xCoord][xyc.yCoord];
     for( TileThreat tt : tileThreats )
     {
-      final UnitContext threatContext = tt.identity;
+      // Scratch struct so we can mess with it
+      final UnitContext threatContext = new UnitContext(tt.identity);
       if( target == threatContext.unit )
         continue; // We aren't scared of that which we're about to shoot
+
+      // Collect planned damage so far
+      int damagePercent = 0;
+      final HashMap<ActionPlan, Integer> damageInstances = mapPlan[threatContext.coord.xCoord][threatContext.coord.yCoord].damageInstances;
+      for( int hit : damageInstances.values() )
+        damagePercent += hit;
+
+      // Apply that damage knowledge
+      if( threatContext.getHP() * 10 <= damagePercent )
+        continue; // Dead people don't usually shoot
+      threatContext.alterHealthPercent(-1 * damagePercent);
+
       for( WeaponModel wep : tt.relevantWeapons )
       {
-        // Does this make sense to do a proper combat calc on?
-        // If so, will need to make a UnitContext overload for CombatEngine
-        int damagePercent = 0;
-        final HashMap<ActionPlan, Integer> damageInstances = mapPlan[threatContext.coord.xCoord][threatContext.coord.yCoord].damageInstances;
-        for( int hit : damageInstances.values() )
-          damagePercent += hit;
-        final double hpFactor = (threatContext.getHP()*10 - damagePercent) / 100.0;
+        threatContext.setWeapon(wep);
 
-        threat = Math.max(threat, wep.getDamage(type) * hpFactor);
+        BattleSummary results = CombatEngine.simulateBattleResults(threatContext, myUnit, gameMap, CalcType.OPTIMISTIC);
+        double hpdamage = results.defender.getPreciseHPDamage();
+
+        threat = Math.max(threat, hpdamage);
       }
     }
-    return (threshhold > threat);
+
+    return threat;
   }
 
   /**
-   * @return whether it's safe or a good place to wall
+   * @return expected funds gain of hanging out here (can be negative)
    * For use after unit building is complete
    */
-  private boolean canWallHere(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
+  private int wallFundsValue(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
   {
     MapLocation destination = gameMap.getLocation(xyc);
-    // if we're safe, we're safe
-    if( isSafe(gameMap, threatMap, unit, xyc, target) )
-      return true;
+    double wallHPTaken = hpThreatAt(gameMap, threatMap, unit, xyc, target);
+    int wallVal = valueUnit(unit, destination, false);
+    int wallLoss = (int) (wallHPTaken * wallVal / 10);
+    int wallGain = 0;
 
-    // TODO: Determine whether the ally actually needs a wall there. Mechs walling for Tanks vs inf is... silly.
-    // if we'd be a nice wall for a worthy ally, we can pretend we're safe there also
+    // TODO: Determine whether we actually block the attack on the ally
     ArrayList<XYCoord> adjacentCoords = Utils.findLocationsInRange(predMap, xyc, 1);
     for( XYCoord coord : adjacentCoords )
     {
@@ -1602,14 +1618,17 @@ public class WallyAI extends ModularAI
       if( loc != null )
       {
         Unit resident = loc.getResident();
-        if( resident != null && !myArmy.isEnemy(resident.CO)
-            && valueUnit(resident, loc, true) > valueUnit(unit, destination, true) )
+        if( resident != null && !myArmy.isEnemy(resident.CO) )
         {
-          return true;
+          double resHPTaken = hpThreatAt(gameMap, threatMap, unit, xyc, target);
+          int resVal = valueUnit(resident, loc, false);
+          int resGain = (int) (resHPTaken * resVal / 10);
+          wallGain += resGain;
         }
       }
     }
-    return false;
+
+    return wallGain - wallLoss;
   }
 
   private static int valueUnit(Unit unit, MapLocation locale, boolean includeCurrentHealth)
@@ -1675,15 +1694,21 @@ public class WallyAI extends ModularAI
     if( null == desiredTerrains || desiredTerrains.size() < 1 )
       return null;
 
+    int threatThreshold = DIRECT_THREAT_THRESHOLD;
+    if( model.hasImmobileWeapon() )
+      threatThreshold = INDIRECT_THREAT_THRESHOLD;
     ArrayList<XYCoord> candidates = new ArrayList<XYCoord>();
     for( MapLocation loc : CPI.availableProperties )
     {
       if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
       {
-        if( model.hasImmobileWeapon() && !isSafe(gameMap, threatMap, model, loc.getCoordinates(), null) )
+        final ModelForCO mfc = new ModelForCO(loc.getOwner(), model);
+
+        double hpThreat = hpThreatAt(gameMap, threatMap, mfc, loc.getCoordinates(), null);
+        if( threatThreshold < hpThreat * 10 )
           continue;
         // If we can get to a target...
-        if( 0 < findCombatUnitDestinations(predMap, allThreats, loc.getCoordinates(), new ModelForCO(loc.getOwner(), model))
+        if( 0 < findCombatUnitDestinations(predMap, allThreats, loc.getCoordinates(), mfc)
             .size() )
           candidates.add(loc.getCoordinates());
       }
@@ -1995,18 +2020,10 @@ public class WallyAI extends ModularAI
       loss     = (hploss   * actorCost  ) / UnitModel.MAXIMUM_HP;
       damage   = (hpdamage * targetValue) / UnitModel.MAXIMUM_HP + captureValue;
 
-      if( ai.canWallHere(gameMap, ai.threatMap, actor.unit, actor.coord, target.unit) )
-      {
-        ai.log(String.format("  %s thinks it's safe to attack %s", actor, target));
-        //           funds "gained" funds lost     term to favor using cheaper units
-        fundsDelta =     damage    -   loss    - (int) (actorCost*AGGRO_CHEAPER_WEIGHT);
-      }
-      else
-      {
-        fundsDelta = (int) (damage*AGGRO_FUNDS_WEIGHT) - actorCost;
-        ai.log(String.format("  %s is going aggro on %s", actor, target));
-        ai.log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", hpdamage, fundsDelta));
-      }
+      int wallValue = ai.wallFundsValue(gameMap, ai.threatMap, actor.unit, actor.coord, target.unit);
+      //                                 funds "gained"              funds lost     term to favor using cheaper units
+      fundsDelta = (int) (damage*AGGRO_FUNDS_WEIGHT + wallValue)    -   loss    - (int) (actorCost*AGGRO_CHEAPER_WEIGHT);
+      // This double-values counterdamage on units that aren't safe, but that seems pretty harmless?
     }
     public static AttackValue forPlannedAttack(WallyAI ai, BattleAction ga, GameMap gameMap)
     {
