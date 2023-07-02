@@ -290,6 +290,7 @@ public class WallyAI extends ModularAI
       {
         if( !gameMap.isLocationEmpty(actor, lastAction.startPos) )
           theUnexpected = true;
+        // Consider removing this check if I am yeeting my unit
         if( actor != gameMap.getResident(action.getMoveLocation()) )
           theUnexpected = true;
       }
@@ -298,6 +299,37 @@ public class WallyAI extends ModularAI
         theUnexpected = true;
     }
     return theUnexpected;
+  }
+
+  public GameAction pollAndCleanUpAction(GameMap map)
+  {
+    ActionPlan ae = queuedActions.poll();
+
+    // Check if it's an attack and has been invalidated by RNG shenanigans
+    while (null != ae)
+    {
+      final GameAction action = ae.action;
+      XYCoord moveLoc = action.getMoveLocation();
+      if( null != moveLoc )
+      {
+        mapPlan[moveLoc.xCoord][moveLoc.yCoord].identity = null;
+        mapPlan[moveLoc.xCoord][moveLoc.yCoord].toAchieve = null;
+      }
+
+      Unit victim = map.getResident(ae.action.getTargetLocation());
+      if( ae.action.getType() == UnitActionFactory.ATTACK && (null == victim || !victim.CO.isEnemy(myArmy)) )
+      {
+        log(String.format("  Discarding invalid attack: %s", ae.action));
+        ae = queuedActions.poll();
+        continue;
+      }
+      break; // Action is valid; ship it
+    }
+
+    lastAction = ae;
+    if( null == ae )
+      return null;
+    return ae.action;
   }
 
   public static class DrainActionQueue implements AIModule
@@ -320,35 +352,7 @@ public class WallyAI extends ModularAI
       if( theUnexpected )
         ai.queuedActions.clear();
 
-      // Clear out the planning state for our last action
-      if( null != ai.lastAction )
-      {
-        XYCoord moveLoc = ai.lastAction.action.getMoveLocation();
-        if( null != moveLoc )
-        {
-          if( theUnexpected ) // Don't assume the action completed correctly
-            ai.mapPlan[moveLoc.xCoord][moveLoc.yCoord].identity = null;
-          ai.mapPlan[moveLoc.xCoord][moveLoc.yCoord].toAchieve = null;
-        }
-      }
-
-      ActionPlan ae = ai.queuedActions.poll();
-      // Check if it's an attack and has been invalidated by RNG shenanigans
-      if (null != ae && ae.action.getType() == UnitActionFactory.ATTACK
-          && null == map.getResident(ae.action.getTargetLocation()))
-      {
-        ai.log(String.format("  Discarding invalid attack: %s", ae.action));
-        ae = null;
-        ai.queuedActions.clear(); // Too bad, gotta re-plan
-      }
-      if( null == ae )
-      {
-        ai.lastAction = null; // Don't be surprised when our dudes we moved last turn die
-        return null;
-      }
-
-      ai.lastAction = ae;
-      return ae.action;
+      return ai.pollAndCleanUpAction(map);
     }
   }
   public static class FillActionQueue implements AIModule
@@ -382,7 +386,8 @@ public class WallyAI extends ModularAI
             {
               if( actionsBooked.containsKey(actor.unit) )
                 ai.log(String.format("Warning: Unit is double-booked %s:\n\t%s\n\t%s", actor, readyPlan, actionsBooked.get(actor.unit)));
-              actionsBooked.put(actor.unit, readyPlan);
+              else
+                actionsBooked.put(actor.unit, readyPlan);
             }
             ai.queuedActions.add(readyPlan);
           }
@@ -405,7 +410,8 @@ public class WallyAI extends ModularAI
             {
               if( actionsBooked.containsKey(actor.unit) )
                 ai.log(String.format("Warning: Unit is double-booked %s:\n\t%s\n\t%s", actor, readyPlan, actionsBooked.get(actor.unit)));
-              actionsBooked.put(actor.unit, readyPlan);
+              else
+                actionsBooked.put(actor.unit, readyPlan);
             }
             ai.queuedActions.add(readyPlan);
             actionAtCoord = movexyc;
@@ -420,18 +426,19 @@ public class WallyAI extends ModularAI
       for( XYCoord movexyc : revisitTiles )
       {
         int x = movexyc.xCoord, y = movexyc.yCoord;
+        final Unit unit = ai.mapPlan[x][y].identity.unit;
         ai.mapPlan[x][y].identity = null;
         ai.mapPlan[x][y].toAchieve = null;
+        if( null != unit )
+          ai.plannedUnits.remove(unit);
       }
-      ai.plannedUnits.clear();
 
       if( ai.queuedActions.isEmpty() )
         return null;
 
-      ActionPlan action = ai.queuedActions.poll();
-      ai.log(String.format("  First queued action: %s", action.action));
-      ai.lastAction = action;
-      return action.action;
+      GameAction action = ai.pollAndCleanUpAction(map);
+      ai.log(String.format("  First queued action: %s", action));
+      return action;
     }
 
     private static ActionPlan fetchPlanAndVacateTiles(HashSet<XYCoord> vacatedTiles,
