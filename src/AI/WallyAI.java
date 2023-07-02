@@ -317,6 +317,12 @@ public class WallyAI extends ModularAI
       }
 
       Unit victim = map.getResident(ae.action.getTargetLocation());
+      if( ae.action instanceof GameAction.UnitProductionAction && (null != victim) )
+      {
+        log(String.format("  Discarding invalid build: %s", ae.action));
+        ae = queuedActions.poll();
+        continue;
+      }
       if( ae.action.getType() == UnitActionFactory.ATTACK && (null == victim || !victim.CO.isEnemy(myArmy)) )
       {
         log(String.format("  Discarding invalid attack: %s", ae.action));
