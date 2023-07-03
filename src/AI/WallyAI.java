@@ -2113,13 +2113,22 @@ public class WallyAI extends ModularAI
       int damagePercent = 0;
       for( int hit : mapPlan[x][y].damageInstances.values() )
         damagePercent += hit;
-      if( damagePercent >= resSource.getHP() * UnitModel.MAXIMUM_HP )
+      int realHP = resSource.getHP();
+      if( damagePercent >= realHP * UnitModel.MAXIMUM_HP )
         return returnLoc; // If we think it will be dead, don't report its presence
 
       Unit resident = resSource.unit;
       if( null == resident )
+      {
         // If we've planned a unit that doesn't exist, make stuff up
         resident = new Unit(resSource.CO, resSource.model);
+        resident.x = x;
+        resident.y = y;
+      }
+      // If the actual unit is gone, treat it as dead
+      if( 0 < new XYCoord(resident).getDistance(x, y) )
+        return returnLoc;
+
       returnLoc.setResident(resident);
       return returnLoc;
     }
