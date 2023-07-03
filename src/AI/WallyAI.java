@@ -1551,22 +1551,22 @@ public class WallyAI extends ModularAI
         boolean residentIsEvictable = !currentResident.isTurnOver && currentResident.CO.army == myArmy;
 
         if( !residentIsEvictable || recurseDepth <= 0 )
-        {
-          // Prevent reflexive eviction
-          evictionStack.add(unit);
-          ArrayList<ActionPlan> evictionPlans = planTravelActions(
-                                                whodunit, gameMap, threatMap,
-                                                currentResident, ignoreSafety, true, // Always move
-                                                avoidProduction, true, // Always enable wandering
-                                                recurseDepth - 1);
-          evictionStack.remove(unit);
-          if( null == evictionPlans )
-            continue;
-          prereqPlans.addAll(evictionPlans);
-        }
+          continue;
         // If nobody's there, no need to evict.
         // If the resident is evictable, try to evict and bail if we can't.
         // If the resident isn't evictable, we think it will be dead soon, so just keep going.
+
+        // Prevent reflexive eviction
+        evictionStack.add(unit);
+        ArrayList<ActionPlan> evictionPlans = planTravelActions(
+                                              whodunit, gameMap, threatMap,
+                                              currentResident, ignoreSafety, true, // Always move
+                                              avoidProduction, true, // Always enable wandering
+                                              recurseDepth - 1);
+        evictionStack.remove(unit);
+        if( null == evictionPlans )
+          continue;
+        prereqPlans.addAll(evictionPlans);
       } // ~if resident
 
       bestPlans = new ArrayList<>();
@@ -2147,8 +2147,8 @@ public class WallyAI extends ModularAI
         resident.x = x;
         resident.y = y;
       }
-      // If the actual unit is gone, treat it as dead
-      if( 0 < new XYCoord(resident).getDistance(x, y) )
+      // If the actual unit is gone and is an enemy, treat it as dead
+      if( viewer.isEnemy(resident.CO) && 0 < new XYCoord(resident).getDistance(x, y) )
         return returnLoc;
 
       returnLoc.setResident(resident);
