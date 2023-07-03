@@ -1248,6 +1248,9 @@ public class WallyAI extends ModularAI
         if( null != uc.weapon )
           break;
       }
+      if( null == uc.weapon )
+        continue; // No point in calculating further if we can't hit the target
+
       XYCoord targetCoord = new XYCoord(target.x, target.y);
       double effectiveness = uc.weapon.getDamage(model);
       if (0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), targetCoord, predMap).getPathLength() &&
