@@ -12,7 +12,6 @@ import Engine.Combat.CombatEngine;
 import Engine.Combat.CombatContext.CalcType;
 import Engine.UnitActionLifecycles.BattleLifecycle.BattleAction;
 import Engine.UnitActionLifecycles.CaptureLifecycle.CaptureAction;
-import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.*;
 import Units.*;
 import Units.MoveTypes.MoveType;
@@ -1232,7 +1231,7 @@ public class WallyAI extends ModularAI
   private ArrayList<XYCoord> findCombatUnitDestinations(GameMap gameMap, ArrayList<Unit> allThreats, XYCoord start, ModelForCO um)
   {
     ArrayList<XYCoord> goals = new ArrayList<>();
-    Map<ModelForCO, Double> valueMap = new HashMap<>();
+    Map<ModelForCO, Integer> valueMap = new HashMap<>();
     Map<ModelForCO, ArrayList<XYCoord>> targetMap = new HashMap<>();
     UnitContext uc = new UnitContext(um.co, um.um);
 
@@ -1256,7 +1255,7 @@ public class WallyAI extends ModularAI
       if (0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), targetCoord, predMap).getPathLength() &&
           AGGRO_EFFECT_THRESHOLD < effectiveness)
       {
-        valueMap.put(modelKey, effectiveness*target.getCost());
+        valueMap.put( modelKey, (int)(effectiveness*target.getCost()) );
         if (!targetMap.containsKey(modelKey)) targetMap.put(modelKey, new ArrayList<XYCoord>());
         targetMap.get(modelKey).add(targetCoord);
       }
@@ -1267,8 +1266,8 @@ public class WallyAI extends ModularAI
       Utils.sortLocationsByDistance(start, targetList);
 
     // Sort all target types by how much we want to shoot them with this unit
-    Queue<Entry<ModelForCO, Double>> targetTypesInOrder =
-        new PriorityQueue<>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
+    Queue<Entry<ModelForCO, Integer>> targetTypesInOrder =
+        new PriorityQueue<>(myArmy.cos[0].unitModels.size(), new EntryValueComparator<>());
     targetTypesInOrder.addAll(valueMap.entrySet());
 
     while (!targetTypesInOrder.isEmpty())
@@ -1365,17 +1364,18 @@ public class WallyAI extends ModularAI
                           gameMap.getLocation(goal).getEnvironment().terrainType, goal,
                           pathPoint, mustMove, ignoreSafety));
 
-    ArrayList<ActionPlan> bestPlans = null;
-    int bestFundsDelta = 0;
+    Queue<Entry<ActionPlan, Integer>> rankedTravelPlans =
+        new PriorityQueue<>(13, new EntryValueComparator<>());
+
+    int minFundsDelta = 0;
     if( mustMove )
-      bestFundsDelta -= 9;
+      minFundsDelta -= 9;
     if( ignoreSafety )
-      bestFundsDelta -= 9000;
+      minFundsDelta -= 9000;
     for( Utils.SearchNode xyc : destinations )
     {
 //      log(String.format("    is it safe to go to %s?", xyc));
 //    log(String.format("    Yes"));
-      ArrayList<ActionPlan> prereqPlans = new ArrayList<>();
 
       Unit plannedResident = predMap.getResident(xyc);
       ActionPlan  ap       = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
@@ -1396,24 +1396,8 @@ public class WallyAI extends ModularAI
           continue;
         boolean residentIsEvictable = !currentResident.isTurnOver && currentResident.CO.army == myArmy;
 
-        if( residentIsEvictable && recurseDepth > 0 )
-        {
-          // Prevent reflexive eviction
-          evictionStack.add(unit);
-          ArrayList<ActionPlan> evictionPlans = planTravelActions(
-                                               whodunit, gameMap, threatMap,
-                                               currentResident,
-                                               ignoreSafety, true, // Always move
-                                               avoidProduction, true, // Always enable wandering
-                                               recurseDepth-1);
-          evictionStack.remove(unit);
-          if( null == evictionPlans )
-            continue;
-          prereqPlans.addAll(evictionPlans);
-        }
-        // If nobody's there, no need to evict.
-        // If the resident is evictable, try to evict and bail if we can't.
-        // If the resident isn't evictable, we think it will be dead soon, so just keep going.
+        if( !residentIsEvictable || recurseDepth <= 0 )
+          continue;
       } // ~if resident
 
       int siegeWallingValueOffset = 0;
@@ -1493,68 +1477,103 @@ public class WallyAI extends ModularAI
 
       int wallGain = wallFundsValue(predMap, threatMap, unit, xyc, null);
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(predMap, movePath, ignoreResident);
-      if( actionSets.size() > 0 )
+      // Since we're moving anyway, might as well try shooting the scenery
+      for( GameActionSet actionSet : actionSets )
       {
-        // Since we're moving anyway, might as well try shooting the scenery
-        for( GameActionSet actionSet : actionSets )
+        final UnitActionFactory actionType = actionSet.getSelected().getType();
+        if( actionType == UnitActionFactory.ATTACK )
         {
-          if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
+          for( GameAction attack : actionSet.getGameActions() )
           {
-            for( GameAction attack : actionSet.getGameActions() )
+            double damageValue = AICombatUtils.scoreAttackAction(unit, attack, predMap,
+                (results) -> {
+                  double loss   = Math.min(unit                 .getHP(), (int)results.attacker.getPreciseHPDamage());
+                  double damage = Math.min(results.defender.unit.getHP(), (int)results.defender.getPreciseHPDamage());
+
+                  if( damage > loss ) // only shoot that which you hurt more than it hurts you
+                    return damage * results.defender.unit.getCost() / 10;
+
+                  return 0.;
+                }, (terrain, params) -> 0.01); // Attack terrain, but don't prioritize it over units
+
+            final int thisDelta = (int) damageValue + wallGain;
+            if( thisDelta > minFundsDelta )
             {
-              double damageValue = AICombatUtils.scoreAttackAction(unit, attack, predMap,
-                  (results) -> {
-                    int loss   = Math.min(unit                 .getHealth(), (int)results.attacker.getPreciseHealthDamage());
-                    int damage = Math.min(results.defender.unit.getHealth(), (int)results.defender.getPreciseHealthDamage());
-
-                    if( damage > loss ) // only shoot that which you hurt more than it hurts you
-                      return damage * results.defender.unit.getCost() / 10;
-
-                    return 0;
-                  }, (terrain, params) -> 1); // Attack terrain, but don't prioritize it over units
-
-              final int thisDelta = (int) damageValue + wallGain;
-              if( thisDelta > bestFundsDelta )
-              {
-                log(String.format("      Best en passant attack deals %s", damageValue));
-                bestFundsDelta = thisDelta;
-                ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), attack);
-                plan.path = movePath;
-                plan.purpose = travelPurpose;
-                plan.isAttack = true;
-                plan.fromEviction = mustMove;
-                Unit target = gameMap.getResident(attack.getTargetLocation());
-                int defLevel = gameMap.getEnvironment(attack.getTargetLocation()).terrainType.getDefLevel();
-                int range = attack.getMoveLocation().getDistance(target);
-                boolean attackerMoved = 0 < attack.getMoveLocation().getDistance(unit);
-                double hpDamage = CombatEngine.calculateOneStrikeDamage(unit, range, target, gameMap, defLevel, attackerMoved);
-                plan.percentDamage = (int) (hpDamage * 10);
-                bestPlans = new ArrayList<>();
-                bestPlans.addAll(prereqPlans);
-                bestPlans.add(plan);
-              }
+              log(String.format("      Best en passant attack deals %s", damageValue));
+              ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), attack);
+              plan.path = movePath;
+              plan.purpose = travelPurpose;
+              plan.isAttack = true;
+              plan.fromEviction = mustMove;
+              Unit target = gameMap.getResident(attack.getTargetLocation());
+              int defLevel = gameMap.getEnvironment(attack.getTargetLocation()).terrainType.getDefLevel();
+              int range = attack.getMoveLocation().getDistance(target);
+              boolean attackerMoved = 0 < attack.getMoveLocation().getDistance(unit);
+              double hpDamage = CombatEngine.calculateOneStrikeDamage(unit, range, target, gameMap, defLevel, attackerMoved);
+              plan.percentDamage = (int) (hpDamage * 10);
+              rankedTravelPlans.add(new AbstractMap.SimpleEntry<>(plan, thisDelta));
             }
           }
-        } // ~for action types
-
-        int walkScore = movePath.getPathLength() + wallGain;
-        if( bestFundsDelta < walkScore && movePath.getPathLength() > 1 ) // Just wait if we can't do anything cool
-        {
-          bestFundsDelta = walkScore;
-          GameAction move = new WaitLifecycle.WaitAction(unit, movePath);
-          ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), move);
-          plan.path = movePath;
-          plan.purpose = travelPurpose;
-          plan.fromEviction = mustMove;
-          bestPlans = new ArrayList<>();
-          bestPlans.addAll(prereqPlans);
-          bestPlans.add(plan);
-          if( prereqPlans.size() > 0 )
-            break; // If we're gonna have to evict, may as well just go as far as possible
         }
 
-      } // ~if any action type
+        if( actionType == UnitActionFactory.WAIT )
+        {
+          for( GameAction move : actionSet.getGameActions() )
+          {
+            int walkScore = movePath.getPathLength() + wallGain;
+            if( minFundsDelta < walkScore && movePath.getPathLength() > 1 ) // Just wait if we can't do anything cool
+            {
+              ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), move);
+              plan.path = movePath;
+              plan.purpose = travelPurpose;
+              plan.fromEviction = mustMove;
+              rankedTravelPlans.add(new AbstractMap.SimpleEntry<>(plan, walkScore));
+            }
+          }
+        }
+      } // ~for action types
     } // ~for destinations
+
+    ArrayList<ActionPlan> bestPlans = null;
+    // Now that we have an ordered list of our travel locations, figure out the best one we can accomplish (potentially requiring eviction)
+    while (!rankedTravelPlans.isEmpty())
+    {
+      ActionPlan plan = rankedTravelPlans.poll().getKey();
+      XYCoord xyc = plan.action.getMoveLocation();
+      ArrayList<ActionPlan> prereqPlans = new ArrayList<>();
+
+      // If whatever's in our landing pad has no plans yet, poke and see if some can be made
+      Unit currentResident = gameMap.getResident(xyc);
+      if( null != currentResident )
+      {
+        if( plannedUnits.contains(currentResident) || evictionStack.contains(currentResident) )
+          continue;
+        boolean residentIsEvictable = !currentResident.isTurnOver && currentResident.CO.army == myArmy;
+
+        if( !residentIsEvictable || recurseDepth <= 0 )
+        {
+          // Prevent reflexive eviction
+          evictionStack.add(unit);
+          ArrayList<ActionPlan> evictionPlans = planTravelActions(
+                                                whodunit, gameMap, threatMap,
+                                                currentResident, ignoreSafety, true, // Always move
+                                                avoidProduction, true, // Always enable wandering
+                                                recurseDepth - 1);
+          evictionStack.remove(unit);
+          if( null == evictionPlans )
+            continue;
+          prereqPlans.addAll(evictionPlans);
+        }
+        // If nobody's there, no need to evict.
+        // If the resident is evictable, try to evict and bail if we can't.
+        // If the resident isn't evictable, we think it will be dead soon, so just keep going.
+      } // ~if resident
+
+      bestPlans = new ArrayList<>();
+      bestPlans.addAll(prereqPlans);
+      bestPlans.add(plan);
+      break; // We found a workable one. Ship it
+    }
 
     return bestPlans;
   }
@@ -1764,7 +1783,7 @@ public class WallyAI extends ModularAI
 
     // Get a count of enemy forces.
     Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, predMap);
-    Map<ModelForCO, Double> enemyUnitCounts = new HashMap<>();
+    Map<ModelForCO, Integer> enemyUnitHP = new HashMap<>();
     for( Commander co : unitLists.keySet() )
     {
       if( myArmy.isEnemy(co) )
@@ -1772,53 +1791,53 @@ public class WallyAI extends ModularAI
         for( Unit u : unitLists.get(co) )
         {
           // Count how many of each model of enemy units are in play.
-          if( enemyUnitCounts.containsKey(new ModelForCO(u)) )
+          if( enemyUnitHP.containsKey(new ModelForCO(u)) )
           {
-            enemyUnitCounts.put(new ModelForCO(u), enemyUnitCounts.get(new ModelForCO(u)) + (u.getHP() / 10));
+            enemyUnitHP.put(new ModelForCO(u), enemyUnitHP.get(new ModelForCO(u)) + (u.getHP() / 10));
           }
           else
           {
-            enemyUnitCounts.put(new ModelForCO(u), u.getHP() / 10.0);
+            enemyUnitHP.put(new ModelForCO(u), u.getHP());
           }
         }
       }
     }
 
     // Figure out how well we think we have the existing threats covered
-    Map<ModelForCO, Double> myUnitCounts = new HashMap<>();
+    Map<ModelForCO, Integer> myUnitHP = new HashMap<>();
     for( Unit u : myArmy.getUnits() )
     {
       // Count how many of each model of enemy units are in play.
-      if( myUnitCounts.containsKey(new ModelForCO(u)) )
+      if( myUnitHP.containsKey(new ModelForCO(u)) )
       {
-        myUnitCounts.put(new ModelForCO(u), myUnitCounts.get(new ModelForCO(u)) + (u.getHP() / 10));
+        myUnitHP.put(new ModelForCO(u), myUnitHP.get(new ModelForCO(u)) + (u.getHP() / 10));
       }
       else
       {
-        myUnitCounts.put(new ModelForCO(u), u.getHP() / 10.0);
+        myUnitHP.put(new ModelForCO(u), u.getHP());
       }
     }
 
-    for( ModelForCO threat : enemyUnitCounts.keySet() )
+    for( ModelForCO threat : enemyUnitHP.keySet() )
     {
-      for( ModelForCO counter : myUnitCounts.keySet() ) // Subtract how well we think we counter each enemy from their HP counts
+      for( ModelForCO counter : myUnitHP.keySet() ) // Subtract how well we think we counter each enemy from their HP counts
       {
         double counterPower = findEffectiveness(counter, threat);
-        enemyUnitCounts.put(threat, enemyUnitCounts.get(threat) - counterPower * myUnitCounts.get(counter));
+        enemyUnitHP.put( threat, (int) (enemyUnitHP.get(threat) - counterPower * myUnitHP.get(counter)) );
       }
     }
 
-    // change unit quantity->funds
-    for( Entry<ModelForCO, Double> ent : enemyUnitCounts.entrySet() )
+    // change unit HP->funds
+    for( Entry<ModelForCO, Integer> ent : enemyUnitHP.entrySet() )
     {
       ModelForCO tmco = ent.getKey();
       // We don't currently have any huge cost-shift COs, so this isn't a big deal at present.
       ent.setValue(ent.getValue() * tmco.co.getCost(tmco.um) / UnitModel.MAXIMUM_HP);
     }
 
-    Queue<Entry<ModelForCO, Double>> enemyModels =
-        new PriorityQueue<>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
-    enemyModels.addAll(enemyUnitCounts.entrySet());
+    Queue<Entry<ModelForCO, Integer>> enemyModels =
+        new PriorityQueue<>(myArmy.cos[0].unitModels.size(), new EntryValueComparator<>());
+    enemyModels.addAll(enemyUnitHP.entrySet());
 
     // Try to purchase units that will counter the most-represented enemies.
     while (!enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
@@ -1826,7 +1845,7 @@ public class WallyAI extends ModularAI
       // Find the first (most funds-invested) enemy UnitModel, and remove it. Even if we can't find an adequate counter,
       // there is not reason to consider it again on the next iteration.
       ModelForCO enemyToCounter = enemyModels.poll().getKey();
-      double enemyNumber = enemyUnitCounts.get(enemyToCounter);
+      double enemyNumber = enemyUnitHP.get(enemyToCounter);
       log(String.format("Need a counter for %s worth %s", enemyToCounter, enemyNumber));
       log(String.format("Remaining budget: %s", budget));
 
@@ -1904,10 +1923,10 @@ public class WallyAI extends ModularAI
   /**
    * Sort units by funds amount in descending order.
    */
-  private static class UnitModelFundsComparator implements Comparator<Entry<ModelForCO, Double>>
+  private static class EntryValueComparator<T> implements Comparator<Entry<T, Integer>>
   {
     @Override
-    public int compare(Entry<ModelForCO, Double> entry1, Entry<ModelForCO, Double> entry2)
+    public int compare(Entry<T, Integer> entry1, Entry<T, Integer> entry2)
     {
       double diff = entry2.getValue() - entry1.getValue();
       return (int) (diff * 10); // Multiply by 10 since we return an int, but don't want to lose the decimal-level discrimination.
