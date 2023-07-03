@@ -315,11 +315,27 @@ public class WallyAI extends ModularAI
       }
 
       Unit victim = map.getResident(ae.action.getTargetLocation());
-      if( ae.action instanceof GameAction.UnitProductionAction && (null != victim) )
+      if( ae.action instanceof GameAction.UnitProductionAction )
       {
-        log(String.format("  Discarding invalid build: %s", ae.action));
-        ae = queuedActions.poll();
-        continue;
+        boolean fail = false;
+        if( null != victim )
+        {
+          log(String.format("  Discarding blocked build: %s", ae.action));
+          fail = true;
+        }
+        XYCoord xyc = ae.action.getTargetLocation();
+        UnitContext toBuild = ae.actor;
+        int cost = toBuild.CO.getBuyCost(toBuild.model, xyc);
+        if( cost > myArmy.money )
+        {
+          log(String.format("  Discarding too-expensive build: %s for %s with %s on hand", ae.action, cost, myArmy.money));
+          fail = true;
+        }
+        if( fail )
+        {
+          ae = queuedActions.poll();
+          continue;
+        }
       }
       if( ae.action.getType() == UnitActionFactory.ATTACK && (null == victim || !victim.CO.isEnemy(myArmy)) )
       {
