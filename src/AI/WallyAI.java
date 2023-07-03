@@ -38,7 +38,6 @@ public class WallyAI extends ModularAI
             new SiegeTravel(army, this),
             new FreeRealEstate(army, this, true,  true), // step on industries we're not using
             new Eviction(army, this, false), // Getting dudes out of the way
-            new Eviction(army, this, true),
 
             new FillActionQueue(army, this),
             new PowerActivator(army, CommanderAbility.PHASE_TURN_END)
@@ -985,11 +984,9 @@ public class WallyAI extends ModularAI
   public static class Eviction extends UnitActionFinder<WallyAI>
   {
     private static final long serialVersionUID = 1L;
-    private final boolean ignoreSafety;
     public Eviction(Army co, WallyAI ai, boolean ignoreSafety)
     {
       super(co, ai);
-      this.ignoreSafety = ignoreSafety;
     }
 
     @Override
@@ -1002,13 +999,16 @@ public class WallyAI extends ModularAI
         return null;
 
       ai.log(String.format("Evaluating eviction for %s.", unit.toStringWithLocation()));
-      boolean mustMove = true;
+      final ActionPlan evicterPlan = ai.mapPlan[unit.x][unit.y].toAchieve;
+      int evictionValue = 0;
+      if( null != evicter && unit != evicter.unit && null != evicterPlan )
+        evictionValue = valueAction(ai, gameMap, evicterPlan);
       boolean avoidProduction = false;
-      boolean shouldWander = true;
+      boolean shouldWander = false;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
                                           this, gameMap, ai.threatMap,
-                                          unit, ignoreSafety, mustMove, avoidProduction,
-                                          shouldWander, EVICTION_DEPTH);
+                                          unit, avoidProduction, shouldWander,
+                                          evictionValue, EVICTION_DEPTH);
 
       if( null == travelPlans )
         return null;
@@ -1039,14 +1039,16 @@ public class WallyAI extends ModularAI
 
       ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
       final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
-      boolean mustMove = null != evicter && unit != evicter.unit;
+      final ActionPlan evicterPlan = ai.mapPlan[unit.x][unit.y].toAchieve;
+      int evictionValue = 0;
+      if( null != evicter && unit != evicter.unit && null != evicterPlan )
+        evictionValue = valueAction(ai, gameMap, evicterPlan);
       boolean avoidProduction = false;
-      boolean ignoreSafety = false;
       boolean shouldWander = false;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
                                           this, gameMap, ai.threatMap,
-                                          unit, ignoreSafety, mustMove, avoidProduction,
-                                          shouldWander, EVICTION_DEPTH);
+                                          unit, avoidProduction, shouldWander,
+                                          evictionValue, EVICTION_DEPTH);
 
       if( null == travelPlans )
         return null;
@@ -1092,14 +1094,16 @@ public class WallyAI extends ModularAI
 
       ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
       final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
-      boolean mustMove = null != evicter && unit != evicter.unit;
+      final ActionPlan evicterPlan = ai.mapPlan[unit.x][unit.y].toAchieve;
+      int evictionValue = 0;
+      if( null != evicter && unit != evicter.unit && null != evicterPlan )
+        evictionValue = valueAction(ai, gameMap, evicterPlan);
       boolean avoidProduction = false;
-      boolean ignoreSafety = false;
       boolean shouldWander = false;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
                                           this, gameMap, ai.threatMap,
-                                          unit, ignoreSafety, mustMove, avoidProduction,
-                                          shouldWander, EVICTION_DEPTH);
+                                          unit, avoidProduction, shouldWander,
+                                          evictionValue, EVICTION_DEPTH);
 
       if( null == travelPlans )
         return null;
@@ -1299,9 +1303,8 @@ public class WallyAI extends ModularAI
   private ArrayList<ActionPlan> planTravelActions(
                         AIModule whodunit, GameMap gameMap,
                         ArrayList<TileThreat>[][] threatMap, Unit unit,
-                        boolean ignoreSafety, boolean mustMove,
                         boolean avoidProduction, boolean shouldWander,
-                        int recurseDepth)
+                        int evictionValue, int recurseDepth)
   {
     if( evictionStack.contains(unit) )
       return null;
@@ -1321,6 +1324,7 @@ public class WallyAI extends ModularAI
     ArrayList<XYCoord> validTargets = new ArrayList<XYCoord>();
     TravelPurpose travelPurpose = fillTravelDestinations(predMap, validTargets, unit, avoidProduction);
 
+    final boolean mustMove = evictionValue > 0;
     if( !mustMove && !shouldWander && travelPurpose == TravelPurpose.WANDER )
       return null; // Don't clutter the queue with pointless movements
 
@@ -1359,19 +1363,15 @@ public class WallyAI extends ModularAI
     // and build a GameAction to move to the closest one.
     Utils.sortLocationsByDistance(pathPoint, destinations);
 
-    log(String.format("  %s is traveling toward %s at %s via %s  mustMove?: %s  ignoreSafety?: %s",
+    log(String.format("  %s is traveling toward %s at %s via %s  mustMove?: %s  evictionValue?: %s",
                           unit.toStringWithLocation(),
                           gameMap.getLocation(goal).getEnvironment().terrainType, goal,
-                          pathPoint, mustMove, ignoreSafety));
+                          pathPoint, mustMove, evictionValue));
 
     Queue<Entry<ActionPlan, Integer>> rankedTravelPlans =
         new PriorityQueue<>(13, new EntryValueComparator<>());
 
-    int minFundsDelta = 0;
-    if( mustMove )
-      minFundsDelta -= 9;
-    if( ignoreSafety )
-      minFundsDelta -= 9000;
+    int minFundsDelta = -1 * evictionValue;
     for( Utils.SearchNode xyc : destinations )
     {
 //      log(String.format("    is it safe to go to %s?", xyc));
@@ -1538,7 +1538,8 @@ public class WallyAI extends ModularAI
     // Now that we have an ordered list of our travel locations, figure out the best one we can accomplish (potentially requiring eviction)
     while (!rankedTravelPlans.isEmpty())
     {
-      ActionPlan plan = rankedTravelPlans.poll().getKey();
+      final Entry<ActionPlan, Integer> entry = rankedTravelPlans.poll();
+      ActionPlan plan = entry.getKey();
       XYCoord xyc = plan.action.getMoveLocation();
       ArrayList<ActionPlan> prereqPlans = new ArrayList<>();
 
@@ -1556,13 +1557,13 @@ public class WallyAI extends ModularAI
         // If the resident is evictable, try to evict and bail if we can't.
         // If the resident isn't evictable, we think it will be dead soon, so just keep going.
 
+        int planEvictionValue = evictionValue + entry.getValue();
         // Prevent reflexive eviction
         evictionStack.add(unit);
         ArrayList<ActionPlan> evictionPlans = planTravelActions(
                                               whodunit, gameMap, threatMap,
-                                              currentResident, ignoreSafety, true, // Always move
-                                              avoidProduction, true, // Always enable wandering
-                                              recurseDepth - 1);
+                                              currentResident, avoidProduction, true, // Always enable wandering
+                                              planEvictionValue, recurseDepth - 1);
         evictionStack.remove(unit);
         if( null == evictionPlans )
           continue;
@@ -2103,6 +2104,12 @@ public class WallyAI extends ModularAI
       opportunityCost = ai.valueCapture((CaptureAction) ap.action, gameMap);
     if( apType == UnitActionFactory.WAIT )
       opportunityCost = 0;
+    if( ap.action instanceof GameAction.UnitProductionAction )
+    {
+      XYCoord xyc = ap.action.getTargetLocation();
+      UnitContext toBuild = ai.mapPlan[xyc.xCoord][xyc.yCoord].identity;
+      opportunityCost = toBuild.CO.getCost(toBuild.model) * 3;
+    }
     return opportunityCost;
   }
 
