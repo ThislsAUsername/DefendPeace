@@ -67,7 +67,10 @@ public class OverlayCache implements CacheInvalidationListener
       switch (mode)
       {
         case THREATS_MANUAL:
-          threats.addAll(viewer.threatsToOverlay);
+          for( Unit threat : viewer.threatsToOverlay )
+            // If the unit's tile's fogged, the overlay draw code will handle ignoring the unit
+            if( !threat.model.hidden || drawableMap.isConfirmedVisible(threat) )
+              threats.add(threat);
           break;
         case THREATS_ALL:
         case VISION:

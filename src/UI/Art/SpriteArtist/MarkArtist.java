@@ -21,19 +21,19 @@ public class MarkArtist
    * Draws any marks for the unit or the terrain it's on, from Commanders or StateTrackers
    * <p>Assumes the unit is on the coordinate it thinks it's on; don't use this for animations
    */
-  public static void drawMark(Graphics g, GameInstance game, Unit unit, int animIndex)
+  public static void drawMark(Graphics g, GameInstance game, Army viewer, Unit unit, int animIndex)
   {
     final MarkingCache cache = MarkingCache.instance(game);
     final XYCoord xyc = new XYCoord(unit);
 
-    ArrayList<MarkData> markList = cache.getMarks(unit);
-    markList.addAll(cache.getMarks(xyc));
+    ArrayList<MarkData> markList = cache.getMarks(viewer, unit);
+    markList.addAll(cache.getMarks(viewer, xyc));
 
     drawMark(g, markList, animIndex, xyc);
   }
-  public static void drawMark(Graphics g, GameInstance game, XYCoord coord, int animIndex)
+  public static void drawMark(Graphics g, GameInstance game, Army viewer, XYCoord coord, int animIndex)
   {
-    ArrayList<MarkData> markList = MarkingCache.instance(game).getMarks(coord);
+    ArrayList<MarkData> markList = MarkingCache.instance(game).getMarks(viewer, coord);
 
     drawMark(g, markList, animIndex, coord);
   }
@@ -98,7 +98,7 @@ public class MarkArtist
       unitMarks.clear();
     }
 
-    public ArrayList<MarkData> getMarks(Unit unit)
+    public ArrayList<MarkData> getMarks(Army viewer, Unit unit)
     {
       setupMarkers();
       if( !unitMarks.containsKey(unit) )
@@ -106,7 +106,7 @@ public class MarkArtist
         ArrayList<MarkData> marks = new ArrayList<>();
         for( UnitMarker m : markers )
         {
-          char symbol = m.getUnitMarking(unit, game.activeArmy);
+          char symbol = m.getUnitMarking(unit, viewer);
           if( '\0' != symbol ) // null char is our sentry value
             marks.add(new MarkData(symbol, m.getMarkingColor(unit)));
         }
@@ -118,7 +118,7 @@ public class MarkArtist
       return output;
     }
 
-    public ArrayList<MarkData> getMarks(XYCoord xyc)
+    public ArrayList<MarkData> getMarks(Army viewer, XYCoord xyc)
     {
       setupMarkers();
 
@@ -127,7 +127,7 @@ public class MarkArtist
         ArrayList<MarkData> marks = new ArrayList<>();
         for( UnitMarker m : markers )
         {
-          char symbol = m.getPlaceMarking(xyc, game.activeArmy);
+          char symbol = m.getPlaceMarking(xyc, viewer);
           if( '\0' != symbol ) // null char is our sentry value
             marks.add(new MarkData(symbol, m.getMarkingColor(xyc)));
         }

@@ -14,6 +14,7 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Patch;
 import Engine.Army;
 import Engine.GameAction;
+import Engine.GameAction.EndTurnAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.GameScenario.TagMode;
@@ -306,6 +307,9 @@ public class FightClub
           {
             endAITurn = true;
           }
+          if( endAITurn )
+            executeGameAction(new EndTurnAction(game.activeArmy, game.getCurrentTurn()),
+                actionEvents, game, defaultOut);
 
           while (!isGameOver && !actionEvents.isEmpty())
           {

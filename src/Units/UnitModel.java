@@ -83,6 +83,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
   public long carryableMask;
   public long carryableExclusionMask;
+  public Set<TerrainType> unloadExclusionTerrain = new HashSet<TerrainType>();
 
   public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] pWeapons, double powerValue)
