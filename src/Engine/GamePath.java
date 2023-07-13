@@ -147,7 +147,7 @@ public class GamePath
     {
       XYCoord from = waypoints.get(i-1).GetCoordinates();
       XYCoord to   = waypoints.get( i ).GetCoordinates();
-      if( unit.getMovePower(map) < fff.getTransitionCost(map, from, to, unit, canTravelThroughEnemies) )
+      if( unit.getMovePower(map) < fff.getTransitionCost(map, from, to, unit.CO.army, canTravelThroughEnemies) )
       {
         snip(i);
         break;
@@ -176,7 +176,7 @@ public class GamePath
     {
       XYCoord from = waypoints.get(i-1).GetCoordinates();
       XYCoord to   = waypoints.get( i ).GetCoordinates();
-      int tileCost = fff.getTransitionCost(map, from, to, unit, canTravelThroughEnemies);
+      int tileCost = fff.getTransitionCost(map, from, to, unit.CO.army, canTravelThroughEnemies);
       fuelBudget  -= tileCost * unit.model.fuelBurnPerTile;
       if( 0 > fuelBudget )
       {

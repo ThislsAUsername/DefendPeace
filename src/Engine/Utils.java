@@ -118,16 +118,20 @@ public class Utils
   public static ArrayList<XYCoord> findPossibleDestinations(XYCoord start, Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
   {
     boolean canTravelThroughEnemies = false;
-    return findFloodFillArea(start, unit, unit.getMoveFunctor(), Math.min(unit.getMovePower(gameMap), unit.fuel), gameMap, includeOccupiedSpaces, canTravelThroughEnemies);
+    return findFloodFillArea(start, unit, unit.CO.army, unit.getMoveFunctor(), Math.min(unit.getMovePower(gameMap), unit.fuel), gameMap, includeOccupiedSpaces, canTravelThroughEnemies);
   }
   /**
    * @param start Initial location; will usually be in the output set.
-   * @param fff Determines the cost to fill from one tile to another.
-   * @param initialFillPower How much juice to give the FloodFillFunctor
+   * @param mover Identity of the unit that's moving; may be null
+   * @param team Affiliation of the unit that's moving; may be null
+   * @param fff Determines the cost to move from one tile to another.
+   * @param initialFillPower How much move juice we start with
    * @param gameMap The map to search over.
+   * @param includeOccupiedSpaces Whether to include places that have units in them already; generally true if canTravelThroughEnemies is
+   * @param canTravelThroughEnemies Whether to allow pathing through enemies
    * @return The list of XYCoords in gameMap reachable by the FloodFillFunctor from the start coord, given initialFillPower.
    */
-  public static ArrayList<XYCoord> findFloodFillArea(XYCoord start, Unit unit, MoveType fff, int initialFillPower, GameMap gameMap, boolean includeOccupiedSpaces, boolean canTravelThroughEnemies)
+  public static ArrayList<XYCoord> findFloodFillArea(XYCoord start, Unit mover, Army team, MoveType fff, int initialFillPower, GameMap gameMap, boolean includeOccupiedSpaces, boolean canTravelThroughEnemies)
   {
     ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
 
@@ -158,12 +162,12 @@ public class Utils
       // pull out the next search node
       SearchNode currentNode = searchQueue.poll();
       XYCoord coord = new XYCoord(currentNode.x, currentNode.y);
-      if( fff.canStandOn(gameMap, coord, unit, includeOccupiedSpaces) )
+      if( fff.canStandOn(gameMap, coord, mover, includeOccupiedSpaces) )
       {
         reachableTiles.add(coord);
       }
 
-      expandSearchNode(unit, fff, gameMap, currentNode, searchQueue, powerGrid, canTravelThroughEnemies);
+      expandSearchNode(team, fff, gameMap, currentNode, searchQueue, powerGrid, canTravelThroughEnemies);
 
       currentNode = null;
     }
@@ -173,21 +177,17 @@ public class Utils
 
   public static boolean isPathValid(Unit unit, GamePath path, GameMap map, boolean includeOccupiedSpaces)
   {
-    return isPathValid(new XYCoord(unit.x, unit.y), unit, path, map, includeOccupiedSpaces);
+    return isPathValid(new XYCoord(unit), unit, unit.CO.army, unit.getMoveFunctor(), Math.min(unit.getMovePower(map), unit.fuel), path, map, includeOccupiedSpaces);
   }
-  public static boolean isPathValid(XYCoord start, Unit unit, GamePath path, GameMap map, boolean includeOccupiedSpaces)
+  public static boolean isPathValid(XYCoord start, Unit mover, Army team, MoveType fff, int initialFillPower, GamePath path, GameMap map, boolean includeOccupiedSpaces)
   {
-    return isPathValid(start, unit, unit.getMoveFunctor(), Math.min(unit.getMovePower(map), unit.fuel), path, map, includeOccupiedSpaces);
-  }
-  public static boolean isPathValid(XYCoord start, Unit unit, MoveType fff, int initialFillPower, GamePath path, GameMap map, boolean includeOccupiedSpaces)
-  {
-    if( (null == path) || (null == fff) || (null == start) )
+    if( (null == path) || (null == fff) )
     {
       return false;
     }
 
     // Make sure the first waypoint is under the Unit.
-    if( path.getPathLength() <= 0 || path.getWaypoint(0).x != start.xCoord || path.getWaypoint(0).y != start.yCoord )
+    if( path.getPathLength() <= 0 || !path.getWaypoint(0).GetCoordinates().equals(start) )
     {
       return false;
     }
@@ -201,7 +201,7 @@ public class Utils
     {
       XYCoord newCoord = path.getWaypoint(i).GetCoordinates();
 
-      movePower -= fff.getTransitionCost(map, lastCoord, newCoord, unit, canTravelThroughEnemies);
+      movePower -= fff.getTransitionCost(map, lastCoord, newCoord, team, canTravelThroughEnemies);
       lastCoord = newCoord;
       if( movePower < 0 )
       {
@@ -209,67 +209,49 @@ public class Utils
       }
     }
 
-    return fff.canStandOn(map, lastCoord, unit, includeOccupiedSpaces);
+    return fff.canStandOn(map, lastCoord, mover, includeOccupiedSpaces);
   }
 
-  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
-  public static GamePath findShortestPath(Unit unit, XYCoord destination, GameMap map, boolean theoretical)
+  public static GamePath findShortestPath(Unit unit, XYCoord end, GameMap map)
   {
-    return findShortestPath(unit, destination.xCoord, destination.yCoord, map, theoretical);
+    return findShortestPath(unit, end, map, false);
   }
-  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
-  public static GamePath findShortestPath(Unit unit, int x, int y, GameMap map, boolean theoretical)
-  {
-    return findShortestPath(new XYCoord(unit.x, unit.y), unit, x, y, map, theoretical);
-  }
-  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
-  public static GamePath findShortestPath(Unit unit, XYCoord destination, GameMap map)
-  {
-    return findShortestPath(unit, destination.xCoord, destination.yCoord, map, false);
-  }
-  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
   public static GamePath findShortestPath(Unit unit, int x, int y, GameMap map)
   {
-    return findShortestPath(unit, x, y, map, false);
+    return findShortestPath(unit, new XYCoord(x, y), map, false);
   }
-  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
-  public static GamePath findShortestPath(XYCoord start, Unit unit, int x, int y, GameMap map)
+  public static GamePath findShortestPath(Unit unit, XYCoord end, GameMap map, boolean theoretical)
   {
-    return findShortestPath(start, unit, x, y, map, false);
+    return findShortestPath(new XYCoord(unit), unit, end, map, theoretical);
   }
-  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
   public static GamePath findShortestPath(XYCoord start, Unit unit, XYCoord destination, GameMap map)
   {
-    return findShortestPath(start, unit, destination.xCoord, destination.yCoord, map, false);
-  }
-  /** Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)} **/
-  public static GamePath findShortestPath(XYCoord start, Unit unit, XYCoord destination, GameMap map, boolean theoretical)
-  {
-    return findShortestPath(start, unit, destination.xCoord, destination.yCoord, map, theoretical);
+    return findShortestPath(start, unit, destination, map, false);
   }
   /**
-   * Alias for {@link #findShortestPath(XYCoord, Unit, int, int, GameMap, boolean) findShortestPath(XYCoord, Unit, int, int, GameMap, boolean=false)}
    * @param theoretical If true, ignores other Units and move-power limitations.
    */
-  public static GamePath findShortestPath(XYCoord start, Unit unit, int x, int y, GameMap map, boolean theoretical)
+  public static GamePath findShortestPath(XYCoord start, Unit unit, XYCoord end, GameMap map, boolean theoretical)
   {
     // findShortestPath() is given a particular endpoint already, so it assumes that it is valid to end up there.
-    return findShortestPath(start, unit, unit.getMoveFunctor(),
+    return findShortestPath(start, unit.CO.army, unit.getMoveFunctor(),
                             (theoretical)? Integer.MAX_VALUE : Math.min(unit.getMovePower(map), unit.fuel),
-                            x, y, map, theoretical);
+                            end.xCoord, end.yCoord, map, theoretical);
   }
   /**
    * Calculate and return the minimum-cost path for the FloodFillFunctor from its current location to map(x, y).
    * The Path will avoid non-allied units unless `theoretical` is true.
    * If no valid path is found, an empty Path will be returned.
    * @param start Initial location; will usually be in the output set.
-   * @param fff Determines the cost to fill from one tile to another.
-   * @param initialFillPower How much juice to give the FloodFillFunctor
+   * @param team The affiliation of the unit moving
+   * @param fff Determines the cost to move from one tile to another.
+   * @param initialFillPower How much move juice to start with
    * @param x Final X coordinate
    * @param y Final Y coordinate
    * @param map The map to search over.
+   * @param canTravelThroughEnemies Whether to allow pathing through enemies
    */
-  public static GamePath findShortestPath(XYCoord start, Unit unit, MoveType fff, int initialFillPower, int x, int y, GameMap map, boolean canTravelThroughEnemies)
+  public static GamePath findShortestPath(XYCoord start, Army team, MoveType fff, int initialFillPower, int x, int y, GameMap map, boolean canTravelThroughEnemies)
   {
     if( null == start || null == fff || null == map || !map.isLocationValid(start.xCoord, start.yCoord) )
     {
@@ -322,7 +304,7 @@ public class Utils
         break;
       }
 
-      expandSearchNode(unit, fff, map, currentNode, searchQueue, powerGrid, canTravelThroughEnemies);
+      expandSearchNode(team, fff, map, currentNode, searchQueue, powerGrid, canTravelThroughEnemies);
 
       currentNode = null;
     }
@@ -347,7 +329,7 @@ public class Utils
    * can reach more economically than previously discovered, update the cost grid and enqueue the node.
    * @param theoretical If set, don't limit range using move power, and don't worry about other Units in the way.
    */
-  private static void expandSearchNode(Unit unit, MoveType fff, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,
+  private static void expandSearchNode(Army team, MoveType fff, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,
       int[][] powerGrid, boolean canTravelThroughEnemies)
   {
     ArrayList<XYCoord> coordsToCheck = findLocationsInRange(map, currentNode.getCoordinates(), 1, 1);
@@ -358,7 +340,7 @@ public class Utils
       // then update the power grid and re-queue the next node.
       int oldPower = powerGrid[currentNode.x][currentNode.y];
       int oldNextPower = powerGrid[next.xCoord][next.yCoord];
-      final int transitionCost = fff.getTransitionCost(map, currentNode.getCoordinates(), next, unit, canTravelThroughEnemies);
+      final int transitionCost = fff.getTransitionCost(map, currentNode.getCoordinates(), next, team, canTravelThroughEnemies);
       int newNextPower = oldPower - transitionCost;
 
       if( transitionCost < MoveType.IMPASSABLE && newNextPower > oldNextPower )
@@ -653,7 +635,7 @@ public class Utils
       XYCoord from = path.getWaypoint(i-1).GetCoordinates();
       XYCoord to   = path.getWaypoint( i ).GetCoordinates();
       // If there are collisions relevant to the unit, the cost will be IMPASSABLE
-      if( movePower < fff.getTransitionCost(map, from, to, unit, canTravelThroughEnemies) )
+      if( movePower < fff.getTransitionCost(map, from, to, unit.CO.army, canTravelThroughEnemies) )
       {
         result = true;
         break;

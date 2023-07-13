@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.HashMap;
 
+import Engine.Army;
 import Engine.XYCoord;
 import Terrain.Environment;
 import Terrain.GameMap;
@@ -74,7 +75,7 @@ public class MoveType implements Serializable
     return getTransitionCost(map, from, to, null, true);
   }
   public int getTransitionCost(GameMap map, XYCoord from, XYCoord to,
-                               Unit mover, boolean canTravelThroughEnemies)
+                               Army team, boolean canTravelThroughEnemies)
   {
     // if we're past the edges of the map
     if( !map.isLocationValid(to) )
@@ -83,11 +84,13 @@ public class MoveType implements Serializable
     // note to self: extend this if we ever support moving to non-adjacent tiles
     int cost = getMoveCost(map.getEnvironment(to.xCoord, to.yCoord));
 
-    // if there is an enemy unit in that space
-    if( !canTravelThroughEnemies
-        && (map.getLocation(to).getResident() != null)
-        && mover.CO.isEnemy(map.getLocation(to).getResident().CO) )
-      cost = MoveType.IMPASSABLE;
+    if( !canTravelThroughEnemies )
+    {
+      final Unit blocker = map.getLocation(to).getResident();
+      // if there is an enemy unit in that space
+      if( blocker != null && blocker.CO.isEnemy(team) )
+        cost = MoveType.IMPASSABLE;
+    }
 
     return cost;
   }
