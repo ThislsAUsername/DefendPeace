@@ -1,7 +1,7 @@
 package Units.MoveTypes;
 
 import Terrain.Environment;
-import Units.Unit;
+import Engine.Army;
 import Engine.XYCoord;
 import Terrain.GameMap;
 
@@ -25,7 +25,7 @@ public class MoveTypeFey extends MoveType
 
   @Override
   public int getTransitionCost(GameMap map, XYCoord from, XYCoord to,
-                               Unit mover, boolean canTravelThroughEnemies)
+                               Army team, boolean canTravelThroughEnemies)
   {
     // Mandatory sanity check
     if( !map.isLocationValid(to) )
@@ -33,12 +33,11 @@ public class MoveTypeFey extends MoveType
 
     Environment endEnv = map.getEnvironment(to);
     // Fey units cannot enter enemy-controlled spaces.
-    if( null != mover && mover.model.healableHabs.contains(endEnv.terrainType)
-        && endEnv.terrainType.isCapturable()
-        && mover.CO.isEnemy(map.getLocation(to).getOwner()) )
+    if( endEnv.terrainType.isCapturable() &&
+        (null == team || team.isEnemy(map.getLocation(to).getOwner())) )
       return IMPASSABLE;
 
-    return super.getTransitionCost(map, from, to, mover, canTravelThroughEnemies);
+    return super.getTransitionCost(map, from, to, team, canTravelThroughEnemies);
   }
 
 }

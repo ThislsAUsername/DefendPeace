@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import CommandingOfficers.Commander;
+import Engine.Army;
 import Engine.GameInstance;
 import Engine.GamePath;
 import Engine.StateTrackers.StateTracker;
@@ -90,14 +91,14 @@ public class KaijuWarsKaiju
 
   private static final UnitActionFactory[] KAIJU_ACTIONS = { new KaijuActions.KaijuCrushFactory(), UnitActionFactory.DELETE };
 
-  private static final MoveType KAIJU_MOVE = new FootKaiju();
+  private static final MoveType KAIJU_MOVE         = new FootKaiju(true);
+  private static final MoveType KAIJU_MOVE_RAMPAGE = new FootKaiju(false);
 
   public static class KaijuUnitModel extends KaijuWarsUnitModel
   {
     private static final long serialVersionUID = 1L;
     public final int[] hpChunks, hpBases;
     public boolean regenOnBuildingKill  = false;
-    public boolean stopOnBuildingKill   = true;
     public boolean chargeOnBuildingKill = false;
     public boolean hasRamSkill          = false;
     public boolean hasDeepTunnelSkill   = false;
@@ -127,7 +128,6 @@ public class KaijuWarsKaiju
     {
       super.copyValues(other);
       regenOnBuildingKill   = other.regenOnBuildingKill;
-      stopOnBuildingKill    = other.stopOnBuildingKill;
       chargeOnBuildingKill  = other.chargeOnBuildingKill;
       hasRamSkill           = other.hasRamSkill;
       promotesToAtAllSkills = other.promotesToAtAllSkills;
@@ -333,7 +333,7 @@ public class KaijuWarsKaiju
     {
       super("Big Donk", ROLE, DONK_CHUNKS, DONK_HPBASES);
       regenOnBuildingKill = true;
-      stopOnBuildingKill = false;
+      baseMoveType = KAIJU_MOVE_RAMPAGE;
       addUnitModifier(new BigDonkMod());
     }
   }
@@ -759,8 +759,9 @@ public class KaijuWarsKaiju
   public static class FootKaiju extends MoveType
   {
     private static final long serialVersionUID = 1L;
+    final boolean stopOnBuildingKill;
 
-    public FootKaiju()
+    public FootKaiju(boolean stopOnBuildingKill)
     {
       super();
       moveCosts.get(Weathers.CLEAR).setAllMovementCosts(1);
@@ -772,10 +773,12 @@ public class KaijuWarsKaiju
       // 'cause smashing takes work
       setMoveCost(TerrainType.PILLAR, 2);
       setMoveCost(TerrainType.METEOR, 2);
+      this.stopOnBuildingKill = stopOnBuildingKill;
     }
     public FootKaiju(FootKaiju other)
     {
       super(other);
+      stopOnBuildingKill = other.stopOnBuildingKill;
     }
 
     @Override
@@ -786,35 +789,25 @@ public class KaijuWarsKaiju
 
     @Override
     public int getTransitionCost(GameMap map, XYCoord from, XYCoord to,
-                                 Unit unit, boolean canTravelThroughEnemies)
+                                 Army team, boolean canTravelThroughEnemies)
     {
       // if we're past the edges of the map
       if( !map.isLocationValid(to) )
         return MoveType.IMPASSABLE;
 
-      int cost = super.getTransitionCost(map, from, to, unit, canTravelThroughEnemies);
+      int cost = super.getTransitionCost(map, from, to, team, canTravelThroughEnemies);
 
       // Cannot path through: Kaiju, buildings
       final MapLocation fromLocation = map.getLocation(from);
-      boolean stopOnBuildingKill = true;
-      if( null != unit )
-      {
-        KaijuUnitModel stomperType = (KaijuUnitModel) unit.model;
-        stopOnBuildingKill = stomperType.stopOnBuildingKill;
-      }
 
       if( !canTravelThroughEnemies
           && stopOnBuildingKill
           && fromLocation.isCaptureable()
-          && null != unit
-          && unit.CO.isEnemy(fromLocation.getOwner()) )
+          && (null == team || team.isEnemy(fromLocation.getOwner())) )
         return MoveType.IMPASSABLE;
 
-      if( null == unit )
-        return cost;
-
       final Unit fromResident = fromLocation.getResident();
-      if( null != fromResident && fromResident.CO.isEnemy(unit.CO) )
+      if( null != fromResident && fromResident.CO.isEnemy(team) )
       {
         final KaijuWarsUnitModel fromResidentType = (KaijuWarsUnitModel) fromResident.model;
         if( !canTravelThroughEnemies && null != fromResidentType )
@@ -826,7 +819,7 @@ public class KaijuWarsKaiju
 
       // Prevent pathing into friendly Kaiju. That doesn't end well.
       final Unit toResident = map.getLocation(to).getResident();
-      if( null != toResident && !toResident.CO.isEnemy(unit.CO) )
+      if( null != toResident && !toResident.CO.isEnemy(team) )
       {
         final KaijuWarsUnitModel toResidentType = (KaijuWarsUnitModel) toResident.model;
         if( !canTravelThroughEnemies && null != toResidentType )
