@@ -8,7 +8,6 @@ import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatContext;
-import Engine.Combat.CombatContext.CalcType;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
 import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
@@ -21,7 +20,6 @@ import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.MapMaster;
 import UI.UIUtils;
 import Units.Unit;
-import Units.UnitContext;
 import Units.UnitModel;
 
 /*
@@ -130,16 +128,7 @@ public class Venge extends Commander
       // If we're swapping, and we can counter, and we're on the defensive, do the swap.
       if( instance.canCounter && instance.defender.mods.contains(this) )
       {
-        UnitContext minion = instance.defender;
-
-        instance.defender = instance.attacker;
-        instance.attacker = minion;
-
-        // Since we're swapping the combatants, we also need to swap the prediction polarity
-        if( instance.calcType == CalcType.PESSIMISTIC )
-          instance.calcType = CalcType.OPTIMISTIC;
-        else if( instance.calcType == CalcType.OPTIMISTIC )
-          instance.calcType = CalcType.PESSIMISTIC;
+        instance.swapCombatants();
       }
     }
   }

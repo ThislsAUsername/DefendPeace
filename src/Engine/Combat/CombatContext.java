@@ -101,6 +101,23 @@ public class CombatContext
       mod.changeCombatContext(this);
   }
 
+  /**
+   * For when you want to confuse who started the fight
+   */
+  public void swapCombatants()
+  {
+    UnitContext minion = defender;
+
+    defender = attacker;
+    attacker = minion;
+
+    // Since we're swapping the combatants, we also need to swap the prediction polarity
+    if( calcType == CalcType.PESSIMISTIC )
+      calcType = CalcType.OPTIMISTIC;
+    else if( calcType == CalcType.OPTIMISTIC )
+      calcType = CalcType.PESSIMISTIC;
+  }
+
   public BattleParams getAttack()
   {
     UnitContext aClone = new UnitContext(attacker);
