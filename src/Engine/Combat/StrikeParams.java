@@ -69,6 +69,7 @@ public class StrikeParams
   public double baseDamage;
   public double attackerHP;
   public double attackPower;
+  // These three variables are needed to simulate different games' luck implementations - 1 RN vs 2 RNs
   public int luckBase = 0; // Luck value if you roll 0
   public int luckRolled = 0; // The number we plug into the RNG for luck damage
   public int luckRolledBad = 0; // The number we plug into the RNG for negative luck damage
