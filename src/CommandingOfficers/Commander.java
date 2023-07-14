@@ -42,6 +42,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public ArrayList<Unit> units;
   public final UnitModelList unitModels;
   public Map<TerrainType, ArrayList<UnitModel>> unitProductionByTerrain = new HashMap<>();
+  public int luck = 10; // The number we normally plug into the RNG for luck damage
   public Set<XYCoord> ownedProperties;
   public Color myColor;
   public Faction faction;

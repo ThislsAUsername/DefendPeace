@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.SplittableRandom;
 
 import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
@@ -44,6 +45,10 @@ public class GameInstance implements Serializable
   public final GameScenario.GameRules rules;
   boolean isSecurityEnabled;
 
+  private transient SplittableRandom rng;
+  public final long rngSeed;
+  private long rngNumbersGenerated = 0; // This isn't big enough to hold the period of our RNG, but one can hope games won't have enough combat to overflow this
+
   private int currentTurn;
   private boolean currentTurnEnded = true; // Set to false when saving a game mid-turn.
 
@@ -60,6 +65,9 @@ public class GameInstance implements Serializable
     gameScenario = scenario;
     rules = scenario.rules;
     isSecurityEnabled = useSecurity;
+
+    rngSeed = new SplittableRandom().nextLong();
+    rng = new SplittableRandom(rngSeed);
 
     currentTurn = 1;
 
@@ -283,7 +291,18 @@ public class GameInstance implements Serializable
       army.deInitForGame(this);
     }
   }
-  
+
+  /**
+   * Gives you a random number between 0 (inclusive) and the input (exclusive)
+   * <p>Call this in GameAction.getEvents()/event constructors and nowhere else
+   */
+  public int getRN(int upperBound)
+  {
+    upperBound = Math.abs(upperBound);
+    ++rngNumbersGenerated;
+    return rng.nextInt(upperBound);
+  }
+
   /**
    * Just concatenates the names of all the COs involved
    * TODO: get fancy and actually split the teams out
@@ -366,6 +385,12 @@ public class GameInstance implements Serializable
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException
   {
     stream.defaultReadObject();
+
+    rng = new SplittableRandom(rngSeed);
+    for( int i = 0; i < rngNumbersGenerated; ++i )
+    {
+      rng.nextInt();
+    }
 
     // restore any serializable listeners
     eventListeners = (Set<GameEventListener>) stream.readObject();

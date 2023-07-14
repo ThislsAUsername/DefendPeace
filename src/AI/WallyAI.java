@@ -8,6 +8,7 @@ import CommandingOfficers.CommanderAbility;
 import Engine.*;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
+import Engine.Combat.CombatContext.CalcType;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.*;
@@ -66,7 +67,9 @@ public class WallyAI extends ModularAI
   private static final double TERRAIN_FUNDS_WEIGHT = 2.5; // Multiplier for per-city income for adding value to units threatening to cap
   private static final double TERRAIN_INDUSTRY_WEIGHT = 20000; // Funds amount added to units threatening to cap an industry
   private static final double TERRAIN_HQ_WEIGHT = 42000; //                  "                                      HQ
-  
+
+  private static final CalcType CALC = CalcType.PESSIMISTIC;
+
   private Map<UnitModel, Map<XYCoord, Double>> threatMap;
   private ArrayList<Unit> allThreats;
   private HashMap<UnitModel, Double> unitEffectiveMove = null; // How well the unit can move, on average, on this map
@@ -197,7 +200,7 @@ public class WallyAI extends ModularAI
             MapLocation loc = gameMap.getLocation(action.getTargetLocation());
             Unit target = loc.getResident();
             if( null == target ) continue; // Ignore terrain
-            double damage = valueUnit(target, loc, false) * Math.min(target.getHP(), CombatEngine.simulateBattleResults(unit, target, gameMap, movePath).defender.getPreciseHPDamage());
+            double damage = valueUnit(target, loc, false) * Math.min(target.getHP(), CombatEngine.simulateBattleResults(unit, target, gameMap, movePath, CALC).defender.getPreciseHPDamage());
             if( damage > bestDamage )
             {
               bestDamage = damage;
@@ -312,7 +315,7 @@ public class WallyAI extends ModularAI
         if( unit.isTurnOver || !gameMap.isLocationEmpty(unit, xyc) )
           continue;
 
-        damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc).defender.getPreciseHPDamage();
+        damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CALC).defender.getPreciseHPDamage();
         ai.log(String.format("    %s brings the damage total to %s", unit.toStringWithLocation(), damageSum));
         return new BattleLifecycle.BattleAction(gameMap, unit, Utils.findShortestPath(unit, xyc, gameMap), target.x, target.y);
       }
@@ -440,7 +443,7 @@ public class WallyAI extends ModularAI
               if( null == target )
                 continue;
               BattleSummary results =
-                  CombatEngine.simulateBattleResults(unit, target, gameMap, movePath);
+                  CombatEngine.simulateBattleResults(unit, target, gameMap, movePath, CALC);
               double loss   = Math.min(unit  .getHP(), (int)results.attacker.getPreciseHPDamage());
               double damage = Math.min(target.getHP(), (int)results.defender.getPreciseHPDamage());
               

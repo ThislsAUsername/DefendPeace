@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import Engine.GamePath;
 import Engine.XYCoord;
+import Engine.Combat.CombatContext.CalcType;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.UnitActionLifecycles.BattleLifecycle.BattleEvent;
 import Terrain.GameMap;
@@ -24,28 +25,31 @@ public class CombatEngine
    */
   public static BattleSummary calculateBattleResults( UnitContext attacker, UnitContext defender, MapMaster map )
   {
-    return calculateBattleResults(attacker, defender, map, false);
+    CombatContext context = new CombatContext(map.game, map, attacker, defender, CalcType.COMBAT);
+    return calculateBattleResults(context, map);
   }
 
   /**
    * Assuming Commanders get weird, this allows for you to check the results of combat without perfect map info.
    * This also provides un-capped damage estimates, so perfect HP info isn't revealed by the map.
    */
-  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY )
+  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY, CalcType calcType )
   {
-    return simulateBattleResults(attacker, defender, map, new XYCoord(attackerX, attackerY));
+    return simulateBattleResults(attacker, defender, map, new XYCoord(attackerX, attackerY), calcType);
   }
-  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, XYCoord moveCoord )
+  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, XYCoord moveCoord, CalcType calcType )
   {
     UnitContext attackerContext = new UnitContext(map, attacker, null, null, moveCoord);
     UnitContext defenderContext = new UnitContext(map, defender, null, null, new XYCoord(defender.x, defender.y));
-    return calculateBattleResults(attackerContext, defenderContext, map, true);
+    CombatContext context = new CombatContext(null, map, attackerContext, defenderContext, calcType);
+    return calculateBattleResults(context, map);
   }
-  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, GamePath path )
+  public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, GamePath path, CalcType calcType )
   {
     UnitContext attackerContext = new UnitContext(map, attacker, null, path, path.getEndCoord());
     UnitContext defenderContext = new UnitContext(map, defender, null, null, new XYCoord(defender.x, defender.y));
-    return calculateBattleResults(attackerContext, defenderContext, map, true);
+    CombatContext context = new CombatContext(null, map, attackerContext, defenderContext, calcType);
+    return calculateBattleResults(context, map);
   }
 
   public static StrikeParams calculateTerrainDamage( Unit attacker, GamePath path, MapLocation target, GameMap map )
@@ -63,20 +67,23 @@ public class CombatEngine
    * Calculate and return the results of a battle.
    * <p>This will not actually apply the damage taken; that is done later in {@link BattleEvent}.
    * <p>Requires the coord field be defined for both attacker and defender.
-   * @param isSim Determines whether to cap damage at the HP of the victim in question
    * @return A BattleSummary object containing all relevant details from this combat instance.
    */
-  public static BattleSummary calculateBattleResults(UnitContext attacker, UnitContext defender,
-                                                     GameMap map, boolean isSim)
+  public static BattleSummary calculateBattleResults(CombatContext inputContext, GameMap map)
   {
-    int attackerX = attacker.coord.xCoord;
-    int attackerY = attacker.coord.yCoord;
-    int defenderX = defender.coord.xCoord;
-    int defenderY = defender.coord.yCoord;
+    UnitContext attacker = inputContext.attacker;
+    UnitContext defender = inputContext.defender;
 
-    int battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
+    // Build a new context before applying modifiers, so we keep true outside knowledge
+    CombatContext context = new CombatContext(inputContext);
+    context.applyModifiers();
+    boolean isSim = context.calcType.isSim();
 
-    CombatContext context = CombatContext.build(map, attacker, defender, battleRange);
+    if (isSim) // When simulating, round up unit HP to avoid leaking precise health info
+    {
+      context.attacker.alterHP(0);
+      context.defender.alterHP(0);
+    }
 
     // Provides a simple way to correlate start state and end state of each combatant.
     // Uses a map to make it easy to pass information coherently between this function's local context
@@ -125,10 +132,11 @@ public class CombatEngine
     attackerContext.chooseWeapon(defender.model, battleRange, attackerMoved);
     if( null == attackerContext.weapon )
       return 0;
+    CombatContext context = new CombatContext(map.game, map, attackerContext, new UnitContext(map, defender), CalcType.PESSIMISTIC);
     return StrikeParams.buildBattleParams(
         attackerContext,
-        new UnitContext(map, defender),
-        map, battleRange,
+        context.defender,
+        context,
         false).calculateDamage();
   }
 }

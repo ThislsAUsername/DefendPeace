@@ -19,11 +19,25 @@ public class InputOptionsController implements IController
       return super.toString().replace("_", " ");
     }
   }
+  /**
+   *  Compare with {@link CombatContext.CalcType}
+   */
+  public static enum InputCalcType
+  {
+    NO_LUCK, PESSIMISTIC, OPTIMISTIC;
+    @Override
+    public String toString()
+    {
+      return super.toString().replace("_", " ");
+    }
+  };
 
   public static GameOptionBool seekBuildingsLastOption = new GameOptionBool("Seek Units First", true);
   public static GameOption<HideAbilityPreviews> previewFogPowersOption
                            = new GameOption<HideAbilityPreviews>("Hide Ability Previews", HideAbilityPreviews.values(), 2);
-  public static GameOption<?>[] allOptions = { seekBuildingsLastOption, previewFogPowersOption };
+  public static GameOption<InputCalcType> damagePreviewTypeOption
+                           = new GameOption<InputCalcType>("Damage Preview", InputCalcType.values(), 1);
+  public static GameOption<?>[] allOptions = { seekBuildingsLastOption, previewFogPowersOption, damagePreviewTypeOption };
   public static OptionSelector actionCommandSelector = new OptionSelector( allOptions.length );
 
   static

@@ -8,8 +8,6 @@ import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
 
-import Engine.UuidGenerator;
-
 public class PasswordManager
 {
   private static final String PASSFILE_NAME = "res/passfile";
