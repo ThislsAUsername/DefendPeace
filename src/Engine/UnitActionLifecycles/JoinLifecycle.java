@@ -113,7 +113,7 @@ public abstract class JoinLifecycle
       if( isValid )
       {
         // Move to the recipient, if we don't get blocked.
-        if( Utils.enqueueMoveEvent(gameMap, donor, movePath, unitJoinEvents) )
+        if( Utils.enqueueBoardEvent(gameMap, donor, movePath, unitJoinEvents) )
         {
           // Combine forces.
           unitJoinEvents.add(new JoinEvent(donor, recipient));

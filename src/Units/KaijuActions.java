@@ -127,6 +127,7 @@ public class KaijuActions
         // Tracks the Kaiju's predicted state as it progresses through the crush events
         UnitContext kaijuState = new UnitContext(gameMap, actor);
         final int startingMP = kaijuState.calculateMovePower();
+        kaijuState.calculateMoveType(); // cache for later
 
         // movePath should be updated by the above, so we should be good to go
         for( PathNode node : movePath.getWaypoints() )
@@ -245,8 +246,11 @@ public class KaijuActions
       }
 
       // Add property damage and movement if I can reach
-      final int distance = kaijuState.coord.getDistance(destCoord);
-      if( kaijuState.movePower >= distance )
+      int moveCost = 0;
+      if( 0 < kaijuState.coord.getDistance(destCoord) )
+        moveCost = kaijuState.moveType.getMoveCost(location.getEnvironment());
+
+      if( kaijuState.movePower >= moveCost )
       {
         if( isCrushable(location) )
         {
@@ -276,7 +280,7 @@ public class KaijuActions
           }
         }
 
-        kaijuState.movePower -= distance;
+        kaijuState.movePower -= moveCost;
         GamePath oneTilePath = new GamePath();
         oneTilePath.addWaypoint(kaijuState.coord);
         oneTilePath.addWaypoint(destCoord);

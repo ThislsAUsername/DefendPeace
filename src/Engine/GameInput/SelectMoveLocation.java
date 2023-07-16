@@ -30,14 +30,14 @@ class SelectMoveLocation extends GameInputState<XYCoord>
                                        myStateData.gameMap, canEndOnOccupied);
     if (null != myStateData.unitLauncher)
       moveLocations.remove(myStateData.unitCoord); // Prevent returning to the spot of the launch
-    buildMovePath(myStateData.unitCoord.xCoord, myStateData.unitCoord.yCoord);
+    buildMovePath(myStateData.unitCoord);
     return new OptionSet(InputType.PATH_SELECT, moveLocations);
   }
 
   @Override
-  public void consider(XYCoord coord)
+  public void consider(XYCoord end)
   {
-    buildMovePath(coord.xCoord, coord.yCoord);
+    buildMovePath(end);
   }
   @Override
   public GameInputState<?> select(XYCoord coord)
@@ -51,7 +51,7 @@ class SelectMoveLocation extends GameInputState<XYCoord>
     else if( (null != myStateData.path) && (myStateData.path.getPathLength() > 0)
         && myOptions.getCoordinateOptions().contains(myStateData.path.getEndCoord())
         && myStateData.path.getEndCoord().equals(coord)
-        && Utils.isPathValid(myStateData.unitCoord, myStateData.unitActor, myStateData.path, myStateData.gameMap, canEndOnOccupied) )
+        && Utils.isPathValid(myStateData.unitActor, myStateData.path, myStateData.gameMap, canEndOnOccupied) )
     {
       // Construct the next state instance.
       next = new SelectUnitAction(myStateData);
@@ -87,7 +87,7 @@ class SelectMoveLocation extends GameInputState<XYCoord>
    * Constructs a unit's movement path, one tile at a time, as the user moves the cursor around the map.
    * If the current movement path is impossible, it will attempt to regenerate a path from scratch.
    */
-  private void buildMovePath(int x, int y)
+  private void buildMovePath(XYCoord end)
   {
     if( null == myStateData.path )
     {
@@ -97,22 +97,22 @@ class SelectMoveLocation extends GameInputState<XYCoord>
     // If the new point already exists on the path, cut the extraneous points out.
     for( int i = 0; i < myStateData.path.getPathLength(); ++i )
     {
-      if( myStateData.path.getWaypoint(i).x == x && myStateData.path.getWaypoint(i).y == y )
+      if( myStateData.path.getWaypoint(i).GetCoordinates().equals(end) )
       {
         myStateData.path.snip(i);
         break;
       }
     }
 
-    myStateData.path.addWaypoint(x, y);
+    myStateData.path.addWaypoint(end);
 
     Unit actor = myStateData.unitActor;
     XYCoord coord = myStateData.unitCoord;
     boolean canEndOnOccupied = true;
-    if( !Utils.isPathValid(coord, actor, myStateData.path, myStateData.gameMap, canEndOnOccupied) )
+    if( !Utils.isPathValid(actor, myStateData.path, myStateData.gameMap, canEndOnOccupied) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      myStateData.path = Utils.findShortestPath(coord, actor, x, y, myStateData.gameMap);
+      myStateData.path = Utils.findShortestPath(coord, actor, end, myStateData.gameMap);
     }
   }
 }

@@ -393,10 +393,10 @@ public class CapPhaseAnalyzer implements Serializable
   public static GamePath findFeasiblePath(final Unit unit, final XYCoord destination, final GameMap map)
   {
     final boolean theoretical = true;
-    return Utils.findShortestPath(new XYCoord(unit), unit.getMoveFunctor(true, theoretical),
+    return Utils.findShortestPath(new XYCoord(unit), unit.CO.army, unit.getMoveFunctor(),
                                   unit.getMovePower(map) * (LOOKAHEAD_TURNS),
                                   destination.xCoord, destination.yCoord,
-                                  map);
+                                  map, theoretical);
   }
 
   /**

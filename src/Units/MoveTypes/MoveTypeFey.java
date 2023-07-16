@@ -1,10 +1,8 @@
 package Units.MoveTypes;
 
 import Terrain.Environment;
-import Units.Unit;
-import Engine.FloodFillFunctor;
+import Engine.Army;
 import Engine.XYCoord;
-import Engine.FloodFillFunctor.BasicMoveFillFunctor;
 import Terrain.GameMap;
 
 /**
@@ -26,29 +24,20 @@ public class MoveTypeFey extends MoveType
   }
 
   @Override
-  public FloodFillFunctor getUnitMoveFunctor(Unit mover, boolean includeOccupied, boolean canTravelThroughEnemies)
+  public int getTransitionCost(GameMap map, XYCoord from, XYCoord to,
+                               Army team, boolean canTravelThroughEnemies)
   {
-    return new FeyMoveFillFunctor(mover, this, includeOccupied, canTravelThroughEnemies);
+    // Mandatory sanity check
+    if( !map.isLocationValid(to) )
+      return IMPASSABLE;
+
+    Environment endEnv = map.getEnvironment(to);
+    // Fey units cannot enter enemy-controlled spaces.
+    if( endEnv.terrainType.isCapturable() &&
+        (null == team || team.isEnemy(map.getLocation(to).getOwner())) )
+      return IMPASSABLE;
+
+    return super.getTransitionCost(map, from, to, team, canTravelThroughEnemies);
   }
 
-  public static class FeyMoveFillFunctor extends BasicMoveFillFunctor
-  {
-    public FeyMoveFillFunctor(Unit mover, MoveType propulsion, boolean includeOccupied, boolean canTravelThroughEnemies)
-    {
-      super(mover, propulsion, includeOccupied, canTravelThroughEnemies);
-    }
-
-    @Override
-    public int findMoveCost(XYCoord from, XYCoord to, GameMap map)
-    {
-      Environment endEnv = map.getEnvironment(to);
-      // Fey units cannot enter enemy-controlled spaces.
-      if (null != unit && unit.model.healableHabs.contains(endEnv.terrainType)
-          && endEnv.terrainType.isCapturable()
-          && unit.CO.isEnemy(map.getLocation(to).getOwner()))
-        return IMPASSABLE;
-
-      return propulsion.getMoveCost(endEnv);
-    }
-  } // ~FeyMoveFillFunctor
 }
