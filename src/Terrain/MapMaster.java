@@ -271,36 +271,31 @@ public class MapMaster extends GameMap
       return;
     }
 
+    final MapLocation newLoc = getLocation(x, y);
     if( !isLocationEmpty(unit, x, y) )
     {
       if( force ) // Force is set; the user *must* know what he's doing.
       {
-        removeUnit(getLocation(x, y).getResident());
-      }
-      else
-      {
-        System.out.println("ERROR! Attempting to move unit to an occupied MapLocation!");
-        return;
+        removeUnit(newLoc.getResident());
       }
     }
 
     // Update the map
-    MapLocation priorLoc = getLocation(unit.x, unit.y);
-    if( null != priorLoc && priorLoc.getResident() == unit )
+    removeUnit(unit);
+
+    // If we're joining/loading, we don't want to mess with the destination unit
+    if( null == newLoc.getResident() )
     {
-      priorLoc.setResident(null);
+      newLoc.setResident(unit);
+      unit.x = x;
+      unit.y = y;
     }
-    getLocation(x, y).setResident(unit);
 
     // Reset capture progress, since we moved.
     if( unit.getCaptureProgress() > 0 )
     {
       unit.stopCapturing();
     }
-
-    // Update the Unit location.
-    unit.x = x;
-    unit.y = y;
   }
 
   /** Removes the Unit from the map, if the map agrees with the Unit on its location. */
@@ -310,7 +305,7 @@ public class MapMaster extends GameMap
     {
       if( getLocation(u.x, u.y).getResident() != u )
       {
-        System.out.println("WARNING! Trying to remove a Unit that isn't where he claims to be.");
+        // Assume it's already gone
       }
       else
       {

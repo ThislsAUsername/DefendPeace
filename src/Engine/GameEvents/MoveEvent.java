@@ -45,8 +45,7 @@ public class MoveEvent implements GameEvent
       GamePath.PathNode endpoint = unitPath.getEnd();
       int fuelBurn = unitPath.getFuelCost(unit, gameMap);
 
-      if( null == gameMap.getLocation(endpoint.x, endpoint.y).getResident() ) // Just avoid triggering a warning.
-        gameMap.moveUnit(unit, endpoint.x, endpoint.y);
+      gameMap.moveUnit(unit, endpoint.x, endpoint.y);
       unit.isTurnOver = true;
 
       unit.fuel = Math.max(0, unit.fuel - fuelBurn);

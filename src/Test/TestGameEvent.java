@@ -244,17 +244,18 @@ public class TestGameEvent extends TestCase
     GameEventQueue events = new GameEventQueue();
     // Validation is now performed primarily in the enqueue function since there's too much complexity to handle it nicely in the constructor
     Utils.enqueueMoveEvent(testMap, mech, path, events);
-    events.getFirst().performEvent(testMap); // This should not execute. Water is bad for grunts.
+    events.pop().performEvent(testMap); // This should not execute. Water is bad for grunts.
     testPassed &= validate(7 == mech.x && 6 == mech.y, "    Mech does not think he is at (7, 6), but should.");
     testPassed &= validate(testMap.getLocation(7, 6).getResident() == mech, "    Mech is not still at (7, 6), but should be.");
     testPassed &= validate(testMap.getLocation(7, 0).getResident() == null, "    MapLocation (7, 0) should still be empty.");
 
     path.addWaypoint(7, 5); // New endpoint to move apc over infantry.
-    new MoveEvent(apc, path).performEvent(testMap); // This should not execute. Treads are bad for grunts.
+    Utils.enqueueMoveEvent(testMap, apc, path, events);
+    events.pop().performEvent(testMap); // APC shouldn't go the full movement. Treads are bad for grunts.
     testPassed &= validate(7 == inf.x && 5 == inf.y, "    Infantry should still think he is at (7, 5).");
     testPassed &= validate(testMap.getLocation(7, 5).getResident() == inf, "    Infantry should still be at (7, 5).");
-    testPassed &= validate(3 == apc.x && 2 == apc.y, "    APC should still think it is at (3, 2).");
-    testPassed &= validate(testMap.getLocation(3, 2).getResident() == apc, "    APC should still be at (3, 2)");
+    testPassed &= validate(3 != apc.x && 2 != apc.y, "    APC should have moved.");
+    testPassed &= validate(testMap.getLocation(3, 2).getResident() == null, "    APC should not be at (3, 2)");
 
     // Clean up.
     testMap.removeUnit(inf);
