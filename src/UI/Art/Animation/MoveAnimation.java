@@ -48,9 +48,9 @@ public class MoveAnimation extends BaseUnitActionAnimation
   {
     final long animTime = System.currentTimeMillis() - startTime;
 
-    double tilesTraveled = 0;
     double timeLeft = animTime;
     int currentTile = 0;
+    double tileDiff = 0;
     while (0 < timeLeft && currentTile < pathCosts.length)
     {
       double thisTime = pathCosts[currentTile];
@@ -60,20 +60,19 @@ public class MoveAnimation extends BaseUnitActionAnimation
         ++currentTile;
         continue;
       }
-      double fractionalMove = timeLeft / thisTime;
-      tilesTraveled = currentTile + fractionalMove;
+      tileDiff = timeLeft / thisTime;
+      timeLeft = -1;
       break;
     }
 
-    final int prevTileIndex = Math.min((int) Math.floor(tilesTraveled), path.getPathLength() - 1);
-    final int nextTileIndex = Math.min((int) Math.ceil (tilesTraveled), path.getPathLength() - 1);
+    final int prevTileIndex = Math.min(currentTile  , path.getPathLength() - 1);
+    final int nextTileIndex = Math.min(currentTile+1, path.getPathLength() - 1);
 
     final XYCoord coord1 = path.getWaypoint( prevTileIndex ).GetCoordinates();
     final XYCoord coord2 = path.getWaypoint( nextTileIndex ).GetCoordinates();
 
     final double diffX = coord2.xCoord - coord1.xCoord;
     final double diffY = coord2.yCoord - coord1.yCoord;
-    final double tileDiff = tilesTraveled - prevTileIndex;
     final double currX = coord1.xCoord + tileDiff * diffX;
     final double currY = coord1.yCoord + tileDiff * diffY;
 
