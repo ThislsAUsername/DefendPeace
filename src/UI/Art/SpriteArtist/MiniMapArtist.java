@@ -36,7 +36,7 @@ public class MiniMapArtist
    * @param teamColors A set of colors to be used for drawing each team. If insufficient colors
    *        are provided, black will be used for any remaining ones. If null is passed in,
    *        the default team-color ordering will be used.
-   * @param factions Ditto, but factions and the default
+   * @param factions Ditto, but factions and SpriteLibrary.DEFAULT_FACTION (Thorn)
    */
   public static BufferedImage getMapImage(MapInfo mapInfo, Faction[] factions, Color[] teamColors, int maxWidth, int maxHeight)
   {
