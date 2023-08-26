@@ -196,7 +196,7 @@ public abstract class CaptureLifecycle
   public boolean willCapture()
   {
     int finalCapAmt = priorCaptureAmount + captureAmount;
-    return finalCapAmt >= 20;
+    return finalCapAmt >= location.getEnvironment().terrainType.getCaptureThreshold();
   }
 
   /**
