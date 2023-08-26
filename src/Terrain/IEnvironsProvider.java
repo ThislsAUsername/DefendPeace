@@ -14,5 +14,5 @@ public interface IEnvironsProvider
   public Environment getEnvironment(XYCoord coord);
 
   /** Returns the Environment of the specified tile, or null if that location does not exist. */
-  public Environment getEnvironment(int w, int h);
+  public Environment getEnvironment(int x, int y);
 }

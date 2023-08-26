@@ -10,6 +10,7 @@ import Terrain.MapInfo;
 import UI.UIUtils;
 import UI.UIUtils.COSpriteSpec;
 import UI.UIUtils.Faction;
+import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 
 public class MiniMapArtist
 {
@@ -25,7 +26,7 @@ public class MiniMapArtist
    */
   public static BufferedImage getMapImage(MapInfo mapInfo, int maxWidth, int maxHeight)
   {
-    return getMapImage(mapInfo, UIUtils.getCOColors(), maxWidth, maxHeight);
+    return getMapImage(mapInfo, UIUtils.getFactions(), UIUtils.getCOColors(), maxWidth, maxHeight);
   }
 
   /**
@@ -35,13 +36,14 @@ public class MiniMapArtist
    * @param teamColors A set of colors to be used for drawing each team. If insufficient colors
    *        are provided, black will be used for any remaining ones. If null is passed in,
    *        the default team-color ordering will be used.
+   * @param factions Ditto, but factions and SpriteLibrary.DEFAULT_FACTION (Thorn)
    */
-  public static BufferedImage getMapImage(MapInfo mapInfo, Color[] teamColors, int maxWidth, int maxHeight)
+  public static BufferedImage getMapImage(MapInfo mapInfo, Faction[] factions, Color[] teamColors, int maxWidth, int maxHeight)
   {
     if( mapInfo != lastMapDrawn || palettesDiffer(teamColors) )
     {
       // If we don't already have an image, generate and store it for later.
-      lastFullMapImage = generateFullMapImage(mapInfo, teamColors);
+      lastFullMapImage = generateFullMapImage(mapInfo, factions, teamColors);
       lastMapDrawn = mapInfo;
       lastTeamColors = teamColors;
     }
@@ -72,7 +74,7 @@ public class MiniMapArtist
   /**
    * Generates a BufferedImage containing the full-scale map.
    */
-  private static BufferedImage generateFullMapImage(MapInfo mapInfo, Color[] teamColors)
+  private static BufferedImage generateFullMapImage(MapInfo mapInfo, Faction[] factions, Color[] teamColors)
   {
     // If we don't have a palette yet, just get the default one from UIUtis.
     if( null == teamColors ) teamColors = UIUtils.getCOColors();
@@ -89,29 +91,28 @@ public class MiniMapArtist
       {
         XYCoord coord = new XYCoord(x, y);
         COSpriteSpec spec = null;
-        // Figure out team color, if any
+
+        boolean anyUnits = (mapInfo.mapUnits.size() > 0);
+        String unitName = null;
+        COSpriteSpec unitSpec = null;
+        boolean unitFlip = false, unitBuff = false;
+
         for( int co = 0; co < mapInfo.COProperties.length; ++co )
         {
+          // Figure out unit details, if any
+          if( anyUnits && mapInfo.mapUnits.get(co).containsKey(coord) )
+          {
+            unitName = mapInfo.mapUnits.get(co).get(coord);
+            unitSpec = getNthSpriteSpec(factions, teamColors, co);
+            unitFlip = (co % 2) == 1;
+          }
+
+          // Figure out team color, if any
           for( int i = 0; i < mapInfo.COProperties[co].length; ++i )
           {
             if( coord.equals(mapInfo.COProperties[co][i]) )
             {
-              Color coColor;
-
-              // Log a warning if SpriteLibrary doesn't have enough colors to support this map.
-              if( co >= teamColors.length )
-              {
-                System.out.println("WARNING! '" + mapInfo.mapName + "' has more start locations than there are team colors!");
-
-                // But soldier onwards anyway.
-                coColor = Color.BLACK;
-              }
-              else
-              {
-                coColor = teamColors[co];
-              }
-
-              spec = new COSpriteSpec(new Faction(), coColor);
+              spec = getNthSpriteSpec(factions, teamColors, co);
               break;
             }
           }
@@ -123,10 +124,36 @@ public class MiniMapArtist
         TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(mapInfo.terrain[x][y], spec);
         spriteSet.drawTerrain(g, mapInfo, x, y, false);
         spriteSet.drawTerrainObject(g, mapInfo, x, y, false);
+
+        if( null != unitName )
+        {
+          int tileSize = SpriteLibrary.baseSpriteSize;
+          UnitSpriteSet unitSpriteSet = SpriteLibrary.getMapUnitSpriteSet(unitName, unitSpec.faction, unitSpec.color);
+          unitSpriteSet.drawUnit(g, AnimState.IDLE, 0,
+                                 x*tileSize, y*tileSize,
+                                 unitFlip  , unitBuff
+                                 );
+        }
       }
     }
 
     return image;
+  }
+
+  private static COSpriteSpec getNthSpriteSpec(Faction[] factions, Color[] teamColors, int co)
+  {
+    COSpriteSpec spec;
+    Color coColor = Color.BLACK;
+    Faction faction = new Faction();
+
+    if( co < factions.length )
+      faction = factions[co];
+
+    if( co < teamColors.length )
+      coColor = teamColors[co];
+
+    spec = new COSpriteSpec(faction, coColor);
+    return spec;
   }
 
   private static boolean palettesDiffer(Color[] newColors)

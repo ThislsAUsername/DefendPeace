@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import Engine.IController;
@@ -13,6 +14,7 @@ import UI.PlayerSetupInfo;
 import UI.PlayerSetupTeamController;
 import UI.SlidingValue;
 import UI.UIUtils;
+import UI.UIUtils.Faction;
 
 public class PlayerSetupTeamArtist
 {
@@ -92,12 +94,17 @@ public class PlayerSetupTeamArtist
     int maxMiniMapWidth = myWidth - playerZoneWidth - 4; // Subtract 4 so we have room to draw a frame.
     int maxMiniMapHeight = myHeight - 4;
 
+    Faction[] teamFactions = new Faction[mapInfo.getNumCos()];
+    for( int i = 0; i < mapInfo.getNumCos(); ++i )
+    {
+      teamFactions[i] = control.getPlayerInfo(i).getCurrentFaction();
+    }
     Color[] teamColors = new Color[mapInfo.getNumCos()];
     for( int i = 0; i < mapInfo.getNumCos(); ++i )
     {
       teamColors[i] = control.getPlayerInfo(i).getCurrentColor();
     }
-    BufferedImage miniMap = MiniMapArtist.getMapImage( mapInfo, teamColors, drawScale*maxMiniMapWidth, drawScale*maxMiniMapHeight );
+    BufferedImage miniMap = MiniMapArtist.getMapImage( mapInfo, teamFactions, teamColors, drawScale*maxMiniMapWidth, drawScale*maxMiniMapHeight );
 
     int mmWScale = drawScale*maxMiniMapWidth / miniMap.getWidth();
     int mmHScale = drawScale*maxMiniMapHeight / miniMap.getHeight();
@@ -115,7 +122,7 @@ public class PlayerSetupTeamArtist
 
     // Draw the mini map.
     g.drawImage(miniMap, mapLeft, mapTop, mapWidth, mapHeight, null);
-    drawPlayerPropertyHighlights(g, mapLeft, mapTop, mapInfo,
+    drawPlayerStuffHighlights(g, mapLeft, mapTop, mapInfo,
                                  mmScale * (double) (miniMap.getWidth()) / mapInfo.getWidth(),
                                  highlightedPlayer, (int) (Math.abs(target - player0YCenter.get()) / 4));
 
@@ -197,10 +204,15 @@ public class PlayerSetupTeamArtist
    * Draws little white boxes around all the currently-highlighted player's properties.
    * @param distance - defines how far the boxes should be from the property edge (serves to highlight the new properties when switching between players)
    */
-  private static void drawPlayerPropertyHighlights(Graphics g, int baseX, int baseY, MapInfo mapInfo, double scale, int faction, int distance)
+  private static void drawPlayerStuffHighlights(Graphics g, int baseX, int baseY, MapInfo mapInfo, double scale, int faction, int distance)
   {
     g.setColor(Color.WHITE);
-    XYCoord[] ownedCoords = mapInfo.COProperties[faction];
+    ArrayList<XYCoord> ownedCoords = new ArrayList<>();
+
+    for( XYCoord coord : mapInfo.COProperties[faction] )
+      ownedCoords.add(coord);
+    ownedCoords.addAll(mapInfo.mapUnits.get(faction).keySet());
+
     for( XYCoord coord : ownedCoords )
     {
       int x = (int)(baseX + coord.xCoord * scale - distance);

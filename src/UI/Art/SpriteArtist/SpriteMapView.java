@@ -609,6 +609,10 @@ public class SpriteMapView extends MapView
   {
     return u.CO.faction.flip;
   }
+  public static boolean shouldDrawBuff(Unit u)
+  {
+    return !u.CO.army.getAbilityText().isEmpty();
+  }
 
   private void drawHUD(Graphics g, boolean includeTileDetails)
   {

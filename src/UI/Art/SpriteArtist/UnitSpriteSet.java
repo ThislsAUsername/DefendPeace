@@ -176,15 +176,13 @@ public class UnitSpriteSet
 
   AlphaComposite buffComposite = null;
   long lastCompositeCreationTime = 0;
-  public void drawUnit(Graphics g, Unit u, AnimState state, int imageIndex, int drawX, int drawY)
+  public void drawUnit(Graphics g, AnimState state, int imageIndex, int drawX, int drawY, boolean flipImage, boolean buffOn)
   {
     Graphics2D g2d = (Graphics2D)g;
     Composite oldComposite = g2d.getComposite();
 
-    boolean flipImage = SpriteMapView.shouldFlip(u);
-
     // Figure out if we need to draw a buff overlay. If so, get some things together.
-    boolean drawBuff = AnimState.IDLE == state && !u.CO.army.getAbilityText().isEmpty();
+    boolean drawBuff = AnimState.IDLE == state && buffOn;
     float buffOpacity = 0;
     if( drawBuff )
     {

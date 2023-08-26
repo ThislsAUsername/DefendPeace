@@ -43,7 +43,8 @@ public class UnitArtist
     AnimState state = (tired) ? AnimState.TIRED : AnimState.IDLE;
 
     // Draw the unit at the specified location.
-    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnit(g, unit, state,
-    animIndex, drawX, drawY);
+    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnit(g, state,
+        animIndex, drawX, drawY,
+        SpriteMapView.shouldFlip(unit), SpriteMapView.shouldDrawBuff(unit) );
   }
 }
