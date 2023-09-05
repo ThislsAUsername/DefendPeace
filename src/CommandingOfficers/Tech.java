@@ -194,10 +194,15 @@ public class Tech extends Commander
       if( unitsOverCharged.containsKey(myCommander) )
       {
         // End Overcharge. Any units who still have > MAXIMUM_HP get reset to max.
+        final int maxPercent = UnitModel.MAXIMUM_HP*10;
         for( Unit u : unitsOverCharged.get(myCommander) )
         {
-          if( u.getPreciseHP() > UnitModel.MAXIMUM_HP )
-            u.alterHP(10);
+          final int preciseHP = (int) (u.getPreciseHP() * 10);
+          if( preciseHP > maxPercent )
+          {
+            int deltaPercent = Math.min(preciseHP - maxPercent, healAmount * 10);
+            u.alterHealthPercent(-1 * deltaPercent);
+          }
         }
         unitsOverCharged.remove(myCommander);
       }
