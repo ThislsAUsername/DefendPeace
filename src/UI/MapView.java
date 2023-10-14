@@ -11,7 +11,7 @@ import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.ArmyDefeatEvent;
-import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.GameEvent;
 import Terrain.MapPerspective;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
@@ -34,10 +34,8 @@ public abstract class MapView implements IView
     return mapController.getCurrentGameMenu();
   }
 
-  /**
-   * Adds the new events to the queue so they can be animated.
-   */
-  public abstract void animate( GameEventQueue newEvents );
+  public abstract boolean shouldAnimate( GameEvent toAnimate );
+  public abstract void animate( GameEvent toAnimate );
 
   public void cancelAnimation()
   {

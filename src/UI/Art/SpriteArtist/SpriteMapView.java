@@ -6,8 +6,6 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Queue;
-
 import AI.AICombatUtils;
 import Engine.Army;
 import Engine.Driver;
@@ -20,7 +18,6 @@ import Engine.Combat.BattleSummary;
 import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEvent;
-import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.MapPerspective;
 import UI.GameOverlay;
@@ -60,7 +57,6 @@ public class SpriteMapView extends MapView
   final int COMPREHENSIVE_HUD_H_SIZE;
 
   // Variables for controlling map animations.
-  protected Queue<GameEvent> eventsToAnimate = new GameEventQueue();
   private static final int animIndexUpdateInterval = 250;
 
   // Separate animation speed for "active" things (e.g. units moving).
@@ -137,57 +133,43 @@ public class SpriteMapView extends MapView
   }
 
   @Override
-  public void animate(GameEventQueue newEvents)
+  public void animate(GameEvent toAnimate)
   {
-    if( null != newEvents )
+    // If we want to animate something hidden, or we don't have anything to animate, animate nothing instead.
+    if( !shouldAnimate(toAnimate) )
     {
-      eventsToAnimate.addAll(newEvents);
+      currentAnimation = new NoAnimation();
+      return;
+    }
 
-      // If we aren't currently animating anything, load up the next animation.
-      if( null == currentAnimation )
-      {
-        loadNextEventAnimation();
-      }
-      if( null == currentAnimation )
-      {
-        // Nothing to animate. Release control.
-        mapController.animationEnded(null, true);
-      }
-    }
-    else
-    {
-      mapController.animationEnded(null, true);
-    }
+    currentAnimation = toAnimate.getEventAnimation(this);
+    if( null == currentAnimation )
+      currentAnimation = new NoAnimation();
+
+    if( toAnimate.getEndPoint() != null )
+      myGame.setCursorLocation(toAnimate.getEndPoint());
   }
 
-  /**
-   * Utility function to get the animation for the next animatable GameEvent
-   * in the GameEvent queue.
-   */
-  private void loadNextEventAnimation()
+  @Override
+  public boolean shouldAnimate(GameEvent toAnimate)
   {
+    if( null == toAnimate )
+      return false;
+    if( !SpriteOptions.getAnimationsEnabled() )
+      return false;
+
     GameMap gameMap = getDrawableMap(myGame);
 
-    // Keep pulling events off the queue until we get one we can draw.
-    while (null == currentAnimation && !eventsToAnimate.isEmpty())
-    {
-      GameEvent event = eventsToAnimate.peek();
-      boolean isEventHidden = !(null == event.getStartPoint()) && gameMap.isLocationFogged(event.getStartPoint())
-          && gameMap.isLocationFogged(event.getEndPoint());
+    XYCoord animStart = toAnimate.getStartPoint();
+    XYCoord animEnd = toAnimate.getEndPoint();
+    boolean isEventHidden = (null == animStart || gameMap.isLocationFogged(animStart))
+                         && (null == animEnd   || gameMap.isLocationFogged(animEnd));
 
-      currentAnimation = event.getEventAnimation(this);
-      if( SpriteOptions.getAnimationsEnabled() && (null != currentAnimation)
-          && !isEventHidden)
-      {
-        if(event.getEndPoint() != null)
-        {
-          myGame.setCursorLocation(event.getEndPoint());
-        }
-      }
-      else
-        // If we want to animate something hidden, or we don't have anything to animate, animate nothing instead.
-        currentAnimation = new NoAnimation();
-    }
+    if( isEventHidden )
+      return false;
+
+    GameAnimation animResult = toAnimate.getEventAnimation(this);
+    return (null != animResult);
   }
 
   private void renderCurrentAnimation(Graphics g, boolean notifyControllerOnEnd)
@@ -199,10 +181,7 @@ public class SpriteMapView extends MapView
 
       // The animation is over; remove the corresponding event and notify the controller.
       if( notifyControllerOnEnd ) // ...but only if we're animating events
-        mapController.animationEnded(eventsToAnimate.poll(), eventsToAnimate.isEmpty());
-
-      // Get the next event animation if one exists.
-      loadNextEventAnimation();
+        mapController.animationEnded();
     }
   }
 
