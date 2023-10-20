@@ -19,7 +19,7 @@ public class PlayerSetupCommanderController implements IController
   public final ArrayList<CommanderInfo> cmdrInfos;
   public final boolean shouldSelectMultiCO;
   public final int noCmdr;
-  public final COSpriteSpec[] actualFactions;
+  public final COSpriteSpec[] canonFactions;
   // Lists, organized by x then y, of indices into the canonical commander list
   public final ArrayList<Integer>[][] cosByGameFaction;
   public final ArrayList<Integer>[][] cosByFactionGame;
@@ -36,10 +36,10 @@ public class PlayerSetupCommanderController implements IController
     HashSet<COSpriteSpec> uniqueFactions = new HashSet<>();
     for( int co = 0; co < cmdrInfos.size(); ++co )
       uniqueFactions.add(cmdrInfos.get(co).baseFaction);
-    actualFactions = uniqueFactions.toArray(new COSpriteSpec[0]);
+    canonFactions = uniqueFactions.toArray(new COSpriteSpec[0]);
 
     int gameCount = UIUtils.SourceGames.values().length;
-    int factionCount = actualFactions.length;
+    int factionCount = canonFactions.length;
     cosByGameFaction = new ArrayList[gameCount][factionCount];
     cosByFactionGame = new ArrayList[factionCount][gameCount];
 
@@ -56,7 +56,7 @@ public class PlayerSetupCommanderController implements IController
       int game = info.game.ordinal();
       int faction = 0;
       for( ; faction < factionCount; ++faction )
-        if( info.baseFaction == actualFactions[faction] )
+        if( info.baseFaction == canonFactions[faction] )
           break;
 
       cosByGameFaction[game][faction].add(co);
