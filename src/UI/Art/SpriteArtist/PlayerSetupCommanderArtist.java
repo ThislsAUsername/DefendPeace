@@ -35,6 +35,9 @@ public class PlayerSetupCommanderArtist
   static final BufferedImage toArmyTip = SpriteUIUtils.makeTextFrame("Q: To Army", 3, 2);
   static final BufferedImage etip = SpriteUIUtils.makeTextFrame("E: CO Info", 3, 2);
 
+  static final int textWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
+  static final int textHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
+
   public static void draw(Graphics g, IController controller, ArrayList<CommanderInfo> infos, Color playerColor)
   {
     PlayerSetupCommanderController control = (PlayerSetupCommanderController)controller;
@@ -154,36 +157,7 @@ public class PlayerSetupCommanderArtist
     }
   }
 
-  static final int textWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
-  static final int textHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
   static final int txtBuf = 2;
-  static final int textToastHeight = textHeight + txtBuf; // upper buffer only
-  public static void drawCmdrBin(Graphics g, String label, Color bg,  Color frame, int screenWidth, int y, int drawHeight)
-  {
-    int textToastWidth  = textWidth*label.length();
-    int drawX = txtBuf;
-    final int bodyHeight = drawHeight - textToastHeight;
-
-    // Smooths between the label backing to the CO face holder
-    Polygon triangle = new Polygon();
-    triangle.addPoint(drawX+textToastWidth                , y);                 // top left
-    triangle.addPoint(drawX+textToastWidth                , y+textToastHeight); // bottom left
-    triangle.addPoint(drawX+textToastWidth+textToastHeight, y+textToastHeight); // right
-
-    g.setColor(frame);
-    g.fillPolygon(triangle);
-    g.fillRect(0, y                 , txtBuf+textToastWidth , bodyHeight); // behind text
-    g.fillRect(0, y+textToastHeight , screenWidth           , bodyHeight); // main body
-
-    g.setColor(bg);
-    for( int i = 0; i < 3; ++i )
-      triangle.ypoints[i] += 1; // Shift one pixel down to expose the frame
-    g.fillPolygon(triangle);
-    g.fillRect(0, y+1                , txtBuf+textToastWidth, bodyHeight-2);
-    g.fillRect(0, y+1+textToastHeight, screenWidth          , bodyHeight-2);
-
-    SpriteUIUtils.drawTextSmallCaps(g, label, drawX, y + txtBuf);
-  }
   /**
    * Draws a little side bin with beveled edges
    *  /
@@ -448,6 +422,34 @@ public class PlayerSetupCommanderArtist
       }
 
       return myImage;
+    }
+    static final int textToastHeight = textHeight + TEXT_MARGIN_Y; // upper buffer only
+    private static void drawCmdrBin(Graphics g, String label, Color bg,  Color frame, int screenWidth, int y, int drawHeight)
+    {
+      final int textToastWidth  = textWidth*label.length();
+      final int xBufT = TEXT_MARGIN_X;
+      final int yBufT = TEXT_MARGIN_Y;
+      final int bodyHeight = drawHeight - textToastHeight;
+
+      // Smooths between the label backing to the CO face holder
+      Polygon triangle = new Polygon();
+      triangle.addPoint(xBufT+textToastWidth                , y);                 // top left
+      triangle.addPoint(xBufT+textToastWidth                , y+textToastHeight); // bottom left
+      triangle.addPoint(xBufT+textToastWidth+textToastHeight, y+textToastHeight); // right
+
+      g.setColor(frame);
+      g.fillPolygon(triangle);
+      g.fillRect(0, y                 , yBufT+textToastWidth, bodyHeight); // behind text
+      g.fillRect(0, y+textToastHeight , screenWidth         , bodyHeight); // main body
+
+      g.setColor(bg);
+      for( int i = 0; i < 3; ++i )
+        triangle.ypoints[i] += 1; // Shift one pixel down to expose the frame
+      g.fillPolygon(triangle);
+      g.fillRect(0, y+1                , yBufT+textToastWidth, bodyHeight-2);
+      g.fillRect(0, y+1+textToastHeight, screenWidth         , bodyHeight-2);
+
+      SpriteUIUtils.drawTextSmallCaps(g, label, xBufT, y + txtBuf);
     }
   }
 
