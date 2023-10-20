@@ -11,6 +11,7 @@ import java.util.HashMap;
 import CommandingOfficers.CommanderInfo;
 import Engine.IController;
 import Engine.OptionSelector;
+import Engine.XYCoord;
 import UI.InputHandler.InputAction;
 import UI.PlayerSetupCommanderController;
 import UI.SlidingValue;
@@ -79,7 +80,7 @@ public class PlayerSetupCommanderArtist
   }
 
   static final int leftMargin = 13;
-  static final int mugBuffer = 3;
+  static final int mugPanelBuffer = 3;
   public static void drawCmdrPickerPanels(
                        Graphics myG, int myHeight, int myWidth,
                        ArrayList<CommanderInfo> infos, Color playerColor,
@@ -90,94 +91,38 @@ public class PlayerSetupCommanderArtist
     // Index into that bin that's selected
     int coIndex         = cmdrInBinSelector.getSelectionNormalized();
     // Value of that selection; index into the list of CO infos
-    int highlightedCmdr = cmdrBins.get(binIndex).get(coIndex);
-    // Calculate the vertical space each bin panel will consume.
-    final int mugShiftY = CommanderPanel.PANEL_HEIGHT + mugBuffer;
-    final int panelHeight = mugShiftY + 1;
-    final int panelShift  = textToastHeight + panelHeight + mugBuffer;
+    int highlightedCmdr = cmdrBins.get(binIndex).cmdrs.get(coIndex);
+    CommanderInfo highlightedCmdrInfo = infos.get(highlightedCmdr);
 
     int mmpr = getMaxMugsPerRow();
 
     // We're drawing the panels to align with the vertically-fixed cursor,
     // so figure out where the zeroth bin panel should be drawn.
-    int totalShift = binIndex * panelShift;
-    // For all panels above us, add their extra mugshifts
+    int totalShift = 0;
     for( int i = 0; i < binIndex; ++i )
-      totalShift += mugShiftY * (cmdrBins.get(i).size() / mmpr); // int rounding: useful?
-    panelOffsetY.set(totalShift, snapCursor);
-    int drawY = myHeight / 2 - panelOffsetY.geti() - panelHeight + mugBuffer + 1;
+      totalShift += cmdrBins.get(i).calcPanelHeight(mmpr) + mugPanelBuffer;
+
+    // X offset to start drawing CO faces from
+    int baseDrawX = leftMargin;// + SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
+
+    XYCoord mugCoord = cmdrBins.get(binIndex).calcMugPosition(mmpr, coIndex);
+    panelDrawX.set(baseDrawX + mugCoord.xCoord, snapCursor);
+    panelOffsetY.set(totalShift + mugCoord.yCoord, snapCursor);
+
+    int drawY = myHeight / 2 - panelOffsetY.geti() - CommanderPanel.PANEL_HEIGHT/2;
     final int startY = drawY;
 
-    // Selected CO's name for drawing later
-    String coNameText = "";
-
-    int binToDraw = 0;
-    // X offset to start drawing CO faces from
-    int baseDrawX = leftMargin + SpriteLibrary.getCursorSprites().getFrame(0).getWidth(); // Make sure we have room to draw the cursor around the frame.
-
-    for(; drawY - CommanderPanel.PANEL_HEIGHT/2 < myHeight
+    for(int binToDraw = 0; drawY - CommanderPanel.PANEL_HEIGHT/2 < myHeight
         && binToDraw < cmdrBins.size();
         ++binToDraw )
     {
-      int indexInBin = 0;
-      int drawX = baseDrawX;
-      ArrayList<Integer> currentBin = cmdrBins.get(binToDraw);
+      InnerCategoryPanel currentPanel = cmdrBins.get(binToDraw);
+      BufferedImage panelImage = currentPanel.update(infos, myWidth, mmpr);
 
-      // Draw the bin panel to go behind the COs
-      final COSpriteSpec spriteSpec = binColorSpec.get(binToDraw);
-      Color[] palette = UIUtils.defaultMapColors;
-      String canonName = "MISC";
-      if( Color.LIGHT_GRAY != spriteSpec.color )
-      {
-        palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
-        if( sortByGameThenFaction )
-          canonName = UIUtils.getCanonicalFactionName(spriteSpec);
-        else // Our inner category is games, so just pull the hardcoded faction name
-          canonName = spriteSpec.faction.name;
-      }
-      int mugRows = 1;
-      while (mugRows * mmpr < currentBin.size())
-        ++mugRows;
-      int currentPanelBottomY = drawCmdrBin(myG, canonName, palette[5], palette[3], myWidth, drawY, panelHeight*mugRows);
+      myG.drawImage(panelImage, baseDrawX, drawY, null);
+      int currentPanelBottomY = drawY + panelImage.getHeight();
 
-      // Actually draw the CO mugs
-      while (indexInBin < currentBin.size())
-      {
-        int coToDraw = currentBin.get(indexInBin);
-        CommanderInfo coInfo = infos.get(coToDraw);
-        Integer key = coToDraw;
-
-        // Get the relevant PlayerPanel.
-        if( !coPanels.containsKey(key) )
-          coPanels.put(key, new CommanderPanel(coInfo, coInfo.baseFaction.color));
-        CommanderPanel panel = coPanels.get(key);
-
-        // Update the PlayerPanel and render it to an image.
-        BufferedImage playerImage = panel.update(coInfo, coInfo.baseFaction.color);
-
-        int drawCmdrY = drawY + textToastHeight + txtBuf;
-        myG.drawImage(playerImage, drawX, drawCmdrY, null);
-
-        // Set the cursor width.
-        if( highlightedCmdr == coToDraw )
-        {
-          panelDrawX.set(drawX, snapCursor);
-          coNameText = coInfo.name;
-          int cursorBonusMugRows = indexInBin / mmpr;
-          panelOffsetY.set(totalShift + mugShiftY*cursorBonusMugRows, snapCursor);
-        }
-
-        ++indexInBin;
-        if( indexInBin >= mmpr )
-        {
-          drawY += mugShiftY;
-          drawX = baseDrawX;
-        }
-        else
-          drawX += playerImage.getWidth() + mugBuffer;
-      }
-
-      drawY = currentPanelBottomY + mugBuffer;
+      drawY = currentPanelBottomY + mugPanelBuffer;
     }
 
     // Draw the outer level's side panel
@@ -192,13 +137,14 @@ public class PlayerSetupCommanderArtist
       else // Our inner category is games, so just pull the hardcoded faction name
         outerName = outerSpriteSpec.faction.name;
     }
-    drawSideBin(myG, outerName, outerPalette[5], outerPalette[3], startY, drawY-startY-mugBuffer);
+    drawSideBin(myG, outerName, outerPalette[5], outerPalette[3], startY, drawY-startY-mugPanelBuffer);
 
     final int cursorY = myHeight / 2 - CommanderPanel.PANEL_HEIGHT / 2;
 
     // Draw stuff for the selected option.
     if( !amPickingTagIndex )
     {
+      String coNameText = highlightedCmdrInfo.name;
       BufferedImage coNameFrame = SpriteUIUtils.makeTextFrame(coNameText, 2, 2);
       int drawNameX = panelDrawX.geti() + panelDrawW / 2;
       int drawNameY = cursorY + CommanderPanel.PANEL_HEIGHT + coNameFrame.getHeight() / 2 + 2;
@@ -212,10 +158,11 @@ public class PlayerSetupCommanderArtist
   static final int textHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
   static final int txtBuf = 2;
   static final int textToastHeight = textHeight + txtBuf; // upper buffer only
-  public static int drawCmdrBin(Graphics g, String label, Color bg,  Color frame, int screenWidth, int y, int bodyHeight)
+  public static void drawCmdrBin(Graphics g, String label, Color bg,  Color frame, int screenWidth, int y, int drawHeight)
   {
     int textToastWidth  = textWidth*label.length();
-    int drawX = leftMargin + txtBuf;
+    int drawX = txtBuf;
+    final int bodyHeight = drawHeight - textToastHeight;
 
     // Smooths between the label backing to the CO face holder
     Polygon triangle = new Polygon();
@@ -225,19 +172,17 @@ public class PlayerSetupCommanderArtist
 
     g.setColor(frame);
     g.fillPolygon(triangle);
-    g.fillRect(leftMargin, y                 , txtBuf+textToastWidth , bodyHeight); // behind text
-    g.fillRect(leftMargin, y+textToastHeight , screenWidth           , bodyHeight); // main body
+    g.fillRect(0, y                 , txtBuf+textToastWidth , bodyHeight); // behind text
+    g.fillRect(0, y+textToastHeight , screenWidth           , bodyHeight); // main body
 
     g.setColor(bg);
     for( int i = 0; i < 3; ++i )
       triangle.ypoints[i] += 1; // Shift one pixel down to expose the frame
     g.fillPolygon(triangle);
-    g.fillRect(leftMargin, y+1                , txtBuf+textToastWidth, bodyHeight-2);
-    g.fillRect(leftMargin, y+1+textToastHeight, screenWidth          , bodyHeight-2);
+    g.fillRect(0, y+1                , txtBuf+textToastWidth, bodyHeight-2);
+    g.fillRect(0, y+1+textToastHeight, screenWidth          , bodyHeight-2);
 
     SpriteUIUtils.drawTextSmallCaps(g, label, drawX, y + txtBuf);
-
-    return y + textToastHeight + bodyHeight;
   }
   /**
    * Draws a little side bin with beveled edges
@@ -364,17 +309,15 @@ public class PlayerSetupCommanderArtist
   private static class CommanderPanel
   {
     // A couple of helper quantities.
-    public static int eyesWidth = SpriteLibrary.getCommanderSprites( "STRONG" ).eyes.getWidth();
-    public static int eyesHeight = SpriteLibrary.getCommanderSprites( "STRONG" ).eyes.getHeight();
+    public static final int eyesWidth = SpriteLibrary.getCommanderSprites( "STRONG" ).eyes.getWidth();
+    public static final int eyesHeight = SpriteLibrary.getCommanderSprites( "STRONG" ).eyes.getHeight();
 
     // Total vertical panel space, sans scaling.
     public static final int PANEL_HEIGHT = eyesHeight + 2; // Eyes plus 1 above and below.
     public static final int PANEL_WIDTH  = eyesWidth  + 2; // ditto
 
-    // The composed TeamPanel image.
     private BufferedImage myImage;
 
-    // Each frame that makes up the larger panel.
     private SpriteUIUtils.ImageFrame commanderFace;
 
     // Stored values.
@@ -405,7 +348,111 @@ public class PlayerSetupCommanderArtist
     }
   }
 
- // Input control be beyond here
+  /**
+   * Renders itself into an image like this, with no scaling applied.
+   * +-----------------\
+   * | Name of Category \___________________
+   * |
+   * |   Cmdr      Cmdr      Cmdr
+   * |
+   * +--------------------------------------
+   */
+  private static class InnerCategoryPanel
+  {
+    // A couple of helper quantities.
+    public static final int TEXT_MARGIN_X = 2;
+    public static final int TEXT_MARGIN_Y = 2;
+    public static final int CMDR_MARGIN_LEFT = 6; // Extra margin on the left before drawing COs
+    public static final int CMDR_MARGIN_X = 2;
+    public static final int CMDR_MARGIN_Y = 2;
+
+    private int calcPanelHeight(int mmpr)
+    {
+      int total = 0;
+      total += 2 * TEXT_MARGIN_Y;
+      total += textHeight;
+      int mugRows = 1;
+      while (mugRows * mmpr < cmdrs.size())
+        ++mugRows;
+      total += mugRows * (2 * CMDR_MARGIN_Y + CommanderPanel.PANEL_HEIGHT);
+      return total;
+    }
+    public XYCoord calcMugPosition(int mmpr, int mugIndex)
+    {
+      int y = 0;
+      y += 2 * TEXT_MARGIN_Y;
+      y += textHeight;
+      y += CMDR_MARGIN_Y; // upper margin
+      int mugRows = 0;
+      while (mugRows * mmpr <= mugIndex - mmpr)
+        ++mugRows;
+      // mugs above, plus their lower/upper margins
+      y += mugRows * (2 * CMDR_MARGIN_Y + CommanderPanel.PANEL_HEIGHT);
+
+      int mugCountFromLeft = mugIndex - mugRows * mmpr;
+      int x = CMDR_MARGIN_LEFT;
+      x += mugCountFromLeft * (2 * CMDR_MARGIN_X + CommanderPanel.PANEL_WIDTH);
+      return new XYCoord(x, y);
+    }
+
+    public final ArrayList<Integer> cmdrs;
+    private Color border, fill;
+    private String canonName;
+    private BufferedImage myImage;
+    private int minMMPR;
+
+    public InnerCategoryPanel(ArrayList<Integer> cmdrs, Color[] palette, String canonName)
+    {
+      this.cmdrs = cmdrs;
+      minMMPR = cmdrs.size();
+      border = palette[3];
+      fill = palette[5];
+      this.canonName = canonName;
+    }
+
+    public BufferedImage update(ArrayList<CommanderInfo> infos, int drawWidth, int mmpr)
+    {
+      int panelHeight = calcPanelHeight(mmpr);
+      if( null == myImage
+          || minMMPR > mmpr
+          || panelHeight != myImage.getHeight()
+          || drawWidth > myImage.getWidth() )
+      {
+        minMMPR = Math.min(cmdrs.size(), mmpr);
+        // Re-render the panel.
+        myImage = SpriteLibrary.createTransparentSprite(drawWidth, panelHeight);
+        Graphics g = myImage.getGraphics();
+
+        int indexInBin = 0;
+        drawCmdrBin(g, canonName, fill, border, drawWidth, 0, panelHeight);
+
+        // Actually draw the CO mugs
+        while (indexInBin < cmdrs.size())
+        {
+          int coToDraw = cmdrs.get(indexInBin);
+          CommanderInfo coInfo = infos.get(coToDraw);
+          Integer key = coToDraw;
+
+          // Get the relevant PlayerPanel.
+          if( !coPanels.containsKey(key) )
+            coPanels.put(key, new CommanderPanel(coInfo, coInfo.baseFaction.color));
+          CommanderPanel panel = coPanels.get(key);
+
+          // Update the PlayerPanel and render it to an image.
+          BufferedImage playerImage = panel.update(coInfo, coInfo.baseFaction.color);
+
+          XYCoord mugPos = calcMugPosition(mmpr, indexInBin);
+          g.drawImage(playerImage, mugPos.xCoord, mugPos.yCoord, null);
+          ++indexInBin;
+        }
+      }
+
+      return myImage;
+    }
+  }
+
+////////// Input control be beyond here ///////////////
+
   public static boolean amPickingTagIndex;
   // Range: [0, tag count], to handle the "done" button.
   public static OptionSelector tagIndexSelector;
@@ -414,7 +461,7 @@ public class PlayerSetupCommanderArtist
   public static OptionSelector outerCategorySelector;
   public static OptionSelector innerCategorySelector;
 
-  public static ArrayList<ArrayList<Integer>> cmdrBins;
+  public static ArrayList<InnerCategoryPanel> cmdrBins;
   public static ArrayList<COSpriteSpec> outerBinColorSpec;
   public static ArrayList<COSpriteSpec> binColorSpec;
   public static OptionSelector cmdrInBinSelector;
@@ -444,10 +491,10 @@ public class PlayerSetupCommanderArtist
   {
     final CommanderInfo selectedInfo = myControl.cmdrInfos.get(selectedCO);
 
-    ArrayList<Integer>[] innerCategoryCOs;
+    ArrayList<Integer>[] innerCategoryCmdrLists;
     outerBinColorSpec = new ArrayList<>();
     binColorSpec = new ArrayList<>();
-    int outerMax, outerSel, innerMax, innerSel;
+    int outerMax, outerSel;
     if( sortByGameThenFaction )
     {
       outerMax = UIUtils.SourceGames.values().length;
@@ -456,71 +503,82 @@ public class PlayerSetupCommanderArtist
         outerSel = selectedInfo.game.ordinal();
       else
         outerSel = innerCategorySelector.getSelectionNormalized();
-      innerMax = myControl.actualFactions.length;
-      innerSel = 0;
-      for( ; innerSel < myControl.actualFactions.length; ++innerSel )
-        if( selectedInfo.baseFaction == myControl.actualFactions[innerSel] )
-          break;
 
       // outer bin = game
       for( SourceGames game : UIUtils.SourceGames.values() )
         outerBinColorSpec.add(game.uiColorSpec);
       // Factions for both
-      innerCategoryCOs = myControl.cosByGameFaction[outerSel];
-      for( COSpriteSpec spec : myControl.actualFactions )
+      innerCategoryCmdrLists = myControl.cosByGameFaction[outerSel];
+      for( COSpriteSpec spec : myControl.canonFactions )
         binColorSpec.add(spec);
     }
     else
     {
-      outerMax = myControl.actualFactions.length;
+      outerMax = myControl.canonFactions.length;
       outerSel = 0;
       // Pivot our previous *inner* selection to be our new outer selection
       if( null == innerCategorySelector )
       {
-        for( ; outerSel < myControl.actualFactions.length; ++outerSel )
-          if( selectedInfo.baseFaction == myControl.actualFactions[outerSel] )
+        for( ; outerSel < myControl.canonFactions.length; ++outerSel )
+          if( selectedInfo.baseFaction == myControl.canonFactions[outerSel] )
             break;
       }
       else
         outerSel = innerCategorySelector.getSelectionNormalized();
-      innerMax = UIUtils.SourceGames.values().length;
-      innerSel = selectedInfo.game.ordinal();
 
       // outer bin = faction
-      for( COSpriteSpec spec : myControl.actualFactions )
+      for( COSpriteSpec spec : myControl.canonFactions )
         outerBinColorSpec.add(spec);
       // Games for both
-      innerCategoryCOs = myControl.cosByFactionGame[outerSel];
+      innerCategoryCmdrLists = myControl.cosByFactionGame[outerSel];
       for( SourceGames game : UIUtils.SourceGames.values() )
         binColorSpec.add(game.uiColorSpec);
     }
     outerCategorySelector = new OptionSelector(outerMax);
     outerCategorySelector.setSelectedOption   (outerSel);
-    innerCategorySelector = new OptionSelector(innerMax);
-    innerCategorySelector.setSelectedOption   (innerSel);
 
     cmdrBins = new ArrayList<>();
 
-    int startBin = innerSel;
-
-    for( int innerIdX = 0; innerIdX < innerCategoryCOs.length; ++innerIdX )
+    for( int innerIdX = 0; innerIdX < innerCategoryCmdrLists.length; ++innerIdX )
     {
-      ArrayList<Integer> innerBin = new ArrayList<>(innerCategoryCOs[innerIdX]);
-      if( 1 > innerBin.size() )
-        // Enable selecting any faction from any game and vice versa
-        innerBin.add(myControl.noCmdr);
+      if( 0 >= innerCategoryCmdrLists[innerIdX].size() )
+        continue;
 
-      cmdrBins.add(innerBin);
+      ArrayList<Integer> innerBin = new ArrayList<>(innerCategoryCmdrLists[innerIdX]);
+      final COSpriteSpec spriteSpec = binColorSpec.get(innerIdX);
+      Color[] palette = UIUtils.defaultMapColors;
+      String canonName = "MISC";
+      if( Color.LIGHT_GRAY != spriteSpec.color )
+      {
+        palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
+        if( sortByGameThenFaction )
+          canonName = UIUtils.getCanonicalFactionName(spriteSpec);
+        else // Our inner category is games, so just pull the hardcoded faction name
+          canonName = spriteSpec.faction.name;
+      }
+      InnerCategoryPanel icp = new InnerCategoryPanel(innerBin, palette, canonName);
+      cmdrBins.add(icp);
     }
+
+    int innerMax = cmdrBins.size();
+    int innerSel = 0;
+    int cmdrInBinSel = -1;
+    for( ; innerSel < innerMax; ++innerSel )
+    {
+      cmdrInBinSel = cmdrBins.get(innerSel).cmdrs.indexOf(selectedCO);
+      if( -1 != cmdrInBinSel )
+        break;
+    }
+    innerCategorySelector = new OptionSelector(innerMax);
+    innerCategorySelector.setSelectedOption   (innerSel);
 
     tagIndexSelector = new OptionSelector(1);
     syncTagIndexSelector();
 
-    int startBinIndex = cmdrBins.get(startBin).indexOf(selectedCO);
-    rightGlueColumn = startBinIndex;
+    rightGlueColumn = cmdrInBinSel;
 
-    cmdrInBinSelector = new OptionSelector(cmdrBins.get(startBin).size());
-    cmdrInBinSelector.setSelectedOption(startBinIndex);
+    cmdrInBinSelector = new OptionSelector(cmdrBins.get(innerSel).cmdrs.size());
+    cmdrInBinSelector.setSelectedOption(cmdrInBinSel);
   }
 
   public static boolean handleInput(InputAction action)
@@ -593,7 +651,7 @@ public class PlayerSetupCommanderArtist
     final int selectedBin    = innerCategorySelector.getSelectionNormalized();
     final int selectedColumn = cmdrInBinSelector.getSelectionNormalized();
     // Value of selection; index into the list of CO infos
-    final int selectedCO     = cmdrBins.get(selectedBin).get(selectedColumn);
+    final int selectedCO     = cmdrBins.get(selectedBin).cmdrs.get(selectedColumn);
     switch(action)
     {
       case SELECT:
@@ -622,10 +680,10 @@ public class PlayerSetupCommanderArtist
         }
         break;
       case UP:
-        handleVerticalMove(action, cmdrBins.get(selectedBin), selectedColumn, -mmpr);
+        handleVerticalMove(action, cmdrBins.get(selectedBin).cmdrs, selectedColumn, -mmpr);
         break;
       case DOWN:
-        handleVerticalMove(action, cmdrBins.get(selectedBin), selectedColumn, mmpr);
+        handleVerticalMove(action, cmdrBins.get(selectedBin).cmdrs, selectedColumn, mmpr);
         break;
       case LEFT:
       case RIGHT:
@@ -669,7 +727,7 @@ public class PlayerSetupCommanderArtist
       --currentVisualBin;
     if( 0 <= currentVisualBin && currentVisualBin < maxVisualBin ) // We're visually wrapping, so go down *within* this bin
     {
-      final int destBinSize = cmdrBins.get(innerCategorySelector.getSelectionNormalized()).size();
+      final int destBinSize = cmdrBins.get(innerCategorySelector.getSelectionNormalized()).cmdrs.size();
       int destColumn = Math.min(destBinSize-1, currentVisualBin*jumpValue + destShift);
 
       cmdrInBinSelector.setSelectedOption(destColumn);
@@ -678,7 +736,7 @@ public class PlayerSetupCommanderArtist
     }
 
     final int binPicked = innerCategorySelector.handleInput(action);
-    final int destBinSize = cmdrBins.get(binPicked).size();
+    final int destBinSize = cmdrBins.get(binPicked).cmdrs.size();
     // Selection column clamps to the max for the new bin
     cmdrInBinSelector.reset(destBinSize);
 
@@ -696,7 +754,7 @@ public class PlayerSetupCommanderArtist
     int drawScale = SpriteOptions.getDrawScale();
     Dimension dimensions = SpriteOptions.getScreenDimensions();
     int myWidth = dimensions.width / drawScale - leftMargin - SpriteLibrary.getCursorSprites().getFrame(0).getWidth();
-    int xPerMug = CommanderPanel.PANEL_WIDTH + mugBuffer;
+    int xPerMug = CommanderPanel.PANEL_WIDTH + mugPanelBuffer;
     return (int) Math.floor(myWidth * 1.0 / xPerMug);
   }
 
