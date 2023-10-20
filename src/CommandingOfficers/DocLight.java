@@ -30,6 +30,8 @@ public class DocLight extends RuinedCommander
           "A hero is just a man who knows he is free.\n"));
       infoPages.add(DeployableCommander.COU_MECHANICS_BLURB);
       infoPages.add(RuinedCommander.DOR_MECHANICS_BLURB);
+      infoPages.add(new InfoPage(
+          "Art by Kayaur"));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
