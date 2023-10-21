@@ -28,7 +28,8 @@ public class PlayerSetupController implements IController
   private OptionSelector playerSelector;
   private OptionSelector categorySelector;
 
-  private GameBuilder gameBuilder = null;
+  private boolean enteredSubmenu;
+  private GameBuilder gameBuilder;
   PlayerSetupInfo[] coSelectors;
 
   public enum SelectionCategories { COMMANDER, COLOR_FACTION, TEAM, AI, START };
@@ -39,6 +40,7 @@ public class PlayerSetupController implements IController
   {
     // Once we hit go, we plug all the COs we chose into our gameBuilder.
     gameBuilder = builder;
+    enteredSubmenu = false;
 
     // Set up our row/col selectors.
     int numCos = gameBuilder.mapInfo.getNumCos();
@@ -115,19 +117,23 @@ public class PlayerSetupController implements IController
         // Open a sub-menu based on which player attribute is selected, or start the game.
         if( categorySelector.getSelectionNormalized() == SelectionCategories.COMMANDER.ordinal() )
         {
+          enteredSubmenu = true;
           ArrayList<CommanderInfo> infos = CommanderLibrary.getCommanderList();
           subMenu = new PlayerSetupCommanderController(infos, getPlayerInfo(playerSelector.getSelectionNormalized()), gameBuilder.tagMode);
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.COLOR_FACTION.ordinal() )
         {
+          enteredSubmenu = true;
           subMenu = new PlayerSetupColorFactionController(getPlayerInfo(playerSelector.getSelectionNormalized()), getIconicUnit());
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.TEAM.ordinal() )
         {
+          enteredSubmenu = true;
           subMenu = new PlayerSetupTeamController(coSelectors, playerSelector.getSelectionNormalized());
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.AI.ordinal() )
         {
+          enteredSubmenu = true;
           subMenu = new PlayerSetupAiController(getPlayerInfo(playerSelector.getSelectionNormalized()));
         }
         else // ( categorySelector.getSelectionNormalized() == SelectionCategories.START.ordinal() )
@@ -139,8 +145,9 @@ public class PlayerSetupController implements IController
           if( null != newGame )
           {
             // Save these settings for next time
-            if( !ConfigUtils.writeConfigStrings(buildSettingsFileName(), coSelectors) )
-              System.out.println("Unable to write player setup options to file.");
+            if( enteredSubmenu )
+              if( !ConfigUtils.writeConfigStrings(buildSettingsFileName(), coSelectors) )
+                System.out.println("Unable to write player setup options to file.");
 
             MapView mv = Driver.getInstance().gameGraphics.createMapView(newGame);
             MapController mapController = new MapController(newGame, mv);
