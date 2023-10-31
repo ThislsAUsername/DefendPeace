@@ -22,7 +22,7 @@ public class DocLight extends RuinedCommander
           + "Someone has written on this stone: 'Hope rides alone'\n"));
       infoPages.add(new InfoPage(
           "Base Zone: 0\n" +
-          "Can deploy your COU only twice, with different stats each time (Protoman is first)\n" +
+          "Can deploy your COU only twice (per game!), with different stats each time (Protoman is first)\n" +
           "Protoman Boost: +"+BLUES_POWER+"/"+BLUES_POWER+" stats and +0/"+BLUES_SHIELD+" vs indirect attack ("+(BLUES_POWER+130)+"/"+(BLUES_POWER+BLUES_SHIELD+130)+" vs indirects)\n" +
           "Megaman Boost: +"+ROCK_POWER+"/"+ROCK_POWER+" stats ("+(ROCK_POWER+130)+"/"+(ROCK_POWER+130)+" total)\n"));
       infoPages.add(new InfoPage(
