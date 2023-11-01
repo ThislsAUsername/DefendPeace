@@ -78,6 +78,9 @@ public class JakeMan extends ModularAI
     // Comment from L&F/Rize, on the idea of engaging e.g. a Lin COU on a city:
     // IF the dude is free & there's multiple attackers & you can do multiple attacks (since having 2 tanks for 1 tile won't help),
     //   check the total calc after shooting with every firepower thing that can shoot and not the normal one
+    // [On the subject of attacking a unit that would be unappealing to hit with one unit (city tank with +stats)...
+    //   If I think I have local force superiority, and I can hit with multiple units, evaluate the entire sequence of shots rather than just a single attack.
+    //   (since the more hits you can do, the more favorable the overall outcome is liable to be)]
 
     aiPhases = new ArrayList<AIModule>(
         Arrays.asList(
