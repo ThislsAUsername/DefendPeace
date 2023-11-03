@@ -34,9 +34,10 @@ public abstract class RuinedCommander extends DeployableCommander
   private static final long serialVersionUID = 1L;
   public static final InfoPage DOR_MECHANICS_BLURB = new InfoPage(
             "Days of Ruin mechanics:\n"
+          + "Defense is much weaker; Damage is base x attack/defense, vs base x attack x (200-defense)\n"
           + "You have a CO zone that covers the area around your COU, and grants bonuses to your units inside.\n"
           + "The zone expands 1 tile when your meter is half full, and again at full charge.\n"
-          + "All units get +10 attack and +10 Damage Division (DD) while in the zone.\n"
+          + "All units get +10 attack and +10 defense while in the zone.\n"
           + "Your CO may also have another zone boost that stacks with that boost, but may only apply to some unit types.\n"
           + "The zone becomes global while your power is active, but activating your power requires your COU's action.\n"
           + "Zone boosts apply to other COs in a tag, even when tagged out.\n"
@@ -46,7 +47,7 @@ public abstract class RuinedCommander extends DeployableCommander
           + "However, your CO ability does not increase in cost as you use it.\n"
           + "Veterancy:\n"
           + "On making a kill, your unit will level up.\n"
-          + "There are 3 veterancy levels; their stat boosts are +5/0, +10/0, and +20/20 attack/DD.\n"
+          + "There are 3 veterancy levels; their stat boosts are +5/0, +10/0, and +20/20 attack/defense.\n"
           + "Your COU is always max level.\n"
           + "Veterancy bonuses do not apply if this CO is tagged out, but kills are always tracked.\n"
           );

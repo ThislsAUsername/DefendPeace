@@ -21,7 +21,7 @@ public class BrennerDoR extends RuinedCommander
     {
       super("Brenner", UIUtils.BW);
       infoPages.add(new InfoPage(
-          "Captain of the 12th Battalion. He has an unshakable faith in humanity’s goodness, and will aid any in need.\n"));
+          "Captain of the 12th Battalion. He has an unshakable faith in humanity's goodness, and will aid any in need.\n"));
       infoPages.add(new InfoPage(
           "Base Zone: 3\n" +
           "Zone Boost: All units +20 DD\n"));
