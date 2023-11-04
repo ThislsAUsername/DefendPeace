@@ -351,46 +351,27 @@ public class Utils
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid, x, y));
     searchQueue.add(root);
 
-    ArrayList<SearchNode> waypointList = new ArrayList<SearchNode>();
+    SearchNode currentNode = null;
 
     // Find optimal route.
     while (!searchQueue.isEmpty())
     {
       // Retrieve the next search node.
-      SearchNode currentNode = searchQueue.poll();
+      currentNode = searchQueue.poll();
 
       // If this node is our destination, we are done.
       if( currentNode.x == x && currentNode.y == y )
-      {
-        // Add all of the points on the route to our waypoint list.
-        while (currentNode.parent != null)
-        {
-          waypointList.add(currentNode);
-          currentNode = currentNode.parent;
-        }
-        // Don't forget the starting node (no parent).
-        waypointList.add(currentNode);
         break;
-      }
 
       expandSearchNode(team, fff, map, currentNode, searchQueue, powerGrid, canTravelThroughEnemies);
 
       currentNode = null;
     }
 
-    // Clear and Populate the Path object.
-    aPath.clear();
-    // We added the waypoints to the list from end to beginning, so populate the Path in reverse order.
-    if( !waypointList.isEmpty() )
-    {
-      for( int j = waypointList.size() - 1; j >= 0; --j )
-      {
-        //System.out.println("Waypoint " + waypointList.get(j).x + ", " + waypointList.get(j).y + " over " + map.getEnvironment(waypointList.get(j).x, waypointList.get(j).y).terrainType);
-        aPath.addWaypoint(waypointList.get(j).x, waypointList.get(j).y);
-      }
-    }
-
-    return aPath;
+    if( null == currentNode )
+      return aPath;
+    else
+      return currentNode.getMyPath();
   }
 
   /**
