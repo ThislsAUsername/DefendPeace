@@ -19,12 +19,16 @@ public class GamePath
 
   public GamePath()
   {
-    waypoints = new ArrayList<PathNode>();
+    waypoints = new ArrayList<>();
   }
 
   public void addWaypoint(int x, int y)
   {
     waypoints.add(new PathNode(x, y));
+  }
+  public void addWaypoint(int index, int x, int y)
+  {
+    waypoints.add(index, new PathNode(x, y));
   }
   public void addWaypoint(XYCoord xyc)
   {

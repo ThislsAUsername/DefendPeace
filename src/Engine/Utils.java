@@ -175,6 +175,75 @@ public class Utils
     return reachableTiles;
   }
 
+  public static class PathCalcParams
+  {
+    public XYCoord start;
+    public Unit moverIdentity;
+    public Army team;
+    public MoveType mt;
+    public int initialMovePower;
+    public final GameMap gameMap;
+    public boolean includeOccupiedSpaces;
+    public boolean canTravelThroughEnemies;
+
+    // Does this need a constructor that doesn't require a Unit?
+    public PathCalcParams(Unit unit, GameMap gameMap)
+    {
+      this.gameMap = gameMap;
+      start = new XYCoord(unit);
+      moverIdentity = unit;
+      team = unit.CO.army;
+      mt = unit.getMoveFunctor();
+      initialMovePower = Math.min(unit.getMovePower(gameMap), unit.fuel);
+      includeOccupiedSpaces = true;
+      canTravelThroughEnemies = false;
+    }
+
+    public ArrayList<SearchNode> findAllPaths()
+    {
+      ArrayList<SearchNode> reachableTiles = new ArrayList<>();
+
+      if( null == mt || null == start || start.xCoord < 0 || start.yCoord < 0 )
+      {
+        System.out.println("WARNING! Finding destinations for ineligible unit!");
+        return reachableTiles;
+      }
+
+      // set all locations to unreachable
+      int[][] powerGrid = new int[gameMap.mapWidth][gameMap.mapHeight];
+      for( int i = 0; i < gameMap.mapWidth; i++ )
+      {
+        for( int j = 0; j < gameMap.mapHeight; j++ )
+        {
+          powerGrid[i][j] = -1;
+        }
+      }
+
+      // set up our search
+      SearchNode root = new SearchNode(start.xCoord, start.yCoord);
+      powerGrid[start.xCoord][start.yCoord] = initialMovePower;
+      Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid));
+      searchQueue.add(root);
+      // do search
+      while (!searchQueue.isEmpty())
+      {
+        // pull out the next search node
+        SearchNode currentNode = searchQueue.poll();
+        XYCoord coord = new XYCoord(currentNode.x, currentNode.y);
+        if( mt.canStandOn(gameMap, coord, moverIdentity, includeOccupiedSpaces) )
+        {
+          reachableTiles.add(currentNode);
+        }
+
+        expandSearchNode(team, mt, gameMap, currentNode, searchQueue, powerGrid, canTravelThroughEnemies);
+
+        currentNode = null;
+      }
+
+      return reachableTiles;
+    }
+  }
+
   public static boolean isPathValid(Unit unit, GamePath path, GameMap map, boolean includeOccupiedSpaces)
   {
     return isPathValid(unit, unit.CO.army, unit.getMoveFunctor(), Math.min(unit.getMovePower(map), unit.fuel), path, map, includeOccupiedSpaces);
@@ -357,9 +426,12 @@ public class Utils
    * Utility class used for pathfinding. Optionally holds a
    *   reference to a parent node for path reconstruction.
    */
-  private static class SearchNode
+  public static class SearchNode extends XYCoord
   {
-    public int x, y;
+    private static final long serialVersionUID = 2637721435469761667L;
+    // Both XYCoord's and these are final, so no desync is possible.
+    // However, TODO: delete one pair or the other
+    final public int x, y;
     public SearchNode parent;
 
     public SearchNode(int x, int y)
@@ -373,6 +445,7 @@ public class Utils
     }
     public SearchNode(int x, int y, SearchNode parent)
     {
+      super(x, y);
       this.x = x;
       this.y = y;
       this.parent = parent;
@@ -380,6 +453,21 @@ public class Utils
     public XYCoord getCoordinates()
     {
       return new XYCoord(x, y);
+    }
+    public GamePath getMyPath()
+    {
+      GamePath aPath = new GamePath();
+
+      SearchNode currentNode = this;
+      // Add all of the points on the route to our waypoint list.
+      while (currentNode != null)
+      {
+        // Since we're iterating dest->start, each point is the new "first" point.
+        aPath.addWaypoint(0, currentNode.x, currentNode.y);
+        currentNode = currentNode.parent;
+      }
+
+      return aPath;
     }
     @Override
     public String toString()
@@ -477,7 +565,7 @@ public class Utils
    * @param center
    * @param mapLocations
    */
-  public static void sortLocationsByDistance(XYCoord center, ArrayList<XYCoord> mapLocations)
+  public static void sortLocationsByDistance(XYCoord center, ArrayList<? extends XYCoord> mapLocations)
   {
     ManhattanDistanceComparator mdc = new ManhattanDistanceComparator(center);
     Collections.sort(mapLocations, mdc);
