@@ -153,8 +153,8 @@ public class PlayerSetupCommanderArtist
       {
         outerPalette = UIUtils.getMapUnitColors(outerSpriteSpec.color).paletteColors;
         if( !sortByGameThenFaction )
-          outerName = UIUtils.getCanonicalFactionName(outerSpriteSpec);
-        else // Our inner category is games, so just pull the hardcoded faction name
+          outerName = " "; // Handled by the inner title
+        else // Our outer category is games, so just pull the hardcoded faction name
           outerName = outerSpriteSpec.faction.name;
       }
       drawOuterPanel(myG, outerName, outerPalette[5], outerPalette[3], startY, drawY-startY-mugPanelBuffer);
@@ -564,8 +564,14 @@ public class PlayerSetupCommanderArtist
           palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
           if( sortByGameThenFaction )
             canonName = UIUtils.getCanonicalFactionName(spriteSpec);
-          else // Our inner category is games, so just pull the hardcoded faction name
-            canonName = spriteSpec.faction.name;
+          else // Our inner category is games, so build the outer category together with the hardcoded faction name
+          {
+            COSpriteSpec outerSpec = outerBinColorSpec.get(outerIndex);
+            String factionName = "MISC";
+            if( Color.LIGHT_GRAY != outerSpec.color ) // Should this value live in getCanonicalFactionName()?
+              factionName = UIUtils.getCanonicalFactionName(outerSpec);
+            canonName = factionName + ": " + spriteSpec.faction.name;
+          }
         }
         InnerCategoryPanel icp = new InnerCategoryPanel(innerBin, palette, canonName);
         outerCategory.add(icp);
