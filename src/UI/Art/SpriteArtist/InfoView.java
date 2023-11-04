@@ -9,7 +9,7 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderInfo.InfoPage;
 import CommandingOfficers.CommanderInfo.InfoPage.PageType;
 import Engine.Army;
-import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.GameEvent;
 import Terrain.MapPerspective;
 import UI.COStateInfo;
 import UI.InfoController;
@@ -191,7 +191,12 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
 
   // Vestigial method stubs from MapView
   @Override
-  public void animate(GameEventQueue newEvents)
+  public boolean shouldAnimate(GameEvent toAnimate)
+  {
+    return false;
+  }
+  @Override
+  public void animate(GameEvent newEvents)
   {
   }
   @Override
