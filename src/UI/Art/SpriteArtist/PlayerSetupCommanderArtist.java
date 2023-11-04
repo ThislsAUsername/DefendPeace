@@ -128,13 +128,14 @@ public class PlayerSetupCommanderArtist
 
     int drawY = myHeight / 2 - panelOffsetY.geti() - CommanderPanel.PANEL_HEIGHT/2;
 
-    for( int outerBinToDraw = 0; outerBinToDraw < cmdrBins.size(); ++outerBinToDraw )
+    for( int outerBinToDraw = 0;
+             drawY - CommanderPanel.PANEL_HEIGHT/2 < myHeight
+             && outerBinToDraw < cmdrBins.size();
+             ++outerBinToDraw )
     {
       final int startY = drawY;
       ArrayList<InnerCategoryPanel> currentPanelList = cmdrBins.get(outerBinToDraw);
-      for(int binToDraw = 0; drawY - CommanderPanel.PANEL_HEIGHT/2 < myHeight
-          && binToDraw < currentPanelList.size();
-          ++binToDraw )
+      for(int binToDraw = 0; binToDraw < currentPanelList.size(); ++binToDraw )
       {
         InnerCategoryPanel currentPanel = currentPanelList.get(binToDraw);
         BufferedImage panelImage = currentPanel.update(infos, myWidth, mmpr);
