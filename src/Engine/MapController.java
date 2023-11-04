@@ -45,6 +45,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   private InputMode inputMode;
 
+  // Holds events that are yet to be executed
+  // If we are currently animating, the top of the queue is the event being animated
   GameEventQueue activeEventQueue;
   private boolean isTurnEnding;
   private boolean isGameOver;
@@ -536,6 +538,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       GameEventQueue listenerEvents = GameEventListener.publishEvent(event, myGame);
 
       activeEventQueue.addAll(listenerEvents);
+      event = null;
     }
 
     return event;
@@ -663,7 +666,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     GameEvent toAnimate = executeSilentEvents();
 
     // Kick off the animation cycle
-    if( !activeEventQueue.isEmpty() )
+    if( null != toAnimate )
       myView.animate(toAnimate);
     else // If there's nothing to animate, cut out the middleman
       animationEnded();
