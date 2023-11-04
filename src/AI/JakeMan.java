@@ -262,7 +262,9 @@ public class JakeMan extends ModularAI
       XYCoord position = new XYCoord(unit.x, unit.y);
 
       boolean includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
-      ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
+      Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+      pcp.includeOccupiedSpaces = includeOccupiedSpaces;
+      ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
       if( mustMove )
         destinations.remove(new XYCoord(unit.x, unit.y));
       destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, co.army, destinations, !avoidProduction));
@@ -271,10 +273,10 @@ public class JakeMan extends ModularAI
       Collections.reverse(destinations);
       ArrayList<GameAction> freeDudeShots = new ArrayList<>();
 
-      for( XYCoord moveCoord : destinations )
+      for( Utils.SearchNode moveCoord : destinations )
       {
         // Figure out how to get here.
-        GamePath movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
+        GamePath movePath = moveCoord.getMyPath();
 
         // Figure out what I can do here.
         ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedSpaces);
@@ -568,7 +570,9 @@ public class JakeMan extends ModularAI
   {
     // Find the possible destinations.
     boolean ignoreResident = true;
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, ignoreResident);
+    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    pcp.includeOccupiedSpaces = ignoreResident;
+    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
     destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, destinations, !avoidProduction));
 
     XYCoord goal = null;
@@ -605,7 +609,7 @@ public class JakeMan extends ModularAI
                           unit.toStringWithLocation(),
                           gameMap.getLocation(goal).getEnvironment().terrainType, goal,
                           pathPoint, mustMove));
-    for( XYCoord xyc : destinations )
+    for( Utils.SearchNode xyc : destinations )
     {
       log(String.format("    is it safe to go to %s?", xyc));
       if( !isDudeFree(gameMap, unit, xyc, false) )
@@ -622,7 +626,7 @@ public class JakeMan extends ModularAI
       }
       log(String.format("    Yes"));
 
-      GamePath movePath = Utils.findShortestPath(unit, xyc, gameMap);
+      GamePath movePath = xyc.getMyPath();
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, ignoreResident);
       if( actionSets.size() > 0 )
       {

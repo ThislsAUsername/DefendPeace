@@ -73,8 +73,10 @@ public class AICombatUtils
   public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, XYCoord origin, UnitModel target)
   {
     Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
-    boolean includeOccupiedDestinations = true; // We assume the enemy knows how to manage positioning within his turn
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(origin, unit, gameMap, includeOccupiedDestinations);
+    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    pcp.start = origin;
+    pcp.includeOccupiedSpaces = true; // We assume the enemy knows how to manage positioning within his turn
+    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
     for( WeaponModel wep : unit.model.weapons )
     {
       double damage = (null == target)? 1 : wep.getDamage(target) * unit.getHPFactor();
@@ -93,9 +95,9 @@ public class AICombatUtils
         }
         else
         {
-          for( XYCoord dest : destinations )
+          for( Utils.SearchNode dest : destinations )
           {
-            UnitContext uc = new UnitContext(gameMap, unit, wep, Utils.findShortestPath(unit, dest, gameMap), dest);
+            UnitContext uc = new UnitContext(gameMap, unit, wep, dest.getMyPath(), dest);
             for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, uc))
             {
               double val = damage;

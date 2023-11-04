@@ -334,7 +334,7 @@ public class AIUtils
   /**
    * Finds allied production centers in the input set
    */
-  public static Set<XYCoord> findAlliedIndustries(GameMap gameMap, Army co, Iterable<XYCoord> coords, boolean ignoreMyOwn)
+  public static Set<XYCoord> findAlliedIndustries(GameMap gameMap, Army co, Iterable<? extends XYCoord> coords, boolean ignoreMyOwn)
   {
     Set<XYCoord> result = new HashSet<XYCoord>();
     for( XYCoord coord : coords )
