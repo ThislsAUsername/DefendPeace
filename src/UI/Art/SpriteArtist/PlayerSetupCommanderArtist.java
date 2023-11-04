@@ -91,7 +91,7 @@ public class PlayerSetupCommanderArtist
                        boolean snapCursor)
   {
     int outerIndex      = outerCategorySelector.getSelectionNormalized();
-    ArrayList<InnerCategoryPanel> outerGroup = cmdrBins.get(outerIndex);
+    ArrayList<InnerCategoryPanel> outerGroup = cmdrBins.get(outerIndex).panels;
     // Selected horizontal bin on the screen
     int binIndex        = innerCategorySelector.getSelectionNormalized();
     InnerCategoryPanel highlightedPanel = outerGroup.get(binIndex);
@@ -110,7 +110,7 @@ public class PlayerSetupCommanderArtist
     // Handle the vertical space of all the outer panels above the selected one
     for( int i = 0; i < outerIndex; ++i )
     {
-      ArrayList<InnerCategoryPanel> currentOuter = cmdrBins.get(i);
+      ArrayList<InnerCategoryPanel> currentOuter = cmdrBins.get(i).panels;
       for( int j = 0; j < currentOuter.size(); ++j )
         totalShift += currentOuter.get(j).calcPanelHeight(mmpr) + mugPanelBuffer;
       totalShift += outerPanelBuffer;
@@ -134,10 +134,11 @@ public class PlayerSetupCommanderArtist
              ++outerBinToDraw )
     {
       final int startY = drawY;
-      ArrayList<InnerCategoryPanel> currentPanelList = cmdrBins.get(outerBinToDraw);
-      for(int binToDraw = 0; binToDraw < currentPanelList.size(); ++binToDraw )
+      OuterCategoryPanel outerPanel = cmdrBins.get(outerBinToDraw);
+      ArrayList<InnerCategoryPanel> innerPanelList = outerPanel.panels;
+      for(int binToDraw = 0; binToDraw < innerPanelList.size(); ++binToDraw )
       {
-        InnerCategoryPanel currentPanel = currentPanelList.get(binToDraw);
+        InnerCategoryPanel currentPanel = innerPanelList.get(binToDraw);
         BufferedImage panelImage = currentPanel.update(infos, myWidth, mmpr);
 
         myG.drawImage(panelImage, baseDrawX, drawY, null);
@@ -146,19 +147,7 @@ public class PlayerSetupCommanderArtist
         drawY = currentPanelBottomY + mugPanelBuffer;
       }
 
-      // Draw the outer level's side panel
-      final COSpriteSpec outerSpriteSpec = outerBinColorSpec.get(outerBinToDraw);
-      Color[] outerPalette = UIUtils.defaultMapColors;
-      String outerName = "MISC";
-      if( Color.LIGHT_GRAY != outerSpriteSpec.color )
-      {
-        outerPalette = UIUtils.getMapUnitColors(outerSpriteSpec.color).paletteColors;
-        if( !sortByGameThenFaction )
-          outerName = " "; // Handled by the inner title
-        else // Our outer category is games, so just pull the hardcoded faction name
-          outerName = outerSpriteSpec.faction.name;
-      }
-      drawOuterPanel(myG, outerName, outerPalette[5], outerPalette[3], startY, drawY-startY-mugPanelBuffer);
+      drawOuterPanel(myG, outerPanel, startY, drawY-startY-mugPanelBuffer);
       drawY += outerPanelBuffer;
     }
 
@@ -186,8 +175,11 @@ public class PlayerSetupCommanderArtist
    * |1
    *  \
    */
-  public static int drawOuterPanel(Graphics g, String label, Color bg,  Color frame, int y, int totalHeight)
+  public static int drawOuterPanel(Graphics g, OuterCategoryPanel outerPanel, int y, int totalHeight)
   {
+    String label = outerPanel.canonName;
+    Color frame  = outerPanel.border;
+    Color bg     = outerPanel.fill;
     //                    *      - 2 triangles
     int bodyHeight = totalHeight - 2*(leftMargin) + 2;
     final int drawBodyY = y+leftMargin-1;
@@ -342,6 +334,20 @@ public class PlayerSetupCommanderArtist
     }
   }
 
+  private static class OuterCategoryPanel
+  {
+    public Color border, fill;
+    public String canonName;
+    ArrayList<InnerCategoryPanel> panels;
+
+    public OuterCategoryPanel(Color[] palette, String canonName)
+    {
+      border = palette[3];
+      fill = palette[5];
+      this.canonName = canonName;
+      panels = new ArrayList<>();
+    }
+  }
   /**
    * Renders itself into an image like this, with no scaling applied.
    * +-----------------\
@@ -483,9 +489,7 @@ public class PlayerSetupCommanderArtist
   public static OptionSelector outerCategorySelector;
   public static OptionSelector innerCategorySelector;
 
-  public static ArrayList<ArrayList<InnerCategoryPanel>> cmdrBins;
-  public static ArrayList<COSpriteSpec> outerBinColorSpec;
-  public static ArrayList<COSpriteSpec> binColorSpec;
+  public static ArrayList<OuterCategoryPanel> cmdrBins;
   public static OptionSelector cmdrInBinSelector;
   public static ArrayList<Integer> tagCmdrList;
   public static int rightGlueColumn;
@@ -514,8 +518,8 @@ public class PlayerSetupCommanderArtist
     final CommanderInfo selectedInfo = myControl.cmdrInfos.get(selectedCO);
 
     ArrayList<Integer>[][] allCmdrLists;
-    outerBinColorSpec = new ArrayList<>();
-    binColorSpec = new ArrayList<>();
+    ArrayList<COSpriteSpec> outerBinColorSpec = new ArrayList<>();
+    ArrayList<COSpriteSpec> binColorSpec = new ArrayList<>();
     int outerMax, outerSel;
     if( sortByGameThenFaction )
     {
@@ -550,7 +554,17 @@ public class PlayerSetupCommanderArtist
 
     for( int outerIndex = 0; outerIndex < outerMax; ++outerIndex )
     {
-      ArrayList<InnerCategoryPanel> outerCategory = new ArrayList<>();
+      COSpriteSpec outerSpec = outerBinColorSpec.get(outerIndex);
+      Color[] outerPalette = UIUtils.defaultMapColors;
+      String outerName = (!sortByGameThenFaction)? " " : "MISC"; // Faction name is handled by the inner title
+      if( Color.LIGHT_GRAY != outerSpec.color )
+      {
+        outerPalette = UIUtils.getMapUnitColors(outerSpec.color).paletteColors;
+        if( sortByGameThenFaction ) // Our outer category is games, so just pull the hardcoded faction name
+          outerName = outerSpec.faction.name;
+      }
+      OuterCategoryPanel outerCategory = new OuterCategoryPanel(outerPalette, outerName);
+
       for( int innerIndex = 0; innerIndex < allCmdrLists.length; ++innerIndex )
       {
         if( 0 >= allCmdrLists[outerIndex][innerIndex].size() )
@@ -562,22 +576,21 @@ public class PlayerSetupCommanderArtist
         String canonName = "MISC";
         if( Color.LIGHT_GRAY != spriteSpec.color )
         {
-          palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
           if( sortByGameThenFaction )
-            canonName = UIUtils.getCanonicalFactionName(spriteSpec);
-          else // Our inner category is games, so build the outer category together with the hardcoded faction name
           {
-            COSpriteSpec outerSpec = outerBinColorSpec.get(outerIndex);
-            String factionName = "MISC";
-            if( Color.LIGHT_GRAY != outerSpec.color ) // Should this value live in getCanonicalFactionName()?
-              factionName = UIUtils.getCanonicalFactionName(outerSpec);
-            canonName = factionName + ": " + spriteSpec.faction.name;
+            palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
+            canonName = UIUtils.getCanonicalFactionName(spriteSpec);
+          }
+          else // Our inner category is games, so steal stuff from the outer category
+          {
+            palette   = outerPalette;
+            canonName = outerSpec.faction.name + ": " + spriteSpec.faction.name;
           }
         }
         InnerCategoryPanel icp = new InnerCategoryPanel(innerBin, palette, canonName);
-        outerCategory.add(icp);
+        outerCategory.panels.add(icp);
       }
-      if( outerCategory.size() > 0 )
+      if( outerCategory.panels.size() > 0 )
         cmdrBins.add(outerCategory);
 
       // Fix outer selection to use the right index (given our missing nodes)
@@ -588,13 +601,13 @@ public class PlayerSetupCommanderArtist
     outerMax = cmdrBins.size();
     outerCategorySelector = new OptionSelector(outerMax, outerSel);
 
-    int innerMax = cmdrBins.get(outerSel).size();
+    int innerMax = cmdrBins.get(outerSel).panels.size();
     int innerSel = 0;
     ArrayList<Integer> innerSelBin = null;
     int cmdrInBinSel = -1;
     for( ; innerSel < innerMax; ++innerSel )
     {
-      innerSelBin = cmdrBins.get(outerSel).get(innerSel).cmdrs;
+      innerSelBin = cmdrBins.get(outerSel).panels.get(innerSel).cmdrs;
       cmdrInBinSel = innerSelBin.indexOf(selectedCO);
       if( -1 != cmdrInBinSel )
         break;
@@ -677,7 +690,7 @@ public class PlayerSetupCommanderArtist
     int mmpr = getMaxMugsPerRow();
 
     int outerIndex      = outerCategorySelector.getSelectionNormalized();
-    ArrayList<InnerCategoryPanel> outerGroup = cmdrBins.get(outerIndex);
+    ArrayList<InnerCategoryPanel> outerGroup = cmdrBins.get(outerIndex).panels;
     final int selectedBin    = innerCategorySelector.getSelectionNormalized();
     final int selectedColumn = cmdrInBinSelector.getSelectionNormalized();
     // Value of selection; index into the list of CO infos
@@ -748,7 +761,7 @@ public class PlayerSetupCommanderArtist
   private static void handleVerticalMove(InputAction action, ArrayList<Integer> currentBin, int selectedColumn, int jump)
   {
     int outerIndex      = outerCategorySelector.getSelectionNormalized();
-    ArrayList<InnerCategoryPanel> outerGroup = cmdrBins.get(outerIndex);
+    ArrayList<InnerCategoryPanel> outerGroup = cmdrBins.get(outerIndex).panels;
 
     int jumpValue = Math.abs(jump);
     int maxVisualBin = (currentBin.size() - 1) / jumpValue + 1;
@@ -776,12 +789,12 @@ public class PlayerSetupCommanderArtist
     {
       // Travel between outer panels
       final int outerSel = outerCategorySelector.handleInput(action);
-      int binCount = cmdrBins.get(outerSel).size();
+      int binCount = cmdrBins.get(outerSel).panels.size();
       binPicked = 0;
       if (jump < 0)
         binPicked = binCount-1;
       innerCategorySelector.reset(binCount, binPicked);
-      outerGroup = cmdrBins.get(outerSel);
+      outerGroup = cmdrBins.get(outerSel).panels;
     }
 
     // Align our state within our outer panel
