@@ -177,9 +177,9 @@ public class Utils
 
   public static boolean isPathValid(Unit unit, GamePath path, GameMap map, boolean includeOccupiedSpaces)
   {
-    return isPathValid(new XYCoord(unit), unit, unit.CO.army, unit.getMoveFunctor(), Math.min(unit.getMovePower(map), unit.fuel), path, map, includeOccupiedSpaces);
+    return isPathValid(unit, unit.CO.army, unit.getMoveFunctor(), Math.min(unit.getMovePower(map), unit.fuel), path, map, includeOccupiedSpaces);
   }
-  public static boolean isPathValid(XYCoord start, Unit mover, Army team, MoveType fff, int initialFillPower, GamePath path, GameMap map, boolean includeOccupiedSpaces)
+  public static boolean isPathValid(Unit mover, Army team, MoveType fff, int initialFillPower, GamePath path, GameMap map, boolean includeOccupiedSpaces)
   {
     if( (null == path) || (null == fff) )
     {
@@ -187,7 +187,7 @@ public class Utils
     }
 
     // Make sure the first waypoint is under the Unit.
-    if( path.getPathLength() <= 0 || !path.getWaypoint(0).GetCoordinates().equals(start) )
+    if( path.getPathLength() <= 0 )
     {
       return false;
     }

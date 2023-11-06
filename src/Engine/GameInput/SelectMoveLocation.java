@@ -109,7 +109,7 @@ class SelectMoveLocation extends GameInputState<XYCoord>
     Unit actor = myStateData.unitActor;
     XYCoord coord = myStateData.unitCoord;
     boolean canEndOnOccupied = true;
-    if( !Utils.isPathValid(actor, myStateData.path, myStateData.gameMap, canEndOnOccupied) )
+    if( !myStateData.path.getWaypoint(0).GetCoordinates().equals(coord) || !Utils.isPathValid(actor, myStateData.path, myStateData.gameMap, canEndOnOccupied) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
       myStateData.path = Utils.findShortestPath(coord, actor, end, myStateData.gameMap);
