@@ -1,6 +1,11 @@
 package UI;
 
 import Engine.GameScenario.TagMode;
+
+import java.util.HashMap;
+import java.util.Scanner;
+
+import Engine.ConfigUtils;
 import Engine.IController;
 import Engine.OptionSelector;
 import Terrain.Environment.Weathers;
@@ -9,6 +14,8 @@ import Units.UnitModelScheme;
 
 public class GameOptionSetupController implements IController
 {
+  public final int GAME_OPTIONS_CONFIG_KEY = -1; // Player indices start at 0, so -1 should be safe.
+
   private GameOption<Boolean> fowOption = new GameOptionBool("Fog of War", false);
   private GameOption<Integer> startingFundsOption = new GameOptionInt("Starting Funds", 0, 50000, 1000, 0);
   private GameOption<Integer> incomeOption = new GameOptionInt("Income", 250, 20000, 250, 1000);
@@ -19,11 +26,14 @@ public class GameOptionSetupController implements IController
 
   // Get a list of all GameOptions.
   public GameOption<?>[] gameOptions;
+  // The options last used on this map, if any
+  HashMap<Integer, String> initialPicksMap;
 
   public OptionSelector optionSelector;
   private PlayerSetupController coSelectMenu;
 
   private boolean isInSubmenu = false;
+  private boolean changesMade = false;
 
   // GameBuilder to set options.
   private GameBuilder gameBuilder = null;
@@ -40,6 +50,32 @@ public class GameOptionSetupController implements IController
 
     gameOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, tagsOption, securityOption};
     optionSelector = new OptionSelector( gameOptions.length );
+
+    // Read in the last settings we used on this map, if available
+    initialPicksMap = new HashMap<Integer, String>();
+    ConfigUtils.readConfigLists(PlayerSetupController.buildSettingsFileName(gameBuilder),
+                                (String s)->Integer.valueOf(s),
+                                (Scanner linescan)->linescan.nextLine(),
+                                initialPicksMap);
+
+    if( initialPicksMap.containsKey(GAME_OPTIONS_CONFIG_KEY) )
+    {
+      String fullConfig = initialPicksMap.get(GAME_OPTIONS_CONFIG_KEY);
+      String[] s = fullConfig.split("\\s+"); // Split (string integers)
+      int si = 0; // Split Index
+      while (s[si].isEmpty()) ++si; // Skip any sneaky empty splits
+
+      for( int i = 0; i < gameOptions.length; ++i )
+        if( s.length > si )
+          gameOptions[i].setSelectedOption(Integer.valueOf(s[si++]));
+    }
+    else
+    {
+      if( gameBuilder.mapInfo.mapName.startsWith("HF") )
+        incomeOption.setSelectedOption(3 + 4); // 250 = 0, increment 250
+      if( gameBuilder.mapInfo.mapName.startsWith("FoW") )
+        fowOption.setSelectedOption(1);
+    }
   }
 
   @Override
@@ -80,6 +116,12 @@ public class GameOptionSetupController implements IController
     switch(action)
     {
       case SELECT:
+        // Shove our selections into the initialPicksMap so they'll be persisted
+        StringBuilder fullConfig = new StringBuilder();
+        for( int i = 0; i < gameOptions.length; ++i )
+          fullConfig.append(" " + gameOptions[i].getSelectionNormalized());
+        initialPicksMap.put(GAME_OPTIONS_CONFIG_KEY, fullConfig.toString());
+
         // Set the selected options and transition to the player setup screen.
         for( GameOption<?> go : gameOptions ) go.storeCurrentValue();
         gameBuilder.isFowEnabled = fowOption.getSelectedObject();
@@ -89,7 +131,7 @@ public class GameOptionSetupController implements IController
         gameBuilder.unitModelScheme = unitSchemeOption.getSelectedObject();
         gameBuilder.tagMode = (TagMode)tagsOption.getSelectedObject();
         gameBuilder.isSecurityEnabled = securityOption.getSelectedObject();
-        coSelectMenu = new PlayerSetupController( gameBuilder );
+        coSelectMenu = new PlayerSetupController( gameBuilder, initialPicksMap, changesMade );
         isInSubmenu = true;
         break;
       case BACK:
@@ -103,6 +145,7 @@ public class GameOptionSetupController implements IController
       case RIGHT:
         int opt = optionSelector.getSelectionNormalized();
         gameOptions[opt].handleInput(action);
+        changesMade = true;
         break;
         default:
           System.out.println("Warning: Unsupported input " + action + " in map select menu.");
