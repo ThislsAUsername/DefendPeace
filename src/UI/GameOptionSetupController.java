@@ -131,7 +131,8 @@ public class GameOptionSetupController implements IController
         gameBuilder.unitModelScheme = unitSchemeOption.getSelectedObject();
         gameBuilder.tagMode = (TagMode)tagsOption.getSelectedObject();
         gameBuilder.isSecurityEnabled = securityOption.getSelectedObject();
-        coSelectMenu = new PlayerSetupController( gameBuilder, initialPicksMap, changesMade );
+        if( null == coSelectMenu )
+          coSelectMenu = new PlayerSetupController(gameBuilder, initialPicksMap, changesMade);
         isInSubmenu = true;
         break;
       case BACK:
