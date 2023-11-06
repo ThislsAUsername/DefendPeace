@@ -70,10 +70,6 @@ public class MoveType implements Serializable
     return cost.intValue();
   }
 
-  public int getTransitionCost(GameMap map, XYCoord from, XYCoord to)
-  {
-    return getTransitionCost(map, from, to, null, true);
-  }
   public int getTransitionCost(GameMap map, XYCoord from, XYCoord to,
                                Army team, boolean canTravelThroughEnemies)
   {
