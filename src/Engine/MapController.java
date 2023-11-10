@@ -45,6 +45,10 @@ public class MapController implements IController, GameInputHandler.StateChanged
 
   private InputMode inputMode;
 
+  // Holds events that are yet to be executed
+  // If we are currently animating, the top of the queue is the event being animated
+  GameEventQueue activeEventQueue;
+  private boolean isTurnEnding;
   private boolean isGameOver;
 
   public MapController(GameInstance game, MapView view)
@@ -54,6 +58,8 @@ public class MapController implements IController, GameInputHandler.StateChanged
     myView.setController(this);
     inputMode = InputMode.INPUT;
     armyOverlayModes = new int[game.armies.length];
+    activeEventQueue = new GameEventQueue();
+    isTurnEnding = false;
     isGameOver = false;
     nextSeekIndex = 0;
 
@@ -486,14 +492,16 @@ public class MapController implements IController, GameInputHandler.StateChanged
     if( null != action )
     {
       // Compile the GameAction to its component events.
-      GameEventQueue events = action.getEvents(myGame.gameMap);
+      activeEventQueue = action.getEvents(myGame.gameMap);
 
-      if( events.size() > 0 )
+      if( activeEventQueue.size() > 0 )
       {
         actionOK = true; // Invalid actions don't produce events.
-        // Send the events to the animator. They will be applied/executed in animationEnded().
+
+        GameEvent evt = executeSilentEvents();
+
         changeInputMode(InputMode.ANIMATION);
-        myView.animate(events);
+        myView.animate(evt);
       }
     }
     else
@@ -503,23 +511,50 @@ public class MapController implements IController, GameInputHandler.StateChanged
     return actionOK;
   }
 
-  public void animationEnded(GameEvent event, boolean animEventQueueIsEmpty)
+  private GameEvent executeSilentEvents()
   {
-    if( null != event )
+    return executeSilentEvents(false);
+  }
+  /**
+   * Runs all events until it encounters one that needs animation.
+   * @return The first animatable event, or the last event run.
+   */
+  private GameEvent executeSilentEvents(boolean skipFirstAnimation)
+  {
+    // Keep pulling events off the queue until we get one we can draw.
+    GameEvent event = null;
+    while (!activeEventQueue.isEmpty())
     {
+      event = activeEventQueue.peek(); // If the event is to be animated, leave it in the queue to remember it when the animation's done
+      if( !skipFirstAnimation && myView.shouldAnimate(event) )
+        break;
+
+      skipFirstAnimation = false;
+      activeEventQueue.poll(); // We'll deal with this event immediately
       event.performEvent(myGame.gameMap);
+      isTurnEnding = event.shouldEndTurn();
 
       // Now that the event has been completed, let the world know.
-      GameEventQueue events = GameEventListener.publishEvent(event, myGame);
-      if( !events.isEmpty() )
-      {
-        animEventQueueIsEmpty = false;
-        myView.animate(events);
-      }
+      GameEventQueue listenerEvents = GameEventListener.publishEvent(event, myGame);
+
+      activeEventQueue.addAll(listenerEvents);
+      event = null;
+    }
+
+    return event;
+  }
+
+  public void animationEnded()
+  {
+    GameEvent evt = executeSilentEvents(true);
+    boolean animEventQueueIsEmpty = activeEventQueue.isEmpty();
+    if( !animEventQueueIsEmpty )
+    {
+      myView.animate(evt);
+      return;
     }
 
     // If we are done animating the last action, check to see if the game is over.
-    if( animEventQueueIsEmpty )
     {
       int activeTeamCount = 0;
       ArrayList<Integer> teams = new ArrayList<>();
@@ -547,8 +582,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
         // Signal the view to animate the victory/defeat overlay.
         myView.gameIsOver();
       }
-      else if( event.shouldEndTurn() )
+      else if( isTurnEnding )
       {
+        isTurnEnding = false;
         handleEndTurn();
       }
       else
@@ -604,9 +640,9 @@ public class MapController implements IController, GameInputHandler.StateChanged
       saveMsg.add("Saved game to");
       saveMsg.add(saveName);
 
-      GameEventQueue outro = new GameEventQueue();
       boolean hideMap = true;
-      outro.add(new TurnInitEvent(myGame.activeArmy, myGame.getCurrentTurn(), hideMap, saveMsg));
+      TurnInitEvent outro = new TurnInitEvent(myGame.activeArmy, myGame.getCurrentTurn(), hideMap, saveMsg);
+      activeEventQueue.add(outro);
       myView.animate(outro);
 
       changeInputMode(InputMode.EXITGAME);
@@ -620,24 +656,20 @@ public class MapController implements IController, GameInputHandler.StateChanged
     nextSeekIndex = 0;
 
     // Tell the game a turn has changed. This will update the active CO.
-    GameEventQueue turnEvents = new GameEventQueue();
-    boolean turnOK = myGame.turn(turnEvents);
+    boolean turnOK = myGame.turn(activeEventQueue);
 
     // Reinitialize the InputStateHandler for the new turn.
     myGameInputHandler = new GameInputHandler(myGame.activeArmy.myView, myGame.activeArmy, this);
 
-    if( !turnEvents.isEmpty() ) // If there's nothing to animate, don't animate it twice
-    {
-      // Kick off the animation cycle, which will animate/init each unit.
-      myView.animate(turnEvents);
+    // If the GameInstance isn't allowing the next CO to go, exit to the main menu.
+    changeInputMode(turnOK ? InputMode.ANIMATION : InputMode.EXITGAME);
+    GameEvent toAnimate = executeSilentEvents();
 
-      // If the GameInstance isn't allowing the next CO to go, exit to the main menu.
-      changeInputMode(turnOK ? InputMode.ANIMATION : InputMode.EXITGAME);
-    }
-    else
-    {
-      myView.animate(null);
-    }
+    // Kick off the animation cycle
+    if( null != toAnimate )
+      myView.animate(toAnimate);
+    else // If there's nothing to animate, cut out the middleman
+      animationEnded();
   }
 
   public Unit getContemplatedActor()
