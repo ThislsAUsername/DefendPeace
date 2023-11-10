@@ -342,6 +342,7 @@ def indexToTerrainCode(x):
 		192: '15HQ',
 		193: '15LB',
 		194: '15SP',
+		195: '  TT',#Teletiles
 	}.get(x, '  XX')    # '  XX' is default if x not found
 
 
