@@ -5,6 +5,7 @@ import java.io.Serializable;
 import Terrain.TerrainType;
 import Units.AWBWUnits.AWBWUnitModel;
 import Units.DoRUnits.DoRUnitModel;
+import Units.GBAFEUnits.GBAFEUnitModel;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 
 public abstract class WeaponModel implements Serializable
@@ -66,6 +67,10 @@ public abstract class WeaponModel implements Serializable
     throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
   }
   public int getDamage(DoRUnitModel defender)
+  {
+    throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
+  }
+  public int getDamage(GBAFEUnitModel defender)
   {
     throw new UnsupportedOperationException("Called base WeaponModel.getDamage() with input type " + defender.getClass());
   }
