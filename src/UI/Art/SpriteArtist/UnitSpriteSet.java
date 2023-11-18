@@ -257,7 +257,7 @@ public class UnitSpriteSet
       }
       else
         num = SpriteLibrary.getMapUnitNumberSprites().getFrame(u.getHP());
-      g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(), null);
+      g.drawImage(num, drawX, drawY + (SpriteLibrary.baseSpriteSize / 2), num.getWidth(), num.getHeight(), null);
     }
 
     // Evaluate/draw unit status effects.
@@ -300,8 +300,8 @@ public class UnitSpriteSet
       int iconIndex = (animIndex%(unitIcons.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK;
       BufferedImage icon = unitIcons.get(iconIndex);
 
-      int iconX = drawX + ((unitHeight) / 2);
-      int iconY = drawY + ((unitHeight) / 2);
+      int iconX = drawX + (SpriteLibrary.baseSpriteSize / 2);
+      int iconY = drawY + (SpriteLibrary.baseSpriteSize / 2);
       int iconW = icon.getWidth();
       int iconH = icon.getHeight();
 
