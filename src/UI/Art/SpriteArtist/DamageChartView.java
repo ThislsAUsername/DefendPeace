@@ -10,13 +10,14 @@ import Engine.IView;
 import UI.DamageChartController;
 import UI.SlidingValue;
 import UI.UIUtils;
+import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.UnitModel;
 import Units.WeaponModel;
 
 public class DamageChartView implements IView
 {
   // Keep track of all the unit images we need to juggle.
-  private BufferedImage[] shooterArray, targetArray;
+  private UnitSpriteSet[] shooterArray, targetArray;
   private final int unitSizePx; // Units are square
   private final int unitBuffer;
   private final int unitSpacingH;
@@ -32,13 +33,13 @@ public class DamageChartView implements IView
   public DamageChartView(DamageChartController control)
   {
     this.control = control;
-    shooterArray = new BufferedImage[control.shooterModels.length];
-    targetArray = new BufferedImage[control.targetModels.length];
+    shooterArray = new UnitSpriteSet[control.shooterModels.length];
+    targetArray = new UnitSpriteSet[control.targetModels.length];
 
     // Pull in one sprite for a sizing basis
-    shooterArray[0] = SpriteLibrary.getMapUnitSpriteSet(control.shooterModels[0].name, control.shooterFac, control.shooterColor).sprites[0].getFrame(0);
+    shooterArray[0] = SpriteLibrary.getMapUnitSpriteSet(control.shooterModels[0].name, control.shooterFac, control.shooterColor);
 
-    unitSizePx = shooterArray[0].getHeight(); // Units are square.
+    unitSizePx = SpriteLibrary.baseSpriteSize; // Units are square.
     unitBuffer = unitSizePx / 3; // Space between options in the grid.
     unitSpacingH = unitSizePx + unitBuffer;
     unitSpacingV = unitSizePx;
@@ -200,19 +201,22 @@ public class DamageChartView implements IView
   private void drawShooterAt(Graphics g, int unitIndex, int xOff, int yOff)
   {
     if( null == shooterArray[unitIndex] )
-      shooterArray[unitIndex] = SpriteLibrary.getMapUnitSpriteSet(control.shooterModels[unitIndex].name, control.shooterFac, control.shooterColor).sprites[0].getFrame(0);
-    drawUnitAt(g, shooterArray[unitIndex], xOff, yOff, control.shooterModels[unitIndex].hidden, control.shooterColor);
+      shooterArray[unitIndex] = SpriteLibrary.getMapUnitSpriteSet(control.shooterModels[unitIndex].name, control.shooterFac, control.shooterColor);
+    drawUnitAt(g, shooterArray[unitIndex], xOff, yOff, false, control.shooterModels[unitIndex].hidden, control.shooterColor);
   }
   private void drawTargetAt(Graphics g, int unitIndex, int xOff, int yOff)
   {
     if( null == targetArray[unitIndex] )
-      targetArray[unitIndex] = SpriteLibrary.getMapUnitSpriteSet(control.targetModels[unitIndex].name, control.targetFac, control.targetColor).sprites[0].getFrame(0);
-    drawUnitAt(g, targetArray[unitIndex], xOff, yOff, control.targetModels[unitIndex].hidden, control.targetColor);
+      targetArray[unitIndex] = SpriteLibrary.getMapUnitSpriteSet(control.targetModels[unitIndex].name, control.targetFac, control.targetColor);
+    drawUnitAt(g, targetArray[unitIndex], xOff, yOff, true, control.targetModels[unitIndex].hidden, control.targetColor);
   }
 
-  private void drawUnitAt(Graphics g, BufferedImage image, int xOff, int yOff, boolean isCloaked, Color iconColor)
+  private void drawUnitAt(Graphics g, UnitSpriteSet spriteSet, int xOff, int yOff, boolean unitFlip, boolean isCloaked, Color iconColor)
   {
-    g.drawImage(image, xOff, yOff, null);
+    spriteSet.drawUnit(g, AnimState.IDLE, SpriteMapView.getAnimIndex(),
+                        xOff, yOff,
+                        false, false
+                        );
     if( isCloaked )
       g.drawImage(SpriteLibrary.getHideIcon(iconColor), xOff + unitSizePx / 2, yOff + unitSizePx / 2, null);
   }
