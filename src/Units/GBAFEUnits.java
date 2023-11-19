@@ -99,21 +99,29 @@ public class GBAFEUnits extends UnitModelScheme
 
     // Add the promote-only units to the main list
     for( UnitModel um : factoryModels )
-      if( null != ((GBAFEUnitModel) um).promotesTo )
-        extras.add(((GBAFEUnitModel) um).promotesTo);
+      addPromotionFor(um, extras);
     for( UnitModel um : airportModels )
-      if( null != ((GBAFEUnitModel) um).promotesTo )
-        extras.add(((GBAFEUnitModel) um).promotesTo);
+      addPromotionFor(um, extras);
     for (UnitModel um : shipModels)
-      if( null != ((GBAFEUnitModel) um).promotesTo )
-        extras.add(((GBAFEUnitModel) um).promotesTo);
+      addPromotionFor(um, extras);
     for (UnitModel um : extras)
       feModels.unitModels.add(um);
 
     // Do this after adding all the models, since we don't want two Bishop entries
     priest.promotesTo = monk.promotesTo;
+    priest.baseActions.add(new GBAFEActions.PromotionFactory(priest.promotesTo));
 
     return feModels;
+  }
+
+  private void addPromotionFor(UnitModel um, ArrayList<UnitModel> extras)
+  {
+    GBAFEUnitModel gbaModel = (GBAFEUnitModel) um;
+    if( null != gbaModel.promotesTo )
+    {
+      extras.add(gbaModel.promotesTo);
+      gbaModel.baseActions.add(new GBAFEActions.PromotionFactory(gbaModel.promotesTo));
+    }
   }
 
   public void registerStateTrackers(GameInstance gi)
