@@ -487,6 +487,7 @@ public class GBAFEWeapons
       super(stats, subWeapons);
       axe = true;
       lance = true;
+      slaysHorse = true;
     }
   }
 
