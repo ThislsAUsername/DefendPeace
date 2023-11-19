@@ -1,5 +1,7 @@
 package Units;
 
+import Engine.Combat.CombatContext;
+import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.TerrainType;
 import Units.GBAFEUnits.GBAFEStats;
 import Units.GBAFEUnits.GBAFEUnitModel;
@@ -591,6 +593,25 @@ public class GBAFEWeapons
       hitsAir    = false;
       slaysArmor = true;
       slaysHorse = true;
+    }
+  }
+
+  public static class GBAFEFightMod implements UnitModifierWithDefaults
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public void changeCombatContext(CombatContext cc)
+    {
+      GBAFEWeapon startGun = (GBAFEWeapon) cc.attacker.weapon;
+      GBAFEWeapon endGun   = (GBAFEWeapon) cc.defender.weapon;
+      cc.canCounter = startGun.canCounter;
+      cc.canCounter &= null != endGun && endGun.canCounter;
+      if( cc.canCounter )
+      {
+        cc.canCounter &= endGun.rangeMax >= cc.battleRange;
+        cc.canCounter &= endGun.rangeMin <= cc.battleRange;
+      }
     }
   }
 
