@@ -245,6 +245,7 @@ public class GBAFEUnits extends UnitModelScheme
       baseXP = stats.level*100;
       fuelBurnPerTile = 0;
       needsMaterials = false;
+      addUnitModifier(new GBAFEWeapons.GBAFEFightMod());
     }
     public GBAFEUnitModel(String pName, GBAFEStats stats, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
         int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> WEAPONS, double starValue)
@@ -254,6 +255,7 @@ public class GBAFEUnits extends UnitModelScheme
       baseXP = stats.level*100;
       fuelBurnPerTile = 0;
       needsMaterials = false;
+      addUnitModifier(new GBAFEWeapons.GBAFEFightMod());
     }
 
     @Override
@@ -717,7 +719,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 9000;
+    private static final int UNIT_COST = 8000;
     private static final double STAR_VALUE = 1.2;
     private static final int MOVE_POWER = 4;
 
@@ -791,7 +793,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 10000;
+    private static final int UNIT_COST = 22000;
     private static final double STAR_VALUE = 1.0;
     private static final int MOVE_POWER = 6;
 
@@ -900,7 +902,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 6000;
+    private static final int UNIT_COST = 5000;
     private static final double STAR_VALUE = 0.8;
     private static final int MOVE_POWER = 5;
 
@@ -1076,7 +1078,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 6000;
+    private static final int UNIT_COST = 5000;
     private static final double STAR_VALUE = 0.8;
     private static final int MOVE_POWER = 5;
 
@@ -1148,7 +1150,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 6000;
+    private static final int UNIT_COST = 5000;
     private static final double STAR_VALUE = 0.8;
     private static final int MOVE_POWER = 5;
 
@@ -1220,7 +1222,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 7000;
+    private static final int UNIT_COST = 6000;
     private static final double STAR_VALUE = 0.8;
     private static final int MOVE_POWER = 5;
 
@@ -1292,7 +1294,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 7000;
+    private static final int UNIT_COST = 10000;
     private static final double STAR_VALUE = 1.2;
     private static final int MOVE_POWER = 7;
 
@@ -1327,7 +1329,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 10000;
+    private static final int UNIT_COST = 16000;
     private static final double STAR_VALUE = 1.0;
     private static final int MOVE_POWER = 8;
 
