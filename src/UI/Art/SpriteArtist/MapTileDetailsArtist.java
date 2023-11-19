@@ -64,7 +64,6 @@ public class MapTileDetailsArtist
     int iconSize = SpriteLibrary.baseSpriteSize/2;
     MapLocation loc = map.getLocation(coord);
     TerrainType terrain = loc.getEnvironment().terrainType;
-    boolean isTerrainObject = TerrainSpriteSet.isTerrainObject(terrain);
     Unit unit = loc.getResident();
 
     // Get the terrain image to draw.
@@ -97,14 +96,16 @@ public class MapTileDetailsArtist
 
     ///////////////////////////////////////////////////////////////
     // Calculate the size of the panel.
-    int terrainPanelW = tileSize * 3;
-    int unitPanelW = (unitAttrs.isEmpty() ? 0 : (tileSize * 2));
-    int panelW = terrainPanelW + unitPanelW;
-    
-    // Each attribute with a 1-px buffer, plus space for the tile itself.
-    int numAttrs = Math.max(terrainAttrs.size(), unitAttrs.size());
     int bufferPx = 3;
-    int panelH = numAttrs*iconSize+numAttrs+(tileSize*2)+bufferPx;
+    //            left buf          attr icon               tile     right buffer
+    int columnW = bufferPx + iconSize+ATTR_TEXT_SPACING + tileSize + bufferPx*2;
+    int panelW = columnW;
+    if( null != unitImage )
+      panelW += columnW - bufferPx*2; // The panel gets only one right buffer
+
+    int numAttrs = Math.max(terrainAttrs.size(), unitAttrs.size());
+    //         upper buffer   tile   lower buffer   each attribute with a 1-px buffer
+    int panelH = iconSize + tileSize + bufferPx  +  numAttrs*(iconSize+1);
 
     // Create the overlay image.
     tileOverlay = SpriteLibrary.createTransparentSprite(panelW, panelH);
@@ -115,30 +116,36 @@ public class MapTileDetailsArtist
     //ltog.fillRect(0, 0, tileOverlay.getWidth(), tileOverlay.getHeight());
     ltog.fillRoundRect(0, 0, tileOverlay.getWidth(), tileOverlay.getHeight(), bufferPx*2, bufferPx*2);
 
-    // Figure out where to draw.
-    int drawX = isTerrainObject ? 0 : tileSize;
-    int drawY = isTerrainObject ? 0 : tileSize;
+    // Match the buffers from above
+    int drawX = bufferPx;
+    int drawY = iconSize;
 
     // Draw all the terrain stuff.
-    drawColumn(ltog, terrainSprite, terrainAttrs, drawX, drawY, isTerrainObject ? iconSize : -iconSize);
+    drawColumn(ltog, terrainSprite, terrainAttrs, drawX, drawY, false);
 
     // Draw all the unit stuff.
     if( null != unitImage )
     {
-      drawX = terrainPanelW;
-      drawY = tileSize;
-      drawColumn(ltog, unitImage, unitAttrs, drawX, drawY, -iconSize/2);
+      drawX = columnW;
+      drawColumn(ltog, unitImage, unitAttrs, drawX, drawY, true);
     }
 
     currentTile = coord;
   }
 
-  private static void drawColumn(Graphics g, BufferedImage image, ArrayList<AttributeArtist> attrs, int drawX, int drawY, int bumpAmt)
+  private static void drawColumn(Graphics g, BufferedImage image, ArrayList<AttributeArtist> attrs, int drawX, int drawY, boolean centerImage)
   {
+    int tileSize = SpriteLibrary.baseSpriteSize;
     int iconSize = SpriteLibrary.baseSpriteSize/2;
-    g.drawImage(image, drawX, drawY, null);
-    drawX += bumpAmt;
-    drawY += image.getHeight();
+    int imageShiftX = iconSize + ATTR_TEXT_SPACING; // Scoot it over to align with the text
+    // Make sure the main image sits where it would relative to its place in the map/tile
+    if( centerImage )
+      imageShiftX  += (tileSize - image.getWidth() )/2;
+    else
+      imageShiftX  += (tileSize - image.getWidth() );
+    int imageShiftY = (tileSize - image.getHeight());
+    g.drawImage(image, drawX + imageShiftX, drawY + imageShiftY, null);
+    drawY += SpriteLibrary.baseSpriteSize;
     for( AttributeArtist aa : attrs )
     {
       drawY++;
@@ -147,6 +154,7 @@ public class MapTileDetailsArtist
     }
   }
 
+  private static final int ATTR_TEXT_SPACING = 2;
   private static class AttributeArtist
   {
     private BufferedImage icon;
@@ -159,7 +167,7 @@ public class MapTileDetailsArtist
     public void draw(Graphics g, int drawX, int drawY)
     {
       g.drawImage(icon, drawX, drawY, null);
-      drawX += icon.getWidth() + 2;
+      drawX += icon.getWidth() + ATTR_TEXT_SPACING;
       Sprite numbers = SpriteLibrary.getMapUnitNumberSprites();
       int tensVal = (int)(value / 10);
       if( 0 != tensVal )
