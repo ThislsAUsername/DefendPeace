@@ -49,8 +49,9 @@ public class KaijuWarsWeapons
     }
     public KaijuWarsWeapon(KaijuWarsWeapon other)
     {
-      this(other.vsLand, other.vsAir, other.rangeMin, other.rangeMax);
-      canFireAfterMoving   = other.canFireAfterMoving;
+      super(other);
+      vsLand               = other.vsLand;
+      vsAir                = other.vsAir;
       isAirWeapon          = other.isAirWeapon;
       negateCounterBonuses = other.negateCounterBonuses;
     }
