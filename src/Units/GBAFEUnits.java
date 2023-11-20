@@ -1505,6 +1505,7 @@ public class GBAFEUnits extends UnitModelScheme
     public Bard()
     {
       super("Bard", static_stats, UNIT_COST, MOVE_POWER, new WeaponModel[0], STAR_VALUE);
+      baseActions.add(0, new GBAFEActions.ReactivateUnitFactory("PLAY"));
     }
     private static GBAFEStats buildStats()
     {
