@@ -49,8 +49,7 @@ public class GBAFEUnits extends UnitModelScheme
     Monk monk = new Monk();
     factoryModels.add(monk);
     factoryModels.add(new Nomad());
-    Archer archer = new Archer();
-    factoryModels.add(archer);
+    factoryModels.add(new Archer());
     factoryModels.add(new ArmorKnight());
     factoryModels.add(new Cavalier());
     factoryModels.add(new GreatKnight());
@@ -64,12 +63,9 @@ public class GBAFEUnits extends UnitModelScheme
 
     // Record those units we can get from a Seaport.
     shipModels.add(new Pirate());
-    Fleet fleet = new Fleet();
-    shipModels.add(fleet);
-    SiegeBoat siegeBoat = new SiegeBoat();
-    shipModels.add(siegeBoat);
-    CloisterBoat cloisterBoat = new CloisterBoat();
-    shipModels.add(cloisterBoat);
+    shipModels.add(new Fleet());
+    shipModels.add(new SiegeBoat());
+    shipModels.add(new CloisterBoat());
 
     // Dump these lists into a hashmap for easy reference later.
     feModels.shoppingList.put(TerrainType.FACTORY, factoryModels);
@@ -84,55 +80,16 @@ public class GBAFEUnits extends UnitModelScheme
     for (UnitModel um : shipModels)
       feModels.unitModels.add(um);
 
-    // Handle transforming units separately, since we don't want two buy-entries
-    UnitModel fleetPack = new FleetPack();
-    fleet    .baseActions.add(new TransformLifecycle.TransformFactory(fleetPack, "PACK"));
-    fleetPack.baseActions.add(new TransformLifecycle.TransformFactory(fleet,     "UNPACK"));
-    extras.add(fleetPack);
-    UnitModel siegeBoatPack = new SiegeBoatPack();
-    siegeBoat    .baseActions.add(new TransformLifecycle.TransformFactory(siegeBoatPack, "PACK"));
-    siegeBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(siegeBoat,     "UNPACK"));
-    extras.add(siegeBoatPack);
-    UnitModel cloisterBoatPack = new CloisterBoatPack();
-    cloisterBoat    .baseActions.add(new TransformLifecycle.TransformFactory(cloisterBoatPack, "PACK"));
-    cloisterBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(cloisterBoat,     "UNPACK"));
-    extras.add(cloisterBoatPack);
-
-    // Archers get to be special snowflakes too, since they have two "promotions"
-    UnitModel ballista = new ArcherInBallista();
-    archer  .baseActions.add(new GBAFEActions.PromotionFactory(ballista));
-    ballista.baseActions.add(new TransformLifecycle.TransformFactory(archer, "DISMOUNT"));
-    extras.add(ballista);
-    UnitModel killerBallista = new SniperInBallista();
-    archer.promotesTo.baseActions.add(new GBAFEActions.PromotionFactory(killerBallista));
-    killerBallista   .baseActions.add(new TransformLifecycle.TransformFactory(archer.promotesTo, "DISMOUNT"));
-    extras.add(killerBallista);
-
-    // Add the promote-only units to the main list
-    for( UnitModel um : factoryModels )
-      addPromotionFor(um, extras);
-    for( UnitModel um : airportModels )
-      addPromotionFor(um, extras);
-    for( UnitModel um : shipModels )
-      addPromotionFor(um, extras);
     for (UnitModel um : extras)
       feModels.unitModels.add(um);
+    for (int i = 0; i < feModels.unitModels.size(); ++i)
+      ((GBAFEUnitModel) feModels.unitModels.get(i)).addVariants(feModels.unitModels, i);
 
     // Do this after adding all the models, since we don't want two Bishop entries
     priest.promotesTo = monk.promotesTo;
     priest.baseActions.add(new GBAFEActions.PromotionFactory(priest.promotesTo));
 
     return feModels;
-  }
-
-  private void addPromotionFor(UnitModel um, ArrayList<UnitModel> extras)
-  {
-    GBAFEUnitModel gbaModel = (GBAFEUnitModel) um;
-    if( null != gbaModel.promotesTo )
-    {
-      extras.add(gbaModel.promotesTo);
-      gbaModel.baseActions.add(new GBAFEActions.PromotionFactory(gbaModel.promotesTo));
-    }
   }
 
   public void registerStateTrackers(GameInstance gi)
@@ -299,6 +256,15 @@ public class GBAFEUnits extends UnitModelScheme
     {
       return wm.getDamage(this);
     }
+
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      if( null != this.promotesTo )
+      {
+        unitList.add(yourIndex+1, this.promotesTo);
+        this.baseActions.add(new GBAFEActions.PromotionFactory(this.promotesTo));
+      }
+    }
   }
 
   public abstract static class FootUnit extends GBAFEUnitModel
@@ -445,6 +411,19 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthDef =  45;// + 10 - 35;
       bases.growthRes =  40;// + 13 - 15;
       return bases.build(true, 9);
+    }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      if( !hidden )
+      {
+        super.addVariants(unitList, yourIndex);
+        UnitModel javelineer = new Halberdier();
+        javelineer.weapons.remove(0);
+        javelineer.hidden = true; // for visual distinctiveness
+        unitList.add(yourIndex+1, javelineer);
+      }
     }
   }
 
@@ -663,6 +642,19 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthRes =  17; // 7 in 6
       return bases.build(true, 9);
     }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      if( !hidden )
+      {
+        super.addVariants(unitList, yourIndex);
+        UnitModel rangedOnly = new Warrior();
+        rangedOnly.weapons.remove(0);
+        rangedOnly.hidden = true; // for visual distinctiveness
+        unitList.add(yourIndex + 1, rangedOnly);
+      }
+    }
   }
 
   public static class Mercenary extends FootUnit
@@ -807,6 +799,19 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthRes =  25; // 15 in 6
       return bases.build(true, 2);
     }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      if( !hidden )
+      {
+        super.addVariants(unitList, yourIndex);
+        UnitModel rangedOnly = new General();
+        rangedOnly.weapons.remove(0);
+        rangedOnly.hidden = true; // for visual distinctiveness
+        unitList.add(yourIndex + 1, rangedOnly);
+      }
+    }
   }
 
   public static class GreatKnight extends HorseUnit
@@ -916,6 +921,19 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthRes =  15; // 10 in 6, 20 female in 7
       return bases.build(true, 0); // The idea is "promo gains and killer weapons only"
     }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      if( !hidden )
+      {
+        super.addVariants(unitList, yourIndex);
+        UnitModel rangedOnly = new NomadTrooper();
+        rangedOnly.weapons.remove(0);
+        rangedOnly.hidden = true; // for visual distinctiveness
+        unitList.add(yourIndex + 1, rangedOnly);
+      }
+    }
   }
 
   public static class ArcherInBallista extends FootUnit
@@ -969,6 +987,24 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthRes =  20; // 10 in 6, 15 female
       return bases.build(14); // Wow, this class's stats are bad
     }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      if( !hidden )
+      {
+        super.addVariants(unitList, yourIndex);
+        UnitModel rangedOnly = new Archer();
+        rangedOnly.weapons.remove(0);
+        rangedOnly.hidden = true; // for visual distinctiveness
+        unitList.add(yourIndex + 1, rangedOnly);
+
+        UnitModel ballista = new ArcherInBallista();
+        baseActions.add(new GBAFEActions.PromotionFactory(ballista));
+        ballista.baseActions.add(new TransformLifecycle.TransformFactory(this, "DISMOUNT"));
+        unitList.add(yourIndex + 2, ballista);
+      }
+    }
   }
   public static class SniperInBallista extends FootUnit
   {
@@ -1020,6 +1056,24 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthDef =  15;
       bases.growthRes =  20; // 15 in 6
       return bases.build(true, 9);
+    }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      if( !hidden )
+      {
+        super.addVariants(unitList, yourIndex);
+        UnitModel rangedOnly = new Sniper();
+        rangedOnly.weapons.remove(0);
+        rangedOnly.hidden = true; // for visual distinctiveness
+        unitList.add(yourIndex + 1, rangedOnly);
+
+        UnitModel killerBallista = new SniperInBallista();
+        baseActions.add(new GBAFEActions.PromotionFactory(killerBallista));
+        killerBallista   .baseActions.add(new TransformLifecycle.TransformFactory(this, "DISMOUNT"));
+        unitList.add(yourIndex + 2, killerBallista);
+      }
     }
   }
 
@@ -1197,6 +1251,19 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthDef =  10;
       bases.growthRes =  40; // 25 in 6
       return bases.build(true, 9);
+    }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      if( !hidden )
+      {
+        super.addVariants(unitList, yourIndex);
+        UnitModel rangedOnly = new Sage();
+        rangedOnly.weapons.remove(0);
+        rangedOnly.hidden = true; // for visual distinctiveness
+        unitList.add(yourIndex + 1, rangedOnly);
+      }
     }
   }
 
@@ -1483,6 +1550,19 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthRes =  35;
       return bases.build(3);
     }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      if( !hidden )
+      {
+        super.addVariants(unitList, yourIndex);
+        UnitModel rangedOnly = new PegKnight();
+        rangedOnly.weapons.remove(0);
+        rangedOnly.hidden = true; // for visual distinctiveness
+        unitList.add(yourIndex + 1, rangedOnly);
+      }
+    }
   }
   public static class FalcoKnight extends FlierUnit
   {
@@ -1517,6 +1597,19 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthDef =  12;
       bases.growthRes =  30; // 20 in FE6
       return bases.build(true, 9);
+    }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      if( !hidden )
+      {
+        super.addVariants(unitList, yourIndex);
+        UnitModel rangedOnly = new FalcoKnight();
+        rangedOnly.weapons.remove(0);
+        rangedOnly.hidden = true; // for visual distinctiveness
+        unitList.add(yourIndex + 1, rangedOnly);
+      }
     }
   }
 
@@ -1709,6 +1802,7 @@ public class GBAFEUnits extends UnitModelScheme
     private static final int MOVE_POWER = 6;
 
     private static final GBAFEStats static_stats = buildStats();
+    // TODO: Killer axe?
     private static final WeaponModel[] weapons = { new GBAFEWeapons.HandAxe(static_stats) };
 
     public Berserker()
@@ -1792,6 +1886,16 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthRes =  15;
       return bases.build(9);
     }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      super.addVariants(unitList, yourIndex);
+      UnitModel fleetPack = new FleetPack();
+      baseActions.add(new TransformLifecycle.TransformFactory(fleetPack, "PACK"));
+      fleetPack.baseActions.add(new TransformLifecycle.TransformFactory(this, "UNPACK"));
+      unitList.add(yourIndex + 1, fleetPack);
+    }
   }
 
   public static class SiegeBoatPack extends GBAFEUnitModel
@@ -1849,6 +1953,16 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthRes =  15;
       return bases.build(true, 9);
     }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      super.addVariants(unitList, yourIndex);
+      UnitModel siegeBoatPack = new SiegeBoatPack();
+      baseActions.add(new TransformLifecycle.TransformFactory(siegeBoatPack, "PACK"));
+      siegeBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(this, "UNPACK"));
+      unitList.add(yourIndex + 1, siegeBoatPack);
+    }
   }
 
   public static class CloisterBoatPack extends GBAFEUnitModel
@@ -1905,6 +2019,16 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthDef =  15;
       bases.growthRes =  35; // to match Pegasus Knight
       return bases.build(true, 14);
+    }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      super.addVariants(unitList, yourIndex);
+      UnitModel cloisterBoatPack = new CloisterBoatPack();
+      baseActions.add(new TransformLifecycle.TransformFactory(cloisterBoatPack, "PACK"));
+      cloisterBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(this, "UNPACK"));
+      unitList.add(yourIndex + 1, cloisterBoatPack);
     }
   }
 
