@@ -11,6 +11,7 @@ import Units.MoveTypes.*;
 public class GBAFEUnits extends UnitModelScheme
 {
   private static final long serialVersionUID = 1L;
+  private static final boolean SORT_PROMOTED_UNITS_LAST = true;
 
   @Override
   public String toString()
@@ -261,7 +262,10 @@ public class GBAFEUnits extends UnitModelScheme
     {
       if( null != this.promotesTo )
       {
-        unitList.add(yourIndex+1, this.promotesTo);
+        if( SORT_PROMOTED_UNITS_LAST )
+          unitList.add(this.promotesTo);
+        else
+          unitList.add(yourIndex + 1, this.promotesTo);
         this.baseActions.add(new GBAFEActions.PromotionFactory(this.promotesTo));
       }
     }
