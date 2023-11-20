@@ -106,25 +106,21 @@ public class GBAFEActions
     }
   } // ~PromotionAction
 
-  /**
-   * Repair, but:<p>
-   * It's free<p>
-   * It has variable heal quantity<p>
-   * It has variable range<p>
-   * It doesn't take target HP into account because it'd be very annoying to play with<p>
-   * It doesn't work on boats (I have stupid plans for boats)<p>
-   */
-  public static class HealStaffFactory extends UnitActionFactory
+  public static abstract class SupportActionFactory extends UnitActionFactory
   {
     private static final long serialVersionUID = 1L;
     public final String name;
-    public final int quantity, range;
+    public final int rangeMin, rangeMax;
 
-    public HealStaffFactory(String name, int healHP, int range)
+    public SupportActionFactory(String name)
     {
-      this.name = name;
-      quantity = healHP;
-      this.range = range;
+      this(name, 1, 1);
+    }
+    public SupportActionFactory(String name, int rangeMin, int rangeMax)
+    {
+      this.name     = name;
+      this.rangeMin = rangeMin;
+      this.rangeMax = rangeMax;
     }
 
     @Override
@@ -134,17 +130,19 @@ public class GBAFEActions
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         ArrayList<GameAction> repairOptions = new ArrayList<GameAction>();
-        ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, 1, range);
+        ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, rangeMin, rangeMax);
 
         // For each location, see if there is a friendly unit to repair.
         for( XYCoord loc : locations )
         {
           // If there's a friendly unit there who isn't us, we can repair them.
           Unit other = map.getLocation(loc).getResident();
-          if( other != null && !other.model.isAny(UnitModel.SHIP) && !actor.CO.isEnemy(other.CO) && other != actor
-              && (!other.isFullySupplied() || other.isHurt()) )
+          if( other != null
+              && !actor.CO.isEnemy(other.CO) && other != actor
+              && canSupport(map, actor, movePath, other)
+              )
           {
-            repairOptions.add(new HealStaffAction(this, actor, movePath, other));
+            repairOptions.add(getSupport(map, actor, movePath, other));
           }
         }
 
@@ -162,6 +160,39 @@ public class GBAFEActions
     public String name(Unit actor)
     {
       return name;
+    }
+
+    public abstract boolean canSupport(GameMap map, Unit actor, GamePath movePath, Unit other);
+    public abstract GameAction getSupport(GameMap map, Unit actor, GamePath movePath, Unit other);
+  }
+
+  /**
+   * Repair, but:<p>
+   * It's free<p>
+   * It has variable heal quantity<p>
+   * It has variable range<p>
+   * It doesn't take target HP into account because it'd be very annoying to play with<p>
+   * It doesn't work on boats (I have stupid plans for boats)<p>
+   */
+  public static class HealStaffFactory extends SupportActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+    public final int quantity;
+
+    public HealStaffFactory(String name, int healHP, int range)
+    {
+      super(name, 1, range);
+      quantity = healHP;
+    }
+    @Override
+    public boolean canSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
+    {
+      return !other.model.isAny(UnitModel.SHIP) && (!other.isFullySupplied() || other.isHurt());
+    }
+    @Override
+    public GameAction getSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
+    {
+      return new HealStaffAction(this, actor, movePath, other);
     }
   }
 
@@ -259,49 +290,23 @@ public class GBAFEActions
   /**
    * Uses hacker wizard powers to cheat the turn system<p>
    */
-  public static class ReactivateUnitFactory extends UnitActionFactory
+  public static class ReactivateUnitFactory extends SupportActionFactory
   {
     private static final long serialVersionUID = 1L;
-    public final String name;
 
     public ReactivateUnitFactory(String name)
     {
-      this.name = name;
+      super(name);
     }
-
     @Override
-    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    public boolean canSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
     {
-      XYCoord moveLocation = movePath.getEndCoord();
-      if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
-      {
-        ArrayList<GameAction> actionOptions = new ArrayList<GameAction>();
-        ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, 1, 1);
-
-        for( XYCoord loc : locations )
-        {
-          Unit other = map.getLocation(loc).getResident();
-          if( other != null && other.isTurnOver && !actor.CO.isEnemy(other.CO) && other != actor
-              && (!other.isFullySupplied() || other.isHurt()) )
-          {
-            actionOptions.add(new ReactivateUnitAction(this, actor, movePath, other));
-          }
-        }
-
-        // Only add this action set if we actually have a target
-        if( !actionOptions.isEmpty() )
-        {
-          // Bundle our attack options into an action set
-          return new GameActionSet(actionOptions);
-        }
-      }
-      return null;
+      return other.isTurnOver;
     }
-
     @Override
-    public String name(Unit actor)
+    public GameAction getSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
     {
-      return name;
+      return new ReactivateUnitAction(this, actor, movePath, other);
     }
   }
 
