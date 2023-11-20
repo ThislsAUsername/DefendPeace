@@ -18,6 +18,22 @@ public class FEMoveTypes
     }
   }
 
+  public static class FEWheel extends MoveTypeLand
+  {
+    private static final long serialVersionUID = 1L;
+
+    public FEWheel()
+    {
+      setMoveCost(TerrainType.FOREST, MoveType.IMPASSABLE);
+      setMoveCost(TerrainType.DUNES,  MoveType.IMPASSABLE);
+      setMoveCost(TerrainType.MOUNTAIN, MoveType.IMPASSABLE);
+      setMoveCost(TerrainType.RIVER, MoveType.IMPASSABLE);
+
+      setMoveCost(Weathers.SNOW, TerrainType.GRASS, 2);
+      setMoveCost(Weathers.RAIN, TerrainType.GRASS, 2);
+    }
+  }
+
   public static class FEFlight extends Flight
   {
     private static final long serialVersionUID = 1L;
