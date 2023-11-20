@@ -39,6 +39,13 @@ public abstract class WeaponModel implements Serializable
   {
     this(true, 1, 1);
   }
+  protected WeaponModel(WeaponModel other)
+  {
+    canFireAfterMoving = other.canFireAfterMoving;
+    hasInfiniteAmmo    = other.hasInfiniteAmmo;
+    rangeMax           = other.rangeMax;
+    rangeMin           = other.rangeMin;
+  }
   public abstract WeaponModel clone();
 
   public boolean loaded(UnitState user)

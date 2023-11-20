@@ -40,8 +40,8 @@ public class DoRWeapons
     }
     public DoRWeapon(DoRWeapon other)
     {
-      this(other.type, other.hasInfiniteAmmo, other.rangeMin, other.rangeMax);
-      canFireAfterMoving = other.canFireAfterMoving;
+      super(other);
+      this.type = other.type;
     }
     @Override
     public WeaponModel clone()
