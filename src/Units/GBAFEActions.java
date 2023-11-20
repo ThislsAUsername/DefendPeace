@@ -8,6 +8,7 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.ModifyFundsEvent;
+import Engine.GameEvents.ResupplyEvent;
 import Engine.UnitActionLifecycles.TransformLifecycle.TransformEvent;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
@@ -76,8 +77,9 @@ public class GBAFEActions
         if( moveEvent.getEndPoint().equals(getMoveLocation()) ) // make sure we shouldn't be pre-empted
         {
           transformEvents.add(new ModifyFundsEvent(actor.CO.army, -1 * PROMOTION_COST));
-          transformEvents.add(new HealUnitEvent(actor, 10, null)); // "Free" fullheal included, for tactical spice
           transformEvents.add(new TransformEvent(actor, type.destinationType));
+          transformEvents.add(new HealUnitEvent(actor, 10, null)); // "Free" fullheal included, for tactical spice
+          transformEvents.add(new ResupplyEvent(null, actor));     //   and also resupply, since we use this for ballistae
         }
       }
       return transformEvents;

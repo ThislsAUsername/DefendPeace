@@ -190,7 +190,11 @@ public class GBAFEWeapons
     }
     public GBAFEWeapon(GBAFEWeapon other)
     {
-      this(other.stats, other.might, other.hit, other.crit, other.rangeMin, other.rangeMax);
+      super(other);
+      stats = other.stats;
+      might = other.might;
+      hit   = other.hit  ;
+      crit  = other.crit ;
       canFireAfterMoving = other.canFireAfterMoving;
       hitsAir    = other.hitsAir   ;
       slaysAir   = other.slaysAir  ;
@@ -567,6 +571,7 @@ public class GBAFEWeapons
       super(stats, 8, 70, 0, MIN_RANGE, MAX_RANGE);
       canCounter = false;
       slaysAir   = true;
+      hasInfiniteAmmo = false;
     }
   }
   public static class KillerBallista extends GBAFEWeapon
@@ -579,6 +584,7 @@ public class GBAFEWeapons
       super(stats, 12, 60, 10, MIN_RANGE, MAX_RANGE);
       canCounter = false;
       slaysAir   = true;
+      hasInfiniteAmmo = false;
     }
   }
   public static class Trebuchet extends GBAFEWeapon
@@ -594,6 +600,7 @@ public class GBAFEWeapons
       hitsAir    = false;
       slaysArmor = true;
       slaysHorse = true;
+      hasInfiniteAmmo = false;
     }
   }
 

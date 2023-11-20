@@ -49,7 +49,8 @@ public class GBAFEUnits extends UnitModelScheme
     Monk monk = new Monk();
     factoryModels.add(monk);
     factoryModels.add(new Nomad());
-    factoryModels.add(new Archer());
+    Archer archer = new Archer();
+    factoryModels.add(archer);
     factoryModels.add(new ArmorKnight());
     factoryModels.add(new Cavalier());
     factoryModels.add(new GreatKnight());
@@ -97,12 +98,22 @@ public class GBAFEUnits extends UnitModelScheme
     cloisterBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(cloisterBoat,     "UNPACK"));
     extras.add(cloisterBoatPack);
 
+    // Archers get to be special snowflakes too, since they have two "promotions"
+    UnitModel ballista = new ArcherInBallista();
+    archer  .baseActions.add(new GBAFEActions.PromotionFactory(ballista));
+    ballista.baseActions.add(new TransformLifecycle.TransformFactory(archer, "DISMOUNT"));
+    extras.add(ballista);
+    UnitModel killerBallista = new SniperInBallista();
+    archer.promotesTo.baseActions.add(new GBAFEActions.PromotionFactory(killerBallista));
+    killerBallista   .baseActions.add(new TransformLifecycle.TransformFactory(archer.promotesTo, "DISMOUNT"));
+    extras.add(killerBallista);
+
     // Add the promote-only units to the main list
     for( UnitModel um : factoryModels )
       addPromotionFor(um, extras);
     for( UnitModel um : airportModels )
       addPromotionFor(um, extras);
-    for (UnitModel um : shipModels)
+    for( UnitModel um : shipModels )
       addPromotionFor(um, extras);
     for (UnitModel um : extras)
       feModels.unitModels.add(um);
@@ -310,7 +321,7 @@ public class GBAFEUnits extends UnitModelScheme
   public abstract static class HorseUnit extends GBAFEUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = TROOP | LAND;
+    private static final long ROLE = TANK | LAND;
 
     private static final int MAX_AMMO = -1;
     private static final int VISION_RANGE = VISION_NORMAL;
@@ -348,6 +359,7 @@ public class GBAFEUnits extends UnitModelScheme
   }
 
   private static final MoveType wing       = new FEMoveTypes.FEFlight();
+  private static final MoveType wheel      = new FEMoveTypes.FEWheel();
   private static final MoveType boat       = new FEMoveTypes.FEBoat();
   private static final MoveType foot       = new FEMoveTypes.FEFoot();
   private static final MoveType footAxe    = new FEMoveTypes.FEFootAxe();
@@ -906,11 +918,28 @@ public class GBAFEUnits extends UnitModelScheme
     }
   }
 
+  public static class ArcherInBallista extends FootUnit
+  {
+    private static final long serialVersionUID = 1L;
+    private static final WeaponModel[] weapons = { new GBAFEWeapons.Ballista(Archer.static_stats) };
+
+    public ArcherInBallista()
+    {
+      super("Ballista", Archer.static_stats, Archer.UNIT_COST, Archer.MOVE_POWER, weapons, Archer.STAR_VALUE);
+      baseActions.clear();
+      for( UnitActionFactory action : UnitActionFactory.COMBAT_VEHICLE_ACTIONS )
+        baseActions.add(action);
+      maxAmmo = 5;
+      role = TANK | LAND;
+      healableHabs.clear(); // No free resupplies for you
+      baseMoveType = wheel;
+    }
+  }
   public static class Archer extends FootUnit
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 5000;
+    private static final int UNIT_COST = 6000;
     private static final double STAR_VALUE = 0.8;
     private static final int MOVE_POWER = 5;
 
@@ -938,7 +967,24 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  35;
       bases.growthDef =  15;
       bases.growthRes =  20; // 10 in 6, 15 female
-      return bases.build(9);
+      return bases.build(14); // Wow, this class's stats are bad
+    }
+  }
+  public static class SniperInBallista extends FootUnit
+  {
+    private static final long serialVersionUID = 1L;
+    private static final WeaponModel[] weapons = { new GBAFEWeapons.KillerBallista(Sniper.static_stats) };
+
+    public SniperInBallista()
+    {
+      super("Killer Ballista", Sniper.static_stats, Sniper.UNIT_COST, Sniper.MOVE_POWER, weapons, Sniper.STAR_VALUE);
+      baseActions.clear();
+      for( UnitActionFactory action : UnitActionFactory.COMBAT_VEHICLE_ACTIONS )
+        baseActions.add(action);
+      maxAmmo = 5;
+      role = TANK | LAND;
+      healableHabs.clear(); // No free resupplies for you
+      baseMoveType = wheel;
     }
   }
   public static class Sniper extends FootUnit
@@ -1712,7 +1758,7 @@ public class GBAFEUnits extends UnitModelScheme
 
     private static final int UNIT_COST = 16000;
     private static final double STAR_VALUE = 1.8;
-    private static final int MAX_AMMO = -1;
+    private static final int MAX_AMMO = 5;
     private static final int VISION_RANGE = VISION_NORMAL;
     private static final int MOVE_POWER = 3;
 
@@ -1769,7 +1815,7 @@ public class GBAFEUnits extends UnitModelScheme
 
     private static final int UNIT_COST = 24000;
     private static final double STAR_VALUE = 1.8;
-    private static final int MAX_AMMO = -1;
+    private static final int MAX_AMMO = 5;
     private static final int VISION_RANGE = VISION_NORMAL;
     private static final int MOVE_POWER = 3;
 
