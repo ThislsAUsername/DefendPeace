@@ -1085,7 +1085,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 3000;
+    private static final int UNIT_COST = 2000;
     private static final double STAR_VALUE = 0.8;
     private static final int MOVE_POWER = 5;
 
@@ -1096,6 +1096,7 @@ public class GBAFEUnits extends UnitModelScheme
       super("Priest", static_stats, UNIT_COST, MOVE_POWER, new WeaponModel[0], STAR_VALUE);
       // Promotion is set by the caller
       baseMoveType = footMage;
+      baseActions.add(new GBAFEActions.HealStaffFactory("HEAL (3)", 3, 1));
     }
     private static GBAFEStats buildStats()
     {
@@ -1121,7 +1122,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 5000;
+    private static final int UNIT_COST = 6000;
     private static final double STAR_VALUE = 0.8;
     private static final int MOVE_POWER = 7;
 
@@ -1131,6 +1132,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Troubadour", static_stats, UNIT_COST, MOVE_POWER, new WeaponModel[0], STAR_VALUE);
       promotesTo = new Valkyrie();
+      baseActions.add(new GBAFEActions.HealStaffFactory("HEAL (5)", 5, 1));
     }
     private static GBAFEStats buildStats()
     {
@@ -1155,7 +1157,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 16000;
+    private static final int UNIT_COST = 11000;
     private static final double STAR_VALUE = 2.0;
     private static final int MOVE_POWER = 8;
 
@@ -1165,6 +1167,7 @@ public class GBAFEUnits extends UnitModelScheme
     public Valkyrie()
     {
       super("Valkyrie", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
+      baseActions.add(new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
     }
     private static GBAFEStats buildStats()
     {
@@ -1237,6 +1240,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Sage", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseMoveType = footMage;
+      baseActions.add(new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
     }
     private static GBAFEStats buildStats()
     {
@@ -1322,6 +1326,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Druid", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseMoveType = footMage;
+      baseActions.add(new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
     }
     private static GBAFEStats buildStats()
     {
@@ -1394,6 +1399,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Bishop", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseMoveType = footMage;
+      baseActions.add(new GBAFEActions.HealStaffFactory("PHYSIC (7)", 7, 5));
     }
     private static GBAFEStats buildStats()
     {
@@ -1740,6 +1746,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Summoner", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseMoveType = footMage;
+      baseActions.add(new GBAFEActions.HealStaffFactory("HEAL (5)", 5, 1));
     }
     private static GBAFEStats buildStats()
     {
@@ -2005,6 +2012,7 @@ public class GBAFEUnits extends UnitModelScheme
           moveType, actions, weapons, STAR_VALUE);
       baseCargoCapacity = 2;
       carryableMask = TROOP | TANK | HOVER;
+      baseActions.add(new GBAFEActions.HealStaffFactory("PHYSIC (7)", 7, 5));
     }
     private static GBAFEStats buildStats()
     {
