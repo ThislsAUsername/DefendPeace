@@ -392,6 +392,18 @@ public class GBAFEWeapons
       lance = true;
     }
   }
+  public static class Tomahawk extends GBAFEWeapon
+  {
+    private static final long serialVersionUID = 1L;
+    private static final int MIN_RANGE = 1;
+    private static final int MAX_RANGE = 2;
+    public Tomahawk(GBAFEStats stats)
+    {
+      // 55 hit in FE6
+      super(stats, 13, 65, 0, MIN_RANGE, MAX_RANGE);
+      axe = true;
+    }
+  }
 
   public static class IronBow extends GBAFEWeapon
   {
