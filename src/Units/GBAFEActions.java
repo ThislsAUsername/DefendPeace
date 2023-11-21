@@ -1,6 +1,7 @@
 package Units;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import Engine.GameAction;
 import Engine.GameActionSet;
@@ -8,22 +9,144 @@ import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.ModifyFundsEvent;
 import Engine.GameEvents.ResupplyEvent;
+import Engine.StateTrackers.StateTracker;
 import Engine.UnitActionLifecycles.TransformLifecycle.TransformEvent;
+import Engine.UnitActionLifecycles.JoinLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
+import Units.GBAFEUnits.GBAFEUnitModel;
 
 public class GBAFEActions
 {
+  public static class GBAFEExperienceTracker extends StateTracker
+  {
+    private static final long serialVersionUID = 1L;
+    private static final int PROMO_LEVEL_BONUS = 20; // 20 levels before promotion. A real shocker, I know.
+    // ref https://fireemblemwiki.org/wiki/Class_relative_power
+    private static final int BASE_DAMAGE_XP    = 31;
+    private static final int BASE_KILL_XP      = 20;
+    private static final int THIEF_KILL_XP     = 20; // Don't ask me why
+    private static final int PROMO_KILL_XP     = 60; // Except for some classes... again, don't ask me why
+    private static final int EXP_MULTIPLIER    =  3; // To make it actually feasible to level units
+
+    public HashMap<Unit, Integer> experience = new HashMap<>();
+
+    public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event)
+    {
+      experience.remove(event.unitDonor);
+      return null;
+    };
+    @Override
+    public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+    {
+      experience.remove(victim);
+      return null;
+    }
+
+    public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location)
+    {
+      addExperience(unit, 10);
+      return null;
+    };
+    @Override
+    public GameEventQueue receiveBattleEvent(BattleSummary battleInfo)
+    {
+      experiencize(battleInfo.attacker, battleInfo.defender);
+      experiencize(battleInfo.defender, battleInfo.attacker);
+      return null;
+    }
+    private void experiencize(UnitDelta attacker, UnitDelta defender)
+    {
+      if( defender.deltaPreciseHP > -0.1 )
+      {
+        addExperience(attacker.unit, 1);
+        return; // No damage? Count it as a whiff
+      }
+      GBAFEUnitModel attackerType = (GBAFEUnitModel) attacker.model;
+      GBAFEUnitModel defenderType = (GBAFEUnitModel) defender.model;
+      experiencize(attacker.unit, defender.after.getHP() == 0,
+                   attackerType, defenderType);
+    }
+    private void experiencize(Unit profiteer, boolean isLethal, GBAFEUnitModel attacker, GBAFEUnitModel defender)
+    {
+      int profit = calcDamageXP(attacker, defender);
+      if(isLethal)
+        profit += calcKillXP(attacker, defender);
+      addExperience(profiteer, attacker.baseXP, profit);
+    }
+    private static int calcDamageXP(GBAFEUnitModel unit, GBAFEUnitModel target)
+    {
+      int unitLevel = unit.stats.level;
+      if( unit.stats.promoted ) unitLevel += PROMO_LEVEL_BONUS;
+      int crp = unit.classRelativePower;
+      int targetLevel = target.stats.level;
+      if( target.stats.promoted ) targetLevel += PROMO_LEVEL_BONUS;
+
+      int profit = (BASE_DAMAGE_XP + targetLevel - unitLevel) / crp;
+      return Math.max(0, profit);
+    }
+    private static int calcKillXP(GBAFEUnitModel unit, GBAFEUnitModel target)
+    {
+      int unitLevel = unit.stats.level;
+      int levelXP = -1 * unitLevel * unit.classRelativePower;
+      int targetLevel = target.stats.level;
+      levelXP += targetLevel * target.classRelativePower;
+
+      int bonusKillXP = 0;
+      if( target.visionRange == GBAFEUnits.VISION_THIEF )
+        bonusKillXP += THIEF_KILL_XP;
+      bonusKillXP -= promoKillBonus(unit);
+      bonusKillXP += promoKillBonus(target);
+
+      int profit = BASE_KILL_XP + bonusKillXP + levelXP;
+      return Math.max(0, profit);
+    }
+    private static int promoKillBonus(GBAFEUnitModel target)
+    {
+      int bonusKillXP = 0;
+      if( target.stats.promoted )
+      {
+        bonusKillXP += PROMO_KILL_XP;
+        if( target.reducedPromoKillBonus )
+          bonusKillXP -= THIEF_KILL_XP; // I don't know whyyyyyyy
+      }
+      return bonusKillXP;
+    }
+
+    public int getExperience(Unit profiteer)
+    {
+      GBAFEUnitModel profiteerType = (GBAFEUnitModel) profiteer.model;
+      return addExperience(profiteer, profiteerType.baseXP, 0);
+    }
+    public int addExperience(Unit profiteer, int profit)
+    {
+      GBAFEUnitModel profiteerType = (GBAFEUnitModel) profiteer.model;
+      return addExperience(profiteer, profiteerType.baseXP, profit);
+    }
+    private int addExperience(Unit profiteer, int base, int profit)
+    {
+      if( !experience.containsKey(profiteer) )
+        experience.put(profiteer, base);
+      int xp = experience.get(profiteer);
+      int finalVal = xp + profit*EXP_MULTIPLIER;
+      if( finalVal > PROMO_LEVEL_BONUS*100 )
+        finalVal = PROMO_LEVEL_BONUS*100;
+      experience.put(profiteer, finalVal);
+      return finalVal;
+    }
+  }
+
   public static final int PROMOTION_COST = 5000;
   public static class PromotionFactory extends UnitActionFactory
   {
@@ -47,6 +170,11 @@ public class GBAFEActions
         validPromo &= actor.CO.army.money >= PROMOTION_COST;
         MapLocation destInfo = map.getLocation(moveLocation);
         validPromo &= !actor.CO.isEnemy(destInfo.getOwner());
+        if( validPromo )
+        {
+          GBAFEExperienceTracker xp = StateTracker.instance(map.game, GBAFEExperienceTracker.class);
+          validPromo &= xp.getExperience(actor) > 999;
+        }
         if( validPromo )
           return new GameActionSet(new PromotionAction(actor, movePath, this), false);
       }
@@ -249,6 +377,7 @@ public class GBAFEActions
         {
           // No surprises in the fog.
           healEvents.add(new HealUnitEvent(beneficiary, type.quantity, null));
+          healEvents.add(new AddExperienceEvent(benefactor, 11));
         }
       }
       return healEvents;
@@ -363,6 +492,7 @@ public class GBAFEActions
         {
           // No surprises in the fog.
           healEvents.add(new ReactivateUnitEvent(beneficiary));
+          healEvents.add(new AddExperienceEvent(benefactor, 10));
         }
       }
       return healEvents;
@@ -400,46 +530,51 @@ public class GBAFEActions
     }
   } // ~ReactivateUnitAction
 
-public static class ReactivateUnitEvent implements GameEvent
-{
-  private Unit unit;
-
-  public ReactivateUnitEvent(Unit aTarget)
+  public static class ReactivateUnitEvent implements GameEvent
   {
-    unit = aTarget;
+    private Unit unit;
+
+    public ReactivateUnitEvent(Unit aTarget)
+    {
+      unit = aTarget;
+    }
+
+    @Override
+    public void performEvent(MapMaster gameMap)
+    {
+      if( unit.isStunned )
+        unit.isStunned = false;
+      else
+        unit.isTurnOver = false;
+    }
+
+    @Override public GameAnimation getEventAnimation(MapView mapView) { return null; }
+    @Override public GameEventQueue sendToListener(GameEventListener listener) { return null; }
+    @Override public XYCoord getStartPoint() { return new XYCoord(unit.x, unit.y); }
+    @Override public XYCoord getEndPoint() { return new XYCoord(unit.x, unit.y); }
   }
 
-  @Override
-  public GameAnimation getEventAnimation(MapView mapView)
+  public static class AddExperienceEvent implements GameEvent
   {
-    return null;
-  }
+    private Unit unit;
+    private int exp;
 
-  @Override
-  public GameEventQueue sendToListener(GameEventListener listener)
-  {
-    return null;
-  }
+    public AddExperienceEvent(Unit aTarget, int xp)
+    {
+      unit = aTarget;
+      exp = xp;
+    }
 
-  @Override
-  public void performEvent(MapMaster gameMap)
-  {
-    if( unit.isStunned )
-      unit.isStunned = false;
-    else
-      unit.isTurnOver = false;
-  }
+    @Override
+    public void performEvent(MapMaster map)
+    {
+      GBAFEExperienceTracker xp = StateTracker.instance(map.game, GBAFEExperienceTracker.class);
+      xp.addExperience(unit, exp);
+    }
 
-  @Override
-  public XYCoord getStartPoint()
-  {
-    return new XYCoord(unit.x, unit.y);
+    @Override public GameAnimation getEventAnimation(MapView mapView) { return null; }
+    @Override public GameEventQueue sendToListener(GameEventListener listener) { return null; }
+    @Override public XYCoord getStartPoint() { return new XYCoord(unit.x, unit.y); }
+    @Override public XYCoord getEndPoint() { return new XYCoord(unit.x, unit.y); }
   }
-
-  @Override
-  public XYCoord getEndPoint()
-  {
-    return new XYCoord(unit.x, unit.y);
-  }
-}
 }
