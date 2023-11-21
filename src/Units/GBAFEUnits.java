@@ -91,7 +91,7 @@ public class GBAFEUnits extends UnitModelScheme
     for (UnitModel um : extras)
       feModels.unitModels.add(um);
     for (int i = 0; i < feModels.unitModels.size(); ++i)
-      ((GBAFEUnitModel) feModels.unitModels.get(i)).addVariants(feModels.unitModels, i);
+      ((GBAFEUnitModel) feModels.unitModels.get(i)).addVariants(feModels, i);
 
     // Do this after adding all the models, since we don't want two Bishop entries
     priest.promotesTo = monk.promotesTo;
@@ -262,14 +262,14 @@ public class GBAFEUnits extends UnitModelScheme
       return wm.getDamage(this);
     }
 
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
       if( null != this.promotesTo )
       {
         if( SORT_PROMOTED_UNITS_LAST )
-          unitList.add(this.promotesTo);
+          feModels.unitModels.add(this.promotesTo);
         else
-          unitList.add(yourIndex + 1, this.promotesTo);
+          feModels.unitModels.add(yourIndex + 1, this.promotesTo);
         this.baseActions.add(new GBAFEActions.PromotionFactory(this.promotesTo));
       }
     }
@@ -423,15 +423,15 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
       if( !hidden )
       {
-        super.addVariants(unitList, yourIndex);
+        super.addVariants(feModels, yourIndex);
         UnitModel javelineer = new Halberdier();
         javelineer.weapons.remove(0);
         javelineer.hidden = true; // for visual distinctiveness
-        unitList.add(yourIndex+1, javelineer);
+        feModels.unitModels.add(yourIndex+1, javelineer);
       }
     }
   }
@@ -661,15 +661,15 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
       if( !hidden )
       {
-        super.addVariants(unitList, yourIndex);
+        super.addVariants(feModels, yourIndex);
         UnitModel rangedOnly = new Warrior();
         rangedOnly.weapons.remove(0);
         rangedOnly.hidden = true; // for visual distinctiveness
-        unitList.add(yourIndex + 1, rangedOnly);
+        feModels.unitModels.add(yourIndex + 1, rangedOnly);
       }
     }
   }
@@ -822,15 +822,15 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
       if( !hidden )
       {
-        super.addVariants(unitList, yourIndex);
+        super.addVariants(feModels, yourIndex);
         UnitModel rangedOnly = new General();
         rangedOnly.weapons.remove(0);
         rangedOnly.hidden = true; // for visual distinctiveness
-        unitList.add(yourIndex + 1, rangedOnly);
+        feModels.unitModels.add(yourIndex + 1, rangedOnly);
       }
     }
   }
@@ -947,15 +947,15 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
       if( !hidden )
       {
-        super.addVariants(unitList, yourIndex);
+        super.addVariants(feModels, yourIndex);
         UnitModel rangedOnly = new NomadTrooper();
         rangedOnly.weapons.remove(0);
         rangedOnly.hidden = true; // for visual distinctiveness
-        unitList.add(yourIndex + 1, rangedOnly);
+        feModels.unitModels.add(yourIndex + 1, rangedOnly);
       }
     }
   }
@@ -1014,20 +1014,20 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
       if( !hidden )
       {
-        super.addVariants(unitList, yourIndex);
+        super.addVariants(feModels, yourIndex);
         UnitModel rangedOnly = new Archer();
         rangedOnly.weapons.remove(0);
         rangedOnly.hidden = true; // for visual distinctiveness
-        unitList.add(yourIndex + 1, rangedOnly);
+        feModels.unitModels.add(yourIndex + 1, rangedOnly);
 
         UnitModel ballista = new ArcherInBallista();
         baseActions.add(new GBAFEActions.PromotionFactory(ballista));
         ballista.baseActions.add(new TransformLifecycle.TransformFactory(this, "DISMOUNT"));
-        unitList.add(yourIndex + 2, ballista);
+        feModels.unitModels.add(yourIndex + 2, ballista);
       }
     }
   }
@@ -1085,20 +1085,20 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
       if( !hidden )
       {
-        super.addVariants(unitList, yourIndex);
+        super.addVariants(feModels, yourIndex);
         UnitModel rangedOnly = new Sniper();
         rangedOnly.weapons.remove(0);
         rangedOnly.hidden = true; // for visual distinctiveness
-        unitList.add(yourIndex + 1, rangedOnly);
+        feModels.unitModels.add(yourIndex + 1, rangedOnly);
 
         UnitModel killerBallista = new SniperInBallista();
         baseActions.add(new GBAFEActions.PromotionFactory(killerBallista));
         killerBallista   .baseActions.add(new TransformLifecycle.TransformFactory(this, "DISMOUNT"));
-        unitList.add(yourIndex + 2, killerBallista);
+        feModels.unitModels.add(yourIndex + 2, killerBallista);
       }
     }
   }
@@ -1289,15 +1289,15 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
       if( !hidden )
       {
-        super.addVariants(unitList, yourIndex);
+        super.addVariants(feModels, yourIndex);
         UnitModel rangedOnly = new Sage();
         rangedOnly.weapons.remove(0);
         rangedOnly.hidden = true; // for visual distinctiveness
-        unitList.add(yourIndex + 1, rangedOnly);
+        feModels.unitModels.add(yourIndex + 1, rangedOnly);
       }
     }
   }
@@ -1595,15 +1595,15 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
       if( !hidden )
       {
-        super.addVariants(unitList, yourIndex);
+        super.addVariants(feModels, yourIndex);
         UnitModel rangedOnly = new PegKnight();
         rangedOnly.weapons.remove(0);
         rangedOnly.hidden = true; // for visual distinctiveness
-        unitList.add(yourIndex + 1, rangedOnly);
+        feModels.unitModels.add(yourIndex + 1, rangedOnly);
       }
     }
   }
@@ -1643,15 +1643,15 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
       if( !hidden )
       {
-        super.addVariants(unitList, yourIndex);
+        super.addVariants(feModels, yourIndex);
         UnitModel rangedOnly = new FalcoKnight();
         rangedOnly.weapons.remove(0);
         rangedOnly.hidden = true; // for visual distinctiveness
-        unitList.add(yourIndex + 1, rangedOnly);
+        feModels.unitModels.add(yourIndex + 1, rangedOnly);
       }
     }
   }
@@ -1802,12 +1802,12 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
-      super.addVariants(unitList, yourIndex);
+      super.addVariants(feModels, yourIndex);
       UnitModel summon = new Phantom();
       baseActions.add(1, new GBAFEActions.SummonPhantomFactory(summon));
-      unitList.add(yourIndex + 1, summon);
+      feModels.unitModels.add(yourIndex + 1, summon);
     }
   }
   public static class Phantom extends FootUnit
@@ -1985,13 +1985,13 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
-      super.addVariants(unitList, yourIndex);
+      super.addVariants(feModels, yourIndex);
       UnitModel fleetPack = new FleetPack();
       baseActions.add(new TransformLifecycle.TransformFactory(fleetPack, "PACK"));
       fleetPack.baseActions.add(new TransformLifecycle.TransformFactory(this, "UNPACK"));
-      unitList.add(yourIndex + 1, fleetPack);
+      feModels.unitModels.add(yourIndex + 1, fleetPack);
     }
   }
 
@@ -2054,13 +2054,13 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
-      super.addVariants(unitList, yourIndex);
+      super.addVariants(feModels, yourIndex);
       UnitModel siegeBoatPack = new SiegeBoatPack();
       baseActions.add(new TransformLifecycle.TransformFactory(siegeBoatPack, "PACK"));
       siegeBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(this, "UNPACK"));
-      unitList.add(yourIndex + 1, siegeBoatPack);
+      feModels.unitModels.add(yourIndex + 1, siegeBoatPack);
     }
   }
 
@@ -2125,13 +2125,13 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
-      super.addVariants(unitList, yourIndex);
+      super.addVariants(feModels, yourIndex);
       UnitModel cloisterBoatPack = new CloisterBoatPack();
       baseActions.add(new TransformLifecycle.TransformFactory(cloisterBoatPack, "PACK"));
       cloisterBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(this, "UNPACK"));
-      unitList.add(yourIndex + 1, cloisterBoatPack);
+      feModels.unitModels.add(yourIndex + 1, cloisterBoatPack);
     }
   }
 
