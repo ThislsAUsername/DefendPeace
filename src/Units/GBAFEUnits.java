@@ -1936,6 +1936,7 @@ public class GBAFEUnits extends UnitModelScheme
           Fleet.moveType, actions, new WeaponModel[0], Fleet.STAR_VALUE);
       baseCargoCapacity = 2;
       carryableMask = TROOP | TANK | HOVER;
+      baseActions.add(0, UnitActionFactory.LAUNCH);
     }
   }
   public static class Fleet extends GBAFEUnitModel
@@ -1943,7 +1944,7 @@ public class GBAFEUnits extends UnitModelScheme
     private static final long serialVersionUID = 1L;
     private static final long ROLE = SHIP | SEA | SURFACE_TO_AIR;
 
-    private static final int UNIT_COST = 16000;
+    private static final int UNIT_COST = 10000;
     private static final double STAR_VALUE = 1.8;
     private static final int MAX_AMMO = 5;
     private static final int VISION_RANGE = VISION_NORMAL;
@@ -1960,6 +1961,7 @@ public class GBAFEUnits extends UnitModelScheme
           moveType, actions, weapons, STAR_VALUE);
       baseCargoCapacity = 2;
       carryableMask = TROOP | TANK | HOVER;
+      baseActions.add(0, UnitActionFactory.LAUNCH);
     }
     private static GBAFEStats buildStats()
     {
@@ -2003,6 +2005,7 @@ public class GBAFEUnits extends UnitModelScheme
           SiegeBoat.moveType, actions, new WeaponModel[0], SiegeBoat.STAR_VALUE);
       baseCargoCapacity = 2;
       carryableMask = TROOP | TANK | HOVER;
+      baseActions.add(0, UnitActionFactory.LAUNCH);
     }
   }
   public static class SiegeBoat extends GBAFEUnitModel
@@ -2027,6 +2030,7 @@ public class GBAFEUnits extends UnitModelScheme
           moveType, actions, weapons, STAR_VALUE);
       baseCargoCapacity = 2;
       carryableMask = TROOP | TANK | HOVER;
+      baseActions.add(0, UnitActionFactory.LAUNCH);
     }
     private static GBAFEStats buildStats()
     {
@@ -2070,6 +2074,7 @@ public class GBAFEUnits extends UnitModelScheme
           CloisterBoat.moveType, actions, CloisterBoat.weapons, CloisterBoat.STAR_VALUE);
       baseCargoCapacity = 2;
       carryableMask = TROOP | TANK | HOVER;
+      baseActions.add(0, UnitActionFactory.LAUNCH);
     }
   }
   public static class CloisterBoat extends GBAFEUnitModel
@@ -2077,7 +2082,7 @@ public class GBAFEUnits extends UnitModelScheme
     private static final long serialVersionUID = 1L;
     private static final long ROLE = SHIP | SEA | ASSAULT;
 
-    private static final int UNIT_COST = 24000;
+    private static final int UNIT_COST = 20000;
     private static final double STAR_VALUE = 1.8;
     private static final int MAX_AMMO = -1;
     private static final int VISION_RANGE = VISION_NORMAL;
@@ -2094,7 +2099,9 @@ public class GBAFEUnits extends UnitModelScheme
           moveType, actions, weapons, STAR_VALUE);
       baseCargoCapacity = 2;
       carryableMask = TROOP | TANK | HOVER;
-      baseActions.add(1, new GBAFEActions.HealStaffFactory("PHYSIC (7)", 7, 10));
+      baseActions.add(0, UnitActionFactory.LAUNCH);
+      //                                   attack
+      baseActions.add(2, new GBAFEActions.HealStaffFactory("PHYSIC (7)", 7, 10));
     }
     private static GBAFEStats buildStats()
     {
