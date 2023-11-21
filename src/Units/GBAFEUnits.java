@@ -1798,7 +1798,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super.addVariants(unitList, yourIndex);
       UnitModel summon = new Phantom();
-//      baseActions.add(new TransformLifecycle.TransformFactory(summon, "PACK"));
+      baseActions.add(1, new GBAFEActions.SummonPhantomFactory(summon));
       unitList.add(yourIndex + 1, summon);
     }
   }
@@ -1818,6 +1818,9 @@ public class GBAFEUnits extends UnitModelScheme
       super("Phantom", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseMoveType = wing;
       healableHabs.clear();
+      baseActions.clear(); // Phantoms shouldn't capture. That's... not kosher.
+      for( UnitActionFactory action : UnitActionFactory.COMBAT_VEHICLE_ACTIONS )
+        baseActions.add(action);
     }
     private static GBAFEStats buildStats()
     {

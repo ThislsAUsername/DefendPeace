@@ -11,6 +11,7 @@ import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
+import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -21,6 +22,7 @@ import Engine.StateTrackers.StateTracker;
 import Engine.UnitActionLifecycles.TransformLifecycle.TransformEvent;
 import Engine.UnitActionLifecycles.JoinLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
+import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
@@ -400,35 +402,15 @@ public class GBAFEActions
       return healEvents;
     }
 
-    @Override
-    public Unit getActor()
-    {
-      return benefactor;
-    }
-
-    @Override
-    public XYCoord getMoveLocation()
-    {
-      return moveCoord;
-    }
-
-    @Override
-    public XYCoord getTargetLocation()
-    {
-      return repairCoord;
-    }
-
+    @Override public Unit getActor() { return benefactor; }
+    @Override public XYCoord getMoveLocation() { return moveCoord; }
+    @Override public XYCoord getTargetLocation() { return repairCoord; }
+    @Override public UnitActionFactory getType() { return type; }
     @Override
     public String toString()
     {
       return String.format("[Move %s to %s and use %s to heal %s]", benefactor.toStringWithLocation(), moveCoord,
           type.name, beneficiary.toStringWithLocation());
-    }
-
-    @Override
-    public UnitActionFactory getType()
-    {
-      return type;
     }
   } // ~HealStaffAction
 
@@ -447,7 +429,7 @@ public class GBAFEActions
     @Override
     public boolean canSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
     {
-      return other.isTurnOver;
+      return other.isTurnOver && actor.CO.army == other.CO.army;
     }
     @Override
     public GameAction getSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
@@ -461,7 +443,7 @@ public class GBAFEActions
     private GamePath movePath;
     private XYCoord startCoord;
     private XYCoord moveCoord;
-    private XYCoord repairCoord;
+    private XYCoord targetCoord;
     Unit benefactor;
     Unit beneficiary;
     ReactivateUnitFactory type;
@@ -475,7 +457,7 @@ public class GBAFEActions
       if( benefactor != null && null != beneficiary )
       {
         startCoord = new XYCoord(actor.x, actor.y);
-        repairCoord = new XYCoord(target.x, target.y);
+        targetCoord = new XYCoord(target.x, target.y);
       }
       if( null != path && (path.getEnd() != null) )
       {
@@ -493,11 +475,11 @@ public class GBAFEActions
 
       boolean isValid = true;
 
-      if( (null != gameMap) && (null != startCoord) && (null != repairCoord) && gameMap.isLocationValid(startCoord)
-          && gameMap.isLocationValid(repairCoord) )
+      if( (null != gameMap) && (null != startCoord) && (null != targetCoord) && gameMap.isLocationValid(startCoord)
+          && gameMap.isLocationValid(targetCoord) )
       {
         isValid &= benefactor != null && !benefactor.isTurnOver;
-        isValid &= isValid && null != beneficiary && !benefactor.CO.isEnemy(beneficiary.CO);
+        isValid &= isValid && null != beneficiary && benefactor.CO.army == beneficiary.CO.army;
         isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       }
       else
@@ -515,35 +497,15 @@ public class GBAFEActions
       return healEvents;
     }
 
-    @Override
-    public Unit getActor()
-    {
-      return benefactor;
-    }
-
-    @Override
-    public XYCoord getMoveLocation()
-    {
-      return moveCoord;
-    }
-
-    @Override
-    public XYCoord getTargetLocation()
-    {
-      return repairCoord;
-    }
-
+    @Override public Unit getActor() { return benefactor; }
+    @Override public XYCoord getMoveLocation() { return moveCoord; }
+    @Override public XYCoord getTargetLocation() { return targetCoord; }
+    @Override public UnitActionFactory getType() { return type; }
     @Override
     public String toString()
     {
-      return String.format("[Move %s to %s and use %s to heal %s]", benefactor.toStringWithLocation(), moveCoord,
+      return String.format("[Move %s to %s and use %s to reactivate %s]", benefactor.toStringWithLocation(), moveCoord,
           type.name, beneficiary.toStringWithLocation());
-    }
-
-    @Override
-    public UnitActionFactory getType()
-    {
-      return type;
     }
   } // ~ReactivateUnitAction
 
@@ -594,4 +556,113 @@ public class GBAFEActions
     @Override public XYCoord getStartPoint() { return new XYCoord(unit.x, unit.y); }
     @Override public XYCoord getEndPoint() { return new XYCoord(unit.x, unit.y); }
   }
+
+  public static class SummonPhantomFactory extends UnitActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+    public static final String name = "SUMMON";
+    public final UnitModel summonType;
+
+    public SummonPhantomFactory(UnitModel type)
+    {
+      summonType = type;
+    }
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    {
+      XYCoord moveLocation = movePath.getEndCoord();
+      if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
+      {
+        ArrayList<GameAction> repairOptions = new ArrayList<GameAction>();
+        ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, 1, 1);
+
+        for( XYCoord loc : locations )
+        {
+          Environment env = map.getEnvironment(loc);
+          if( map.isLocationEmpty(actor, loc) && actor.getMoveFunctor().canStandOn(env) )
+          {
+            repairOptions.add(new SummonPhantomAction(this, actor, movePath, loc));
+          }
+        }
+
+        // Only add this action set if we actually have a target
+        if( !repairOptions.isEmpty() )
+        {
+          // Bundle our attack options into an action set
+          return new GameActionSet(repairOptions);
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public String name(Unit actor)
+    {
+      return name;
+    }
+  }
+
+  public static class SummonPhantomAction extends GameAction
+  {
+    private GamePath movePath;
+    private XYCoord startCoord;
+    private XYCoord moveCoord;
+    Unit summoner;
+    XYCoord target;
+    private SummonPhantomFactory type;
+
+    public SummonPhantomAction(SummonPhantomFactory type, Unit actor, GamePath path, XYCoord target)
+    {
+      this.type = type;
+      summoner = actor;
+      this.target = target;
+      movePath = path;
+      startCoord = new XYCoord(actor);
+      moveCoord = movePath.getEndCoord();
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      // action consists of
+      //   MOVE
+      //   SUMMON
+      GameEventQueue healEvents = new GameEventQueue();
+
+      boolean isValid = true;
+
+      if( (null != gameMap) && (null != startCoord) && (null != target) && gameMap.isLocationValid(startCoord)
+          && gameMap.isLocationValid(target) )
+      {
+        isValid &= summoner != null && !summoner.isTurnOver;
+        isValid &= gameMap.isLocationEmpty(summoner, target);
+        isValid &= (movePath != null) && (movePath.getPathLength() > 0);
+      }
+      else
+        isValid = false;
+
+      if( isValid )
+      {
+        if( Utils.enqueueMoveEvent(gameMap, summoner, movePath, healEvents) )
+        {
+          // No surprises in the fog.
+          healEvents.add(new CreateUnitEvent(summoner.CO, type.summonType, target));
+          healEvents.add(new AddExperienceEvent(summoner, 10));
+        }
+      }
+      return healEvents;
+    }
+
+    @Override public Unit getActor() { return summoner; }
+    @Override public XYCoord getMoveLocation() { return moveCoord; }
+    @Override public XYCoord getTargetLocation() { return target; }
+    @Override public UnitActionFactory getType() { return type; }
+    @Override
+    public String toString()
+    {
+      return String.format("[Move %s to %s and summon at %s]", summoner.toStringWithLocation(), moveCoord, target);
+    }
+  } // ~SummonPhantomAction
+
 }
