@@ -21,8 +21,10 @@ import Engine.GameEvents.ModifyFundsEvent;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.StateTrackers.StateTracker;
 import Engine.UnitActionLifecycles.TransformLifecycle.TransformEvent;
+import Engine.UnitActionLifecycles.UnloadLifecycle.UnloadEvent;
 import Engine.UnitActionLifecycles.JoinLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
+import Engine.UnitActionLifecycles.LoadLifecycle.LoadEvent;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Terrain.MapLocation;
@@ -284,7 +286,7 @@ public class GBAFEActions
       XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
-        ArrayList<GameAction> repairOptions = new ArrayList<GameAction>();
+        ArrayList<GameAction> options = new ArrayList<GameAction>();
         ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, rangeMin, rangeMax);
 
         // For each location, see if there is a friendly unit to repair.
@@ -297,15 +299,15 @@ public class GBAFEActions
               && canSupport(map, actor, movePath, other)
               )
           {
-            repairOptions.add(getSupport(map, actor, movePath, other));
+            options.addAll(getSupportAll(map, actor, movePath, other));
           }
         }
 
         // Only add this action set if we actually have a target
-        if( !repairOptions.isEmpty() )
+        if( !options.isEmpty() )
         {
           // Bundle our attack options into an action set
-          return new GameActionSet(repairOptions);
+          return new GameActionSet(options);
         }
       }
       return null;
@@ -318,7 +320,17 @@ public class GBAFEActions
     }
 
     public abstract boolean canSupport(GameMap map, Unit actor, GamePath movePath, Unit other);
-    public abstract GameAction getSupport(GameMap map, Unit actor, GamePath movePath, Unit other);
+    // Implementers must override one of these
+    public ArrayList<GameAction> getSupportAll(GameMap map, Unit actor, GamePath movePath, Unit other)
+    {
+      ArrayList<GameAction> result = new ArrayList<>();
+      result.add(getSupportSingle(map, actor, movePath, other));
+      return result;
+    }
+    public GameAction getSupportSingle(GameMap map, Unit actor, GamePath movePath, Unit other)
+    {
+      return null;
+    }
   }
 
   /**
@@ -345,7 +357,7 @@ public class GBAFEActions
       return !other.model.isAny(UnitModel.SHIP) && (!other.isFullySupplied() || other.isHurt());
     }
     @Override
-    public GameAction getSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
+    public GameAction getSupportSingle(GameMap map, Unit actor, GamePath movePath, Unit other)
     {
       return new HealStaffAction(this, actor, movePath, other);
     }
@@ -440,7 +452,7 @@ public class GBAFEActions
       return other.isTurnOver && actor.CO.army == other.CO.army;
     }
     @Override
-    public GameAction getSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
+    public GameAction getSupportSingle(GameMap map, Unit actor, GamePath movePath, Unit other)
     {
       return new ReactivateUnitAction(this, actor, movePath, other);
     }
@@ -732,4 +744,369 @@ public class GBAFEActions
     @Override public XYCoord getEndPoint() { return new XYCoord(unit.x, unit.y); }
   }
 
+  // rescue/drop stuff
+
+  /**
+   * Provides an alternate method to get units loaded onto other units; includes canto
+   */
+  public static class RescueUnitFactory extends SupportActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+    public static final RescueUnitFactory instance = new RescueUnitFactory();
+    private Object readResolve() { return instance; }
+    public RescueUnitFactory()
+    {
+      super("RESCUE");
+    }
+    @Override
+    public boolean canSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
+    {
+      // Can't rescue ships or units with cargo
+      return !other.model.isAny(UnitModel.SHIP) && !(other.heldUnits.size() > 0);
+    }
+    @Override
+    public ArrayList<GameAction> getSupportAll(GameMap map, Unit actor, GamePath movePath, Unit other)
+    {
+      ArrayList<GameAction> result = new ArrayList<>();
+
+      boolean includeOccupiedDestinations = false;
+      boolean canTravelThroughEnemies = false;
+      int movePoints = actor.getMovePower(map) - movePath.getFuelCost(actor, map);
+      ArrayList<XYCoord> destinations = Utils.findFloodFillArea(movePath.getEndCoord(), actor, actor.CO.army, actor.getMoveFunctor(),
+                                     Math.min(movePoints, actor.fuel), map, includeOccupiedDestinations, canTravelThroughEnemies);
+
+      for( XYCoord coord : destinations )
+      {
+        GamePath canto = Utils.findShortestPath(actor, coord, map);
+        result.add(new RescueUnitAction(actor, movePath, other, canto));
+      }
+
+      return result;
+    }
+  }
+
+  public static class RescueUnitAction extends GameAction
+  {
+    private GamePath movePath, canto;
+    private XYCoord startCoord;
+    private XYCoord moveCoord;
+    Unit grabber;
+    XYCoord target;
+
+    public RescueUnitAction(Unit actor, GamePath path, Unit target, GamePath canto)
+    {
+      grabber = actor;
+      this.target = new XYCoord(target); // lazy/10
+      movePath = path;
+      this.canto = canto;
+      startCoord = new XYCoord(actor);
+      moveCoord = movePath.getEndCoord();
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      // action consists of
+      //   MOVE
+      //   RESCUE
+      //   CANTO
+      GameEventQueue events = new GameEventQueue();
+
+      boolean isValid = true;
+
+      if( (null != gameMap) && (null != startCoord) && (null != target) && gameMap.isLocationValid(startCoord)
+          && gameMap.isLocationValid(target) )
+      {
+        isValid &= grabber != null && !grabber.isTurnOver;
+        isValid &= !gameMap.isLocationEmpty(grabber, target);
+        isValid &= (movePath != null) && (movePath.getPathLength() > 0);
+      }
+      else
+        isValid = false;
+
+      if( isValid )
+      {
+        if( Utils.enqueueMoveEvent(gameMap, grabber, movePath, events) )
+        {
+          // No surprises in the fog.
+          events.add(new LoadEvent(gameMap.getResident(target), grabber));
+          Utils.enqueueMoveEvent(gameMap, grabber, canto, events);
+        }
+      }
+      return events;
+    }
+
+    @Override public Unit getActor() { return grabber; }
+    @Override public XYCoord getMoveLocation() { return moveCoord; }
+    @Override public XYCoord getTargetLocation() { return target; }
+    @Override public UnitActionFactory getType() { return RescueUnitFactory.instance; }
+    @Override
+    public String toString()
+    {
+      return String.format("[Move %s to %s and rescue a unit at %s]", grabber.toStringWithLocation(), moveCoord, target);
+    }
+  }
+
+  /**
+   * Steal another unit's cargo; includes a drop and canto
+   */
+  public static class TakeUnitFactory extends SupportActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+    public static final TakeUnitFactory instance = new TakeUnitFactory();
+    private Object readResolve() { return instance; }
+
+    public TakeUnitFactory()
+    {
+      super("TAKE");
+    }
+    @Override
+    public boolean canSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
+    {
+      // Can't take cargo that doesn't exist or that has cargo
+      return other.heldUnits.size() > 0 && !(other.heldUnits.get(0).heldUnits.size() > 0);
+    }
+    @Override
+    public ArrayList<GameAction> getSupportAll(GameMap map, Unit actor, GamePath movePath, Unit other)
+    {
+      Unit cargo = other.heldUnits.get(0); // Always grab the first one
+
+      ArrayList<GameAction> result = new ArrayList<>();
+
+      ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, actor, movePath.getEndCoord(), cargo);
+      if( dropoffLocations.isEmpty() )
+        dropoffLocations.add(null); // If we can't drop, just canto
+
+      boolean includeOccupiedDestinations = false;
+      boolean canTravelThroughEnemies = false;
+      int movePoints = actor.getMovePower(map) - movePath.getFuelCost(actor, map);
+      ArrayList<XYCoord> destinations = Utils.findFloodFillArea(movePath.getEndCoord(), actor, actor.CO.army, actor.getMoveFunctor(),
+                                     Math.min(movePoints, actor.fuel), map, includeOccupiedDestinations, canTravelThroughEnemies);
+
+      for( XYCoord coord : destinations )
+      {
+        GamePath canto = Utils.findShortestPath(actor, coord, map);
+        for( XYCoord dropLoc : dropoffLocations )
+          result.add(new TakeUnitAction(actor, movePath, other, cargo, dropLoc, canto));
+      }
+
+      return result;
+    }
+  }
+  public static class TakeUnitAction extends GameAction
+  {
+    private GamePath movePath, canto;
+    private XYCoord startCoord;
+    private XYCoord moveCoord;
+    Unit grabber, target, cargo;
+    XYCoord dropLoc;
+
+    public TakeUnitAction(Unit actor, GamePath path, Unit target, Unit cargo, XYCoord dropLoc, GamePath canto)
+    {
+      grabber = actor;
+      this.target = target;
+      this.cargo  = cargo;
+      this.dropLoc = dropLoc;
+      movePath = path;
+      this.canto = canto;
+      startCoord = new XYCoord(actor);
+      moveCoord = movePath.getEndCoord();
+      if( null != canto ) // Does this make sense?
+        moveCoord = canto.getEndCoord();
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      // action consists of
+      //   MOVE
+      //   TAKE
+      //   [DROP]
+      //   CANTO
+      GameEventQueue events = new GameEventQueue();
+
+      boolean isValid = true;
+
+      if( (null != gameMap) && (null != startCoord) && (null != target) && gameMap.isLocationValid(startCoord)
+          && gameMap.isLocationValid(dropLoc) )
+      {
+        isValid &= grabber != null && !grabber.isTurnOver;
+        isValid &= target != null && cargo != null;
+        isValid &= gameMap.isLocationEmpty(grabber, dropLoc);
+        isValid &= (movePath != null) && (movePath.getPathLength() > 0);
+        isValid &= (canto != null) && (canto.getPathLength() > 0);
+      }
+      else
+        isValid = false;
+
+      if( isValid )
+      {
+        if( Utils.enqueueMoveEvent(gameMap, grabber, movePath, events) )
+        {
+          // No surprises in the fog.
+          events.add(new TakeUnitEvent(grabber, target, cargo));
+          if( null != dropLoc )
+            events.add(new UnloadEvent(grabber, cargo, dropLoc));
+          Utils.enqueueMoveEvent(gameMap, grabber, canto, events);
+        }
+      }
+      return events;
+    }
+
+    @Override public Unit getActor() { return grabber; }
+    @Override public XYCoord getMoveLocation() { return moveCoord; }
+    @Override public XYCoord getTargetLocation() { return new XYCoord(target); }
+    @Override public UnitActionFactory getType() { return TakeUnitFactory.instance; }
+    @Override
+    public String toString()
+    {
+      return String.format("[Move %s to %s and take a unit at %s]", grabber.toStringWithLocation(), moveCoord, target);
+    }
+  }
+  public static class TakeUnitEvent implements GameEvent
+  {
+    private Unit unit, target, cargo;
+
+    public TakeUnitEvent(Unit caster, Unit target, Unit cargo)
+    {
+      unit = caster;
+      this.target = target;
+      this.cargo  = cargo;
+    }
+
+    @Override
+    public void performEvent(MapMaster map)
+    {
+      target.heldUnits.remove(cargo);
+      unit.heldUnits.add(cargo);
+    }
+
+    @Override public GameAnimation getEventAnimation(MapView mapView) { return null; }
+    @Override public GameEventQueue sendToListener(GameEventListener listener) { return null; }
+    @Override public XYCoord getStartPoint() { return new XYCoord(unit); }
+    @Override public XYCoord getEndPoint() { return new XYCoord(target); }
+  }
+
+  /**
+   * Provides an alternate method to get units unloaded from units; includes canto
+   */
+  public static class DropUnitFactory extends UnitActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+    public static final String name = "DROP";
+    public static final DropUnitFactory instance = new DropUnitFactory();
+
+    @Override
+    public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    {
+      if( actor.heldUnits.size() <= 0 )
+        return null;
+      Unit cargo = actor.heldUnits.get(0); // Always drop the first one
+
+      XYCoord moveLocation = movePath.getEndCoord();
+      if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
+      {
+        ArrayList<GameAction> options = new ArrayList<GameAction>();
+
+        ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, actor, movePath.getEndCoord(), cargo);
+        if( dropoffLocations.isEmpty() )
+          dropoffLocations.add(null); // If we can't drop, just canto
+
+        boolean includeOccupiedDestinations = false;
+        boolean canTravelThroughEnemies = false;
+        int movePoints = actor.getMovePower(map) - movePath.getFuelCost(actor, map);
+        ArrayList<XYCoord> destinations = Utils.findFloodFillArea(movePath.getEndCoord(), actor, actor.CO.army, actor.getMoveFunctor(),
+                                       Math.min(movePoints, actor.fuel), map, includeOccupiedDestinations, canTravelThroughEnemies);
+
+        for( XYCoord coord : destinations )
+        {
+          GamePath canto = Utils.findShortestPath(actor, coord, map);
+          for( XYCoord dropLoc : dropoffLocations )
+            options.add(new DropUnitAction(actor, movePath, cargo, dropLoc, canto));
+        }
+
+        // Only add this action set if we actually have a target
+        if( !options.isEmpty() )
+        {
+          return new GameActionSet(options);
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public String name(Unit actor)
+    {
+      return name;
+    }
+    private Object readResolve()
+    {
+      return instance;
+    }
+  }
+  public static class DropUnitAction extends GameAction
+  {
+    private GamePath movePath, canto;
+    private XYCoord startCoord;
+    private XYCoord moveCoord;
+    Unit grabber, cargo;
+    XYCoord dropLoc;
+
+    public DropUnitAction(Unit actor, GamePath path, Unit cargo, XYCoord dropLoc, GamePath canto)
+    {
+      grabber = actor;
+      this.cargo  = cargo;
+      this.dropLoc = dropLoc;
+      movePath = path;
+      this.canto = canto;
+      startCoord = new XYCoord(actor);
+      moveCoord = movePath.getEndCoord();
+      if( null != canto ) // Does this make sense?
+        moveCoord = canto.getEndCoord();
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      // action consists of
+      //   MOVE
+      //   DROP
+      //   CANTO
+      GameEventQueue events = new GameEventQueue();
+
+      boolean isValid = true;
+
+      if( (null != gameMap) && (null != startCoord) && gameMap.isLocationValid(startCoord)
+          && gameMap.isLocationValid(dropLoc) )
+      {
+        isValid &= grabber != null && !grabber.isTurnOver;
+        isValid &= gameMap.isLocationEmpty(grabber, dropLoc);
+        isValid &= (movePath != null) && (movePath.getPathLength() > 0);
+        isValid &= (canto != null) && (canto.getPathLength() > 0);
+      }
+      else
+        isValid = false;
+
+      if( isValid )
+      {
+        if( Utils.enqueueMoveEvent(gameMap, grabber, movePath, events) )
+        {
+          // No surprises in the fog.
+          events.add(new UnloadEvent(grabber, cargo, dropLoc));
+          Utils.enqueueMoveEvent(gameMap, grabber, canto, events);
+        }
+      }
+      return events;
+    }
+
+    @Override public Unit getActor() { return grabber; }
+    @Override public XYCoord getMoveLocation() { return moveCoord; }
+    @Override public XYCoord getTargetLocation() { return dropLoc; }
+    @Override public UnitActionFactory getType() { return DropUnitFactory.instance; }
+    @Override
+    public String toString()
+    {
+      return String.format("[Move %s to %s and drop a unit at %s]", grabber.toStringWithLocation(), moveCoord, dropLoc);
+    }
+  }
 }

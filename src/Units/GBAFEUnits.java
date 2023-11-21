@@ -301,15 +301,18 @@ public class GBAFEUnits extends UnitModelScheme
     private static final int VISION_RANGE = VISION_NORMAL;
 
     private static final MoveType moveType = hoof;
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
 
     public HorseUnit(String name, GBAFEStats stats, int cost, int move, WeaponModel[] weapons, double starVal)
     {
       super(name, stats, ROLE, cost, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, move,
           moveType, actions, weapons, starVal);
       baseCargoCapacity = 1;
-      carryableMask = TROOP;
+      carryableMask = 0; // The RESCUE action will be used instead of LOAD
       isHorse = true;
+      baseActions.add(1, GBAFEActions.DropUnitFactory.instance);
+      baseActions.add(2, GBAFEActions.TakeUnitFactory.instance);
+      baseActions.add(3, GBAFEActions.RescueUnitFactory.instance);
     }
   }
   public abstract static class FlierUnit extends GBAFEUnitModel
@@ -321,14 +324,14 @@ public class GBAFEUnits extends UnitModelScheme
     private static final int VISION_RANGE = VISION_NORMAL;
 
     private static final MoveType moveType = wing;
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
+    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
 
     public FlierUnit(String name, GBAFEStats stats, int cost, int move, WeaponModel[] weapons, double starVal)
     {
       super(name, stats, ROLE, cost, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, move,
           moveType, actions, weapons, starVal);
       baseCargoCapacity = 1;
-      carryableMask = TROOP;
+      carryableMask = 0; // The RESCUE action will be used instead of LOAD
     }
   }
 
