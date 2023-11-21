@@ -80,33 +80,13 @@ public class MapTileDetailsArtist
     terrainAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.SHIELD.getIcon(), terrain.getDefLevel()));
     if( loc.durability < 99 ) terrainAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), loc.durability));
 
-    // Get the unit image.
-    ArrayList<AttributeArtist> unitAttrs = new ArrayList<AttributeArtist>();
-    BufferedImage unitImage = null;
+    // Collect any unit and its cargo
+    ArrayList<ArrayList<AttributeArtist>> unitAttrCache = new ArrayList<>();
+    ArrayList<BufferedImage> unitImageCache = new ArrayList<>();
     if( null != unit )
     {
-      UnitSpriteSet uss = SpriteLibrary.getMapUnitSpriteSet(unit);
-      unitImage = uss.getUnitImage();
-
-      unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), unit.getHP()));
-      if( unit.model.needsFuel() )
-        unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.FUEL.getIcon(), unit.fuel));
-      if( unit.ammo >= 0 ) 
-        unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.AMMO.getIcon(), unit.ammo));
-      if( unit.getCaptureProgress() > 0)
-        unitAttrs.add(new AttributeArtist(SpriteLibrary.getCaptureIcon(unit.CO.myColor),
-            map.getEnvironment(coord).terrainType.getCaptureThreshold()-unit.getCaptureProgress()));
-
-      final MarkingCache cache = MarkingCache.instance(map.game);
-      cache.setupMarkers();
-      for( UnitMarker m : cache.markers )
-      {
-        CustomStatData stat = m.getCustomStat(unit);
-        if (null == stat)
-          continue;
-        BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(stat.markColor).get(stat.mark);
-        unitAttrs.add(new AttributeArtist(symbol, stat.textColor, stat.text));
-      }
+      addDetailInfoFor(unitImageCache, unitAttrCache,
+                       map, coord, unit);
     }
 
     ///////////////////////////////////////////////////////////////
@@ -114,11 +94,13 @@ public class MapTileDetailsArtist
     int bufferPx = 3;
     //            left buf          attr icon               tile     right buffer
     int columnW = bufferPx + iconSize+ATTR_TEXT_SPACING + tileSize + bufferPx*2;
-    int panelW = columnW;
-    if( null != unitImage )
-      panelW += columnW - bufferPx*2; // The panel gets only one right buffer
+    int panelW = columnW * (unitImageCache.size() + 1);
+    if( unitImageCache.size() > 0 )
+      panelW += bufferPx*2; // The panel gets N-1 right buffers
 
-    int numAttrs = Math.max(terrainAttrs.size(), unitAttrs.size());
+    int numAttrs = terrainAttrs.size();
+    for( ArrayList<AttributeArtist> attrList : unitAttrCache )
+      numAttrs = Math.max(numAttrs, attrList.size());
     //         upper buffer   tile   lower buffer   each attribute with a 1-px buffer
     int panelH = iconSize + tileSize + bufferPx  +  numAttrs*(iconSize+1);
 
@@ -139,13 +121,47 @@ public class MapTileDetailsArtist
     drawColumn(ltog, terrainSprite, terrainAttrs, drawX, drawY, false);
 
     // Draw all the unit stuff.
-    if( null != unitImage )
+    for( int i = 0; i < unitImageCache.size(); i++ )
     {
-      drawX = columnW;
-      drawColumn(ltog, unitImage, unitAttrs, drawX, drawY, true);
+      drawX += columnW;
+      drawColumn(ltog, unitImageCache.get(i), unitAttrCache.get(i), drawX, drawY, true);
     }
 
     currentTile = coord;
+  }
+
+  private static void addDetailInfoFor(ArrayList<BufferedImage> unitImageCache,
+                                       ArrayList<ArrayList<AttributeArtist>> unitAttrCache,
+                                       GameMap map, XYCoord coord, Unit unit)
+  {
+    UnitSpriteSet uss = SpriteLibrary.getMapUnitSpriteSet(unit);
+    unitImageCache.add(uss.getUnitImage());
+    ArrayList<AttributeArtist> unitAttrs = new ArrayList<>();
+    unitAttrCache.add(unitAttrs);
+
+    unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), unit.getHP()));
+    if( unit.model.needsFuel() )
+      unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.FUEL.getIcon(), unit.fuel));
+    if( unit.ammo >= 0 )
+      unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.AMMO.getIcon(), unit.ammo));
+    if( unit.getCaptureProgress() > 0 && null != coord )
+      unitAttrs.add(new AttributeArtist(SpriteLibrary.getCaptureIcon(unit.CO.myColor),
+          map.getEnvironment(coord).terrainType.getCaptureThreshold()-unit.getCaptureProgress()));
+
+    final MarkingCache cache = MarkingCache.instance(map.game);
+    cache.setupMarkers();
+    for( UnitMarker m : cache.markers )
+    {
+      CustomStatData stat = m.getCustomStat(unit);
+      if (null == stat)
+        continue;
+      BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(stat.markColor).get(stat.mark);
+      unitAttrs.add(new AttributeArtist(symbol, stat.textColor, stat.text));
+    }
+    // Also display cargo via DFS
+    for( Unit cargo : unit.heldUnits)
+      addDetailInfoFor(unitImageCache, unitAttrCache,
+                       map, null, cargo);
   }
 
   private static void drawColumn(Graphics g, BufferedImage image, ArrayList<AttributeArtist> attrs, int drawX, int drawY, boolean centerImage)
