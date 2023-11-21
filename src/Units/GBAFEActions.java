@@ -12,6 +12,7 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.CreateUnitEvent;
+import Engine.GameEvents.CreateUnitEvent.AnimationStyle;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -557,6 +558,37 @@ public class GBAFEActions
     @Override public XYCoord getEndPoint() { return new XYCoord(unit.x, unit.y); }
   }
 
+  public static class SummonTracker extends StateTracker
+  {
+    private static final long serialVersionUID = 1L;
+
+    public HashMap<Unit, Unit> summons = new HashMap<>();
+
+    private void removeSummon(Unit tbr)
+    {
+      if( !summons.containsValue(tbr) )
+        return;
+      for( Unit key : summons.keySet() )
+      {
+        if( tbr != summons.get(key) )
+          continue;
+        summons.remove(key);
+        break;
+      }
+    }
+    public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event)
+    {
+      removeSummon(event.unitDonor);
+      return null;
+    };
+    @Override
+    public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+    {
+      removeSummon(victim);
+      return null;
+    }
+  }
+
   public static class SummonPhantomFactory extends UnitActionFactory
   {
     private static final long serialVersionUID = 1L;
@@ -571,10 +603,14 @@ public class GBAFEActions
     @Override
     public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
+      SummonTracker st = StateTracker.instance(map.game, SummonTracker.class);
+      if( st.summons.containsKey(actor) )
+        return null;
+
       XYCoord moveLocation = movePath.getEndCoord();
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
-        ArrayList<GameAction> repairOptions = new ArrayList<GameAction>();
+        ArrayList<GameAction> summonOptions = new ArrayList<GameAction>();
         ArrayList<XYCoord> locations = Utils.findLocationsInRange(map, moveLocation, 1, 1);
 
         for( XYCoord loc : locations )
@@ -582,15 +618,14 @@ public class GBAFEActions
           Environment env = map.getEnvironment(loc);
           if( map.isLocationEmpty(actor, loc) && actor.getMoveFunctor().canStandOn(env) )
           {
-            repairOptions.add(new SummonPhantomAction(this, actor, movePath, loc));
+            summonOptions.add(new SummonPhantomAction(this, actor, movePath, loc));
           }
         }
 
         // Only add this action set if we actually have a target
-        if( !repairOptions.isEmpty() )
+        if( !summonOptions.isEmpty() )
         {
-          // Bundle our attack options into an action set
-          return new GameActionSet(repairOptions);
+          return new GameActionSet(summonOptions);
         }
       }
       return null;
@@ -647,8 +682,9 @@ public class GBAFEActions
         if( Utils.enqueueMoveEvent(gameMap, summoner, movePath, healEvents) )
         {
           // No surprises in the fog.
-          healEvents.add(new CreateUnitEvent(summoner.CO, type.summonType, target));
+          healEvents.add(new CreateUnitEvent(summoner.CO, type.summonType, target, AnimationStyle.NONE, true, false));
           healEvents.add(new AddExperienceEvent(summoner, 10));
+          healEvents.add(new AddSummonEvent(summoner, target));
         }
       }
       return healEvents;
@@ -664,5 +700,29 @@ public class GBAFEActions
       return String.format("[Move %s to %s and summon at %s]", summoner.toStringWithLocation(), moveCoord, target);
     }
   } // ~SummonPhantomAction
+
+  public static class AddSummonEvent implements GameEvent
+  {
+    private Unit unit;
+    XYCoord target;
+
+    public AddSummonEvent(Unit caster, XYCoord target)
+    {
+      unit = caster;
+      this.target = target;
+    }
+
+    @Override
+    public void performEvent(MapMaster map)
+    {
+      SummonTracker st = StateTracker.instance(map.game, SummonTracker.class);
+      st.summons.put(unit, map.getResident(target));
+    }
+
+    @Override public GameAnimation getEventAnimation(MapView mapView) { return null; }
+    @Override public GameEventQueue sendToListener(GameEventListener listener) { return null; }
+    @Override public XYCoord getStartPoint() { return new XYCoord(unit.x, unit.y); }
+    @Override public XYCoord getEndPoint() { return new XYCoord(unit.x, unit.y); }
+  }
 
 }
