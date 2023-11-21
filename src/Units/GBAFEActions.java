@@ -1,5 +1,6 @@
 package Units;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -126,6 +127,8 @@ public class GBAFEActions
 
     public int getExperience(Unit profiteer)
     {
+      if( experience.containsKey(profiteer) )
+        return experience.get(profiteer);
       GBAFEUnitModel profiteerType = (GBAFEUnitModel) profiteer.model;
       return addExperience(profiteer, profiteerType.baseXP, 0);
     }
@@ -144,6 +147,16 @@ public class GBAFEActions
         finalVal = PROMO_LEVEL_BONUS*100;
       experience.put(profiteer, finalVal);
       return finalVal;
+    }
+    @Override
+    public CustomStatData getCustomStat(Unit unit)
+    {
+      Color tc = Color.white;
+      int level = getExperience(unit) / 100;
+      String text = "" + level;
+      if( level >= 10 && null != ((GBAFEUnitModel) unit.model).promotesTo )
+        tc = Color.green; // If we have a promotion available, do fancy text
+      return new CustomStatData('L', Color.white, tc, text);
     }
   }
 
