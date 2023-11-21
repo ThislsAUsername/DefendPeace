@@ -1992,6 +1992,7 @@ public class GBAFEUnits extends UnitModelScheme
       baseActions.add(new TransformLifecycle.TransformFactory(fleetPack, "PACK"));
       fleetPack.baseActions.add(new TransformLifecycle.TransformFactory(this, "UNPACK"));
       feModels.unitModels.add(yourIndex + 1, fleetPack);
+      feModels.shoppingList.get(TerrainType.SEAPORT).add(fleetPack);
     }
   }
 
@@ -2061,6 +2062,7 @@ public class GBAFEUnits extends UnitModelScheme
       baseActions.add(new TransformLifecycle.TransformFactory(siegeBoatPack, "PACK"));
       siegeBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(this, "UNPACK"));
       feModels.unitModels.add(yourIndex + 1, siegeBoatPack);
+      feModels.shoppingList.get(TerrainType.SEAPORT).add(siegeBoatPack);
     }
   }
 
@@ -2132,6 +2134,7 @@ public class GBAFEUnits extends UnitModelScheme
       baseActions.add(new TransformLifecycle.TransformFactory(cloisterBoatPack, "PACK"));
       cloisterBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(this, "UNPACK"));
       feModels.unitModels.add(yourIndex + 1, cloisterBoatPack);
+      feModels.shoppingList.get(TerrainType.SEAPORT).add(cloisterBoatPack);
     }
   }
 
