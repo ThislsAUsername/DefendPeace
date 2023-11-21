@@ -4,8 +4,10 @@ import java.util.ArrayList;
 
 import Engine.GameInstance;
 import Engine.UnitActionFactory;
+import Engine.StateTrackers.StateTracker;
 import Engine.UnitActionLifecycles.TransformLifecycle;
 import Terrain.TerrainType;
+import Units.GBAFEActions.GBAFEExperienceTracker;
 import Units.MoveTypes.*;
 
 public class GBAFEUnits extends UnitModelScheme
@@ -29,6 +31,7 @@ public class GBAFEUnits extends UnitModelScheme
   @Override
   public GameReadyModels buildGameReadyModels()
   {
+    // TODO: Triangle attacks?
     GameReadyModels feModels = new GameReadyModels();
 
     ArrayList<UnitModel> factoryModels = new ArrayList<>();
@@ -97,19 +100,8 @@ public class GBAFEUnits extends UnitModelScheme
   {
     super.registerStateTrackers(gi);
 
-//    StateTracker.instance(gi, UnitTurnPositionTracker.class);
-    // TODO: Experience tracker (kills/capture)
+    StateTracker.instance(gi, GBAFEExperienceTracker.class);
     // TODO: Phantom tracker?
-//    UnitResurrectionTracker rezzer = StateTracker.instance(gi, UnitResurrectionTracker.class);
-//    // Populate resurrection pairs
-//    GameReadyModels grms = gi.rules.unitModelScheme.getGameReadyModels();
-//    for( UnitModel um : grms.unitModels )
-//    {
-//      KaijuWarsUnitModel umCast = (KaijuWarsUnitModel) um;
-//      if( null == umCast.resurrectsAs )
-//        continue;
-//      rezzer.resurrectionTypeMap.put(um, umCast.resurrectsAs);
-//    }
   }
 
   public static class ClassStatsBuilder
@@ -143,7 +135,8 @@ public class GBAFEUnits extends UnitModelScheme
     public GBAFEStats build(boolean promoted, int levels)
     {
       GBAFEStats stats = new GBAFEStats();
-      stats.level = levels+1;
+      stats.level    = levels+1;
+      stats.promoted = promoted;
       if( promoted )
         levels += 9; // 7/8 Easy use 9; all others use 19, but 19 is nuts
       stats.critBoost = critBoost;
@@ -171,6 +164,7 @@ public class GBAFEUnits extends UnitModelScheme
 
   public static class GBAFEStats
   {
+    public boolean promoted  = false;
     public boolean critBoost = false;
     public boolean sureShot  = false;
     public boolean pierce    = false;
@@ -209,6 +203,8 @@ public class GBAFEUnits extends UnitModelScheme
     private static final long serialVersionUID = 1L;
     public final GBAFEStats stats;
     public int baseXP = 0;
+    public boolean reducedPromoKillBonus = false;
+    public int classRelativePower = 3; // "Weaker" classes level faster, and "stronger" classes grant more experience
     public UnitModel promotesTo = null;
 
     public boolean isArmor   = false;
@@ -342,8 +338,8 @@ public class GBAFEUnits extends UnitModelScheme
   private static final MoveType hoofNPromo = new FEMoveTypes.FEHoofNomadPromoted();
   private static final int MAX_FUEL = 99;
   private static final int IDLE_FUEL_BURN = 0;
-  private static final int VISION_NORMAL = 3;
-  private static final int VISION_THIEF  = 8;
+  public static final int VISION_NORMAL = 3;
+  public static final int VISION_THIEF  = 8;
 
   public static class Soldier extends FootUnit
   {
@@ -360,6 +356,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Soldier", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       promotesTo = new Halberdier();
+      classRelativePower = 2;
     }
     private static GBAFEStats buildStats()
     {
@@ -518,6 +515,7 @@ public class GBAFEUnits extends UnitModelScheme
       super("Thief", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       promotesTo = new Assassin();
       visionRange = VISION_THIEF;
+      classRelativePower = 2;
     }
     private static GBAFEStats buildStats()
     {
@@ -553,6 +551,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Assassin", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       visionRange = VISION_THIEF;
+      reducedPromoKillBonus = true;
     }
     private static GBAFEStats buildStats()
     {
@@ -1097,6 +1096,7 @@ public class GBAFEUnits extends UnitModelScheme
       // Promotion is set by the caller
       baseMoveType = footMage;
       baseActions.add(0, new GBAFEActions.HealStaffFactory("HEAL (3)", 3, 1));
+      classRelativePower = 2;
     }
     private static GBAFEStats buildStats()
     {
@@ -1133,6 +1133,7 @@ public class GBAFEUnits extends UnitModelScheme
       super("Troubadour", static_stats, UNIT_COST, MOVE_POWER, new WeaponModel[0], STAR_VALUE);
       promotesTo = new Valkyrie();
       baseActions.add(0, new GBAFEActions.HealStaffFactory("HEAL (5)", 5, 1));
+      classRelativePower = 2;
     }
     private static GBAFEStats buildStats()
     {
@@ -1168,6 +1169,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Valkyrie", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseActions.add(1, new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
+      reducedPromoKillBonus = true;
     }
     private static GBAFEStats buildStats()
     {
@@ -1506,6 +1508,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Bard", static_stats, UNIT_COST, MOVE_POWER, new WeaponModel[0], STAR_VALUE);
       baseActions.add(0, new GBAFEActions.ReactivateUnitFactory("PLAY"));
+      classRelativePower = 2;
     }
     private static GBAFEStats buildStats()
     {
