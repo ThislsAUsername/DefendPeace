@@ -15,6 +15,8 @@ public class GBAFEUnits extends UnitModelScheme
 {
   private static final long serialVersionUID = 1L;
   private static final boolean SORT_PROMOTED_UNITS_LAST = true;
+  private static final boolean USE_GROWTHS              = true;
+  private static final int     PROMOTION_LEVEL_BOOST    = 9; // 7/8 Easy use 9; all others use 19, but 19 is nuts
 
   @Override
   public String toString()
@@ -139,7 +141,7 @@ public class GBAFEUnits extends UnitModelScheme
       stats.level    = levels+1;
       stats.promoted = promoted;
       if( promoted )
-        levels += 9; // 7/8 Easy use 9; all others use 19, but 19 is nuts
+        levels += PROMOTION_LEVEL_BOOST;
       stats.critBoost = critBoost;
       stats.sureShot  = sureShot;
       stats.pierce    = pierce;
@@ -152,13 +154,16 @@ public class GBAFEUnits extends UnitModelScheme
       stats.Lck   = baseLck;
       stats.Def   = baseDef;
       stats.Res   = baseRes;
-      stats.HP    = baseHP  + growthHP *levels/100;
-      stats.Str   = baseStr + growthStr*levels/100;
-      stats.Skl   = baseSkl + growthSkl*levels/100;
-      stats.Spd   = baseSpd + growthSpd*levels/100;
-      stats.Lck   = baseLck + growthLck*levels/100;
-      stats.Def   = baseDef + growthDef*levels/100;
-      stats.Res   = baseRes + growthRes*levels/100;
+      if( USE_GROWTHS )
+      {
+        stats.HP  += growthHP *levels/100;
+        stats.Str += growthStr*levels/100;
+        stats.Skl += growthSkl*levels/100;
+        stats.Spd += growthSpd*levels/100;
+        stats.Lck += growthLck*levels/100;
+        stats.Def += growthDef*levels/100;
+        stats.Res += growthRes*levels/100;
+      }
       return stats;
     }
   }

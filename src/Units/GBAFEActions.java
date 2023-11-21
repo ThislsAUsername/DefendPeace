@@ -33,6 +33,10 @@ import Units.GBAFEUnits.GBAFEUnitModel;
 
 public class GBAFEActions
 {
+  public static final boolean VARIABLE_PROMO_COST = false;
+  public static final int PROMOTION_COST = 5000;
+  public static final boolean PROMOTION_REQUIRES_LEVELS = true;
+
   public static class GBAFEExperienceTracker extends StateTracker
   {
     private static final long serialVersionUID = 1L;
@@ -167,17 +171,14 @@ public class GBAFEActions
     }
   }
 
-  public static final int PROMOTION_COST = 5000;
   public static class PromotionFactory extends UnitActionFactory
   {
     private static final long serialVersionUID = 1L;
-    public final UnitModel destinationType;
-    public final String name;
+    public final UnitModel destType;
 
     public PromotionFactory(UnitModel type)
     {
-      destinationType = type;
-      name = "~" + type.name + " ("+PROMOTION_COST+")";
+      destType = type;
     }
 
     @Override
@@ -187,10 +188,10 @@ public class GBAFEActions
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         boolean validPromo = true;
-        validPromo &= actor.CO.army.money >= PROMOTION_COST;
+        validPromo &= actor.CO.army.money >= getPromoCost(actor);
         MapLocation destInfo = map.getLocation(moveLocation);
         validPromo &= !actor.CO.isEnemy(destInfo.getOwner());
-        if( validPromo )
+        if( validPromo && PROMOTION_REQUIRES_LEVELS )
         {
           GBAFEExperienceTracker xp = StateTracker.instance(map.game, GBAFEExperienceTracker.class);
           validPromo &= xp.getExperience(actor) > 999;
@@ -204,7 +205,13 @@ public class GBAFEActions
     @Override
     public String name(Unit actor)
     {
-      return name;
+      return "~" + destType.name + " ("+getPromoCost(actor)+")";
+    }
+    public int getPromoCost(Unit actor)
+    {
+      if( VARIABLE_PROMO_COST )
+        return destType.costBase - actor.model.costBase;
+      return PROMOTION_COST;
     }
   }
 
@@ -231,8 +238,8 @@ public class GBAFEActions
         GameEvent moveEvent = transformEvents.peek();
         if( moveEvent.getEndPoint().equals(getMoveLocation()) ) // make sure we shouldn't be pre-empted
         {
-          transformEvents.add(new ModifyFundsEvent(actor.CO.army, -1 * PROMOTION_COST));
-          transformEvents.add(new TransformEvent(actor, type.destinationType));
+          transformEvents.add(new ModifyFundsEvent(actor.CO.army, -1 * type.getPromoCost(actor)));
+          transformEvents.add(new TransformEvent(actor, type.destType));
           transformEvents.add(new HealUnitEvent(actor, 10, null)); // "Free" fullheal included, for tactical spice
           transformEvents.add(new ResupplyEvent(null, actor));     //   and also resupply, since we use this for ballistae
         }
@@ -244,7 +251,7 @@ public class GBAFEActions
     public String toString()
     {
       return String.format("[Move %s to %s and promote to %s]", actor.toStringWithLocation(), getMoveLocation(),
-          type.destinationType);
+          type.destType);
     }
 
     @Override
