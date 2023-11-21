@@ -45,7 +45,11 @@ public class GBAFEActions
 
     public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event)
     {
-      experience.remove(event.unitDonor);
+      int donorXP = 0;
+      if( experience.containsKey(event.unitDonor) )
+        donorXP = experience.remove(event.unitDonor);
+      if( donorXP > getExperience(event.unitRecipient) )
+        experience.put(event.unitRecipient, donorXP);
       return null;
     };
     @Override
