@@ -391,7 +391,7 @@ public class GBAFEUnits extends UnitModelScheme
     public Halberdier()
     {
       super("Halberdier", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = null;
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -443,6 +443,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Myrmidon", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       promotesTo = new Swordmaster();
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -477,6 +478,7 @@ public class GBAFEUnits extends UnitModelScheme
     public Swordmaster()
     {
       super("Swordmaster", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -516,6 +518,7 @@ public class GBAFEUnits extends UnitModelScheme
       promotesTo = new Assassin();
       visionRange = VISION_THIEF;
       classRelativePower = 2;
+      role |= RECON;
     }
     private static GBAFEStats buildStats()
     {
@@ -552,6 +555,7 @@ public class GBAFEUnits extends UnitModelScheme
       super("Assassin", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       visionRange = VISION_THIEF;
       reducedPromoKillBonus = true;
+      role |= ASSAULT | RECON;
     }
     private static GBAFEStats buildStats()
     {
@@ -591,6 +595,7 @@ public class GBAFEUnits extends UnitModelScheme
       super("Axeman", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       promotesTo = new Warrior();
       baseMoveType = footAxe;
+      role |= ASSAULT | MECH;
     }
     private static GBAFEStats buildStats()
     {
@@ -626,6 +631,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Warrior", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseMoveType = footAxe;
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -675,6 +681,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Mercenary", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       promotesTo = new Hero();
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -709,6 +716,7 @@ public class GBAFEUnits extends UnitModelScheme
     public Hero()
     {
       super("Hero", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -747,6 +755,7 @@ public class GBAFEUnits extends UnitModelScheme
       promotesTo = new General();
       isArmor = true;
       baseMoveType = footArmor;
+      role |= MECH;
     }
     private static GBAFEStats buildStats()
     {
@@ -783,6 +792,7 @@ public class GBAFEUnits extends UnitModelScheme
       super("General", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       isArmor = true;
       baseMoveType = footArmor;
+      role |= ASSAULT | MECH;
     }
     private static GBAFEStats buildStats()
     {
@@ -833,6 +843,7 @@ public class GBAFEUnits extends UnitModelScheme
       super("Great Knight", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseMoveType = hoofPromo;
       isArmor = true;
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -870,6 +881,7 @@ public class GBAFEUnits extends UnitModelScheme
       super("Nomad", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       promotesTo = new NomadTrooper();
       baseMoveType = hoofN;
+      role |= SURFACE_TO_AIR;
     }
     private static GBAFEStats buildStats()
     {
@@ -905,6 +917,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Nomad Trooper", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseMoveType = hoofNPromo;
+      role |= ASSAULT | SURFACE_TO_AIR;
     }
     private static GBAFEStats buildStats()
     {
@@ -951,7 +964,7 @@ public class GBAFEUnits extends UnitModelScheme
       for( UnitActionFactory action : UnitActionFactory.COMBAT_VEHICLE_ACTIONS )
         baseActions.add(action);
       maxAmmo = 5;
-      role = TANK | LAND;
+      role = TANK | LAND | SURFACE_TO_AIR;
       healableHabs.clear(); // No free resupplies for you
       baseMoveType = wheel;
     }
@@ -971,6 +984,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Archer", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       promotesTo = new Sniper();
+      role |= SURFACE_TO_AIR;
     }
     private static GBAFEStats buildStats()
     {
@@ -1021,7 +1035,7 @@ public class GBAFEUnits extends UnitModelScheme
       for( UnitActionFactory action : UnitActionFactory.COMBAT_VEHICLE_ACTIONS )
         baseActions.add(action);
       maxAmmo = 5;
-      role = TANK | LAND;
+      role = TANK | LAND | SURFACE_TO_AIR;
       healableHabs.clear(); // No free resupplies for you
       baseMoveType = wheel;
     }
@@ -1040,6 +1054,7 @@ public class GBAFEUnits extends UnitModelScheme
     public Sniper()
     {
       super("Sniper", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
+      role |= SURFACE_TO_AIR;
     }
     private static GBAFEStats buildStats()
     {
@@ -1170,6 +1185,7 @@ public class GBAFEUnits extends UnitModelScheme
       super("Valkyrie", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseActions.add(1, new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
       reducedPromoKillBonus = true;
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -1243,6 +1259,7 @@ public class GBAFEUnits extends UnitModelScheme
       super("Sage", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseMoveType = footMage;
       baseActions.add(1, new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -1293,6 +1310,7 @@ public class GBAFEUnits extends UnitModelScheme
       super("Shaman", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       promotesTo = new Druid();
       baseMoveType = footMage;
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -1329,6 +1347,7 @@ public class GBAFEUnits extends UnitModelScheme
       super("Druid", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseMoveType = footMage;
       baseActions.add(1, new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -1438,6 +1457,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Cavalier", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       promotesTo = new Paladin();
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -1473,6 +1493,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Paladin", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseMoveType = hoofPromo;
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -1592,7 +1613,7 @@ public class GBAFEUnits extends UnitModelScheme
     public FalcoKnight()
     {
       super("Falco Knight", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = null;
+      role |= ASSAULT | AIR_TO_AIR | AIR_TO_SURFACE;
     }
     private static GBAFEStats buildStats()
     {
@@ -1642,6 +1663,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Wyvern Rider", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       promotesTo = new WyvernLord();
+      role |= ASSAULT | AIR_TO_AIR | AIR_TO_SURFACE;
     }
     private static GBAFEStats buildStats()
     {
@@ -1676,7 +1698,7 @@ public class GBAFEUnits extends UnitModelScheme
     public WyvernLord()
     {
       super("Wyvern Lord", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = null;
+      role |= ASSAULT | AIR_TO_AIR | AIR_TO_SURFACE;
     }
     private static GBAFEStats buildStats()
     {
@@ -1712,7 +1734,7 @@ public class GBAFEUnits extends UnitModelScheme
     public WyvernKnight()
     {
       super("Wyvern Knight", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = null;
+      role |= ASSAULT | AIR_TO_AIR | AIR_TO_SURFACE;
     }
     private static GBAFEStats buildStats()
     {
@@ -1824,6 +1846,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Berserker", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       baseMoveType = footPirate;
+      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -1863,7 +1886,7 @@ public class GBAFEUnits extends UnitModelScheme
   public static class Fleet extends GBAFEUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = SHIP | SEA;
+    private static final long ROLE = SHIP | SEA | SURFACE_TO_AIR;
 
     private static final int UNIT_COST = 16000;
     private static final double STAR_VALUE = 1.8;
@@ -1997,7 +2020,7 @@ public class GBAFEUnits extends UnitModelScheme
   public static class CloisterBoat extends GBAFEUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = SHIP | SEA;
+    private static final long ROLE = SHIP | SEA | ASSAULT;
 
     private static final int UNIT_COST = 24000;
     private static final double STAR_VALUE = 1.8;
