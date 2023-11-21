@@ -1,5 +1,6 @@
 package Units;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import Engine.GameInstance;
@@ -168,8 +169,9 @@ public class GBAFEUnits extends UnitModelScheme
     }
   }
 
-  public static class GBAFEStats
+  public static class GBAFEStats implements Serializable
   {
+    private static final long serialVersionUID = 1L;
     public boolean promoted  = false;
     public boolean critBoost = false;
     public boolean sureShot  = false;
