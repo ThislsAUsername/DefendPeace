@@ -2085,7 +2085,7 @@ public class GBAFEUnits extends UnitModelScheme
           moveType, actions, weapons, STAR_VALUE);
       baseCargoCapacity = 2;
       carryableMask = TROOP | TANK | HOVER;
-      baseActions.add(1, new GBAFEActions.HealStaffFactory("PHYSIC (7)", 7, 5));
+      baseActions.add(1, new GBAFEActions.HealStaffFactory("PHYSIC (7)", 7, 10));
     }
     private static GBAFEStats buildStats()
     {
