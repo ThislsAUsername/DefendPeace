@@ -8,6 +8,7 @@ import Engine.StateTrackers.StateTracker;
 import Engine.UnitActionLifecycles.TransformLifecycle;
 import Terrain.TerrainType;
 import Units.GBAFEActions.GBAFEExperienceTracker;
+import Units.GBAFEActions.SummonTracker;
 import Units.MoveTypes.*;
 
 public class GBAFEUnits extends UnitModelScheme
@@ -101,7 +102,7 @@ public class GBAFEUnits extends UnitModelScheme
     super.registerStateTrackers(gi);
 
     StateTracker.instance(gi, GBAFEExperienceTracker.class);
-    // TODO: Phantom tracker?
+    StateTracker.instance(gi, SummonTracker.class);
   }
 
   public static class ClassStatsBuilder
