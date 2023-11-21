@@ -1792,6 +1792,52 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthRes =  35;
       return bases.build(true, 0);
     }
+
+    @Override
+    public void addVariants(ArrayList<UnitModel> unitList, int yourIndex)
+    {
+      super.addVariants(unitList, yourIndex);
+      UnitModel summon = new Phantom();
+//      baseActions.add(new TransformLifecycle.TransformFactory(summon, "PACK"));
+      unitList.add(yourIndex + 1, summon);
+    }
+  }
+  public static class Phantom extends FootUnit
+  {
+    private static final long serialVersionUID = 1L;
+
+    private static final int UNIT_COST = 0;
+    private static final double STAR_VALUE = 0;
+    private static final int MOVE_POWER = 5;
+
+    private static final GBAFEStats static_stats = buildStats();
+    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronAxe(static_stats) };
+
+    public Phantom()
+    {
+      super("Phantom", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
+      baseMoveType = wing;
+      healableHabs.clear();
+    }
+    private static GBAFEStats buildStats()
+    {
+      ClassStatsBuilder bases = new ClassStatsBuilder();
+      // Lyon's phantom stats
+      bases.baseHP  =  1;
+      bases.baseStr =  8;
+      bases.baseSkl =  4;
+      bases.baseSpd =  7;
+      bases.baseLck = 20; // !?
+      bases.baseDef =  0;
+      bases.baseRes =  0;
+      bases.growthStr =  60;
+      bases.growthSkl =  45;
+      bases.growthSpd =  30;
+      bases.growthLck =  60;
+      bases.growthDef =  0; // Funnily enough, the Phantom *class* has a 15% Def/Res growth.
+      bases.growthRes =  0;
+      return bases.build(4);
+    }
   }
 
   public static class Pirate extends FootUnit
