@@ -588,7 +588,7 @@ public class GBAFEUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Hammer(static_stats) };
+    private static final WeaponModel[] weapons = { new GBAFEWeapons.Hammer(static_stats), new GBAFEWeapons.IronAxe(static_stats) };
 
     public Axeman()
     {
@@ -747,7 +747,7 @@ public class GBAFEUnits extends UnitModelScheme
     private static final int MOVE_POWER = 4;
 
     private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Horseslayer(static_stats) };
+    private static final WeaponModel[] weapons = { new GBAFEWeapons.Horseslayer(static_stats), new GBAFEWeapons.IronLance(static_stats) };
 
     public ArmorKnight()
     {
