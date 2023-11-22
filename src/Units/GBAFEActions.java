@@ -769,17 +769,19 @@ public class GBAFEActions
     {
       ArrayList<GameAction> result = new ArrayList<>();
 
-      boolean includeOccupiedDestinations = false;
-      boolean canTravelThroughEnemies = false;
-      int movePoints = actor.getMovePower(map) - movePath.getFuelCost(actor, map);
-      ArrayList<XYCoord> destinations = Utils.findFloodFillArea(movePath.getEndCoord(), actor, actor.CO.army, actor.getMoveFunctor(),
-                                     Math.min(movePoints, actor.fuel), map, includeOccupiedDestinations, canTravelThroughEnemies);
-
-      for( XYCoord coord : destinations )
-      {
+//      boolean includeOccupiedDestinations = false;
+//      boolean canTravelThroughEnemies = false;
+//      int movePoints = actor.getMovePower(map) - movePath.getFuelCost(actor, map);
+//      ArrayList<XYCoord> destinations = Utils.findFloodFillArea(movePath.getEndCoord(), actor, actor.CO.army, actor.getMoveFunctor(),
+//                                     Math.min(movePoints, actor.fuel), map, includeOccupiedDestinations, canTravelThroughEnemies);
+//
+//      for( XYCoord coord : destinations )
+//      {
+        // The GameInput machinery doesn't expect multiple relevant actions on the same target, and having 200 options isn't amazing either.
+        XYCoord coord = movePath.getEndCoord();
         GamePath canto = Utils.findShortestPath(actor, coord, map);
         result.add(new RescueUnitAction(actor, movePath, other, canto));
-      }
+//      }
 
       return result;
     }
@@ -830,7 +832,7 @@ public class GBAFEActions
         {
           // No surprises in the fog.
           events.add(new LoadEvent(gameMap.getResident(target), grabber));
-          Utils.enqueueMoveEvent(gameMap, grabber, canto, events);
+          Utils.enqueueMoveEvent(gameMap, grabber, canto, events, true);
         }
       }
       return events;
@@ -874,32 +876,35 @@ public class GBAFEActions
       ArrayList<GameAction> result = new ArrayList<>();
 
       ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, actor, movePath.getEndCoord(), cargo);
-      if( dropoffLocations.isEmpty() )
-        dropoffLocations.add(null); // If we can't drop, just canto
+      // MapController hates this
+      // dropoffLocations.add(null); // If we can't drop, just canto
 
-      boolean includeOccupiedDestinations = false;
-      boolean canTravelThroughEnemies = false;
-      int movePoints = actor.getMovePower(map) - movePath.getFuelCost(actor, map);
-      ArrayList<XYCoord> destinations = Utils.findFloodFillArea(movePath.getEndCoord(), actor, actor.CO.army, actor.getMoveFunctor(),
-                                     Math.min(movePoints, actor.fuel), map, includeOccupiedDestinations, canTravelThroughEnemies);
-
-      for( XYCoord coord : destinations )
-      {
+//      boolean includeOccupiedDestinations = false;
+//      boolean canTravelThroughEnemies = false;
+//      int movePoints = actor.getMovePower(map) - movePath.getFuelCost(actor, map);
+//      ArrayList<XYCoord> destinations = Utils.findFloodFillArea(movePath.getEndCoord(), actor, actor.CO.army, actor.getMoveFunctor(),
+//                                     Math.min(movePoints, actor.fuel), map, includeOccupiedDestinations, canTravelThroughEnemies);
+//
+//      for( XYCoord coord : destinations )
+//      {
+      // The GameInput machinery doesn't expect multiple relevant actions on the same target, and having 200 options isn't amazing either.
+      XYCoord coord = movePath.getEndCoord();
         GamePath canto = Utils.findShortestPath(actor, coord, map);
         for( XYCoord dropLoc : dropoffLocations )
-          result.add(new TakeUnitAction(actor, movePath, other, cargo, dropLoc, canto));
-      }
+          if( !coord.equals(dropLoc) )
+            result.add(new TakeUnitAction(actor, movePath, other, cargo, dropLoc, canto));
+//      }
 
       return result;
     }
   }
   public static class TakeUnitAction extends GameAction
   {
-    private GamePath movePath, canto;
-    private XYCoord startCoord;
-    private XYCoord moveCoord;
-    Unit grabber, target, cargo;
-    XYCoord dropLoc;
+    public GamePath movePath, canto;
+    public XYCoord startCoord;
+    public XYCoord moveCoord;
+    public Unit grabber, target, cargo;
+    public XYCoord dropLoc;
 
     public TakeUnitAction(Unit actor, GamePath path, Unit target, Unit cargo, XYCoord dropLoc, GamePath canto)
     {
@@ -927,12 +932,11 @@ public class GBAFEActions
 
       boolean isValid = true;
 
-      if( (null != gameMap) && (null != startCoord) && (null != target) && gameMap.isLocationValid(startCoord)
-          && gameMap.isLocationValid(dropLoc) )
+      if( (null != gameMap) && (null != startCoord) && (null != target) && gameMap.isLocationValid(startCoord) )
       {
         isValid &= grabber != null && !grabber.isTurnOver;
         isValid &= target != null && cargo != null;
-        isValid &= gameMap.isLocationEmpty(grabber, dropLoc);
+        isValid &= null == dropLoc || gameMap.isLocationEmpty(grabber, dropLoc);
         isValid &= (movePath != null) && (movePath.getPathLength() > 0);
         isValid &= (canto != null) && (canto.getPathLength() > 0);
       }
@@ -955,12 +959,12 @@ public class GBAFEActions
 
     @Override public Unit getActor() { return grabber; }
     @Override public XYCoord getMoveLocation() { return moveCoord; }
-    @Override public XYCoord getTargetLocation() { return new XYCoord(target); }
+    @Override public XYCoord getTargetLocation() { return dropLoc; }
     @Override public UnitActionFactory getType() { return TakeUnitFactory.instance; }
     @Override
     public String toString()
     {
-      return String.format("[Move %s to %s and take a unit at %s]", grabber.toStringWithLocation(), moveCoord, target);
+      return String.format("[Move %s to %s, take a unit from %s and drop it at %s]", grabber.toStringWithLocation(), moveCoord, target.toStringWithLocation(), dropLoc);
     }
   }
   public static class TakeUnitEvent implements GameEvent
@@ -1009,21 +1013,22 @@ public class GBAFEActions
         ArrayList<GameAction> options = new ArrayList<GameAction>();
 
         ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, actor, movePath.getEndCoord(), cargo);
-        if( dropoffLocations.isEmpty() )
-          dropoffLocations.add(null); // If we can't drop, just canto
 
-        boolean includeOccupiedDestinations = false;
-        boolean canTravelThroughEnemies = false;
-        int movePoints = actor.getMovePower(map) - movePath.getFuelCost(actor, map);
-        ArrayList<XYCoord> destinations = Utils.findFloodFillArea(movePath.getEndCoord(), actor, actor.CO.army, actor.getMoveFunctor(),
-                                       Math.min(movePoints, actor.fuel), map, includeOccupiedDestinations, canTravelThroughEnemies);
-
-        for( XYCoord coord : destinations )
-        {
+//        boolean includeOccupiedDestinations = false;
+//        boolean canTravelThroughEnemies = false;
+//        int movePoints = actor.getMovePower(map) - movePath.getFuelCost(actor, map);
+//        ArrayList<XYCoord> destinations = Utils.findFloodFillArea(movePath.getEndCoord(), actor, actor.CO.army, actor.getMoveFunctor(),
+//                                       Math.min(movePoints, actor.fuel), map, includeOccupiedDestinations, canTravelThroughEnemies);
+//
+//        for( XYCoord coord : destinations )
+//        {
+          // The GameInput machinery doesn't expect multiple relevant actions on the same target, and having 200 options isn't amazing either.
+          XYCoord coord = movePath.getEndCoord();
           GamePath canto = Utils.findShortestPath(actor, coord, map);
           for( XYCoord dropLoc : dropoffLocations )
-            options.add(new DropUnitAction(actor, movePath, cargo, dropLoc, canto));
-        }
+            if( !coord.equals(dropLoc) )
+              options.add(new DropUnitAction(actor, movePath, cargo, dropLoc, canto));
+//        }
 
         // Only add this action set if we actually have a target
         if( !options.isEmpty() )

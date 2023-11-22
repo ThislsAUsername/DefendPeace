@@ -15,9 +15,9 @@ import Units.Unit;
 class SelectMoveLocation extends GameInputState<XYCoord>
 {
   public final boolean canEndOnOccupied = true;
-  private XYCoord oldUnitCoord;
+  protected XYCoord oldUnitCoord;
 
-  private SelectMoveLocation(StateData data)
+  protected SelectMoveLocation(StateData data)
   {
     super(data);
   }
@@ -89,7 +89,7 @@ class SelectMoveLocation extends GameInputState<XYCoord>
    * Constructs a unit's movement path, one tile at a time, as the user moves the cursor around the map.
    * If the current movement path is impossible, it will attempt to regenerate a path from scratch.
    */
-  private void buildMovePath(XYCoord end)
+  protected void buildMovePath(XYCoord end)
   {
     if( null == myStateData.path )
     {
