@@ -82,7 +82,9 @@ class SelectUnitAction extends GameInputState<GameActionSet>
         else if( actionType.shouldConfirm )
           // Confirm deletion. Don't want angry users rising up with pitchforks.
           next = new ConfirmUnitAction(myStateData);
-        else if( GBAFEActions.RescueUnitFactory.instance == actionType || GBAFEActions.TakeUnitFactory.instance == actionType )
+        else if( GBAFEActions.RescueUnitFactory.instance == actionType
+              || GBAFEActions.TakeUnitFactory.instance == actionType
+              || GBAFEActions.GiveUnitFactory.instance == actionType )
           next = new SelectActionCantoTarget(myStateData);
         else if( GBAFEActions.DropUnitFactory.instance == actionType )
           next = SelectCantoDropLocation.build(myStateData, null, myStateData.unitActor.heldUnits.get(0));

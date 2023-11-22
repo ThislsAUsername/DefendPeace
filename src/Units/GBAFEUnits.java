@@ -311,8 +311,9 @@ public class GBAFEUnits extends UnitModelScheme
       carryableMask = 0; // The RESCUE action will be used instead of LOAD
       isHorse = true;
       baseActions.add(1, GBAFEActions.DropUnitFactory.instance);
-      baseActions.add(2, GBAFEActions.TakeUnitFactory.instance);
-      baseActions.add(3, GBAFEActions.RescueUnitFactory.instance);
+      baseActions.add(2, GBAFEActions.GiveUnitFactory.instance);
+      baseActions.add(3, GBAFEActions.TakeUnitFactory.instance);
+      baseActions.add(4, GBAFEActions.RescueUnitFactory.instance);
     }
   }
   public abstract static class FlierUnit extends GBAFEUnitModel

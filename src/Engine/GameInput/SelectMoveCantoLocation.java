@@ -53,11 +53,13 @@ class SelectMoveCantoLocation extends SelectMoveLocation
   @Override
   public GameInputState<?> select(XYCoord coord)
   {
+    Unit actor = myStateData.unitActor;
+
     boolean valid = true;
     valid &= (null != myStateData.path) && (myStateData.path.getPathLength() > 0);
     valid &= myOptions.getCoordinateOptions().contains(myStateData.path.getEndCoord());
     valid &= myStateData.path.getEndCoord().equals(coord);
-    valid &= Utils.isPathValid(myStateData.unitActor, myStateData.path, myStateData.gameMap, canEndOnOccupied);
+    valid &= Utils.isPathValid(actor, myStateData.path, myStateData.gameMap, canEndOnOccupied);
 
     Unit resident = myStateData.gameMap.getResident(coord);
     if( resident != null )
@@ -67,12 +69,12 @@ class SelectMoveCantoLocation extends SelectMoveLocation
         // This is a rescue, so we can walk onto our victim
         boolean validTile = false;
         validTile |= resident == takenFrom;
-        validTile |= resident == myStateData.unitActor;
+        validTile |= resident == actor;
         valid &= validTile;
       }
       else
         // This is either TAKE or DROP, so we aren't emptying any space other than our starting space.
-        valid &= resident == myStateData.unitActor;
+        valid &= resident == actor;
     }
 
     GameInputState<?> next = this;
@@ -85,19 +87,26 @@ class SelectMoveCantoLocation extends SelectMoveLocation
 
     if( GBAFEActions.RescueUnitFactory.instance == actionType )
     {
-      GameAction ga = new GBAFEActions.RescueUnitAction(myStateData.unitActor, oldPath, takenFrom, myStateData.path);
+      GameAction ga = new GBAFEActions.RescueUnitAction(actor, oldPath, takenFrom, myStateData.path);
       myStateData.actionSet = new GameActionSet( ga, true );
       next = new ActionReady(myStateData);
     }
     else if( GBAFEActions.DropUnitFactory.instance == actionType )
     {
-      GameAction ga = new GBAFEActions.DropUnitAction(myStateData.unitActor, oldPath, myDrop, dropLoc, myStateData.path);
+      GameAction ga = new GBAFEActions.DropUnitAction(actor, oldPath, myDrop, dropLoc, myStateData.path);
       myStateData.actionSet = new GameActionSet( ga, true );
       next = new ActionReady(myStateData);
     }
     else if( GBAFEActions.TakeUnitFactory.instance == actionType )
     {
-      GameAction ga = new GBAFEActions.TakeUnitAction(myStateData.unitActor, oldPath, takenFrom, myDrop, dropLoc, myStateData.path);
+      GameAction ga = new GBAFEActions.TakeUnitAction(actor, oldPath, takenFrom, myDrop, dropLoc, myStateData.path);
+      myStateData.actionSet = new GameActionSet( ga, true );
+      next = new ActionReady(myStateData);
+    }
+    else if( GBAFEActions.GiveUnitFactory.instance == actionType )
+    {
+      // It's "given to" in this case, but oh well.
+      GameAction ga = new GBAFEActions.GiveUnitAction(actor, oldPath, takenFrom, myDrop, myStateData.path);
       myStateData.actionSet = new GameActionSet( ga, true );
       next = new ActionReady(myStateData);
     }

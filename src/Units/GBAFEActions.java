@@ -761,6 +761,8 @@ public class GBAFEActions
     @Override
     public boolean canSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
     {
+      if( actor.heldUnits.size() >= actor.model.baseCargoCapacity )
+        return false;
       // Can't rescue ships or units with cargo
       return !other.model.isAny(UnitModel.SHIP) && !(other.heldUnits.size() > 0);
     }
@@ -865,6 +867,8 @@ public class GBAFEActions
     @Override
     public boolean canSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
     {
+      if( actor.heldUnits.size() >= actor.model.baseCargoCapacity )
+        return false;
       // Can't take cargo that doesn't exist or that has cargo
       return other.heldUnits.size() > 0 && !(other.heldUnits.get(0).heldUnits.size() > 0);
     }
@@ -989,6 +993,115 @@ public class GBAFEActions
     @Override public GameEventQueue sendToListener(GameEventListener listener) { return null; }
     @Override public XYCoord getStartPoint() { return new XYCoord(unit); }
     @Override public XYCoord getEndPoint() { return new XYCoord(target); }
+  }
+
+  /**
+   * Give another unit your cargo; includes canto
+   */
+  public static class GiveUnitFactory extends SupportActionFactory
+  {
+    private static final long serialVersionUID = 1L;
+    public static final GiveUnitFactory instance = new GiveUnitFactory();
+    private Object readResolve() { return instance; }
+
+    public GiveUnitFactory()
+    {
+      super("GIVE");
+    }
+    @Override
+    public boolean canSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
+    {
+      if( actor.heldUnits.size() < 1 )
+        return false;
+      // I'm just going to ignore the possibility of giving a unit to a ship that already has cargo.
+      return other.model.baseCargoCapacity > 0 && other.heldUnits.size() < 1;
+    }
+    @Override
+    public ArrayList<GameAction> getSupportAll(GameMap map, Unit actor, GamePath movePath, Unit other)
+    {
+      Unit cargo = actor.heldUnits.get(0); // Always give the first one
+
+      ArrayList<GameAction> result = new ArrayList<>();
+
+//      boolean includeOccupiedDestinations = false;
+//      boolean canTravelThroughEnemies = false;
+//      int movePoints = actor.getMovePower(map) - movePath.getFuelCost(actor, map);
+//      ArrayList<XYCoord> destinations = Utils.findFloodFillArea(movePath.getEndCoord(), actor, actor.CO.army, actor.getMoveFunctor(),
+//                                     Math.min(movePoints, actor.fuel), map, includeOccupiedDestinations, canTravelThroughEnemies);
+//
+//      for( XYCoord coord : destinations )
+//      {
+        // The GameInput machinery doesn't expect multiple relevant actions on the same target, and having 200 options isn't amazing either.
+        XYCoord coord = movePath.getEndCoord();
+        GamePath canto = Utils.findShortestPath(actor, coord, map);
+        result.add(new GiveUnitAction(actor, movePath, other, cargo, canto));
+//      }
+
+      return result;
+    }
+  }
+  public static class GiveUnitAction extends GameAction
+  {
+    public GamePath movePath, canto;
+    public XYCoord startCoord;
+    public XYCoord moveCoord;
+    public Unit giver, target, cargo;
+
+    public GiveUnitAction(Unit actor, GamePath path, Unit target, Unit cargo, GamePath canto)
+    {
+      giver = actor;
+      this.target = target;
+      this.cargo  = cargo;
+      movePath = path;
+      this.canto = canto;
+      startCoord = new XYCoord(actor);
+      moveCoord = movePath.getEndCoord();
+      if( null != canto ) // Does this make sense?
+        moveCoord = canto.getEndCoord();
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster gameMap)
+    {
+      // action consists of
+      //   MOVE
+      //   GIVE
+      //   CANTO
+      GameEventQueue events = new GameEventQueue();
+
+      boolean isValid = true;
+
+      if( (null != gameMap) && (null != startCoord) && (null != target) && gameMap.isLocationValid(startCoord) )
+      {
+        isValid &= giver != null && !giver.isTurnOver;
+        isValid &= target != null && cargo != null;
+        isValid &= (movePath != null) && (movePath.getPathLength() > 0);
+        isValid &= (canto != null) && (canto.getPathLength() > 0);
+      }
+      else
+        isValid = false;
+
+      if( isValid )
+      {
+        if( Utils.enqueueMoveEvent(gameMap, giver, movePath, events) )
+        {
+          // No surprises in the fog.
+          events.add(new TakeUnitEvent(target, giver, cargo)); // Flip the recipient and donor
+          Utils.enqueueMoveEvent(gameMap, giver, canto, events);
+        }
+      }
+      return events;
+    }
+
+    @Override public Unit getActor() { return giver; }
+    @Override public XYCoord getMoveLocation() { return moveCoord; }
+    @Override public XYCoord getTargetLocation() { return new XYCoord(target); }
+    @Override public UnitActionFactory getType() { return GiveUnitFactory.instance; }
+    @Override
+    public String toString()
+    {
+      return String.format("[Move %s to %s, give a unit to %s]", giver.toStringWithLocation(), moveCoord, target.toStringWithLocation());
+    }
   }
 
   /**
