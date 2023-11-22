@@ -584,7 +584,10 @@ public class PlayerSetupCommanderArtist
           else // Our inner category is games, so steal stuff from the outer category
           {
             palette   = outerPalette;
-            canonName = outerSpec.faction.name + ": " + spriteSpec.faction.name;
+            String factionName = "MISC";
+            if( Color.LIGHT_GRAY != outerSpec.color )
+              factionName = UIUtils.getCanonicalFactionName(outerSpec);
+            canonName = factionName + ": " + spriteSpec.faction.name;
           }
         }
         InnerCategoryPanel icp = new InnerCategoryPanel(innerBin, palette, canonName);
