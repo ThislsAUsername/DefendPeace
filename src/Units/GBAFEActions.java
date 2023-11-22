@@ -882,6 +882,7 @@ public class GBAFEActions
       ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, actor, movePath.getEndCoord(), cargo);
       // MapController hates this
       // dropoffLocations.add(null); // If we can't drop, just canto
+      // TODO: Not having this case means you can't TAKE if you're surrounded
 
 //      boolean includeOccupiedDestinations = false;
 //      boolean canTravelThroughEnemies = false;
