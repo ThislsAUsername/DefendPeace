@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import Engine.GameActionSet;
 import Engine.UnitActionFactory;
 import Engine.Combat.DamagePopup;
+import Units.GBAFEActions;
 
 /************************************************************
  * State to allow selecting an action for a unit.           *
@@ -81,6 +82,10 @@ class SelectUnitAction extends GameInputState<GameActionSet>
         else if( actionType.shouldConfirm )
           // Confirm deletion. Don't want angry users rising up with pitchforks.
           next = new ConfirmUnitAction(myStateData);
+        else if( GBAFEActions.RescueUnitFactory.instance == actionType || GBAFEActions.TakeUnitFactory.instance == actionType )
+          next = new SelectActionCantoTarget(myStateData);
+        else if( GBAFEActions.DropUnitFactory.instance == actionType )
+          next = SelectCantoDropLocation.build(myStateData, null, myStateData.unitActor.heldUnits.get(0));
         else
           // Generic targeting.
           next = new SelectActionTarget(myStateData);

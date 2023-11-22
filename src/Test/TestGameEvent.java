@@ -175,12 +175,6 @@ public class TestGameEvent extends TestCase
     Unit mech = addUnit(testMap, testCo1, UnitModel.MECH, 2, 3);
     Unit apc = addUnit(testMap, testCo1, UnitModel.TRANSPORT, 3, 2);
 
-    // Try to load the infantry onto the mech unit, and ensure it fails.
-    new LoadLifecycle.LoadEvent(inf, mech).performEvent(testMap);
-    testPassed &= validate(testMap.getLocation(2, 2).getResident() == inf, "    Infantry should still be at (2, 2).");
-    testPassed &= validate(2 == inf.x && 2 == inf.y, "    Infantry should still think he is at (2, 2).");
-    testPassed &= validate(mech.heldUnits.size() == 0, "    Mech should not have holding capacity.");
-
     // Try to load the infantry into the APC, and make sure it works.
     new LoadLifecycle.LoadEvent(inf, apc).performEvent(testMap);
     testPassed &= validate(testMap.getLocation(2, 2).getResident() == null, "   Infantry is still at his old map location.");
@@ -188,12 +182,6 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC is not holding 1 unit, but should be holding Infantry.");
     testPassed &= validate(apc.heldUnits.get(0).model.isAll(UnitModel.TROOP | UnitModel.LAND),
         "    Held unit is not infantry, but should be.");
-
-    // Now see if we can also load the mech into the APC; verify this fails.
-    new LoadLifecycle.LoadEvent(mech, apc).performEvent(testMap);
-    testPassed &= validate(testMap.getLocation(2, 3).getResident() == mech, "    Mech should still be at (2, 3).");
-    testPassed &= validate(2 == mech.x && 3 == mech.y, "    Mech does not think he is at (2, 3), but he should.");
-    testPassed &= validate(apc.heldUnits.size() == 1, "    APC should still only be holding 1 unit.");
 
     // Unload the mech; this should fail, since he is not on the transport.
     new UnloadLifecycle.UnloadEvent(apc, mech, 3, 3).performEvent(testMap);

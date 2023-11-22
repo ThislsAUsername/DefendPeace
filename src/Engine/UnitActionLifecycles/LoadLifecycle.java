@@ -170,7 +170,7 @@ public abstract class LoadLifecycle
     @Override
     public void performEvent(MapMaster gameMap)
     {
-      if( null != unitTransport && unitTransport.hasCargoSpace(unitCargo.model.role) )
+      if( null != unitTransport )
       {
         gameMap.removeUnit(unitCargo);
         unitCargo.x = -1;

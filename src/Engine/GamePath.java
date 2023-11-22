@@ -68,9 +68,21 @@ public class GamePath
     return getFuelCost(unit.CO, unit.model, map);
   }
   /**
-   * @return the amount of fuel it would cost to travel this path with the given unit type 
+   * @return the amount of fuel it would cost to travel this path with the given unit type
   **/
   public int getFuelCost(Commander co, UnitModel unit, GameMap map)
+  {
+    return getMoveCost(co, unit, map) * unit.fuelBurnPerTile;
+  }
+
+  public int getMoveCost(Unit unit, GameMap map)
+  {
+    return getMoveCost(unit.CO, unit.model, map);
+  }
+  /**
+   * @return the amount of movepoints it would cost to travel this path with the given unit type 
+  **/
+  public int getMoveCost(Commander co, UnitModel unit, GameMap map)
   {
     int cost = 0;
     MoveType fff = new UnitContext(co, unit).calculateMoveType();
@@ -81,7 +93,7 @@ public class GamePath
       XYCoord to   = waypoints.get( i ).GetCoordinates();
       cost += fff.getTransitionCost(map, from, to, co.army, true);
     }
-    return cost * unit.fuelBurnPerTile;
+    return cost;
   }
 
   public PathNode getWaypoint(int wpt)
