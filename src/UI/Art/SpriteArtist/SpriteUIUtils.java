@@ -2,7 +2,6 @@ package UI.Art.SpriteArtist;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -418,22 +417,6 @@ public class SpriteUIUtils
       num /= 10; // Shift to the next higher digit in the number.
     } while (num > 0);
     return numImage;
-  }
-
-  // Pulled from https://9to5answer.com/rotate-90-degree-to-right-image-in-java
-  public static BufferedImage rotateCounterClockwise90(BufferedImage src)
-  {
-    int width = src.getWidth();
-    int height = src.getHeight();
-
-    BufferedImage dest = new BufferedImage(height, width, src.getType());
-
-    Graphics2D graphics2D = dest.createGraphics();
-    graphics2D.translate((width - height) / 2, (width - height) / 2);
-    graphics2D.rotate(-Math.PI / 2, height / 2, width / 2);
-    graphics2D.drawRenderedImage(src, null);
-
-    return dest;
   }
 
   /**

@@ -46,7 +46,7 @@ public class CommanderLibrary
       private static final long serialVersionUID = 1L;
       public instantiator()
       {
-        super("No CO", UIUtils.SourceGames.AW4, UIUtils.MISC);
+        super("No CO", UIUtils.MISC);
         infoPages.add(new InfoPage("The ultimate expression of fair play"));
       }
       @Override
