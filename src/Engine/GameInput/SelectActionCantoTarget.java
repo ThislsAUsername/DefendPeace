@@ -11,7 +11,6 @@ import Engine.GameInput.GameInputHandler.InputType;
 import Terrain.GameMap;
 import Units.GBAFEActions;
 import Units.Unit;
-import Units.UnitModel;
 
 class SelectActionCantoTarget extends SelectActionTarget
 {
@@ -48,10 +47,15 @@ class SelectActionCantoTarget extends SelectActionTarget
   public boolean canSupport(GameMap map, Unit actor, GamePath movePath, Unit other)
   {
     GameAction selectedAction = myStateData.actionSet.getSelected();
-    if( GBAFEActions.RescueUnitFactory.instance == selectedAction.getType() )
-      return !other.model.isAny(UnitModel.SHIP) && !(other.heldUnits.size() > 0);
-    // else TAKE
-    return other.heldUnits.size() > 0 && !(other.heldUnits.get(0).heldUnits.size() > 0);
+    UnitActionFactory actionType = selectedAction.getType();
+    if( GBAFEActions.RescueUnitFactory.instance == actionType )
+      return GBAFEActions.RescueUnitFactory.instance.canSupport(map, actor, movePath, other);
+    if( GBAFEActions.GiveUnitFactory.instance == actionType )
+      return GBAFEActions.GiveUnitFactory.instance.canSupport(map, actor, movePath, other);
+    if( GBAFEActions.TakeUnitFactory.instance == actionType )
+      return GBAFEActions.TakeUnitFactory.instance.canSupport(map, actor, movePath, other);
+    System.out.println("WARNING: Unexpected state in SACT.canSupport() - actionType = " + actionType);
+    return false;
   }
 
   @Override
@@ -65,6 +69,8 @@ class SelectActionCantoTarget extends SelectActionTarget
 
     if( GBAFEActions.RescueUnitFactory.instance == actionType )
       next = SelectMoveCantoLocation.build(myStateData, myStateData.unitActor, myStateData.path.getEndCoord(), target, null);
+    if( GBAFEActions.GiveUnitFactory.instance == actionType )
+      next = SelectMoveCantoLocation.build(myStateData, myStateData.unitActor, myStateData.path.getEndCoord(), target, myStateData.unitActor.heldUnits.get(0));
     if( GBAFEActions.TakeUnitFactory.instance == actionType )
       next = SelectCantoDropLocation.build(myStateData, target, target.heldUnits.get(0));
 
