@@ -320,6 +320,11 @@ public class UIUtils
   public static final COSpriteSpec AR = COSpriteSpec.fromDisk("Acid"  , "Rain");
   public static final COSpriteSpec WN = COSpriteSpec.fromDisk("White" , "Nova");
 
+  public static final COSpriteSpec BW = COSpriteSpec.fromDisk("Brenner's"     , "Wolves");
+  public static final COSpriteSpec NW = COSpriteSpec.fromDisk("New Rubinelle" , "Wolves");
+  public static final COSpriteSpec LA = COSpriteSpec.fromDisk("Lazurian"      , "Army");
+  public static final COSpriteSpec IA = COSpriteSpec.fromDisk("IDS"           , "Army");
+
 
   private static class TeamColorSpec implements Comparable<TeamColorSpec>
   {

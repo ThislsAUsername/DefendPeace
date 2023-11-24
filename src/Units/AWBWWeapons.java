@@ -47,13 +47,13 @@ public class AWBWWeapons
     }
 
     @Override
-    public double getDamage(AWBWUnitModel defender)
+    public int getDamage(AWBWUnitModel defender)
     {
       return damageChart[type.ordinal()][defender.type.ordinal()];
     }
 
     @Override
-    public double getDamage(TerrainType target)
+    public int getDamage(TerrainType target)
     {
       if( TerrainType.METEOR == target )
         return damageChart[type.ordinal()][AWBWUnitEnum.NEOTANK.ordinal()];

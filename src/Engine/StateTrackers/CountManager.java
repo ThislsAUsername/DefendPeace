@@ -53,11 +53,21 @@ public class CountManager<ListKeyType, CountKeyType> implements Serializable
     int prevCount = getCountFor(listKey, countKey);
     instanceCounts.put(countKey, prevCount + 1);
   }
+  public void setCountFor(ListKeyType listKey, CountKeyType countKey, int newCount)
+  {
+    HashMap<CountKeyType, Integer> instanceCounts = getCountFor(listKey);
+    instanceCounts.put(countKey, newCount);
+  }
   /**
    * Stops tracking any counts for that list; {@link #hasCountFor(ListKeyType)} will now return false.
    */
   public void resetCountFor(ListKeyType listKey)
   {
     countMap.remove(listKey);
+  }
+  public void resetCountFor(ListKeyType listKey, CountKeyType countKey)
+  {
+    HashMap<CountKeyType, Integer> instanceCounts = getCountFor(listKey);
+    instanceCounts.remove(countKey);
   }
 }

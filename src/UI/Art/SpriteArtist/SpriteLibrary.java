@@ -624,7 +624,7 @@ public class SpriteLibrary
   }
 
   /** Draw and return an image with the CO's power bar. */
-  public static BufferedImage getCoOverlayPowerBar(Commander co, double maxAP, double currentAP, double pixelsPerPowerUnit)
+  public static BufferedImage getCoOverlayPowerBar(Commander co, int maxAP, double currentAP, double pixelsPerPowerUnit)
   {
     BufferedImage bar = SpriteLibrary.createDefaultBlankSprite((int) (maxAP*pixelsPerPowerUnit), 5);
     Graphics barGfx = bar.getGraphics();

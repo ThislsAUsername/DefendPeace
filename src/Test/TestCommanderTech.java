@@ -28,7 +28,7 @@ public class TestCommanderTech extends TestCase
     GameScenario scn = new GameScenario();
     Tech.getInfo().injectUnits(scn.rules.unitModelScheme.getGameReadyModels());
     mTech = new Tech(scn.rules);
-    mTech.modifyAbilityPower(20);
+    mTech.modifyAbilityStars(20);
     mPatch = new Patch(scn.rules);
     Army[] cos = { new Army(scn, mTech), new Army(scn, mPatch) };
 

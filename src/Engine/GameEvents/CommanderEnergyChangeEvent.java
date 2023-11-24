@@ -9,14 +9,14 @@ import UI.Art.Animation.GameAnimation;
 public class CommanderEnergyChangeEvent implements GameEvent
 {
   private final Commander beneficiary;
-  private final double delta;
-  private double deltaActual;
+  private final int deltaStars;
+  private int deltaActualFunds;
 
-  public CommanderEnergyChangeEvent(Commander target, double change)
+  public CommanderEnergyChangeEvent(Commander target, int stars)
   {
     beneficiary = target;
-    delta = change;
-    deltaActual = 0;
+    deltaStars = stars;
+    deltaActualFunds = 0;
   }
 
   @Override
@@ -28,16 +28,16 @@ public class CommanderEnergyChangeEvent implements GameEvent
   @Override
   public GameEventQueue sendToListener(GameEventListener listener)
   {
-    return listener.receiveModifyCommanderEnergyEvent(beneficiary, deltaActual);
+    return listener.receiveModifyCommanderEnergyEvent(beneficiary, deltaActualFunds);
   }
 
   @Override
   public void performEvent(MapMaster gameMap)
   {
-    double before = beneficiary.getAbilityPower();
-    beneficiary.modifyAbilityPower(delta);
+    int before = beneficiary.getAbilityPower();
+    beneficiary.modifyAbilityStars(deltaStars);
 
-    deltaActual = beneficiary.getAbilityPower() - before;
+    deltaActualFunds = beneficiary.getAbilityPower() - before;
   }
 
   @Override

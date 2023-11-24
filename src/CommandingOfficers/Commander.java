@@ -49,7 +49,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
   public static final int CHARGERATIO_HP = 100; // Funds value of 1 HP damage dealt, for the purpose of power charge
   public int incomeAdjustment = 0; // Commander subclasses can increase/decrease income if needed.
-  private double myAbilityPower = 0;
+  private int myAbilityPower = 0;
 
   private ArrayList<CommanderAbility> myAbilities = null;
   private CommanderAbility myActiveAbility = null;
@@ -221,9 +221,9 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     return ready;
   }
 
-  public double[] getAbilityCosts()
+  public int[] getAbilityCosts()
   {
-    double[] costs = new double[myAbilities.size()];
+    int[] costs = new int[myAbilities.size()];
     for( int i = 0; i < myAbilities.size(); ++i )
     {
       costs[i] = myAbilities.get(i).getCost();
@@ -231,7 +231,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     return costs;
   }
 
-  public double getAbilityPower()
+  public int getAbilityPower()
   {
     return myAbilityPower;
   }
@@ -251,22 +251,27 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     myActiveAbility = ability;
   }
 
-  public void modifyAbilityPower(double amount)
+  public void modifyAbilityPower(int amount)
   {
     myAbilityPower += amount;
     if( myAbilityPower < 0 )
       myAbilityPower = 0;
-    double maxPower = getMaxAbilityPower();
+    int maxPower = getMaxAbilityPower();
     if( myAbilityPower > maxPower )
       myAbilityPower = maxPower;
+  }
+  public void modifyAbilityStars(int amount)
+  {
+    // TODO: Make this scale with fatigue
+    modifyAbilityPower(amount * CHARGERATIO_FUNDS);
   }
 
   /**
    * @return The maximum level of ability energy this CO can hold
    */
-  public double getMaxAbilityPower()
+  public int getMaxAbilityPower()
   {
-    double maxPower = 0;
+    int maxPower = 0;
     for( CommanderAbility ca : myAbilities )
     {
       if( maxPower < ca.getCost() )
@@ -290,15 +295,15 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   }
 
   // Note: Cart charge only uses whole HP, so that's what we're doing, too.
-  public double calculateCombatCharge(UnitDelta minion, UnitDelta enemy)
+  public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy, boolean isCounter)
   {
     if( minion == null || enemy == null )
       return 0;
 
-    double myHPLoss = minion.getHPDamage();
-    double myHPDealt = enemy.getHPDamage();
+    int myHPLoss  = minion.getHPDamage();
+    int myHPDealt = enemy.getHPDamage();
 
-    double power = 0; // value in funds of the charge we're getting
+    int power = 0; // value in funds of the charge we're getting
 
     // Add up the funds value of the damage done to both participants.
     power += myHPLoss / UnitModel.MAXIMUM_HP * minion.unit.getCost();
@@ -307,22 +312,16 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     // Add power based on HP damage dealt; rewards aggressiveness.
     power += myHPDealt * CHARGERATIO_HP;
 
-    // Convert funds to ability power units
-    power /= CHARGERATIO_FUNDS;
-
     return power;
   }
-  public double calculateMassDamageCharge(Unit minion, int lostHP)
+  public int calculateMassDamageCharge(Unit minion, int lostHP)
   {
     if( minion == null )
       return 0;
 
-    double power = 0; // value in funds of the charge we're getting
+    int power = 0; // value in funds of the charge we're getting
 
-    power += ((double)lostHP) / UnitModel.MAXIMUM_HP * getCost(minion.model);
-
-    // Convert funds to ability power units
-    power /= CHARGERATIO_FUNDS;
+    power += (lostHP * getCost(minion.model)) / UnitModel.MAXIMUM_HP;
 
     return power;
   }
