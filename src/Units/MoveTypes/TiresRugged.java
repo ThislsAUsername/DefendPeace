@@ -12,12 +12,9 @@ public class TiresRugged extends Tires
   {
     super();
     
-    setMoveCost(Weathers.CLEAR, TerrainType.GRASS, 1);
+    setMoveCost(TerrainType.GRASS, 1);
 
-    setMoveCost(Weathers.RAIN, TerrainType.GRASS, 3); // I get to make stuff up, so why not?
-
+    setMoveCost(Weathers.RAIN, TerrainType.GRASS, 2);
     setMoveCost(Weathers.SNOW, TerrainType.GRASS, 2);
-
-    setMoveCost(Weathers.SANDSTORM, TerrainType.GRASS, 1);
   }
 }
