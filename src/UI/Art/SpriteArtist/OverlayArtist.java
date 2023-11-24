@@ -59,7 +59,10 @@ public class OverlayArtist
         overlays.add(ov);
 
     // Check if input is the same as last time
-    ByteBuffer params = ByteBuffer.allocate(Integer.BYTES * (8 + inputOverlays.size()*3) );
+    int paramsBase = 8; // 6 params we always store + move x/y if we're planning a move
+    int paramsPerOverlay = 3; // Overlay tile count + x/y coordinates
+    int intsNeededToValidateCache = paramsBase + inputOverlays.size()*paramsPerOverlay;
+    ByteBuffer params = ByteBuffer.allocate(Integer.BYTES * intsNeededToValidateCache );
     params.putInt(inputOverlays.size())
           .putInt(drawX).putInt(drawY)
           .putInt(viewWidth).putInt(viewHeight)
