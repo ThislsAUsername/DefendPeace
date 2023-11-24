@@ -71,8 +71,10 @@ public class GameOptionSetupController implements IController
     }
     else
     {
+      final int incomeIndexDefault = 3; // 250 = 0, increment 250
+      final int incomeIndexHF = incomeIndexDefault + 4;
       if( gameBuilder.mapInfo.mapName.startsWith("HF") )
-        incomeOption.setSelectedOption(3 + 4); // 250 = 0, increment 250
+        incomeOption.setSelectedOption(incomeIndexHF);
       if( gameBuilder.mapInfo.mapName.startsWith("FoW") )
         fowOption.setSelectedOption(1);
     }
