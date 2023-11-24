@@ -186,7 +186,7 @@ public class Utils
       return false;
     }
 
-    // Make sure the first waypoint is under the Unit.
+    // Make sure the path has at least the starting position.
     if( path.getPathLength() <= 0 )
     {
       return false;
