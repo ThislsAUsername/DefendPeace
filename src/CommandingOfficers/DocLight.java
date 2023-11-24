@@ -16,7 +16,7 @@ public class DocLight extends RuinedCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Doctor Light", UIUtils.MISC);
+      super("Doctor Light", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.MISC);
       infoPages.add(new InfoPage(
             "Even here, it is not safe. Even this grave has been defaced.\n"
           + "Someone has written on this stone: 'Hope rides alone'\n"));
