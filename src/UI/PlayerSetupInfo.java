@@ -53,8 +53,8 @@ public class PlayerSetupInfo
     // Throw away any starting space since it makes us barf
     while (noParens.charAt(0) == ' ')
       noParens = noParens.substring(1);
-    String[] s = noParens.split("\\s+");
-    int si = 0;
+    String[] s = noParens.split("\\s+"); // Split (string integers)
+    int si = 0; // Split Index
 
     coList.clear();
     int coCount = 1;

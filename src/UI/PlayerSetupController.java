@@ -2,7 +2,6 @@ package UI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
 
 import AI.AILibrary;
 import CommandingOfficers.CommanderInfo;
@@ -24,21 +23,27 @@ import UI.PlayerSetupInfo.CODeets;
  */
 public class PlayerSetupController implements IController
 {
+  // The options last used on this map, if any
+  HashMap<Integer, String> initialPicksMap;
+
   // This OptionSelector determines which player we have under the cursor.
   private OptionSelector playerSelector;
   private OptionSelector categorySelector;
 
-  private GameBuilder gameBuilder = null;
+  private boolean changesMade;
+  private GameBuilder gameBuilder;
   PlayerSetupInfo[] coSelectors;
 
   public enum SelectionCategories { COMMANDER, COLOR_FACTION, TEAM, AI, START };
 
   private IController subMenu;
 
-  public PlayerSetupController( GameBuilder builder )
+  public PlayerSetupController( GameBuilder builder, HashMap<Integer, String> initialPicksMap, boolean changesMade )
   {
     // Once we hit go, we plug all the COs we chose into our gameBuilder.
     gameBuilder = builder;
+    this.initialPicksMap = initialPicksMap;
+    this.changesMade = changesMade;
 
     // Set up our row/col selectors.
     int numCos = gameBuilder.mapInfo.getNumCos();
@@ -49,13 +54,6 @@ public class PlayerSetupController implements IController
     // Create objects to keep track of the selected options for each player.
     coSelectors = new PlayerSetupInfo[numCos];
 
-    // Read in the last settings we used on this map, if available
-    HashMap<Integer, String> optionMap = new HashMap<Integer, String>();
-    ConfigUtils.readConfigLists(buildSettingsFileName(),
-                                (String s)->Integer.valueOf(s),
-                                (Scanner linescan)->linescan.nextLine(),
-                                optionMap);
-
     final boolean flySolo = !builder.tagMode.supportsMultiCmdrSelect;
     // Start by making default CO/color selections.
     for(int co = 0; co < numCos; ++co)
@@ -65,7 +63,7 @@ public class PlayerSetupController implements IController
                                CommanderLibrary.getCommanderList(),
                                UIUtils.getCOColors(), UIUtils.getFactions(),
                                AILibrary.getAIList(),
-                               optionMap.get(co) );
+                               initialPicksMap.get(co) );
 
       // Enforce single-CO play if necessary
       final ArrayList<CODeets> coList = coSelectors[co].coList;
@@ -115,19 +113,23 @@ public class PlayerSetupController implements IController
         // Open a sub-menu based on which player attribute is selected, or start the game.
         if( categorySelector.getSelectionNormalized() == SelectionCategories.COMMANDER.ordinal() )
         {
+          changesMade = true;
           ArrayList<CommanderInfo> infos = CommanderLibrary.getCommanderList();
           subMenu = new PlayerSetupCommanderController(infos, getPlayerInfo(playerSelector.getSelectionNormalized()), gameBuilder.tagMode);
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.COLOR_FACTION.ordinal() )
         {
+          changesMade = true;
           subMenu = new PlayerSetupColorFactionController(getPlayerInfo(playerSelector.getSelectionNormalized()), getIconicUnit());
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.TEAM.ordinal() )
         {
+          changesMade = true;
           subMenu = new PlayerSetupTeamController(coSelectors, playerSelector.getSelectionNormalized());
         }
         else if( categorySelector.getSelectionNormalized() == SelectionCategories.AI.ordinal() )
         {
+          changesMade = true;
           subMenu = new PlayerSetupAiController(getPlayerInfo(playerSelector.getSelectionNormalized()));
         }
         else // ( categorySelector.getSelectionNormalized() == SelectionCategories.START.ordinal() )
@@ -139,8 +141,9 @@ public class PlayerSetupController implements IController
           if( null != newGame )
           {
             // Save these settings for next time
-            if( !ConfigUtils.writeConfigStrings(buildSettingsFileName(), coSelectors) )
-              System.out.println("Unable to write player setup options to file.");
+            if( changesMade )
+              if( !writeConfigStrings() )
+                System.out.println("Unable to write player setup options to file.");
 
             MapView mv = Driver.getInstance().gameGraphics.createMapView(newGame);
             MapController mapController = new MapController(newGame, mv);
@@ -205,8 +208,16 @@ public class PlayerSetupController implements IController
     return gameBuilder.unitModelScheme.getIconicUnitName();
   }
 
-  private String buildSettingsFileName()
+  public static String buildSettingsFileName(GameBuilder gameBuilder)
   {
     return "res/map_options/" + gameBuilder.mapInfo.mapName + "_army_selections.txt";
+  }
+
+  public boolean writeConfigStrings()
+  {
+    for( int i = 0; i < coSelectors.length; ++i )
+      initialPicksMap.put(i, coSelectors[i].toString());
+
+    return ConfigUtils.writeConfigItems(buildSettingsFileName(gameBuilder), initialPicksMap);
   }
 }

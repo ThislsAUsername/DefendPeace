@@ -44,6 +44,7 @@ public class MapReader extends IMapBuilder
     {
       System.out.println("WARNING: res/map directory does not exist.");
     }
+    importMaps.sort( (mapA, mapB) -> mapA.mapName.compareTo(mapB.mapName) );
     return importMaps;
   }
 
