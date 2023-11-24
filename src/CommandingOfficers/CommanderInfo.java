@@ -5,18 +5,21 @@ import java.util.ArrayList;
 
 import Engine.GameScenario;
 import UI.UIUtils.COSpriteSpec;
+import UI.UIUtils.SourceGames;
 import Units.UnitModelScheme.GameReadyModels;
 
 public abstract class CommanderInfo implements Serializable
 {
   private static final long serialVersionUID = 1L;
   public final String name;
+  public final SourceGames game;
   public final COSpriteSpec baseFaction;
   public ArrayList<InfoPage> infoPages;
 
-  public CommanderInfo(String name, COSpriteSpec f)
+  public CommanderInfo(String name, SourceGames game, COSpriteSpec f)
   {
     this.name = name;
+    this.game = game;
     this.baseFaction = f;
     infoPages = new ArrayList<InfoPage>();
   }

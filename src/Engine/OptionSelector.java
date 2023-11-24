@@ -16,8 +16,12 @@ public class OptionSelector
    */
   public OptionSelector(int num)
   {
+    this(num, 0);
+  }
+  public OptionSelector(int num, int newSelection)
+  {
     numOptions = num;
-    highlightedOption = 0;
+    highlightedOption = newSelection;
   }
 
   /**
@@ -26,8 +30,12 @@ public class OptionSelector
    */
   public void reset(int newNum)
   {
+    reset(newNum, 0);
+  }
+  public void reset(int newNum, int newSelection)
+  {
     numOptions = newNum;
-    highlightedOption = 0;
+    highlightedOption = newSelection;
   }
 
   /**

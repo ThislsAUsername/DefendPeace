@@ -35,7 +35,7 @@ public class Venge extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Venge", UIUtils.MISC);
+      super("Venge", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.MISC);
       infoPages.add(new InfoPage(
           "Commander Venge likes to get vengeance for any slight.\n" +
           "Attacking Venge is not always difficult, but you may not like the consequences.\n"));
