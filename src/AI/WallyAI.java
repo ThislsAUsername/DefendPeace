@@ -768,7 +768,7 @@ public class WallyAI extends ModularAI
     for( XYCoord target : validTargets )
     {
       path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(target);
-      if( path.getPathLength() > 0 ) // We can reach it.
+      if( path != null ) // We can reach it.
       {
         goal = target;
         break;

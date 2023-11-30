@@ -176,7 +176,7 @@ public class InfantrySpamAI implements AIController
           path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
           validTarget = (myArmy.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
                       && !capturingProperties.contains(goal)                // We aren't already capturing it.
-                      && (path.getPathLength() > 0));                       // We can reach it.
+                      && (path != null));                       // We can reach it.
           log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
         } while( !validTarget && (index < unownedProperties.size()) );      // Loop until we run out of properties to check.
 

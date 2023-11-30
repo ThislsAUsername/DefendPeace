@@ -326,7 +326,7 @@ public class AICombatUtils
         // Figure out how to get here.
         GamePath movePath = new Utils.PathCalcParams(unit, gameMap).findShortestPath(xyc);
 
-        if( movePath.getPathLength() > 0 )
+        if( movePath != null )
         {
           neededAttacks.put(xyc, unit);
           double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CalcType.PESSIMISTIC).defender.getPreciseHPDamage();

@@ -213,7 +213,7 @@ public class AIUtils
     pcp.includeOccupiedSpaces = false;
     ArrayList<Utils.SearchNode> validMoves = pcp.findAllPaths();
 
-    if( path.getPathLength() > 0 && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
+    if( null != path && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
     {
       path.snip(unit.getMovePower(gameMap)+1); // Trim the path so we go the right immediate direction.
       if( null != excludeDestinations) validMoves.removeAll(excludeDestinations);

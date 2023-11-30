@@ -588,7 +588,7 @@ public class JakeMan extends ModularAI
     for( XYCoord target : validTargets )
     {
       path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(target);
-      if( path.getPathLength() > 0 ) // We can reach it.
+      if( null != path ) // We can reach it.
       {
         goal = target;
         break;
