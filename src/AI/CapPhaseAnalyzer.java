@@ -99,7 +99,7 @@ public class CapPhaseAnalyzer implements Serializable
     {
       if( unit.getCaptureProgress() > 0 )
       {
-        return new CaptureLifecycle.CaptureAction(map, unit, Utils.findShortestPath(unit, position, map));
+        return new CaptureLifecycle.CaptureAction(map, unit, GamePath.getStatic(position));
       }
 
       while (!chain.isEmpty())
@@ -394,11 +394,10 @@ public class CapPhaseAnalyzer implements Serializable
 
   public static GamePath findFeasiblePath(final Unit unit, final XYCoord destination, final GameMap map)
   {
-    final boolean theoretical = true;
-    return Utils.findShortestPath(new XYCoord(unit), unit.CO.army, unit.getMoveFunctor(),
-                                  unit.getMovePower(map) * (LOOKAHEAD_TURNS),
-                                  destination.x, destination.y,
-                                  map, theoretical);
+    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, map);
+    pcp.initialMovePower = unit.getMovePower(map) * (LOOKAHEAD_TURNS);
+    pcp.canTravelThroughEnemies = true;
+    return pcp.findShortestPath(destination);
   }
 
   /**

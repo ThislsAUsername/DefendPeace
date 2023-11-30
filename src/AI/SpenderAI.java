@@ -245,7 +245,7 @@ public class SpenderAI implements AIController
             do
             {
               goal = validTargets.get(index++);
-              path = Utils.findShortestPath(unit, goal, gameMap, true);
+              path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
               validTarget = (myArmy.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
                   && !capturingProperties.contains(goal) // We aren't already capturing it.
                   && (path.getPathLength() > 0)); // We can reach it.

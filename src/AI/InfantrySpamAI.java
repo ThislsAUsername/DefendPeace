@@ -173,7 +173,7 @@ public class InfantrySpamAI implements AIController
         do
         {
           goal = unownedProperties.get(index++);
-          path = Utils.findShortestPath(unit, goal, gameMap, true);
+          path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
           validTarget = (myArmy.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
                       && !capturingProperties.contains(goal)                // We aren't already capturing it.
                       && (path.getPathLength() > 0));                       // We can reach it.
@@ -184,7 +184,7 @@ public class InfantrySpamAI implements AIController
         {
           log("    Failed to find a path to a capturable property. Waiting");
           // We couldn't find a valid move point (are we on an island?). Just give up.
-          GameAction wait = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+          GameAction wait = new WaitLifecycle.WaitAction(unit, GamePath.getStatic(unit));
           actions.offer(wait);
           break;
         }

@@ -423,7 +423,7 @@ public class JakeMan extends ModularAI
     boolean canResupply = stations.size() > 0;
     if( canResupply )
     {
-      toClosestStation = Utils.findShortestPath(unit, stations.get(0), gameMap, true);
+      toClosestStation = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(stations.get(0));
       canResupply &= null != toClosestStation;
     }
     if( canResupply )
@@ -460,7 +460,8 @@ public class JakeMan extends ModularAI
         Unit target = gameMap.getResident(xyc);
         UnitModel model = target.model;
         XYCoord targetCoord = new XYCoord(target.x, target.y);
-        if (Utils.findShortestPath(unit, targetCoord, gameMap, true) != null &&
+        GamePath path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(targetCoord);
+        if (path != null &&
             isWeakTo(target.model, unit.model))
         {
           valueMap.put(model, (double)target.getCost());
@@ -586,7 +587,7 @@ public class JakeMan extends ModularAI
 
     for( XYCoord target : validTargets )
     {
-      path = Utils.findShortestPath(unit, target, gameMap, true);
+      path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(target);
       if( path.getPathLength() > 0 ) // We can reach it.
       {
         goal = target;

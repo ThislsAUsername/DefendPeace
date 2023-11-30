@@ -208,7 +208,7 @@ public class AIUtils
     GameAction move = null;
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
-    GamePath path = Utils.findShortestPath(unit, destination, gameMap, true);
+    GamePath path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(destination);
     Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
     pcp.includeOccupiedSpaces = false;
     ArrayList<Utils.SearchNode> validMoves = pcp.findAllPaths();

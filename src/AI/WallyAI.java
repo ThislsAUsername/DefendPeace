@@ -184,8 +184,7 @@ public class WallyAI extends ModularAI
       if( AIUtils.isFriendlyProduction(gameMap, myArmy, coord) || !unit.model.hasImmobileWeapon() )
         return bestAttack;
 
-      // Figure out how to get here.
-      GamePath movePath = Utils.findShortestPath(unit, coord, gameMap);
+      GamePath movePath = GamePath.getStatic(unit);
 
       // Figure out what I can do here.
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
@@ -317,7 +316,8 @@ public class WallyAI extends ModularAI
 
         damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CALC).defender.getPreciseHPDamage();
         ai.log(String.format("    %s brings the damage total to %s", unit.toStringWithLocation(), damageSum));
-        return new BattleLifecycle.BattleAction(gameMap, unit, Utils.findShortestPath(unit, xyc, gameMap), target.x, target.y);
+        GamePath path = new Utils.PathCalcParams(unit, gameMap).findShortestPath(xyc);
+        return new BattleLifecycle.BattleAction(gameMap, unit, path, target.x, target.y);
       }
       // If we're here, we're either done or we need to clear out friendly blockers
       for( XYCoord xyc : neededAttacks.keySet() )
@@ -603,7 +603,7 @@ public class WallyAI extends ModularAI
     boolean canResupply = stations.size() > 0;
     if( canResupply )
     {
-      toClosestStation = Utils.findShortestPath(unit, stations.get(0), gameMap, true);
+      toClosestStation = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(stations.get(0));
       canResupply &= null != toClosestStation;
     }
     if( canResupply )
@@ -638,7 +638,8 @@ public class WallyAI extends ModularAI
         UnitModel model = target.model;
         XYCoord targetCoord = new XYCoord(target.x, target.y);
         double effectiveness = findEffectiveness(unit.model, target.model);
-        if (Utils.findShortestPath(unit, targetCoord, gameMap, true) != null &&
+        GamePath path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(targetCoord);
+        if (path != null &&
             AGGRO_EFFECT_THRESHOLD < effectiveness)
         {
           valueMap.put(model, effectiveness*target.getCost());
@@ -766,7 +767,7 @@ public class WallyAI extends ModularAI
 
     for( XYCoord target : validTargets )
     {
-      path = Utils.findShortestPath(unit, target, gameMap, true);
+      path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(target);
       if( path.getPathLength() > 0 ) // We can reach it.
       {
         goal = target;

@@ -113,7 +113,9 @@ class SelectMoveLocation extends GameInputState<XYCoord>
     if( !myStateData.path.getWaypoint(0).GetCoordinates().equals(coord) || !Utils.isPathValid(actor, myStateData.path, myStateData.gameMap, canEndOnOccupied) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      myStateData.path = Utils.findShortestPath(coord, actor, end, myStateData.gameMap);
+      Utils.PathCalcParams pcp = new Utils.PathCalcParams(actor, myStateData.gameMap);
+      pcp.start = coord;
+      myStateData.path = pcp.findShortestPath(end);
     }
   }
 }
