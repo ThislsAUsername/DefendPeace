@@ -512,9 +512,9 @@ public class Utils
       pcp.setTheoretical();
       pcp.start = start;
       final GamePath path = pcp.findShortestPath(end);
-      int distance = path.getFuelCost(myUnit, myMap);
-      if( 0 == path.getPathLength() )
-        distance = Integer.MAX_VALUE;
+      int distance = Integer.MAX_VALUE;
+      if( null != path )
+        distance = path.getFuelCost(myUnit, myMap);
       distCache.put(xyc, distance);
       return distance;
     }
