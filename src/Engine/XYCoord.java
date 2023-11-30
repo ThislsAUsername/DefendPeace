@@ -35,7 +35,7 @@ public class XYCoord implements Serializable
   }
   public int getDistance(int x, int y)
   {
-    return Math.abs(x - x) + Math.abs(y - y);
+    return Math.abs(this.x - x) + Math.abs(this.y - y);
   }
 
   @Override
