@@ -336,7 +336,8 @@ public class Utils
 
   /**
    * Utility class used for pathfinding. Optionally holds a
-   *   reference to a parent node for path reconstruction.
+   *   reference to a parent node for path reconstruction.<p>
+   * Caveat emptor: the SearchNode quacks like an XYCoord for equality checks
    */
   public static class SearchNode extends XYCoord
   {
@@ -359,7 +360,7 @@ public class Utils
     }
     public XYCoord getCoordinates()
     {
-      return new XYCoord(x, y);
+      return this;
     }
     public GamePath getMyPath()
     {
@@ -375,11 +376,6 @@ public class Utils
       }
 
       return aPath;
-    }
-    @Override
-    public String toString()
-    {
-      return String.format("(%s, %s)", x, y);
     }
   }
 
