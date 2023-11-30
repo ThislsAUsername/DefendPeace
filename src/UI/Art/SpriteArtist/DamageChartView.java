@@ -36,9 +36,6 @@ public class DamageChartView implements IView
     shooterArray = new UnitSpriteSet[control.shooterModels.length];
     targetArray = new UnitSpriteSet[control.targetModels.length];
 
-    // Pull in one sprite for a sizing basis
-    shooterArray[0] = SpriteLibrary.getMapUnitSpriteSet(control.shooterModels[0].name, control.shooterFac, control.shooterColor);
-
     unitSizePx = SpriteLibrary.baseSpriteSize; // Units are square.
     unitBuffer = unitSizePx / 3; // Space between options in the grid.
     unitSpacingH = unitSizePx + unitBuffer;
@@ -202,20 +199,20 @@ public class DamageChartView implements IView
   {
     if( null == shooterArray[unitIndex] )
       shooterArray[unitIndex] = SpriteLibrary.getMapUnitSpriteSet(control.shooterModels[unitIndex].name, control.shooterFac, control.shooterColor);
-    drawUnitAt(g, shooterArray[unitIndex], xOff, yOff, false, control.shooterModels[unitIndex].hidden, control.shooterColor);
+    drawUnitAt(g, shooterArray[unitIndex], xOff, yOff, control.shooterFac.flip, control.shooterModels[unitIndex].hidden, control.shooterColor);
   }
   private void drawTargetAt(Graphics g, int unitIndex, int xOff, int yOff)
   {
     if( null == targetArray[unitIndex] )
       targetArray[unitIndex] = SpriteLibrary.getMapUnitSpriteSet(control.targetModels[unitIndex].name, control.targetFac, control.targetColor);
-    drawUnitAt(g, targetArray[unitIndex], xOff, yOff, true, control.targetModels[unitIndex].hidden, control.targetColor);
+    drawUnitAt(g, targetArray[unitIndex], xOff, yOff, control.targetFac.flip, control.targetModels[unitIndex].hidden, control.targetColor);
   }
 
   private void drawUnitAt(Graphics g, UnitSpriteSet spriteSet, int xOff, int yOff, boolean unitFlip, boolean isCloaked, Color iconColor)
   {
     spriteSet.drawUnit(g, AnimState.IDLE, SpriteMapView.getAnimIndex(),
                         xOff, yOff,
-                        false, false
+                        unitFlip, false
                         );
     if( isCloaked )
       g.drawImage(SpriteLibrary.getHideIcon(iconColor), xOff + unitSizePx / 2, yOff + unitSizePx / 2, null);
