@@ -21,6 +21,16 @@ public class GamePath
   {
     waypoints = new ArrayList<>();
   }
+  public static GamePath getStatic(Unit unit)
+  {
+    return getStatic(new XYCoord(unit));
+  }
+  public static GamePath getStatic(XYCoord xyc)
+  {
+    GamePath output = new GamePath();
+    output.addWaypoint(xyc);
+    return output;
+  }
 
   public void addWaypoint(int x, int y)
   {
