@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Map;
 
 import Engine.GameEvents.GameEventListener.CacheInvalidationListener;
 import Engine.GameInstance;
@@ -11,6 +12,9 @@ import Engine.XYCoord;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.TerrainType;
+import UI.UnitMarker;
+import UI.Art.SpriteArtist.MarkArtist.MarkingCache;
+import UI.UnitMarker.CustomStatData;
 import Units.Unit;
 
 /**
@@ -92,6 +96,17 @@ public class MapTileDetailsArtist
       if( unit.getCaptureProgress() > 0)
         unitAttrs.add(new AttributeArtist(SpriteLibrary.getCaptureIcon(unit.CO.myColor),
             map.getEnvironment(coord).terrainType.getCaptureThreshold()-unit.getCaptureProgress()));
+
+      final MarkingCache cache = MarkingCache.instance(map.game);
+      cache.setupMarkers();
+      for( UnitMarker m : cache.markers )
+      {
+        CustomStatData stat = m.getCustomStat(unit);
+        if (null == stat)
+          continue;
+        BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(stat.markColor).get(stat.mark);
+        unitAttrs.add(new AttributeArtist(symbol, stat.textColor, stat.text));
+      }
     }
 
     ///////////////////////////////////////////////////////////////
@@ -155,30 +170,40 @@ public class MapTileDetailsArtist
   }
 
   private static final int ATTR_TEXT_SPACING = 2;
+  private static final int ATTR_TEXT_COUNT   = 3;
   private static class AttributeArtist
   {
-    private BufferedImage icon;
-    private Integer value;
-    public AttributeArtist(BufferedImage image, Integer quantity)
+    private BufferedImage icon, text;
+    public AttributeArtist(BufferedImage image, Integer value)
+    {
+      this(image, Color.white, ""+Math.min(99, value));
+    }
+    public AttributeArtist(BufferedImage image, Color textColor, String value)
     {
       icon = image;
-      value = quantity;
+      Map<Character, BufferedImage> allChars = SpriteLibrary.getColoredMapTextSprites(textColor);
+      text = allChars.get('A');
+      int charWidth = text.getWidth();
+      text = SpriteLibrary.createTransparentSprite(charWidth*ATTR_TEXT_COUNT, text.getHeight());
+      Graphics g = text.getGraphics();
+
+      int drawX = 0, drawY = 0;
+      int maxIter = Math.min(2, value.length());
+      drawX += charWidth*(2-maxIter); // Pre-cook our spacing
+      for( int i = 0; i < maxIter; ++i )
+      {
+        char foundChar = value.charAt(i);
+        BufferedImage digit = allChars.getOrDefault(foundChar, null);
+        if( null != digit )
+          g.drawImage(digit, drawX, drawY, null);
+        drawX += charWidth;
+      }
     }
     public void draw(Graphics g, int drawX, int drawY)
     {
       g.drawImage(icon, drawX, drawY, null);
       drawX += icon.getWidth() + ATTR_TEXT_SPACING;
-      Sprite numbers = SpriteLibrary.getMapUnitNumberSprites();
-      int tensVal = (int)(value / 10);
-      if( 0 != tensVal )
-      {
-        BufferedImage tens = numbers.getFrame(tensVal);
-        g.drawImage(tens, drawX, drawY, null);
-      }
-      int onesVal = (int)(value % 10);
-      BufferedImage ones = numbers.getFrame(onesVal);
-      drawX += ones.getWidth();
-      g.drawImage(ones, drawX, drawY, null);
+      g.drawImage(text, drawX, drawY, null);
     }
   }
 

@@ -43,4 +43,23 @@ public interface UnitMarker
       this.color = color;
     }
   }
+
+  public static class CustomStatData
+  {
+    public char mark;
+    public Color markColor;
+    public Color textColor;
+    public String text;
+    public CustomStatData(char mark, Color markColor, Color textColor, String text)
+    {
+      this.mark      = mark;
+      this.markColor = markColor;
+      this.textColor = textColor;
+      this.text      = text;
+    }
+  }
+  public default CustomStatData getCustomStat(Unit unit)
+  {
+    return null;
+  }
 }
