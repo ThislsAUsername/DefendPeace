@@ -230,7 +230,7 @@ public class WallyAI extends ModularAI
   private void updatePlan(ActionPlan plan)
   {
     XYCoord dest = plan.action.getMoveLocation();
-    final UnitPrediction destPredictTile = mapPlan[dest.xCoord][dest.yCoord];
+    final UnitPrediction destPredictTile = mapPlan[dest.x][dest.y];
     ActionPlan canceled = destPredictTile.toAchieve;
     if( null != canceled )
     {
@@ -240,12 +240,12 @@ public class WallyAI extends ModularAI
       if( canceled.action.getType() == UnitActionFactory.ATTACK )
       {
         final XYCoord ctt = canceled.action.getTargetLocation();
-        mapPlan[ctt.xCoord][ctt.yCoord].damageInstances.remove(canceled);
+        mapPlan[ctt.x][ctt.y].damageInstances.remove(canceled);
       }
       // Don't mess with canceling attacks that clear tiles, at least for now
 //      final XYCoord cct = canceled.clearTile;
 //      if( null != cct )
-//        mapPlan[cct.xCoord][cct.yCoord].identity =
+//        mapPlan[cct.x][cct.y].identity =
       // Don't chain cancellations - if Wally is dumb enough to cause that, he can recalculate :P
     }
 
@@ -270,7 +270,7 @@ public class WallyAI extends ModularAI
     if( plan.isAttack )
     {
       final XYCoord target = plan.action.getTargetLocation();
-      mapPlan[target.xCoord][target.yCoord].damageInstances.put(plan, plan.percentDamage);
+      mapPlan[target.x][target.y].damageInstances.put(plan, plan.percentDamage);
     }
   }
 
@@ -310,8 +310,8 @@ public class WallyAI extends ModularAI
       XYCoord moveLoc = action.getMoveLocation();
       if( null != moveLoc )
       {
-        mapPlan[moveLoc.xCoord][moveLoc.yCoord].identity = null;
-        mapPlan[moveLoc.xCoord][moveLoc.yCoord].toAchieve = null;
+        mapPlan[moveLoc.x][moveLoc.y].identity = null;
+        mapPlan[moveLoc.x][moveLoc.y].toAchieve = null;
       }
 
       Unit victim = map.getResident(ae.action.getTargetLocation());
@@ -421,7 +421,7 @@ public class WallyAI extends ModularAI
         actionAtCoord = null;
         for( XYCoord movexyc : revisitTiles )
         {
-          int x = movexyc.xCoord, y = movexyc.yCoord;
+          int x = movexyc.x, y = movexyc.y;
           ActionPlan readyPlan = fetchPlanAndVacateTiles(vacatedTiles, ai, map, x, y);
           if( null != readyPlan )
           {
@@ -445,7 +445,7 @@ public class WallyAI extends ModularAI
       // Clear out any stragglers to maybe re-plan
       for( XYCoord movexyc : revisitTiles )
       {
-        int x = movexyc.xCoord, y = movexyc.yCoord;
+        int x = movexyc.x, y = movexyc.y;
         final Unit unit = ai.mapPlan[x][y].identity.unit;
         ai.mapPlan[x][y].identity = null;
         ai.mapPlan[x][y].toAchieve = null;
@@ -510,7 +510,7 @@ public class WallyAI extends ModularAI
       if( plan.action.getType() == UnitActionFactory.ATTACK )
       {
         XYCoord tt = plan.action.getTargetLocation();
-        final UnitPrediction targetPredictTile = ai.mapPlan[tt.xCoord][tt.yCoord];
+        final UnitPrediction targetPredictTile = ai.mapPlan[tt.x][tt.y];
         final UnitContext target = targetPredictTile.identity;
 
         // Predict board state, if we still have the info banging around
@@ -559,7 +559,7 @@ public class WallyAI extends ModularAI
 
       XYCoord mc = capAction.getMoveLocation();
       // If there's a threat here, don't assume we can naively capture
-      if( 0 < ai.threatMap[mc.xCoord][mc.yCoord].size() )
+      if( 0 < ai.threatMap[mc.x][mc.y].size() )
         return null;
 
       // If there's path weirdness this early in the game, it's fine to freak out
@@ -587,7 +587,7 @@ public class WallyAI extends ModularAI
 
       if( AIUtils.isFriendlyProduction(ai.predMap, myArmy, coord) || !unit.model.hasImmobileWeapon() )
         return null;
-      UnitContext resident = ai.mapPlan[coord.xCoord][coord.yCoord].identity;
+      UnitContext resident = ai.mapPlan[coord.x][coord.y].identity;
       // If we've already made plans here, skip evaluation
       if( null != resident )
         return null;
@@ -683,7 +683,7 @@ public class WallyAI extends ModularAI
         }
         UnitContext target = new UnitContext(targetID);
         int damageTotal = 0;
-        for( int hit : ai.mapPlan[coord.xCoord][coord.yCoord].damageInstances.values() )
+        for( int hit : ai.mapPlan[coord.x][coord.y].damageInstances.values() )
           damageTotal += hit;
 
         targetLoc = coord;
@@ -696,7 +696,7 @@ public class WallyAI extends ModularAI
           Unit unit = neededAttacks.get(xyc);
           if( unit.isTurnOver || !gameMap.isLocationEmpty(unit, xyc) )
             continue;
-          UnitContext resident = ai.mapPlan[xyc.xCoord][xyc.yCoord].identity;
+          UnitContext resident = ai.mapPlan[xyc.x][xyc.y].identity;
           if( null != resident && resident.unit.isTurnOver )
           {
             ai.log("    Warning: NHitKO ran into an un-evictable unit");
@@ -713,7 +713,7 @@ public class WallyAI extends ModularAI
           ai.log(String.format("    %s hits for %s, total: %s", unit.toStringWithLocation(), percentDamage, target));
 
           boolean isAttack = true;
-          final BattleAction attack = new BattleAction(ai.predMap, unit, movePath, targetLoc.xCoord, targetLoc.yCoord);
+          final BattleAction attack = new BattleAction(ai.predMap, unit, movePath, targetLoc.x, targetLoc.y);
 
           ai.updatePlan(this, unit, movePath, attack, isAttack, percentDamage);
           attackerOptions.remove(unit);
@@ -862,7 +862,7 @@ public class WallyAI extends ModularAI
         tt.relevantWeapons.add(wep);
       }
       for( XYCoord xyc : shootableTiles.keySet() )
-        threatMap[xyc.xCoord][xyc.yCoord].add(shootableTiles.get(xyc));
+        threatMap[xyc.x][xyc.y].add(shootableTiles.get(xyc));
     }
   } // ~populateTileThreats
 
@@ -923,7 +923,7 @@ public class WallyAI extends ModularAI
         GamePath movePath = moveCoord.getMyPath();
         actor.setPath(movePath);
         Unit resident = ai.predMap.getResident(moveCoord);
-        ActionPlan  ap = ai.mapPlan[moveCoord.xCoord][moveCoord.yCoord].toAchieve;
+        ActionPlan  ap = ai.mapPlan[moveCoord.x][moveCoord.y].toAchieve;
         boolean spaceFree = null == resident;
         if( !spaceFree && (!canEvict || null == ap ) )
           continue; // Bail if we can't clear the space
@@ -938,7 +938,7 @@ public class WallyAI extends ModularAI
             for( GameAction ga : actionSet.getGameActions() )
             {
               XYCoord targetLoc = ga.getTargetLocation();
-              UnitContext target = ai.mapPlan[targetLoc.xCoord][targetLoc.yCoord].identity;
+              UnitContext target = ai.mapPlan[targetLoc.x][targetLoc.y].identity;
               if( null == target )
                 continue;
 
@@ -1394,7 +1394,7 @@ public class WallyAI extends ModularAI
 //    log(String.format("    Yes"));
 
       Unit plannedResident = predMap.getResident(xyc);
-      ActionPlan  ap       = mapPlan[xyc.xCoord][xyc.yCoord].toAchieve;
+      ActionPlan  ap       = mapPlan[xyc.x][xyc.y].toAchieve;
       // Figure out how to get here.
       boolean spaceFree = null == plannedResident;
       if( !spaceFree &&
@@ -1554,10 +1554,10 @@ public class WallyAI extends ModularAI
     UnitContext myUnit = new UnitContext(type.co, type.um);
     myUnit.coord = xyc;
     myUnit.unit = new Unit(type.co, type.um); // Make stuff up so combat modifiers don't explode?
-    myUnit.unit.x = xyc.xCoord;
-    myUnit.unit.y = xyc.yCoord;
+    myUnit.unit.x = xyc.x;
+    myUnit.unit.y = xyc.y;
     double threat = 0;
-    ArrayList<TileThreat> tileThreats = threatMap[xyc.xCoord][xyc.yCoord];
+    ArrayList<TileThreat> tileThreats = threatMap[xyc.x][xyc.y];
     for( TileThreat tt : tileThreats )
     {
       // Scratch struct so we can mess with it
@@ -1567,7 +1567,7 @@ public class WallyAI extends ModularAI
 
       // Collect planned damage so far
       int damagePercent = 0;
-      final HashMap<ActionPlan, Integer> damageInstances = mapPlan[threatContext.coord.xCoord][threatContext.coord.yCoord].damageInstances;
+      final HashMap<ActionPlan, Integer> damageInstances = mapPlan[threatContext.coord.x][threatContext.coord.y].damageInstances;
       for( int hit : damageInstances.values() )
         damagePercent += hit;
 
@@ -1725,7 +1725,7 @@ public class WallyAI extends ModularAI
     for( MapLocation prop : CPI.availableProperties )
     {
       XYCoord coord = prop.getCoordinates();
-      UnitContext resident = mapPlan[coord.xCoord][coord.yCoord].identity;
+      UnitContext resident = mapPlan[coord.x][coord.y].identity;
       if( null != resident )
       {
         log(String.format("  Can't evict unit %s to build", resident));
@@ -2021,8 +2021,8 @@ public class WallyAI extends ModularAI
     {
       XYCoord moveCoord = ga.getMoveLocation();
       XYCoord targetXYC = ga.getTargetLocation();
-      UnitContext actor  = ai.mapPlan[moveCoord.xCoord][moveCoord.yCoord].identity;
-      UnitContext target = ai.mapPlan[targetXYC.xCoord][targetXYC.yCoord].identity;
+      UnitContext actor  = ai.mapPlan[moveCoord.x][moveCoord.y].identity;
+      UnitContext target = ai.mapPlan[targetXYC.x][targetXYC.y].identity;
 
       if( null == target )
       {
@@ -2070,7 +2070,7 @@ public class WallyAI extends ModularAI
     if( ap.action instanceof GameAction.UnitProductionAction )
     {
       XYCoord xyc = ap.action.getTargetLocation();
-      UnitContext toBuild = ai.mapPlan[xyc.xCoord][xyc.yCoord].identity;
+      UnitContext toBuild = ai.mapPlan[xyc.x][xyc.y].identity;
       opportunityCost = toBuild.CO.getCost(toBuild.model) * 3;
     }
     return opportunityCost;
