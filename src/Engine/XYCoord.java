@@ -61,7 +61,8 @@ public class XYCoord implements Serializable
       return true;
     if( obj == null )
       return false;
-    if( getClass() != obj.getClass() )
+    if(    XYCoord.class != obj.getClass()
+        && XYCoord.class != obj.getClass().getSuperclass() )
       return false;
     XYCoord other = (XYCoord) obj;
     if( x != other.x )
