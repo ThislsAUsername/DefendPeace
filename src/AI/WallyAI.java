@@ -1416,59 +1416,6 @@ public class WallyAI extends ModularAI
           continue;
       } // ~if resident
 
-      int siegeWallingValueOffset = 0;
-      HashMap<XYCoord, Unit> wallSlots = new HashMap<>();
-      // Handle walling around siege units
-      if( isSiege )
-      {
-        UnitContext uc = new UnitContext(unit);
-        uc.coord = xyc;
-        int minRange = 0; // Largest min range should be a valid heuristic until I decide to be terrible again
-        for( WeaponModel wm : unit.model.weapons )
-        {
-          uc.setWeapon(wm);
-          minRange = Math.max(minRange, uc.rangeMin);
-        }
-
-        ArrayList<XYCoord> blindSpots = Utils.findLocationsInRange(gameMap, xyc, 1, minRange-1);
-        ArrayList<XYCoord> wallsNeeded = new ArrayList<>();
-        for( XYCoord bs : blindSpots )
-          if( 0 < threatMap[bs.xCoord][bs.yCoord].size() )
-            wallsNeeded.add(bs);
-
-        boolean wallInvalid = false;
-        for( XYCoord wallCoord : wallsNeeded )
-        {
-          Unit planRes = predMap.getResident(wallCoord);
-          if( null != planRes )
-          {
-            if( !planRes.CO.isEnemy(myArmy) )
-              continue; // If there's a friend here already, we're happy
-            wallInvalid = true;
-            break; // If there's an enemy here, don't even try
-          }
-          wallSlots.put(wallCoord, null);
-        }
-        if( wallInvalid )
-          continue;
-
-        ArrayList<Unit> potentialWalls = new ArrayList<>();
-        for( Unit wall : myArmy.getUnits() )
-        {
-          if( wall.isTurnOver || !gameMap.isLocationValid(wall.x, wall.y) )
-            continue; // No actions for units that are stale or out of bounds.
-          if( unit.model.hasImmobileWeapon() )
-            continue;
-          if( plannedUnits.contains(wall) )
-            continue;
-          potentialWalls.add(unit);
-        }
-
-        boolean foundWalls = findWallPlan(predMap, potentialWalls, wallSlots);
-        if( !foundWalls )
-          siegeWallingValueOffset -= unit.CO.getCost(unit.model);
-      }
-
       GamePath movePath = xyc.getMyPath();
       if( movePath.getPathLength() < xyc.getDistance(unit) )
       {
