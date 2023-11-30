@@ -65,7 +65,7 @@ public class GamePath
     {
       XYCoord from = waypoints.get(i-1).GetCoordinates();
       XYCoord to   = waypoints.get( i ).GetCoordinates();
-      cost += fff.getTransitionCost(map, from, to);
+      cost += fff.getTransitionCost(map, from, to, co.army, true);
     }
     return cost * unit.fuelBurnPerTile;
   }
