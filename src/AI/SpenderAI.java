@@ -162,12 +162,14 @@ public class SpenderAI implements AIController
         boolean foundAction = false;
 
         // Find the possible destinations.
-        ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
+        Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+        pcp.includeOccupiedSpaces = false;
+        ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
-        for( XYCoord coord : destinations )
+        for( Utils.SearchNode coord : destinations )
         {
           // Figure out how to get here.
-          GamePath movePath = Utils.findShortestPath(unit, coord, gameMap);
+          GamePath movePath = coord.getMyPath();
 
           // Figure out what I can do here.
           ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
@@ -213,7 +215,9 @@ public class SpenderAI implements AIController
           UnitContext uc = new UnitContext(gameMap, unit);
 
           // Find the possible destinations.
-          ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, false);
+          Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+          pcp.includeOccupiedSpaces = false;
+          ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
           if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
           {
@@ -264,8 +268,8 @@ public class SpenderAI implements AIController
               // Sort my currently-reachable move locations by distance from the goal,
               // and build a GameAction to move to the closest one.
               Utils.sortLocationsByDistance(goal, destinations);
-              XYCoord destination = destinations.get(0);
-              GamePath movePath = Utils.findShortestPath(unit, destination, gameMap);
+              Utils.SearchNode destination = destinations.get(0);
+              GamePath movePath = destination.getMyPath();
               if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
               {
                 GameAction move = new WaitLifecycle.WaitAction(unit, movePath);

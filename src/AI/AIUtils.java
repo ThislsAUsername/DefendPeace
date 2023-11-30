@@ -51,13 +51,14 @@ public class AIUtils
   {
     Map<XYCoord, ArrayList<GameActionSet> > actions = new HashMap<XYCoord, ArrayList<GameActionSet> >();
 
-    // Find the possible destinations.
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedDestinations);
+    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    pcp.includeOccupiedSpaces = includeOccupiedDestinations;
+    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
-    for( XYCoord coord : destinations )
+    for( Utils.SearchNode coord : destinations )
     {
       // Figure out how to get here.
-      GamePath movePath = Utils.findShortestPath(unit, coord, gameMap);
+      GamePath movePath = coord.getMyPath();
 
       // Figure out what I can do here.
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedDestinations);
@@ -208,8 +209,9 @@ public class AIUtils
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
     GamePath path = Utils.findShortestPath(unit, destination, gameMap, true);
-    boolean includeOccupiedSpaces = false;
-    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces); // Find the valid moves we can make.
+    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    pcp.includeOccupiedSpaces = false;
+    ArrayList<Utils.SearchNode> validMoves = pcp.findAllPaths();
 
     if( path.getPathLength() > 0 && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
     {
@@ -218,7 +220,7 @@ public class AIUtils
       if( !validMoves.isEmpty() )
       {
         Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination.
-        move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
+        move = new WaitLifecycle.WaitAction(unit, validMoves.get(0).getMyPath()); // Move to best option.
       }
     }
     return move;

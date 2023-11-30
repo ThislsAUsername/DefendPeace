@@ -71,9 +71,12 @@ public class TestTransport extends TestCase
 
     boolean testPassed = true;
 
+    Utils.PathCalcParams cargoPathCalc = new Utils.PathCalcParams(cargo, testMap);
+    cargoPathCalc.includeOccupiedSpaces = true;
+
     // Try a basic load/move/unload order.
     cargo.initTurn(testMap); // Get him ready.
-    testPassed &= validate(Utils.findPossibleDestinations(cargo, testMap, true).contains(new XYCoord(apc.x, apc.y)), "    Cargo can't actually enter transport's square.");
+    testPassed &= validate(cargoPathCalc.findAllPaths().contains(new XYCoord(apc.x, apc.y)), "    Cargo can't actually enter transport's square.");
     performGameAction(new LoadLifecycle.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 4, 2, testMap)), testGame);
     testPassed &= validate(testMap.getLocation(4, 2).getResident() != cargo, "    Cargo is still on the map.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC is not holding a unit.");

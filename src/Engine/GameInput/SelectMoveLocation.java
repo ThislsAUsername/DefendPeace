@@ -25,9 +25,10 @@ class SelectMoveLocation extends GameInputState<XYCoord>
   protected OptionSet initOptions()
   {
     // Get valid move locations and return our OptionSet.
-    ArrayList<XYCoord> moveLocations = 
-        Utils.findPossibleDestinations(myStateData.unitCoord, myStateData.unitActor,
-                                       myStateData.gameMap, canEndOnOccupied);
+    Utils.PathCalcParams pcp = new Utils.PathCalcParams(myStateData.unitActor, myStateData.gameMap);
+    pcp.start = myStateData.unitCoord;
+    pcp.includeOccupiedSpaces = canEndOnOccupied;
+    ArrayList<XYCoord> moveLocations = new ArrayList<>(pcp.findAllPaths()); // Need to build a new collection because the typechecker doesn't like children
     if (null != myStateData.unitLauncher)
       moveLocations.remove(myStateData.unitCoord); // Prevent returning to the spot of the launch
     buildMovePath(myStateData.unitCoord);

@@ -137,8 +137,11 @@ public class AICombatUtils
   {
     Set<XYCoord> targetLocs = new HashSet<XYCoord>();
     boolean allowEndingOnUnits = false; // We can't attack from on top of another unit.
-    ArrayList<XYCoord> moves = Utils.findPossibleDestinations(start, unit, gameMap, allowEndingOnUnits);
-    for( XYCoord move : moves )
+    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    pcp.start = start;
+    pcp.includeOccupiedSpaces = allowEndingOnUnits;
+    ArrayList<Utils.SearchNode> moves = pcp.findAllPaths();
+    for( Utils.SearchNode move : moves )
     {
       boolean moved = !move.equals(start);
 
@@ -148,7 +151,7 @@ public class AICombatUtils
         // is mobile or we don't care if it's mobile (because we aren't moving).
         if( wpn.loaded(unit) && (!moved || wpn.canFireAfterMoving) )
         {
-          UnitContext uc = new UnitContext(gameMap, unit, wpn, Utils.findShortestPath(unit, move, gameMap), move);
+          UnitContext uc = new UnitContext(gameMap, unit, wpn, move.getMyPath(), move);
           ArrayList<XYCoord> locations = Utils.findTargetsInRange(gameMap, uc, includeTerrain);
           targetLocs.addAll(locations);
         }

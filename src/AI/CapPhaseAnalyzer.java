@@ -122,12 +122,14 @@ public class CapPhaseAnalyzer implements Serializable
   {
     XYCoord goal = chain.get(0).coord;
 
-    boolean includeOccupiedSpaces = false; // We assume that the area won't be cluttered
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
+    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    pcp.includeOccupiedSpaces = false;
+    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
     // If we can get to our destination, go for it
-    if( destinations.contains(goal) )
-      return new CaptureLifecycle.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, goal, gameMap));
+    int goalIndex = destinations.indexOf(goal);
+    if( goalIndex >= 0 )
+      return new CaptureLifecycle.CaptureAction(gameMap, unit, destinations.get(goalIndex).getMyPath());
 
     return AIUtils.moveTowardLocation(unit, goal, gameMap);
   }
