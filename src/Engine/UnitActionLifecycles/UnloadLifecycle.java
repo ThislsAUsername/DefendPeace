@@ -240,7 +240,7 @@ public abstract class UnloadLifecycle
           && gameMap.getLocation(dropLoc).getResident() == null )
       {
         transport.heldUnits.remove(cargo);
-        gameMap.moveUnit(cargo, dropLoc.xCoord, dropLoc.yCoord);
+        gameMap.moveUnit(cargo, dropLoc.x, dropLoc.y);
         cargo.isTurnOver = true;
         transport.CO.army.myView.revealFog(cargo);
       }

@@ -71,7 +71,7 @@ public class TeleportEvent implements GameEvent
   public void performEvent(MapMaster gameMap)
   {
     boolean force = true;
-    gameMap.moveUnit(unit, unitDestination.xCoord, unitDestination.yCoord, force);
+    gameMap.moveUnit(unit, unitDestination.x, unitDestination.y, force);
     unit.CO.army.myView.revealFog(unit);
   }
 

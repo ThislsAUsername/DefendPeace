@@ -78,7 +78,7 @@ public class MoveType implements Serializable
       return MoveType.IMPASSABLE;
 
     // note to self: extend this if we ever support moving to non-adjacent tiles
-    int cost = getMoveCost(map.getEnvironment(to.xCoord, to.yCoord));
+    int cost = getMoveCost(map.getEnvironment(to.x, to.y));
 
     if( !canTravelThroughEnemies )
     {

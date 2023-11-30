@@ -66,7 +66,7 @@ public class TestCommanderAve extends TestCase
     testPassed &= validate(testMap.getEnvironment(city).terrainType == TerrainType.CITY, "    City location is not a city!");
     testPassed &= validate(testMap.getEnvironment(city).weatherType == Weathers.CLEAR, "    Weather is not clear at start!");
 
-    Unit infantry = addUnit(testMap, Ave, UnitModel.TROOP, city.xCoord, city.yCoord);
+    Unit infantry = addUnit(testMap, Ave, UnitModel.TROOP, city.x, city.y);
     GameAction capture = new CaptureLifecycle.CaptureAction(testMap, infantry, Utils.findShortestPath(infantry, city, testMap));
 
     // Give it the ol' one-two.
@@ -75,7 +75,7 @@ public class TestCommanderAve extends TestCase
     infantry.initTurn(testMap);
     performGameAction(capture, game);
 
-    testPassed &= validate(Ave.getSnowMapClone()[city.xCoord][city.yCoord] == CommandingOfficers.Ave.SNOW_THRESHOLD, "    Ave doesn't have 1 snow in city after capture");
+    testPassed &= validate(Ave.getSnowMapClone()[city.x][city.y] == CommandingOfficers.Ave.SNOW_THRESHOLD, "    Ave doesn't have 1 snow in city after capture");
 
     return testPassed;
   }
@@ -122,7 +122,7 @@ public class TestCommanderAve extends TestCase
       }
     }
     //System.out.println("Snow map:\n" + Ave.getSnowMapAsString());
-    Unit infantry = addUnit(testMap, Ave, UnitModel.TROOP, snowCity.xCoord, snowCity.yCoord);
+    Unit infantry = addUnit(testMap, Ave, UnitModel.TROOP, snowCity.x, snowCity.y);
     GamePath path = Utils.findShortestPath(infantry, new XYCoord(10, 5), testMap);
     testPassed &= validate( 2 == path.getFuelCost(Ave, infantry.model, testMap), "    Ave's units burn too much fuel moving through snow." );
 

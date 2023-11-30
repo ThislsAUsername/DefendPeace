@@ -41,8 +41,8 @@ public class MarkArtist
   private static void drawMark(Graphics g, ArrayList<MarkData> markList, int animIndex, XYCoord xyc)
   {
     // Convert "real" location into a draw-space location, then draw icons.
-    final int drawX = (int) (SpriteLibrary.baseSpriteSize * xyc.xCoord);
-    final int drawY = (int) (SpriteLibrary.baseSpriteSize * xyc.yCoord);
+    final int drawX = (int) (SpriteLibrary.baseSpriteSize * xyc.x);
+    final int drawY = (int) (SpriteLibrary.baseSpriteSize * xyc.y);
 
     // Draw one mark, based on our animation index
     if( !markList.isEmpty() )

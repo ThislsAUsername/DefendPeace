@@ -32,7 +32,7 @@ public class GamePath
   }
   public void addWaypoint(XYCoord xyc)
   {
-    addWaypoint(xyc.xCoord, xyc.yCoord);
+    addWaypoint(xyc.x, xyc.y);
   }
 
   public ArrayList<PathNode> getWaypoints()

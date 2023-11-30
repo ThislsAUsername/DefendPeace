@@ -191,8 +191,8 @@ public class MapArtist
     for( XYCoord drawCoord : Utils.findLocationsInRange(gameMap, coord, 0, 1) )
     {
       // Fetch the relevant sprite set for this terrain type and have it draw itself.
-      TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(drawCoord.xCoord, drawCoord.yCoord));
-      spriteSet.drawTerrain(g, gameMap, drawCoord.xCoord, drawCoord.yCoord, false);
+      TerrainSpriteSet spriteSet = SpriteLibrary.getTerrainSpriteSet(gameMap.getLocation(drawCoord.x, drawCoord.y));
+      spriteSet.drawTerrain(g, gameMap, drawCoord.x, drawCoord.y, false);
     }
   }
 

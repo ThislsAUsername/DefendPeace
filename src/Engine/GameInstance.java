@@ -100,7 +100,7 @@ public class GameInstance implements Serializable
       }
       armies[i].initForGame(this);
     }
-    setCursorLocation(playerCursors.get(0).xCoord, playerCursors.get(0).yCoord);
+    setCursorLocation(playerCursors.get(0).x, playerCursors.get(0).y);
     
     saveFile = getSaveName();
   }
@@ -132,7 +132,7 @@ public class GameInstance implements Serializable
 
   public void setCursorLocation(XYCoord loc)
   {
-    setCursorLocation(loc.xCoord, loc.yCoord);
+    setCursorLocation(loc.x, loc.y);
   }
   public void setCursorLocation(int x, int y)
   {
@@ -263,7 +263,7 @@ public class GameInstance implements Serializable
     }
 
     // Set the cursor to the new CO's last known cursor position.
-    setCursorLocation(playerCursors.get(activeCoNum).xCoord, playerCursors.get(activeCoNum).yCoord);
+    setCursorLocation(playerCursors.get(activeCoNum).x, playerCursors.get(activeCoNum).y);
 
     // Handle income and any other scenario-specific events.
     events.addAll(gameScenario.initTurn(gameMap));

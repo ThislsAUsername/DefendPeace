@@ -112,7 +112,7 @@ public class TestAIBehavior extends TestCase
     XYCoord facPos = new XYCoord(7, 1);
 
     // Add some units, and grant us a factory so we can avoid blocking it.
-    Unit myTank = addUnit(testMap, testCo1, "Md Tank", tankStart.xCoord, tankStart.yCoord);
+    Unit myTank = addUnit(testMap, testCo1, "Md Tank", tankStart.x, tankStart.y);
     addUnit(testMap, testCo2, "Recon", 10, 1);
     testMap.getLocation(facPos).setOwner(testCo1);
 

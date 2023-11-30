@@ -206,7 +206,7 @@ public class Ave extends Commander
     for( XYCoord xyc : ownedProperties )
     {
       // Boost the amount of snow power this property has.
-      snowMap[xyc.xCoord][xyc.yCoord] += amount;
+      snowMap[xyc.x][xyc.y] += amount;
       if( gameMap.getEnvironment(xyc).weatherType != Weathers.SNOW )
       {
         Environment envi = Environment.getTile(gameMap.getEnvironment(xyc).terrainType, Weathers.SNOW);
@@ -269,7 +269,7 @@ public class Ave extends Commander
       sortedLeaves.clear();
       for( XYCoord front : frontier )
       {
-        sortedLeaves.add(new SnowPail(front, oldSnowMap[front.xCoord][front.yCoord]));
+        sortedLeaves.add(new SnowPail(front, oldSnowMap[front.x][front.y]));
       }
       frontier.clear();
 
@@ -290,7 +290,7 @@ public class Ave extends Commander
         disconnected.remove(leaf); // Don't consider this tile for melting later.
         log(String.format("Tile %s is connected", leaf));
 
-        if( oldSnowMap[leaf.xCoord][leaf.yCoord] <= SNOW_THRESHOLD )
+        if( oldSnowMap[leaf.x][leaf.y] <= SNOW_THRESHOLD )
         {
           log("  Skipping shallow leaf " + leaf);
           continue;
@@ -299,8 +299,8 @@ public class Ave extends Commander
         log(getSnowMapAsString());
 
         // Figure out how much snow we can spread from this leaf.
-        int snowToSpread = oldSnowMap[leaf.xCoord][leaf.yCoord] - SNOW_THRESHOLD; // Have to leave some behind.
-        snowMap[leaf.xCoord][leaf.yCoord] = SNOW_THRESHOLD;
+        int snowToSpread = oldSnowMap[leaf.x][leaf.y] - SNOW_THRESHOLD; // Have to leave some behind.
+        snowMap[leaf.x][leaf.y] = SNOW_THRESHOLD;
 
         // Collect the adjacent tiles that can collect snow from leaf.
         ArrayList<XYCoord> potentials = Utils.findLocationsInRange(gameMap, leaf, 1);
@@ -315,7 +315,7 @@ public class Ave extends Commander
         for( XYCoord pot : potentials )
           if( gameMap.isLocationValid(pot) && !roots.contains(pot) && !leafStack.contains(pot) )
           {
-            SnowPail neighbor = new SnowPail(pot, oldSnowMap[pot.xCoord][pot.yCoord]);
+            SnowPail neighbor = new SnowPail(pot, oldSnowMap[pot.x][pot.y]);
             workingSet.offer(neighbor);
             log("    " + pot + ": " + neighbor.snowDepth);
           }
@@ -341,7 +341,7 @@ public class Ave extends Commander
           }
           else
           {
-            mostShallow = snowMap[leaf.xCoord][leaf.yCoord];
+            mostShallow = snowMap[leaf.x][leaf.y];
             if( mostShallow == MAX_SNOW_DEPTH )
               shallowTiles.remove(leaf); // If leaf is max depth, just push extra to other unprocessed tiles.
             nextMostShallow = mostShallow + snowToSpread;
@@ -373,8 +373,8 @@ public class Ave extends Commander
           {
             log("    moving " + payment + " snow to " + coord);
             snowToSpread -= payment;
-            snowMap[coord.xCoord][coord.yCoord] += payment;
-            if( (snowMap[coord.xCoord][coord.yCoord] >= SNOW_THRESHOLD) )
+            snowMap[coord.x][coord.y] += payment;
+            if( (snowMap[coord.x][coord.y] >= SNOW_THRESHOLD) )
             {
               toSnow.add(coord);
               log(String.format("Ensuring %s is SNOW", coord));
@@ -398,17 +398,17 @@ public class Ave extends Commander
     // last set of "next tiles" is still connected.
     for( XYCoord front : frontier )
     {
-      if( snowMap[front.xCoord][front.yCoord] > MAX_SNOW_DEPTH )
-        snowMap[front.xCoord][front.yCoord] = MAX_SNOW_DEPTH;
+      if( snowMap[front.x][front.y] > MAX_SNOW_DEPTH )
+        snowMap[front.x][front.y] = MAX_SNOW_DEPTH;
       disconnected.remove(front);
     }
 
     // Any tiles that are no longer being fed snow will melt over time.
     for(XYCoord dis : disconnected )
     {
-      int oldVal = snowMap[dis.xCoord][dis.yCoord];
-      snowMap[dis.xCoord][dis.yCoord] = (oldVal - SNOW_MELT_RATE < 0)? 0 : oldVal - SNOW_MELT_RATE;
-      if( snowLoggingEnabled ) log("Snow at " + dis + " melting from " + oldVal + " to " + snowMap[dis.xCoord][dis.yCoord]);
+      int oldVal = snowMap[dis.x][dis.y];
+      snowMap[dis.x][dis.y] = (oldVal - SNOW_MELT_RATE < 0)? 0 : oldVal - SNOW_MELT_RATE;
+      if( snowLoggingEnabled ) log("Snow at " + dis + " melting from " + oldVal + " to " + snowMap[dis.x][dis.y]);
     }
 
     // Update weather forecast.
@@ -416,7 +416,7 @@ public class Ave extends Commander
     for (XYCoord coord : toSnow)
     {
       Environment newEnvi = Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW);
-      int duration = snowMap[coord.xCoord][coord.yCoord] / SNOW_MELT_RATE;
+      int duration = snowMap[coord.x][coord.y] / SNOW_MELT_RATE;
       tiles.add(new MapChangeEvent.EnvironmentAssignment(coord, newEnvi, duration));
     }
     if( !tiles.isEmpty())
@@ -512,9 +512,9 @@ public class Ave extends Commander
       Set<XYCoord> tiles = Utils.findLocationsNearProperties(gameMap, coCast, coCast.MAX_SNOW_SPREAD_RANGE);
       for( XYCoord coord : tiles )
       {
-        if( coCast.snowMap[coord.xCoord][coord.yCoord] < Ave.SNOW_THRESHOLD )
+        if( coCast.snowMap[coord.x][coord.y] < Ave.SNOW_THRESHOLD )
         {
-          coCast.snowMap[coord.xCoord][coord.yCoord] = Ave.SNOW_THRESHOLD;
+          coCast.snowMap[coord.x][coord.y] = Ave.SNOW_THRESHOLD;
           if( gameMap.getEnvironment(coord).weatherType != Weathers.SNOW )
           {
             snowTiles.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW), 1));
@@ -583,9 +583,9 @@ public class Ave extends Commander
       tilesInRange.addAll(Utils.findLocationsNearUnits(gameMap, coCast.army.getUnits(), GLACIO_SNOW_SPREAD));
       for( XYCoord coord : tilesInRange )
       {
-        if( coCast.snowMap[coord.xCoord][coord.yCoord] < Ave.SNOW_THRESHOLD )
+        if( coCast.snowMap[coord.x][coord.y] < Ave.SNOW_THRESHOLD )
         {
-          coCast.snowMap[coord.xCoord][coord.yCoord] = Ave.SNOW_THRESHOLD;
+          coCast.snowMap[coord.x][coord.y] = Ave.SNOW_THRESHOLD;
           if( gameMap.getEnvironment(coord).weatherType != Weathers.SNOW )
           {
             tileChanges.add(new MapChangeEvent.EnvironmentAssignment(coord, Environment.getTile(gameMap.getEnvironment(coord).terrainType, Weathers.SNOW), 1));
@@ -790,7 +790,7 @@ public class Ave extends Commander
       if( unit.CO == Ave && (location.getOwner() == Ave) )
       {
         XYCoord where = location.getCoordinates();
-        Ave.snowMap[where.xCoord][where.yCoord] += SNOW_THRESHOLD;
+        Ave.snowMap[where.x][where.y] += SNOW_THRESHOLD;
         returnEvents.add(
             new MapChangeEvent( where, Environment.getTile(location.getEnvironment().terrainType, Weathers.SNOW) )
             );

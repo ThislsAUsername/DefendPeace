@@ -215,8 +215,8 @@ public class PlayerSetupTeamArtist
 
     for( XYCoord coord : ownedCoords )
     {
-      int x = (int)(baseX + coord.xCoord * scale - distance);
-      int y = (int)(baseY + coord.yCoord * scale - distance);
+      int x = (int)(baseX + coord.x * scale - distance);
+      int y = (int)(baseY + coord.y * scale - distance);
       int s = (int)(scale + distance * 2);
       g.drawRect(x, y, s, s);
     }

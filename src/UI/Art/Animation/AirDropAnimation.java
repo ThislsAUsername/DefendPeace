@@ -36,8 +36,8 @@ public class AirDropAnimation extends BaseUnitActionAnimation
     dropDestination = end;
 
     // Phase 0
-    xDrop = dropDestination.xCoord;
-    yCurrent = dropDestination.yCoord - dropHeight; // So we drop in from the sky.
+    xDrop = dropDestination.x;
+    yCurrent = dropDestination.y - dropHeight; // So we drop in from the sky.
     vel = 0.5;
     deltaV = 0.03;
 
@@ -69,9 +69,9 @@ public class AirDropAnimation extends BaseUnitActionAnimation
       yCurrent += vel;
       vel += deltaV;
 
-      if( yCurrent > dropDestination.yCoord )
+      if( yCurrent > dropDestination.y )
       {
-        yCurrent = dropDestination.yCoord;
+        yCurrent = dropDestination.y;
         phase++;
 
         // Set up the next phase.
@@ -85,13 +85,13 @@ public class AirDropAnimation extends BaseUnitActionAnimation
     {
       // Draw dust clouds from landing.
       final int diam_px = 10; // Draw-space pixels.
-      final double map_y = dropDestination.yCoord+0.75;
+      final double map_y = dropDestination.y+0.75;
       int xlDraw = (int)(xLeft*tileSize)-diam_px/2;
       int xrDraw = (int)(xRight*tileSize)-diam_px/2;
       int yDraw = (int)(map_y*tileSize)-diam_px/2;
       g.setColor(fxColor);
 
-      drawUnit(g, actor, AnimState.IDLE, dropDestination.xCoord, dropDestination.yCoord);
+      drawUnit(g, actor, AnimState.IDLE, dropDestination.x, dropDestination.y);
       g.fillOval(xlDraw, yDraw, diam_px, diam_px);
       g.fillOval(xrDraw, yDraw, diam_px, diam_px);
 

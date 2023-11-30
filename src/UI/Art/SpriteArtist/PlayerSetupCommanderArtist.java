@@ -123,8 +123,8 @@ public class PlayerSetupCommanderArtist
     int baseDrawX = leftMargin;
 
     XYCoord mugCoord = outerGroup.get(binIndex).calcMugPosition(mmpr, coIndex);
-    panelDrawX.set(baseDrawX + mugCoord.xCoord, snapCursor);
-    panelOffsetY.set(totalShift + mugCoord.yCoord, snapCursor);
+    panelDrawX.set(baseDrawX + mugCoord.x, snapCursor);
+    panelOffsetY.set(totalShift + mugCoord.y, snapCursor);
 
     int drawY = myHeight / 2 - panelOffsetY.geti() - CommanderPanel.PANEL_HEIGHT/2;
 
@@ -442,7 +442,7 @@ public class PlayerSetupCommanderArtist
           BufferedImage playerImage = panel.update(coInfo, coInfo.baseFaction.color);
 
           XYCoord mugPos = calcMugPosition(mmpr, indexInBin);
-          g.drawImage(playerImage, mugPos.xCoord, mugPos.yCoord, null);
+          g.drawImage(playerImage, mugPos.x, mugPos.y, null);
           ++indexInBin;
         }
       }

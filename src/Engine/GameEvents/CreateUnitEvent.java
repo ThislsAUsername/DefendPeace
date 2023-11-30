@@ -72,7 +72,7 @@ public class CreateUnitEvent implements GameEvent
     {
       myCommander.units.add(myNewUnit);
       if( myFudgeRadius < 1 || myBoots )
-        gameMap.addNewUnit(myNewUnit, myBuildCoords.xCoord, myBuildCoords.yCoord, myBoots);
+        gameMap.addNewUnit(myNewUnit, myBuildCoords.x, myBuildCoords.y, myBoots);
       else
       {
         boolean success = false;
@@ -85,7 +85,7 @@ public class CreateUnitEvent implements GameEvent
             Unit resident = gameMap.getResident(xyc);
             if( resident == null && uc.moveType.canStandOn(gameMap.getEnvironment(xyc)) )
             {
-              gameMap.addNewUnit(myNewUnit, xyc.xCoord, xyc.yCoord, false);
+              gameMap.addNewUnit(myNewUnit, xyc.x, xyc.y, false);
               success = true;
               break;
             }

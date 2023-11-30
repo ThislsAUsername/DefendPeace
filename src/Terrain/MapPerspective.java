@@ -72,7 +72,7 @@ public class MapPerspective extends GameMap
   @Override
   public Unit getResident(XYCoord coord)
   {
-    return getResident(coord.xCoord, coord.yCoord);
+    return getResident(coord.x, coord.y);
   }
   @Override
   public Unit getResident(int w, int h)
@@ -89,7 +89,7 @@ public class MapPerspective extends GameMap
   public MapLocation getLocation(XYCoord location)
   {
     if (null != location)
-      return getLocation(location.xCoord, location.yCoord);
+      return getLocation(location.x, location.y);
     return null;
   }
 
@@ -113,7 +113,7 @@ public class MapPerspective extends GameMap
   @Override
   public boolean isLocationEmpty(XYCoord coords)
   {
-    return isLocationEmpty(null, coords.xCoord, coords.yCoord);
+    return isLocationEmpty(null, coords.x, coords.y);
   }
 
   /** Returns true if no unit is at the specified x and y coordinate, false else */
@@ -127,7 +127,7 @@ public class MapPerspective extends GameMap
   @Override
   public boolean isLocationEmpty(Unit unit, XYCoord coords)
   {
-    return isLocationEmpty(unit, coords.xCoord, coords.yCoord);
+    return isLocationEmpty(unit, coords.x, coords.y);
   }
 
   /** Returns true if no unit (excluding 'unit') is in the specified MapLocation. */
@@ -151,7 +151,7 @@ public class MapPerspective extends GameMap
   @Override
   public boolean isLocationFogged(XYCoord coord)
   {
-    return isLocationFogged(coord.xCoord, coord.yCoord);
+    return isLocationFogged(coord.x, coord.y);
   }
   @Override
   public boolean isLocationFogged(int x, int y)
@@ -261,8 +261,8 @@ public class MapPerspective extends GameMap
   public void revealFog(XYCoord coord, boolean piercing)
   {
     MapLocation loc = master.getLocation(coord);
-    isFogged[coord.xCoord][coord.yCoord] = false;
-    lastOwnerSeen[coord.xCoord][coord.yCoord] = loc.getOwner();
+    isFogged[coord.x][coord.y] = false;
+    lastOwnerSeen[coord.x][coord.y] = loc.getOwner();
     if (piercing && loc.getResident() != null)
       confirmedVisibles.add(loc.getResident());
   }

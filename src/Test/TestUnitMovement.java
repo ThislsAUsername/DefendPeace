@@ -99,7 +99,7 @@ public class TestUnitMovement extends TestCase
     // Evaluate the test.
     boolean testPassed = validate(testMap.getLocation(4, 4).getResident() == null, "    Infantry is still at the start point.");
     testPassed &= validate(testMap.getLocation(destination).getResident() == mover, "    Infantry is not at the destination.");
-    testPassed &= validate((destination.xCoord == mover.x) && (destination.yCoord == mover.y),
+    testPassed &= validate((destination.x == mover.x) && (destination.y == mover.y),
         "    Infantry doesn't think he's at the destination.");
     testPassed &= validate(96 == mover.fuel, "    Infantry did not lose the proper amount of fuel.");
 

@@ -108,11 +108,11 @@ public class PlayerSetupInfo
     for( int i = 0; i < mi.COProperties[thisPlayer].length; ++i )
     {
       XYCoord coord = mi.COProperties[thisPlayer][i];
-      final TerrainType terrainType = mi.terrain[coord.xCoord][coord.yCoord];
+      final TerrainType terrainType = mi.terrain[coord.x][coord.y];
       if( terrainType == TerrainType.HEADQUARTERS
           || terrainType == TerrainType.LAB)
       {
-        flipUnits = (coord.xCoord > mi.terrain.length / 2);
+        flipUnits = (coord.x > mi.terrain.length / 2);
         break;
       }
     }

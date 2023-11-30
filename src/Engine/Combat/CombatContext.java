@@ -44,10 +44,10 @@ public class CombatContext
     if (null == gameInstance && !calcType.isSim())
       throw new IllegalArgumentException("Caller requires true game results but did not provide a GameInstance.");
 
-    int attackerX = attacker.coord.xCoord;
-    int attackerY = attacker.coord.yCoord;
-    int defenderX = defender.coord.xCoord;
-    int defenderY = defender.coord.yCoord;
+    int attackerX = attacker.coord.x;
+    int attackerY = attacker.coord.y;
+    int defenderX = defender.coord.x;
+    int defenderY = defender.coord.y;
 
     battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
 

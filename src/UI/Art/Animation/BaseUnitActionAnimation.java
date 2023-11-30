@@ -42,7 +42,7 @@ public class BaseUnitActionAnimation extends GameAnimation
       AnimState state = AnimState.MOVEEAST; // Draw the unit running in place
       if( SpriteMapView.shouldFlip(actor) )
         state = AnimState.MOVEWEST;
-      drawUnit(g, actor, state, actorCoord.xCoord, actorCoord.yCoord);
+      drawUnit(g, actor, state, actorCoord.x, actorCoord.y);
     }
 
     return animTime > duration;

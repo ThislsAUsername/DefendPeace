@@ -47,7 +47,7 @@ public class Utils
       for( int xOff = -maxRange; xOff <= maxRange; ++xOff )
       {
         int currentRange = Math.abs(xOff) + Math.abs(yOff);
-        XYCoord coord = new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff);
+        XYCoord coord = new XYCoord(origin.x + xOff, origin.y + yOff);
         if( currentRange >= minRange && currentRange <= maxRange && map.isLocationValid(coord) )
         {
           // Add this location to the set.
@@ -98,7 +98,7 @@ public class Utils
       {
         // Add any location that is empty and supports movement of the cargo unit.
         if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
-            && cargoMoveType.canStandOn(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+            && cargoMoveType.canStandOn(map.getEnvironment(loc.x, loc.y)) )
         {
           dropoffLocations.add(loc);
         }
@@ -135,7 +135,7 @@ public class Utils
   {
     ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
 
-    if( null == fff || null == start || start.xCoord < 0 || start.yCoord < 0 )
+    if( null == fff || null == start || start.x < 0 || start.y < 0 )
     {
       System.out.println("WARNING! Finding destinations for ineligible unit!");
       return reachableTiles;
@@ -152,8 +152,8 @@ public class Utils
     }
 
     // set up our search
-    SearchNode root = new SearchNode(start.xCoord, start.yCoord);
-    powerGrid[start.xCoord][start.yCoord] = initialFillPower;
+    SearchNode root = new SearchNode(start.x, start.y);
+    powerGrid[start.x][start.y] = initialFillPower;
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid));
     searchQueue.add(root);
     // do search
@@ -203,7 +203,7 @@ public class Utils
     {
       ArrayList<SearchNode> reachableTiles = new ArrayList<>();
 
-      if( null == mt || null == start || start.xCoord < 0 || start.yCoord < 0 )
+      if( null == mt || null == start || start.x < 0 || start.y < 0 )
       {
         System.out.println("WARNING! Finding destinations for ineligible unit!");
         return reachableTiles;
@@ -220,8 +220,8 @@ public class Utils
       }
 
       // set up our search
-      SearchNode root = new SearchNode(start.xCoord, start.yCoord);
-      powerGrid[start.xCoord][start.yCoord] = initialMovePower;
+      SearchNode root = new SearchNode(start.x, start.y);
+      powerGrid[start.x][start.y] = initialMovePower;
       Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid));
       searchQueue.add(root);
       // do search
@@ -305,7 +305,7 @@ public class Utils
     // findShortestPath() is given a particular endpoint already, so it assumes that it is valid to end up there.
     return findShortestPath(start, unit.CO.army, unit.getMoveFunctor(),
                             (theoretical)? Integer.MAX_VALUE : Math.min(unit.getMovePower(map), unit.fuel),
-                            end.xCoord, end.yCoord, map, theoretical);
+                            end.x, end.y, map, theoretical);
   }
   /**
    * Calculate and return the minimum-cost path for the FloodFillFunctor from its current location to map(x, y).
@@ -322,7 +322,7 @@ public class Utils
    */
   public static GamePath findShortestPath(XYCoord start, Army team, MoveType fff, int initialFillPower, int x, int y, GameMap map, boolean canTravelThroughEnemies)
   {
-    if( null == start || null == fff || null == map || !map.isLocationValid(start.xCoord, start.yCoord) )
+    if( null == start || null == fff || null == map || !map.isLocationValid(start.x, start.y) )
     {
       return null;
     }
@@ -346,8 +346,8 @@ public class Utils
     }
 
     // Set up search parameters.
-    SearchNode root = new SearchNode(start.xCoord, start.yCoord);
-    powerGrid[start.xCoord][start.yCoord] = initialFillPower;
+    SearchNode root = new SearchNode(start.x, start.y);
+    powerGrid[start.x][start.y] = initialFillPower;
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid, x, y));
     searchQueue.add(root);
 
@@ -389,13 +389,13 @@ public class Utils
       // If we can move more cheaply than previously discovered,
       // then update the power grid and re-queue the next node.
       int oldPower = powerGrid[currentNode.x][currentNode.y];
-      int oldNextPower = powerGrid[next.xCoord][next.yCoord];
+      int oldNextPower = powerGrid[next.x][next.y];
       final int transitionCost = fff.getTransitionCost(map, currentNode.getCoordinates(), next, team, canTravelThroughEnemies);
       int newNextPower = oldPower - transitionCost;
 
       if( transitionCost < MoveType.IMPASSABLE && newNextPower > oldNextPower )
       {
-        powerGrid[next.xCoord][next.yCoord] = newNextPower;
+        powerGrid[next.x][next.y] = newNextPower;
         // Prevent wrong path generation due to updating the shared powerGrid
         searchQueue.removeIf(node->next.equals(node.getCoordinates()));
         searchQueue.add(new SearchNode(next, currentNode));
@@ -410,9 +410,6 @@ public class Utils
   public static class SearchNode extends XYCoord
   {
     private static final long serialVersionUID = 2637721435469761667L;
-    // Both XYCoord's and these are final, so no desync is possible.
-    // However, TODO: delete one pair or the other
-    final public int x, y;
     public SearchNode parent;
 
     public SearchNode(int x, int y)
@@ -422,13 +419,11 @@ public class Utils
 
     public SearchNode(XYCoord coord, SearchNode parent)
     {
-      this(coord.xCoord, coord.yCoord, parent);
+      this(coord.x, coord.y, parent);
     }
     public SearchNode(int x, int y, SearchNode parent)
     {
       super(x, y);
-      this.x = x;
-      this.y = y;
       this.parent = parent;
     }
     public XYCoord getCoordinates()
@@ -673,7 +668,7 @@ public class Utils
       for( int xOff = -range; xOff <= range; ++xOff )
       {
         int currentRange = Math.abs(xOff) + Math.abs(yOff);
-        XYCoord coord = new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff);
+        XYCoord coord = new XYCoord(origin.x + xOff, origin.y + yOff);
         if( currentRange <= range && map.isLocationValid(coord) )
         {
           // If we're adjacent, or we can see through cover, or it's *not* cover, we can see into it.

@@ -443,7 +443,7 @@ public class SpriteMapView extends MapView
   @Override // from MapView
   public GameAnimation buildDemolitionAnimation( StrikeParams params, XYCoord target, int damage )
   {
-    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, params.attacker.unit, params.attacker.coord.xCoord, params.attacker.coord.yCoord, target.xCoord, target.yCoord);
+    return new NobunagaBattleAnimation(SpriteLibrary.baseSpriteSize, params.attacker.unit, params.attacker.coord.x, params.attacker.coord.y, target.x, target.y);
   }
 
   @Override // from MapView
@@ -558,13 +558,13 @@ public class SpriteMapView extends MapView
 
     // Draw the damage estimate directly above the unit being targeted.
     int tileSize = SpriteLibrary.baseSpriteSize;
-    int estimateX = (data.coords.xCoord * tileSize) + (tileSize / 2);
-    int estimateY = Math.max((data.coords.yCoord * tileSize) - dmgImage.getHeight() / 2, dmgImage.getHeight() / 2); // Don't want it floating off-screen
+    int estimateX = (data.coords.x * tileSize) + (tileSize / 2);
+    int estimateY = Math.max((data.coords.y * tileSize) - dmgImage.getHeight() / 2, dmgImage.getHeight() / 2); // Don't want it floating off-screen
     SpriteUIUtils.drawImageCenteredOnPoint(g, dmgImage, estimateX, estimateY);
 
-    if( spaceEmpty && 0 != data.coords.yCoord )
+    if( spaceEmpty && 0 != data.coords.y )
     {
-      int arrowY = (data.coords.yCoord * tileSize) + (tileSize / 2) - 1; // break the bottom border of the text frame
+      int arrowY = (data.coords.y * tileSize) + (tileSize / 2) - 1; // break the bottom border of the text frame
       SpriteUIUtils.drawImageCenteredOnPoint(g, SpriteLibrary.getPreviewArrow(data.color), estimateX, arrowY);
     }
   }
@@ -668,7 +668,7 @@ public class SpriteMapView extends MapView
 
     XYCoord tileToDetail = myGame.getCursorCoord();
     // Draw the tile coordinates.
-    String coordStr = String.format("(%d,%d)", tileToDetail.xCoord, tileToDetail.yCoord);
+    String coordStr = String.format("(%d,%d)", tileToDetail.x, tileToDetail.y);
     BufferedImage coordsImg = SpriteUIUtils.getTextAsImage(coordStr, true);
     int coordsDrawX = (overlayIsLeft) ? mapViewWidth - coordsImg.getWidth() - bufferPx : bufferPx;
     int coordsDrawY = mapViewHeight - coordsImg.getHeight() - viewModeImg.getHeight() - bufferPx * 5;

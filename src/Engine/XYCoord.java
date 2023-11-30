@@ -7,13 +7,13 @@ import Units.Unit;
 public class XYCoord implements Serializable
 {
   private static final long serialVersionUID = 1L;
-  public final int xCoord;
-  public final int yCoord;
+  public final int x;
+  public final int y;
 
   public XYCoord(int x, int y)
   {
-    xCoord = x;
-    yCoord = y;
+    this.x = x;
+    this.y = y;
   }
   public XYCoord(Unit u)
   {
@@ -22,12 +22,12 @@ public class XYCoord implements Serializable
 
   public boolean equals(int x, int y)
   {
-    return x == xCoord && y == yCoord;
+    return x == this.x && y == this.y;
   }
   
   public int getDistance(XYCoord other)
   {
-    return getDistance(other.xCoord, other.yCoord);
+    return getDistance(other.x, other.y);
   }
   public int getDistance(Unit unit)
   {
@@ -35,13 +35,13 @@ public class XYCoord implements Serializable
   }
   public int getDistance(int x, int y)
   {
-    return Math.abs(xCoord - x) + Math.abs(yCoord - y);
+    return Math.abs(x - x) + Math.abs(y - y);
   }
 
   @Override
   public String toString()
   {
-    return "(" + xCoord + ", " + yCoord + ")";
+    return "(" + x + ", " + y + ")";
   }
 
   @Override
@@ -49,8 +49,8 @@ public class XYCoord implements Serializable
   {
     final int prime = 31;
     int result = 1;
-    result = prime * result + xCoord;
-    result = prime * result + yCoord;
+    result = prime * result + x;
+    result = prime * result + y;
     return result;
   }
 
@@ -64,27 +64,27 @@ public class XYCoord implements Serializable
     if( getClass() != obj.getClass() )
       return false;
     XYCoord other = (XYCoord) obj;
-    if( xCoord != other.xCoord )
+    if( x != other.x )
       return false;
-    if( yCoord != other.yCoord )
+    if( y != other.y )
       return false;
     return true;
   }
 
   public XYCoord up()
   {
-    return new XYCoord(xCoord, yCoord-1);
+    return new XYCoord(x, y-1);
   }
   public XYCoord down()
   {
-    return new XYCoord(xCoord, yCoord+1);
+    return new XYCoord(x, y+1);
   }
   public XYCoord left()
   {
-    return new XYCoord(xCoord-1, yCoord);
+    return new XYCoord(x-1, y);
   }
   public XYCoord right()
   {
-    return new XYCoord(xCoord+1, yCoord);
+    return new XYCoord(x+1, y);
   }
 }
