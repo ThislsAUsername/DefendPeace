@@ -119,14 +119,7 @@ public class Utils
 
     public PathCalcParams(Unit unit, GameMap gameMap)
     {
-      this.gameMap = gameMap;
-      start = new XYCoord(unit);
-      moverIdentity = unit;
-      team = unit.CO.army;
-      mt = unit.getMoveFunctor();
-      initialMovePower = Math.min(unit.getMovePower(gameMap), unit.fuel);
-      includeOccupiedSpaces = true;
-      canTravelThroughEnemies = false;
+      this(new UnitContext(gameMap, unit), gameMap);
     }
     public PathCalcParams(UnitContext uc, GameMap gameMap)
     {
