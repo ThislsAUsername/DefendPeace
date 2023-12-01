@@ -494,7 +494,7 @@ public class WallyAI extends ModularAI
         {
           XYCoord from = waypoints.get(i-1).GetCoordinates();
           XYCoord to   = waypoints.get( i ).GetCoordinates();
-          int cost = fff.getTransitionCost(map, from, to, actor.unit, false); // Assume unit is real if it's moving
+          int cost = fff.getTransitionCost(map, from, to, actor.CO.army, false);
           if( cost > actor.movePower )
             if( !vacatedTiles.contains(to) )
               return null;
@@ -822,11 +822,10 @@ public class WallyAI extends ModularAI
     // Temporary cache to re-locate already-threatened tiles' Tile Threats
     Map<XYCoord, TileThreat> shootableTiles = new HashMap<>();
     // We assume the enemy knows how to manage positioning within his turn, and we don't want to recalc when we move units.
-    boolean includeOccupiedTiles = true, walkThroughEnemies = ignoreFriendlyBlockers;
-    final XYCoord origin = threat.coord;
-    ArrayList<XYCoord> destinations = Utils.findFloodFillArea(origin,
-        threat.unit, threat.calculateMoveType(), threat.calculateMovePower(),
-        gameMap, includeOccupiedTiles, walkThroughEnemies);
+    Utils.PathCalcParams pcp = new Utils.PathCalcParams(threat, gameMap);
+    pcp.includeOccupiedSpaces = true;
+    pcp.canTravelThroughEnemies = ignoreFriendlyBlockers;
+
     for( WeaponModel wep : threat.model.weapons )
     {
       if( !wep.loaded(threat) )
@@ -836,14 +835,15 @@ public class WallyAI extends ModularAI
       HashSet<XYCoord> wepTiles = new HashSet<>();
       if( !wep.canFireAfterMoving )
       {
-        wepTiles.addAll(Utils.findLocationsInRange(gameMap, origin, threat));
+        wepTiles.addAll(Utils.findLocationsInRange(gameMap, threat.coord, threat));
       }
       else
       {
-        for( XYCoord dest : destinations )
+        ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
+        for( Utils.SearchNode dest : destinations )
         {
           UnitContext rangeContext = new UnitContext(threat);
-          rangeContext.setPath(Utils.findShortestPath(threat.unit, dest, gameMap));
+          rangeContext.setPath(dest.getMyPath());
           wepTiles.addAll(Utils.findLocationsInRange(gameMap, dest, rangeContext));
         }
       }
@@ -1254,6 +1254,7 @@ public class WallyAI extends ModularAI
     Map<ModelForCO, Integer> valueMap = new HashMap<>();
     Map<ModelForCO, ArrayList<XYCoord>> targetMap = new HashMap<>();
     UnitContext uc = new UnitContext(um.co, um.um);
+    uc.coord = start;
 
     // Categorize all enemies by type, and all types by how well we match up vs them
     for( Unit target : allThreats )
@@ -1272,7 +1273,8 @@ public class WallyAI extends ModularAI
 
       XYCoord targetCoord = new XYCoord(target.x, target.y);
       double effectiveness = uc.weapon.getDamage(model);
-      if (0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), targetCoord, predMap).getPathLength() &&
+      GamePath path = new Utils.PathCalcParams(uc, predMap).setTheoretical().findShortestPath(targetCoord);
+      if (null != path &&
           AGGRO_EFFECT_THRESHOLD < effectiveness)
       {
         valueMap.put( modelKey, (int)(effectiveness*target.getCost()) );
@@ -1301,9 +1303,10 @@ public class WallyAI extends ModularAI
       for( XYCoord coord : futureCapTargets )
       {
         MapLocation loc = gameMap.getLocation(coord);
+        Utils.PathCalcParams pcp = new Utils.PathCalcParams(uc, gameMap).setTheoretical();
         if( um.co.unitProductionByTerrain.containsKey(loc.getEnvironment().terrainType)
             && myArmy.isEnemy(loc.getOwner())
-            && 0 < Utils.findTheoreticalPath(start, uc.calculateMoveType(), coord, predMap).getPathLength() )
+            && null != pcp.findShortestPath(coord) )
         {
           goals.add(coord);
         }
@@ -1325,7 +1328,6 @@ public class WallyAI extends ModularAI
     if( evictionStack.contains(unit) )
       return null;
 
-    boolean success = false;
     boolean ignoreResident = true;
     // Find the possible destinations.
     PathCalcParams pcp = new PathCalcParams(unit, predMap);
