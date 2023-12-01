@@ -117,7 +117,6 @@ public class Utils
     public boolean includeOccupiedSpaces;
     public boolean canTravelThroughEnemies;
 
-    // Does this need a constructor that doesn't require a Unit?
     public PathCalcParams(Unit unit, GameMap gameMap)
     {
       this.gameMap = gameMap;
@@ -126,6 +125,17 @@ public class Utils
       team = unit.CO.army;
       mt = unit.getMoveFunctor();
       initialMovePower = Math.min(unit.getMovePower(gameMap), unit.fuel);
+      includeOccupiedSpaces = true;
+      canTravelThroughEnemies = false;
+    }
+    public PathCalcParams(UnitContext uc, GameMap gameMap)
+    {
+      this.gameMap = gameMap;
+      start = uc.coord;
+      moverIdentity = uc.unit;
+      team = uc.CO.army;
+      mt = uc.calculateMoveType();
+      initialMovePower = Math.min(uc.calculateMovePower(), uc.fuel);
       includeOccupiedSpaces = true;
       canTravelThroughEnemies = false;
     }
