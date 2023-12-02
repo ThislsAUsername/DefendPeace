@@ -155,7 +155,7 @@ public abstract class ModularAI implements AIController
       {
         XYCoord position = new XYCoord(unit.x, unit.y);
         ai.futureCapTargets.remove(position);
-        return new CaptureLifecycle.CaptureAction(map, unit, GamePath.getStatic(position));
+        return new CaptureLifecycle.CaptureAction(map, unit, GamePath.stayPut(position));
       }
       return null;
     }

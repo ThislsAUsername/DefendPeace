@@ -99,7 +99,7 @@ public class CapPhaseAnalyzer implements Serializable
     {
       if( unit.getCaptureProgress() > 0 )
       {
-        return new CaptureLifecycle.CaptureAction(map, unit, GamePath.getStatic(position));
+        return new CaptureLifecycle.CaptureAction(map, unit, GamePath.stayPut(position));
       }
 
       while (!chain.isEmpty())

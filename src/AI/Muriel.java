@@ -344,7 +344,7 @@ public class Muriel implements AIController
     if( unit.getCaptureProgress() > 0 )
     {
       log(String.format("%s is currently capturing; continue", unit.toStringWithLocation()));
-      queuedActions.add( new CaptureLifecycle.CaptureAction(gameMap, unit, GamePath.getStatic(unit)) );
+      queuedActions.add( new CaptureLifecycle.CaptureAction(gameMap, unit, GamePath.stayPut(unit)) );
       return true;
     }
 
@@ -354,7 +354,7 @@ public class Muriel implements AIController
     if( (unit.getHP() <= 8) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) && (loc.getOwner() == unit.CO) )
     {
       log(String.format("%s is damaged and on a repair tile. Will continue to repair for now.", unit.toStringWithLocation()));
-      ArrayList<GameActionSet> actionSet = unit.getPossibleActions(gameMap, GamePath.getStatic(unit));
+      ArrayList<GameActionSet> actionSet = unit.getPossibleActions(gameMap, GamePath.stayPut(unit));
       for( GameActionSet set : actionSet )
       {
         // Go ahead and attack someone as long as we don't have to move.
@@ -374,7 +374,7 @@ public class Muriel implements AIController
         }
       }
       // We didn't find someone adjacent to smash, so just sit tight for now.
-      queuedActions.add( new WaitLifecycle.WaitAction(unit, GamePath.getStatic(unit)) );
+      queuedActions.add( new WaitLifecycle.WaitAction(unit, GamePath.stayPut(unit)) );
       return true;
     } // ~Continue repairing if in a depot.
 
@@ -673,7 +673,7 @@ public class Muriel implements AIController
       {
         // If no valid move was found, then don't.
         log(String.format("  Could not find an action for %s. Staying put.", unit.toStringWithLocation()));
-        move = new WaitLifecycle.WaitAction(unit, GamePath.getStatic(unit));
+        move = new WaitLifecycle.WaitAction(unit, GamePath.stayPut(unit));
       }
       queuedActions.add(move);
       moving = true;

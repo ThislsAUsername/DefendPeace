@@ -184,7 +184,7 @@ public class InfantrySpamAI implements AIController
         {
           log("    Failed to find a path to a capturable property. Waiting");
           // We couldn't find a valid move point (are we on an island?). Just give up.
-          GameAction wait = new WaitLifecycle.WaitAction(unit, GamePath.getStatic(unit));
+          GameAction wait = new WaitLifecycle.WaitAction(unit, GamePath.stayPut(unit));
           actions.offer(wait);
           break;
         }

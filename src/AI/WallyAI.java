@@ -184,7 +184,7 @@ public class WallyAI extends ModularAI
       if( AIUtils.isFriendlyProduction(gameMap, myArmy, coord) || !unit.model.hasImmobileWeapon() )
         return bestAttack;
 
-      GamePath movePath = GamePath.getStatic(unit);
+      GamePath movePath = GamePath.stayPut(unit);
 
       // Figure out what I can do here.
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
