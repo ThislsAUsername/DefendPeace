@@ -81,7 +81,7 @@ public class WallyAI extends ModularAI
   private static final int    UNIT_HEAL_THRESHOLD = 6; // HP at which units heal
   private static final double UNIT_REFUEL_THRESHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
-  private static final double AGGRO_EFFECT_THRESHOLD = 17; // % base damage required to want to attack something
+  private static final double AGGRO_EFFECT_THRESHOLD = 0.55; // % of a kill required to want to attack something
   private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
   private static final double AGGRO_CHEAPER_WEIGHT = 0.01; // Multiplier on the score penalty for using expensive units to blow up stragglers
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
@@ -1254,8 +1254,7 @@ public class WallyAI extends ModularAI
   private ArrayList<XYCoord> findCombatUnitDestinations(GameMap gameMap, ArrayList<Unit> allThreats, XYCoord start, ModelForCO um)
   {
     ArrayList<XYCoord> goals = new ArrayList<>();
-    Map<ModelForCO, Integer> valueMap = new HashMap<>();
-    Map<ModelForCO, ArrayList<XYCoord>> targetMap = new HashMap<>();
+    Map<XYCoord, Integer> valueMap = new HashMap<>();
     UnitContext uc = new UnitContext(um.co, um.um);
     uc.coord = start;
 
@@ -1275,30 +1274,30 @@ public class WallyAI extends ModularAI
         continue; // No point in calculating further if we can't hit the target
 
       XYCoord targetCoord = new XYCoord(target.x, target.y);
-      double effectiveness = uc.weapon.getDamage(model);
+      double effectiveness = findEffectiveness(um, modelKey);
       GamePath path = new PathCalcParams(uc, predMap).setTheoretical().findShortestPath(targetCoord);
       if (null != path &&
           AGGRO_EFFECT_THRESHOLD < effectiveness)
       {
-        valueMap.put( modelKey, (int)(effectiveness*target.getCost()) );
-        if (!targetMap.containsKey(modelKey)) targetMap.put(modelKey, new ArrayList<XYCoord>());
-        targetMap.get(modelKey).add(targetCoord);
+        int distance = path.getMoveCost(um.co, um.um, gameMap);
+        int distanceTurns = distance / uc.calculateMovePower() + 1; // I sure do love division by 0
+        int targetFunds = target.getCost()*target.getHP()/10;
+        valueMap.put( targetCoord, (int)(effectiveness*targetFunds)/distanceTurns );
       }
     }
 
-    // Sort all individual target lists by distance
-    for (ArrayList<XYCoord> targetList : targetMap.values())
-      Utils.sortLocationsByDistance(start, targetList);
-
-    // Sort all target types by how much we want to shoot them with this unit
-    Queue<Entry<ModelForCO, Integer>> targetTypesInOrder =
-        new PriorityQueue<>(myArmy.cos[0].unitModels.size(), new EntryValueComparator<>());
-    targetTypesInOrder.addAll(valueMap.entrySet());
-
-    while (!targetTypesInOrder.isEmpty())
+    if( !valueMap.isEmpty() )
     {
-      ModelForCO model = targetTypesInOrder.poll().getKey(); // peel off the juiciest
-      goals.addAll(targetMap.get(model)); // produce a list ordered by juiciness first, then distance TODO: consider a holistic "juiciness" metric that takes into account both matchup and distance?
+      // Sort all targets by how much we want to shoot them with this unit
+      Queue<Entry<XYCoord, Integer>> targetTypesInOrder =
+          new PriorityQueue<>(valueMap.size(), new EntryValueComparator<>());
+      targetTypesInOrder.addAll(valueMap.entrySet());
+
+      while (!targetTypesInOrder.isEmpty())
+      {
+        XYCoord coord = targetTypesInOrder.poll().getKey(); // peel off the juiciest
+        goals.add(coord);
+      }
     }
 
     if( goals.isEmpty() ) // Send 'em at production facilities if there's nothing to shoot
@@ -1897,8 +1896,8 @@ public class WallyAI extends ModularAI
     @Override
     public int compare(Entry<T, Integer> entry1, Entry<T, Integer> entry2)
     {
-      double diff = entry2.getValue() - entry1.getValue();
-      return (int) (diff * 10); // Multiply by 10 since we return an int, but don't want to lose the decimal-level discrimination.
+      int diff = entry2.getValue() - entry1.getValue();
+      return diff;
     }
   }
 
@@ -1955,8 +1954,6 @@ public class WallyAI extends ModularAI
         myRange -= (Math.pow(wm.rangeMin, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
 
       double rangeMod = Math.pow(myRange / enemyRange, RANGE_WEIGHT);
-      if( !wm.canFireAfterMoving && myRange > enemyRange )
-        rangeMod *= 42; // If we can nuke the target with indirect attacks from outside its range, that's a huge win
 
       // TODO: account for average terrain defense?
       double effectiveness = damage * rangeMod / 100;
