@@ -20,6 +20,7 @@ import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.Maps.MapReader;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 public class TestUnitMovement extends TestCase
@@ -56,6 +57,7 @@ public class TestUnitMovement extends TestCase
     testPassed &= validate(testOutOfRangeMovement(), "  Move out of range test failed.");
     testPassed &= validate(testFuelCosts(), "  Fuel cost test failed.");
     testPassed &= validate(testDupDests(), "  Dup Dests test failed.");
+    testPassed &= validate(testCalcAllParents(), " Calc All Parents test failed.");
     return testPassed;
   }
 
@@ -210,4 +212,34 @@ public class TestUnitMovement extends TestCase
     return testPassed;
   }
 
+  /** Test the titular flag in PathCalcParams.findAllPaths() */
+  private boolean testCalcAllParents()
+  {
+    setupTest();
+
+    UnitContext tank = new UnitContext(testCo1, testCo1.getUnitModel(UnitModel.ASSAULT));
+
+    tank.coord = new XYCoord(7, 1); // Sit it on a factory
+    XYCoord notionalDest = new XYCoord(7, 3); // 2 tiles up, so the tank can loop around behind and still reach it
+
+    PathCalcParams pcp = new PathCalcParams(tank, testMap);
+    pcp.findAllValidParents = true;
+    ArrayList<SearchNode> paths = pcp.findAllPaths();
+
+    SearchNode calcDest = null;
+    for( SearchNode node : paths )
+      if( node.equals(notionalDest) )
+      {
+        calcDest = node;
+        break;
+      }
+
+    boolean testPassed = true;
+    testPassed &= validate(calcDest.allParents.contains(notionalDest.up()),    "    up is not in all parents");
+    testPassed &= validate(calcDest.allParents.contains(notionalDest.down()),  "    down is not in all parents");
+    testPassed &= validate(calcDest.allParents.contains(notionalDest.left()),  "    left is not in all parents");
+    testPassed &= validate(calcDest.allParents.contains(notionalDest.right()), "    right is not in all parents");
+
+    return testPassed;
+  }
 }
