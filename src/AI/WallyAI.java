@@ -1120,7 +1120,7 @@ public class WallyAI extends ModularAI
       boolean avoidProduction = false;
       boolean shouldWander = false;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
-                                          this, gameMap, ai.threatMap,
+                                          this, gameMap, blockedThreats,
                                           unit, avoidProduction, shouldWander,
                                           evictionValue, EVICTION_DEPTH);
 
