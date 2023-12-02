@@ -310,7 +310,7 @@ public class Utils
       final GamePath path = pcp.findShortestPath(end);
       int distance = Integer.MAX_VALUE;
       if( null != path )
-        distance = path.getFuelCost(myUnit, myMap);
+        distance = path.getMoveCost(myUnit, myMap);
       distCache.put(xyc, distance);
       return distance;
     }
