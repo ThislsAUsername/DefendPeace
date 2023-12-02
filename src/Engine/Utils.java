@@ -200,45 +200,6 @@ public class Utils
   }
 
   /**
-   * Compares SearchNodes based on the amount of movePower they possess, and optionally
-   *   the remaining distance to a destination.
-   */
-  public static class SearchNodeComparator implements Comparator<SearchNode>
-  {
-    int[][] powerGrid;
-    private final boolean hasDestination;
-    private int xDest;
-    private int yDest;
-
-    public SearchNodeComparator(int[][] powerGrid)
-    {
-      this.powerGrid = powerGrid;
-      hasDestination = false;
-      xDest = 0;
-      yDest = 0;
-    }
-
-    public SearchNodeComparator(int[][] powerGrid, int x, int y)
-    {
-      this.powerGrid = powerGrid;
-      hasDestination = true;
-      xDest = x;
-      yDest = y;
-    }
-
-    @Override
-    public int compare(SearchNode o1, SearchNode o2)
-    {
-      int firstDist = Math.abs(o1.x - xDest) + Math.abs(o1.y - yDest);
-      int secondDist = Math.abs(o2.x - xDest) + Math.abs(o2.y - yDest);
-
-      int firstPowerEstimate = powerGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
-      int secondPowerEstimate = powerGrid[o2.x][o2.y] - ((hasDestination) ? secondDist : 0);
-      return secondPowerEstimate - firstPowerEstimate;
-    }
-  }
-
-  /**
    * Returns a list of all vacant industries a army owns
    */
   public static ArrayList<XYCoord> findUsableProperties(Army army, GameMap map)
