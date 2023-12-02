@@ -1487,14 +1487,17 @@ public class WallyAI extends ModularAI
         {
           for( GameAction move : actionSet.getGameActions() )
           {
-            int walkScore = movePath.getPathLength() + wallGain;
-            if( minFundsDelta < walkScore && movePath.getPathLength() > 1 ) // Just wait if we can't do anything cool
+            int startDist = new XYCoord(unit).getDistance(pathPoint);
+            int endDist   = movePath.getEndCoord().getDistance(pathPoint);
+            int walkGain  = startDist - endDist;
+            int waitScore = wallGain + walkGain;
+            if( minFundsDelta < waitScore && movePath.getPathLength() > 1 ) // Just wait if we can't do anything cool
             {
               ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), move);
               plan.path = movePath;
               plan.purpose = travelPurpose;
               plan.fromEviction = mustMove;
-              rankedTravelPlans.add(new AbstractMap.SimpleEntry<>(plan, walkScore));
+              rankedTravelPlans.add(new AbstractMap.SimpleEntry<>(plan, waitScore));
             }
           }
         }
