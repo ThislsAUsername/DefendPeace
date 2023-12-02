@@ -2,6 +2,8 @@ package Engine;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.Queue;
 
 import Engine.Utils.SearchNode;
@@ -20,6 +22,7 @@ public class PathCalcParams
   public final GameMap gameMap;
   public boolean includeOccupiedSpaces;
   public boolean canTravelThroughEnemies;
+  public boolean findAllValidParents;
 
   public PathCalcParams(Unit unit, GameMap gameMap)
   {
@@ -35,6 +38,7 @@ public class PathCalcParams
     initialMovePower = Math.min(uc.calculateMovePower(), uc.fuel);
     includeOccupiedSpaces = true;
     canTravelThroughEnemies = false;
+    findAllValidParents = false;
   }
   /**
    * Tell this to ignore other units and move-power limitations.
@@ -68,6 +72,8 @@ public class PathCalcParams
 
     // set up our search
     SearchNode root = new SearchNode(start.x, start.y);
+    if( findAllValidParents )
+      root.allParents = new HashSet<>();
     powerGrid[start.x][start.y] = initialMovePower;
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid));
     searchQueue.add(root);
@@ -81,7 +87,10 @@ public class PathCalcParams
         reachableTiles.add(currentNode);
       }
 
-      expandSearchNode(currentNode, searchQueue, powerGrid);
+      if( findAllValidParents )
+        expandSearchNodeWithParents(currentNode, searchQueue, powerGrid, reachableTiles);
+      else
+        expandSearchNode(currentNode, searchQueue, powerGrid);
 
       currentNode = null;
     }
@@ -172,6 +181,59 @@ public class PathCalcParams
         // Prevent wrong path generation due to updating the shared powerGrid
         searchQueue.removeIf(node -> next.equals(node));
         searchQueue.add(new SearchNode(next, currentNode));
+      }
+    }
+  }
+
+  private void expandSearchNodeWithParents(SearchNode currentNode, Queue<SearchNode> searchQueue, int[][] powerGrid, ArrayList<SearchNode> reachableTiles)
+  {
+    GameMap map = gameMap;
+    ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(map, currentNode, 1, 1);
+
+    for( XYCoord next : coordsToCheck )
+    {
+      // If we can move more cheaply than previously discovered,
+      // then update the power grid and re-queue the next node.
+      int oldPower = powerGrid[currentNode.x][currentNode.y];
+      int oldNextPower = powerGrid[next.x][next.y];
+      final int transitionCost = mt.getTransitionCost(map, currentNode, next, team, canTravelThroughEnemies);
+      int newNextPower = oldPower - transitionCost;
+
+      if( transitionCost < MoveType.IMPASSABLE && newNextPower >= 0 )
+      {
+        Optional<SearchNode> oldNextOpt = reachableTiles.stream().filter(node -> next.equals(node)).findFirst();
+        // We've already found the best path here, so just add the new parent
+        if( oldNextOpt.isPresent() )
+        {
+          SearchNode oldNext = oldNextOpt.get();
+          oldNext.allParents.add(currentNode);
+          continue;
+        }
+        // We either haven't seen this node before, or it's in the queue
+        oldNextOpt = searchQueue.stream().filter(node -> next.equals(node)).findFirst();
+        if( newNextPower > oldNextPower )
+        {
+          powerGrid[next.x][next.y] = newNextPower;
+
+          SearchNode snNext = new SearchNode(next, currentNode);
+          snNext.allParents = new HashSet<>();
+          snNext.allParents.add(currentNode);
+          // Prevent wrong path generation due to updating the shared powerGrid
+          searchQueue.removeIf(node -> next.equals(node));
+          searchQueue.add(snNext);
+
+          if( !oldNextOpt.isPresent() )
+            continue;
+          SearchNode oldNext = oldNextOpt.get();
+          snNext.allParents.addAll(oldNext.allParents);
+        }
+        else if( oldNextOpt.isPresent() )
+        {
+          SearchNode oldNext = oldNextOpt.get();
+          oldNext.allParents.add(currentNode);
+        }
+        else
+          System.out.println("expandSearchNodeWithParents: Somehow, "+next+" is not a new node, a destination, or in the queue. Ehh?");
       }
     }
   }
