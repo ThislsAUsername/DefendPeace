@@ -11,6 +11,7 @@ import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -173,7 +174,7 @@ public class InfantrySpamAI implements AIController
         do
         {
           goal = unownedProperties.get(index++);
-          path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
+          path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
           validTarget = (myArmy.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
                       && !capturingProperties.contains(goal)                // We aren't already capturing it.
                       && (path != null));                       // We can reach it.

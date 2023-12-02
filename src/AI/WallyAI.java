@@ -316,7 +316,7 @@ public class WallyAI extends ModularAI
 
         damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CALC).defender.getPreciseHPDamage();
         ai.log(String.format("    %s brings the damage total to %s", unit.toStringWithLocation(), damageSum));
-        GamePath path = new Utils.PathCalcParams(unit, gameMap).findShortestPath(xyc);
+        GamePath path = new PathCalcParams(unit, gameMap).findShortestPath(xyc);
         return new BattleLifecycle.BattleAction(gameMap, unit, path, target.x, target.y);
       }
       // If we're here, we're either done or we need to clear out friendly blockers
@@ -410,7 +410,7 @@ public class WallyAI extends ModularAI
       XYCoord position = new XYCoord(unit.x, unit.y);
       MapLocation unitLoc = gameMap.getLocation(position);
 
-      Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+      PathCalcParams pcp = new PathCalcParams(unit, gameMap);
       pcp.includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
       ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
       if( mustMove )
@@ -603,7 +603,7 @@ public class WallyAI extends ModularAI
     boolean canResupply = stations.size() > 0;
     if( canResupply )
     {
-      toClosestStation = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(stations.get(0));
+      toClosestStation = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(stations.get(0));
       canResupply &= null != toClosestStation;
     }
     if( canResupply )
@@ -638,7 +638,7 @@ public class WallyAI extends ModularAI
         UnitModel model = target.model;
         XYCoord targetCoord = new XYCoord(target.x, target.y);
         double effectiveness = findEffectiveness(unit.model, target.model);
-        GamePath path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(targetCoord);
+        GamePath path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(targetCoord);
         if (path != null &&
             AGGRO_EFFECT_THRESHOLD < effectiveness)
         {
@@ -749,7 +749,7 @@ public class WallyAI extends ModularAI
   {
     boolean ignoreResident = true;
     // Find the possible destinations.
-    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.includeOccupiedSpaces = ignoreResident;
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
     destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, destinations, !avoidProduction));
@@ -767,7 +767,7 @@ public class WallyAI extends ModularAI
 
     for( XYCoord target : validTargets )
     {
-      path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(target);
+      path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(target);
       if( path != null ) // We can reach it.
       {
         goal = target;

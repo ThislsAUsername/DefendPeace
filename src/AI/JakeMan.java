@@ -262,7 +262,7 @@ public class JakeMan extends ModularAI
       XYCoord position = new XYCoord(unit.x, unit.y);
 
       boolean includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
-      Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+      PathCalcParams pcp = new PathCalcParams(unit, gameMap);
       pcp.includeOccupiedSpaces = includeOccupiedSpaces;
       ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
       if( mustMove )
@@ -423,7 +423,7 @@ public class JakeMan extends ModularAI
     boolean canResupply = stations.size() > 0;
     if( canResupply )
     {
-      toClosestStation = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(stations.get(0));
+      toClosestStation = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(stations.get(0));
       canResupply &= null != toClosestStation;
     }
     if( canResupply )
@@ -460,7 +460,7 @@ public class JakeMan extends ModularAI
         Unit target = gameMap.getResident(xyc);
         UnitModel model = target.model;
         XYCoord targetCoord = new XYCoord(target.x, target.y);
-        GamePath path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(targetCoord);
+        GamePath path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(targetCoord);
         if (path != null &&
             isWeakTo(target.model, unit.model))
         {
@@ -571,7 +571,7 @@ public class JakeMan extends ModularAI
   {
     // Find the possible destinations.
     boolean ignoreResident = true;
-    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.includeOccupiedSpaces = ignoreResident;
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
     destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, destinations, !avoidProduction));
@@ -587,7 +587,7 @@ public class JakeMan extends ModularAI
 
     for( XYCoord target : validTargets )
     {
-      path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(target);
+      path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(target);
       if( null != path ) // We can reach it.
       {
         goal = target;

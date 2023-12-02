@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -41,7 +42,7 @@ public abstract class LaunchLifecycle
             cargo.x = actor.x;
             cargo.y = actor.y;
 
-            Utils.PathCalcParams pcp = new Utils.PathCalcParams(cargo, map);
+            PathCalcParams pcp = new PathCalcParams(cargo, map);
             pcp.includeOccupiedSpaces = true;
             ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
             // Acting in place after a launch is a cool concept, but a little weird in execution

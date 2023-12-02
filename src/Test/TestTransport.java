@@ -7,6 +7,7 @@ import CommandingOfficers.Patch;
 import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.PathCalcParams;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventListener;
@@ -71,7 +72,7 @@ public class TestTransport extends TestCase
 
     boolean testPassed = true;
 
-    Utils.PathCalcParams cargoPathCalc = new Utils.PathCalcParams(cargo, testMap);
+    PathCalcParams cargoPathCalc = new PathCalcParams(cargo, testMap);
     cargoPathCalc.includeOccupiedSpaces = true;
 
     // Try a basic load/move/unload order.

@@ -13,6 +13,7 @@ import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -51,7 +52,7 @@ public class AIUtils
   {
     Map<XYCoord, ArrayList<GameActionSet> > actions = new HashMap<XYCoord, ArrayList<GameActionSet> >();
 
-    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.includeOccupiedSpaces = includeOccupiedDestinations;
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
@@ -208,8 +209,8 @@ public class AIUtils
     GameAction move = null;
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
-    GamePath path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(destination);
-    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    GamePath path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(destination);
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.includeOccupiedSpaces = false;
     ArrayList<Utils.SearchNode> validMoves = pcp.findAllPaths();
 

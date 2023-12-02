@@ -13,6 +13,7 @@ import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -162,7 +163,7 @@ public class SpenderAI implements AIController
         boolean foundAction = false;
 
         // Find the possible destinations.
-        Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+        PathCalcParams pcp = new PathCalcParams(unit, gameMap);
         pcp.includeOccupiedSpaces = false;
         ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
@@ -215,7 +216,7 @@ public class SpenderAI implements AIController
           UnitContext uc = new UnitContext(gameMap, unit);
 
           // Find the possible destinations.
-          Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+          PathCalcParams pcp = new PathCalcParams(unit, gameMap);
           pcp.includeOccupiedSpaces = false;
           ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
@@ -245,7 +246,7 @@ public class SpenderAI implements AIController
             do
             {
               goal = validTargets.get(index++);
-              path = new Utils.PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
+              path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
               validTarget = (myArmy.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
                   && !capturingProperties.contains(goal) // We aren't already capturing it.
                   && (path != null)); // We can reach it.

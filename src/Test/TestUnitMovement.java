@@ -9,6 +9,7 @@ import Engine.Army;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.PathCalcParams;
 import Engine.GamePath;
 import Engine.Utils;
 import Engine.Utils.SearchNode;
@@ -201,7 +202,7 @@ public class TestUnitMovement extends TestCase
 
     Unit tank = testMap.getResident(0, 3);
 
-    Utils.PathCalcParams pcp = new Utils.PathCalcParams(tank, testMap);
+    PathCalcParams pcp = new PathCalcParams(tank, testMap);
     ArrayList<SearchNode> paths = pcp.findAllPaths();
 
     boolean testPassed = validate(paths.size() == paths.stream().distinct().count(), "    Duplicate destinations exist");

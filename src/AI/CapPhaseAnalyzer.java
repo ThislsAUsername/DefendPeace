@@ -11,6 +11,7 @@ import CommandingOfficers.Commander;
 import Engine.Army;
 import Engine.GameAction;
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
@@ -122,7 +123,7 @@ public class CapPhaseAnalyzer implements Serializable
   {
     XYCoord goal = chain.get(0).coord;
 
-    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.includeOccupiedSpaces = false;
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
@@ -394,7 +395,7 @@ public class CapPhaseAnalyzer implements Serializable
 
   public static GamePath findFeasiblePath(final Unit unit, final XYCoord destination, final GameMap map)
   {
-    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, map);
+    PathCalcParams pcp = new PathCalcParams(unit, map);
     pcp.initialMovePower = unit.getMovePower(map) * (LOOKAHEAD_TURNS);
     pcp.canTravelThroughEnemies = true;
     return pcp.findShortestPath(destination);

@@ -15,6 +15,7 @@ import java.util.function.Function;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
@@ -54,7 +55,7 @@ public class AICombatUtils
     }
     else
     {
-      GamePath path = new Utils.PathCalcParams(unit, map).findShortestPath(action.getMoveLocation()); // Hmm. TODO: Add unit path getter to GameAction?
+      GamePath path = new PathCalcParams(unit, map).findShortestPath(action.getMoveLocation()); // Hmm. TODO: Add unit path getter to GameAction?
       StrikeParams params = CombatEngine.calculateTerrainDamage(unit, path, targetLoc, map);
       score = demolishScorer.apply(targetLoc.getEnvironment().terrainType, params);
     }
@@ -73,7 +74,7 @@ public class AICombatUtils
   public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, XYCoord origin, UnitModel target)
   {
     Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
-    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.start = origin;
     pcp.includeOccupiedSpaces = true; // We assume the enemy knows how to manage positioning within his turn
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
@@ -137,7 +138,7 @@ public class AICombatUtils
   {
     Set<XYCoord> targetLocs = new HashSet<XYCoord>();
     boolean allowEndingOnUnits = false; // We can't attack from on top of another unit.
-    Utils.PathCalcParams pcp = new Utils.PathCalcParams(unit, gameMap);
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.start = start;
     pcp.includeOccupiedSpaces = allowEndingOnUnits;
     ArrayList<Utils.SearchNode> moves = pcp.findAllPaths();
@@ -239,7 +240,7 @@ public class AICombatUtils
         if( !u.model.hasMobileWeapon() )
           continue;
 
-        canReach |= null != new Utils.PathCalcParams(u, gameMap).findShortestPath(xyc);
+        canReach |= null != new PathCalcParams(u, gameMap).findShortestPath(xyc);
         if( canReach )
           break;
       }
@@ -324,7 +325,7 @@ public class AICombatUtils
           continue; // Consider each unit only once
 
         // Figure out how to get here.
-        GamePath movePath = new Utils.PathCalcParams(unit, gameMap).findShortestPath(xyc);
+        GamePath movePath = new PathCalcParams(unit, gameMap).findShortestPath(xyc);
 
         if( movePath != null )
         {
