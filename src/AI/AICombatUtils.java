@@ -55,7 +55,7 @@ public class AICombatUtils
     }
     else
     {
-      GamePath path = new PathCalcParams(unit, map).findShortestPath(action.getMoveLocation()); // Hmm. TODO: Add unit path getter to GameAction?
+      GamePath path = Utils.findShortestPath(unit, action.getMoveLocation(), map); // Hmm. TODO: Add unit path getter to GameAction?
       StrikeParams params = CombatEngine.calculateTerrainDamage(unit, path, targetLoc, map);
       score = demolishScorer.apply(targetLoc.getEnvironment().terrainType, params);
     }
@@ -240,7 +240,7 @@ public class AICombatUtils
         if( !u.model.hasMobileWeapon() )
           continue;
 
-        canReach |= null != new PathCalcParams(u, gameMap).findShortestPath(xyc);
+        canReach |= null != Utils.findShortestPath(u, xyc, gameMap);
         if( canReach )
           break;
       }
@@ -325,7 +325,7 @@ public class AICombatUtils
           continue; // Consider each unit only once
 
         // Figure out how to get here.
-        GamePath movePath = new PathCalcParams(unit, gameMap).findShortestPath(xyc);
+        GamePath movePath = Utils.findShortestPath(unit, xyc, gameMap);
 
         if( movePath != null )
         {
