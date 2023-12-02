@@ -172,13 +172,12 @@ public class Utils
       {
         // pull out the next search node
         SearchNode currentNode = searchQueue.poll();
-        XYCoord coord = new XYCoord(currentNode.x, currentNode.y);
-        if( mt.canStandOn(gameMap, coord, moverIdentity, includeOccupiedSpaces) )
+        if( mt.canStandOn(gameMap, currentNode, moverIdentity, includeOccupiedSpaces) )
         {
           reachableTiles.add(currentNode);
         }
 
-        expandSearchNode(team, mt, gameMap, currentNode, searchQueue, powerGrid, canTravelThroughEnemies);
+        expandSearchNode(this, currentNode, searchQueue, powerGrid);
 
         currentNode = null;
       }
@@ -234,7 +233,7 @@ public class Utils
         if( currentNode.x == x && currentNode.y == y )
           break; // findShortestPath() is given a particular endpoint already, so it assumes that the mover can stand there
 
-        expandSearchNode(team, mt, gameMap, currentNode, searchQueue, powerGrid, canTravelThroughEnemies);
+        expandSearchNode(this, currentNode, searchQueue, powerGrid);
 
         currentNode = null;
       }
@@ -297,12 +296,11 @@ public class Utils
   /**
    * Look at the nodes adjacent to currentNode; if there are any we can reach that we haven't found yet, or that we
    * can reach more economically than previously discovered, update the cost grid and enqueue the node.
-   * @param theoretical If set, don't limit range using move power, and don't worry about other Units in the way.
    */
-  private static void expandSearchNode(Army team, MoveType fff, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,
-      int[][] powerGrid, boolean canTravelThroughEnemies)
+  private static void expandSearchNode(PathCalcParams pcp, SearchNode currentNode, Queue<SearchNode> searchQueue, int[][] powerGrid)
   {
-    ArrayList<XYCoord> coordsToCheck = findLocationsInRange(map, currentNode.getCoordinates(), 1, 1);
+    GameMap map = pcp.gameMap;
+    ArrayList<XYCoord> coordsToCheck = findLocationsInRange(map, currentNode, 1, 1);
 
     for( XYCoord next : coordsToCheck )
     {
@@ -310,14 +308,14 @@ public class Utils
       // then update the power grid and re-queue the next node.
       int oldPower = powerGrid[currentNode.x][currentNode.y];
       int oldNextPower = powerGrid[next.x][next.y];
-      final int transitionCost = fff.getTransitionCost(map, currentNode.getCoordinates(), next, team, canTravelThroughEnemies);
+      final int transitionCost = pcp.mt.getTransitionCost(map, currentNode, next, pcp.team, pcp.canTravelThroughEnemies);
       int newNextPower = oldPower - transitionCost;
 
       if( transitionCost < MoveType.IMPASSABLE && newNextPower > oldNextPower )
       {
         powerGrid[next.x][next.y] = newNextPower;
         // Prevent wrong path generation due to updating the shared powerGrid
-        searchQueue.removeIf(node->next.equals(node.getCoordinates()));
+        searchQueue.removeIf(node -> next.equals(node));
         searchQueue.add(new SearchNode(next, currentNode));
       }
     }
