@@ -822,7 +822,7 @@ public class WallyAI extends ModularAI
     // Temporary cache to re-locate already-threatened tiles' Tile Threats
     Map<XYCoord, TileThreat> shootableTiles = new HashMap<>();
     // We assume the enemy knows how to manage positioning within his turn, and we don't want to recalc when we move units.
-    Utils.PathCalcParams pcp = new Utils.PathCalcParams(threat, gameMap);
+    PathCalcParams pcp = new PathCalcParams(threat, gameMap);
     pcp.includeOccupiedSpaces = true;
     pcp.canTravelThroughEnemies = ignoreFriendlyBlockers;
 
@@ -1273,7 +1273,7 @@ public class WallyAI extends ModularAI
 
       XYCoord targetCoord = new XYCoord(target.x, target.y);
       double effectiveness = uc.weapon.getDamage(model);
-      GamePath path = new Utils.PathCalcParams(uc, predMap).setTheoretical().findShortestPath(targetCoord);
+      GamePath path = new PathCalcParams(uc, predMap).setTheoretical().findShortestPath(targetCoord);
       if (null != path &&
           AGGRO_EFFECT_THRESHOLD < effectiveness)
       {
@@ -1303,7 +1303,7 @@ public class WallyAI extends ModularAI
       for( XYCoord coord : futureCapTargets )
       {
         MapLocation loc = gameMap.getLocation(coord);
-        Utils.PathCalcParams pcp = new Utils.PathCalcParams(uc, gameMap).setTheoretical();
+        PathCalcParams pcp = new PathCalcParams(uc, gameMap).setTheoretical();
         if( um.co.unitProductionByTerrain.containsKey(loc.getEnvironment().terrainType)
             && myArmy.isEnemy(loc.getOwner())
             && null != pcp.findShortestPath(coord) )
