@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import Engine.Army;
+import Engine.GameActionSet;
 import Engine.GameInstance;
+import Engine.GamePath;
 import Engine.GameScenario;
 import Engine.PathCalcParams;
+import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventListener;
@@ -82,6 +85,11 @@ public class TestTransport extends TestCase
     testPassed &= validate(testMap.getLocation(4, 2).getResident() != cargo, "    Cargo is still on the map.");
     testPassed &= validate(apc.heldUnits.size() == 1, "    APC is not holding a unit.");
     apc.initTurn(testMap); // Get him ready.
+
+    // Make sure the player can unload a unit without moving.
+    GameActionSet lazyUnload = UnitActionFactory.UNLOAD.getPossibleActions(testMap, GamePath.stayPut(apc), apc);
+    testPassed &= validate(null != lazyUnload, "    APCs have to move to unload.");
+
     performGameAction(new UnloadLifecycle.UnloadAction(testMap, apc, Utils.findShortestPath(apc, 7, 3, testMap), cargo, 7, 4), testGame);
     testPassed &= validate(testMap.getLocation(7, 4).getResident() == cargo, "    Cargo was not dropped off correctly.");
     testPassed &= validate(apc.heldUnits.isEmpty(), "    APC is not empty when it should be.");
