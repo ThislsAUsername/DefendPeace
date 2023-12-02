@@ -1,5 +1,7 @@
 package Test;
 
+import java.util.ArrayList;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.Patch;
 import CommandingOfficers.Strong;
@@ -9,10 +11,13 @@ import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.GamePath;
 import Engine.Utils;
+import Engine.Utils.SearchNode;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.WaitLifecycle;
+import Terrain.MapInfo;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
+import Terrain.Maps.MapReader;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -23,15 +28,18 @@ public class TestUnitMovement extends TestCase
   private static MapMaster testMap;
   private static GameInstance testGame;
 
-  /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
+  {
+    setupTest(MapLibrary.getByName("Firing Range"));
+  }
+  private void setupTest(MapInfo mapInfo)
   {
     GameScenario scn = new GameScenario();
     testCo1 = new Strong(scn.rules);
     testCo2 = new Patch(scn.rules);
     Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
-    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, mapInfo);
     testGame = new GameInstance(cos, testMap);
   }
 
@@ -46,6 +54,7 @@ public class TestUnitMovement extends TestCase
     testPassed &= validate(testSimpleMovement(), "  Simple movement test failed.");
     testPassed &= validate(testOutOfRangeMovement(), "  Move out of range test failed.");
     testPassed &= validate(testFuelCosts(), "  Fuel cost test failed.");
+    testPassed &= validate(testDupDests(), "  Dup Dests test failed.");
     return testPassed;
   }
 
@@ -184,4 +193,20 @@ public class TestUnitMovement extends TestCase
 
     return testPassed;
   }
+
+  /** Verify PathCalcParams.findAllPaths() doesn't output duplicate coordinates */
+  private boolean testDupDests()
+  {
+    setupTest(MapReader.readSingleMap("src/Test/TestDupDests.map"));
+
+    Unit tank = testMap.getResident(0, 3);
+
+    Utils.PathCalcParams pcp = new Utils.PathCalcParams(tank, testMap);
+    ArrayList<SearchNode> paths = pcp.findAllPaths();
+
+    boolean testPassed = validate(paths.size() == paths.stream().distinct().count(), "    Duplicate destinations exist");
+
+    return testPassed;
+  }
+
 }
