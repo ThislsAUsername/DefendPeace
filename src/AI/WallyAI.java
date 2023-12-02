@@ -554,12 +554,15 @@ public class WallyAI extends ModularAI
     public GameAction getUnitAction(Unit unit, GameMap map)
     {
       final GameAction capAction = super.getUnitAction(unit, map);
+      int capProgress = unit.getCaptureProgress();
       if( null == capAction )
         return null;
 
       XYCoord mc = capAction.getMoveLocation();
+      int finalCapAmt = capProgress + unit.getHP(); // TODO: This probably wants a generic util
+      boolean willCapture = finalCapAmt >= map.getEnvironment(mc).terrainType.getCaptureThreshold();
       // If there's a threat here, don't assume we can naively capture
-      if( 0 < ai.threatMap[mc.x][mc.y].size() )
+      if( !willCapture && 0 < ai.threatMap[mc.x][mc.y].size() )
         return null;
 
       // If there's path weirdness this early in the game, it's fine to freak out
