@@ -188,7 +188,7 @@ public class CapPhaseAnalyzer implements Serializable
         if( null == infPath || infPath.getPathLength() < 1 )
           continue; // Can't reach
 
-        int distance = infPath.getFuelCost(inf, map);
+        int distance = infPath.getMoveCost(inf, map);
         if( distance < newOwnerDistance )
         {
           newOwnerDistance = distance;
@@ -363,7 +363,7 @@ public class CapPhaseAnalyzer implements Serializable
           }
           madeProgress = true; // We have somewhere we can still get to
 
-          final int distance = infPath.getFuelCost(inf, map);
+          final int distance = infPath.getMoveCost(inf, map);
           final int currentTotalMove = (last.extraTurns + 1) * infMove;
 
           if( distance <= currentTotalMove )
