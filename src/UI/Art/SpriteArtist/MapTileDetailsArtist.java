@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Map;
 
 import Engine.GameEvents.GameEventListener.CacheInvalidationListener;
 import Engine.GameInstance;
@@ -11,6 +12,9 @@ import Engine.XYCoord;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.TerrainType;
+import UI.UnitMarker;
+import UI.Art.SpriteArtist.MarkArtist.MarkingCache;
+import UI.UnitMarker.CustomStatData;
 import Units.Unit;
 
 /**
@@ -64,7 +68,6 @@ public class MapTileDetailsArtist
     int iconSize = SpriteLibrary.baseSpriteSize/2;
     MapLocation loc = map.getLocation(coord);
     TerrainType terrain = loc.getEnvironment().terrainType;
-    boolean isTerrainObject = TerrainSpriteSet.isTerrainObject(terrain);
     Unit unit = loc.getResident();
 
     // Get the terrain image to draw.
@@ -77,34 +80,29 @@ public class MapTileDetailsArtist
     terrainAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.SHIELD.getIcon(), terrain.getDefLevel()));
     if( loc.durability < 99 ) terrainAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), loc.durability));
 
-    // Get the unit image.
-    ArrayList<AttributeArtist> unitAttrs = new ArrayList<AttributeArtist>();
-    BufferedImage unitImage = null;
+    // Collect any unit and its cargo
+    ArrayList<ArrayList<AttributeArtist>> unitAttrCache = new ArrayList<>();
+    ArrayList<BufferedImage> unitImageCache = new ArrayList<>();
     if( null != unit )
     {
-      UnitSpriteSet uss = SpriteLibrary.getMapUnitSpriteSet(unit);
-      unitImage = uss.getUnitImage();
-
-      unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), unit.getHP()));
-      if( unit.model.needsFuel() )
-        unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.FUEL.getIcon(), unit.fuel));
-      if( unit.ammo >= 0 ) 
-        unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.AMMO.getIcon(), unit.ammo));
-      if( unit.getCaptureProgress() > 0)
-        unitAttrs.add(new AttributeArtist(SpriteLibrary.getCaptureIcon(unit.CO.myColor),
-            map.getEnvironment(coord).terrainType.getCaptureThreshold()-unit.getCaptureProgress()));
+      addDetailInfoFor(unitImageCache, unitAttrCache,
+                       map, coord, unit);
     }
 
     ///////////////////////////////////////////////////////////////
     // Calculate the size of the panel.
-    int terrainPanelW = tileSize * 3;
-    int unitPanelW = (unitAttrs.isEmpty() ? 0 : (tileSize * 2));
-    int panelW = terrainPanelW + unitPanelW;
-    
-    // Each attribute with a 1-px buffer, plus space for the tile itself.
-    int numAttrs = Math.max(terrainAttrs.size(), unitAttrs.size());
     int bufferPx = 3;
-    int panelH = numAttrs*iconSize+numAttrs+(tileSize*2)+bufferPx;
+    //            left buf          attr icon               tile     right buffer
+    int columnW = bufferPx + iconSize+ATTR_TEXT_SPACING + tileSize + bufferPx*2;
+    int panelW = columnW * (unitImageCache.size() + 1);
+    if( unitImageCache.size() > 0 )
+      panelW += bufferPx*2; // The panel gets N-1 right buffers
+
+    int numAttrs = terrainAttrs.size();
+    for( ArrayList<AttributeArtist> attrList : unitAttrCache )
+      numAttrs = Math.max(numAttrs, attrList.size());
+    //         upper buffer   tile   lower buffer   each attribute with a 1-px buffer
+    int panelH = iconSize + tileSize + bufferPx  +  numAttrs*(iconSize+1);
 
     // Create the overlay image.
     tileOverlay = SpriteLibrary.createTransparentSprite(panelW, panelH);
@@ -115,30 +113,70 @@ public class MapTileDetailsArtist
     //ltog.fillRect(0, 0, tileOverlay.getWidth(), tileOverlay.getHeight());
     ltog.fillRoundRect(0, 0, tileOverlay.getWidth(), tileOverlay.getHeight(), bufferPx*2, bufferPx*2);
 
-    // Figure out where to draw.
-    int drawX = isTerrainObject ? 0 : tileSize;
-    int drawY = isTerrainObject ? 0 : tileSize;
+    // Match the buffers from above
+    int drawX = bufferPx;
+    int drawY = iconSize;
 
     // Draw all the terrain stuff.
-    drawColumn(ltog, terrainSprite, terrainAttrs, drawX, drawY, isTerrainObject ? iconSize : -iconSize);
+    drawColumn(ltog, terrainSprite, terrainAttrs, drawX, drawY, false);
 
     // Draw all the unit stuff.
-    if( null != unitImage )
+    for( int i = 0; i < unitImageCache.size(); i++ )
     {
-      drawX = terrainPanelW;
-      drawY = tileSize;
-      drawColumn(ltog, unitImage, unitAttrs, drawX, drawY, -iconSize/2);
+      drawX += columnW;
+      drawColumn(ltog, unitImageCache.get(i), unitAttrCache.get(i), drawX, drawY, true);
     }
 
     currentTile = coord;
   }
 
-  private static void drawColumn(Graphics g, BufferedImage image, ArrayList<AttributeArtist> attrs, int drawX, int drawY, int bumpAmt)
+  private static void addDetailInfoFor(ArrayList<BufferedImage> unitImageCache,
+                                       ArrayList<ArrayList<AttributeArtist>> unitAttrCache,
+                                       GameMap map, XYCoord coord, Unit unit)
   {
+    UnitSpriteSet uss = SpriteLibrary.getMapUnitSpriteSet(unit);
+    unitImageCache.add(uss.getUnitImage());
+    ArrayList<AttributeArtist> unitAttrs = new ArrayList<>();
+    unitAttrCache.add(unitAttrs);
+
+    unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), unit.getHP()));
+    if( unit.model.needsFuel() )
+      unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.FUEL.getIcon(), unit.fuel));
+    if( unit.ammo >= 0 )
+      unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.AMMO.getIcon(), unit.ammo));
+    if( unit.getCaptureProgress() > 0 && null != coord )
+      unitAttrs.add(new AttributeArtist(SpriteLibrary.getCaptureIcon(unit.CO.myColor),
+          map.getEnvironment(coord).terrainType.getCaptureThreshold()-unit.getCaptureProgress()));
+
+    final MarkingCache cache = MarkingCache.instance(map.game);
+    cache.setupMarkers();
+    for( UnitMarker m : cache.markers )
+    {
+      CustomStatData stat = m.getCustomStat(unit);
+      if (null == stat)
+        continue;
+      BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(stat.markColor).get(stat.mark);
+      unitAttrs.add(new AttributeArtist(symbol, stat.textColor, stat.text));
+    }
+    // Also display cargo via DFS
+    for( Unit cargo : unit.heldUnits)
+      addDetailInfoFor(unitImageCache, unitAttrCache,
+                       map, null, cargo);
+  }
+
+  private static void drawColumn(Graphics g, BufferedImage image, ArrayList<AttributeArtist> attrs, int drawX, int drawY, boolean centerImage)
+  {
+    int tileSize = SpriteLibrary.baseSpriteSize;
     int iconSize = SpriteLibrary.baseSpriteSize/2;
-    g.drawImage(image, drawX, drawY, null);
-    drawX += bumpAmt;
-    drawY += image.getHeight();
+    int imageShiftX = iconSize + ATTR_TEXT_SPACING; // Scoot it over to align with the text
+    // Make sure the main image sits where it would relative to its place in the map/tile
+    if( centerImage )
+      imageShiftX  += (tileSize - image.getWidth() )/2;
+    else
+      imageShiftX  += (tileSize - image.getWidth() );
+    int imageShiftY = (tileSize - image.getHeight());
+    g.drawImage(image, drawX + imageShiftX, drawY + imageShiftY, null);
+    drawY += SpriteLibrary.baseSpriteSize;
     for( AttributeArtist aa : attrs )
     {
       drawY++;
@@ -147,30 +185,41 @@ public class MapTileDetailsArtist
     }
   }
 
+  private static final int ATTR_TEXT_SPACING = 2;
+  private static final int ATTR_TEXT_COUNT   = 3;
   private static class AttributeArtist
   {
-    private BufferedImage icon;
-    private Integer value;
-    public AttributeArtist(BufferedImage image, Integer quantity)
+    private BufferedImage icon, text;
+    public AttributeArtist(BufferedImage image, Integer value)
+    {
+      this(image, Color.white, ""+Math.min(99, value));
+    }
+    public AttributeArtist(BufferedImage image, Color textColor, String value)
     {
       icon = image;
-      value = quantity;
+      Map<Character, BufferedImage> allChars = SpriteLibrary.getColoredMapTextSprites(textColor);
+      text = allChars.get('A');
+      int charWidth = text.getWidth();
+      text = SpriteLibrary.createTransparentSprite(charWidth*ATTR_TEXT_COUNT, text.getHeight());
+      Graphics g = text.getGraphics();
+
+      int drawX = 0, drawY = 0;
+      int maxIter = Math.min(2, value.length());
+      drawX += charWidth*(2-maxIter); // Pre-cook our spacing
+      for( int i = 0; i < maxIter; ++i )
+      {
+        char foundChar = value.charAt(i);
+        BufferedImage digit = allChars.getOrDefault(foundChar, null);
+        if( null != digit )
+          g.drawImage(digit, drawX, drawY, null);
+        drawX += charWidth;
+      }
     }
     public void draw(Graphics g, int drawX, int drawY)
     {
       g.drawImage(icon, drawX, drawY, null);
-      drawX += icon.getWidth() + 2;
-      Sprite numbers = SpriteLibrary.getMapUnitNumberSprites();
-      int tensVal = (int)(value / 10);
-      if( 0 != tensVal )
-      {
-        BufferedImage tens = numbers.getFrame(tensVal);
-        g.drawImage(tens, drawX, drawY, null);
-      }
-      int onesVal = (int)(value % 10);
-      BufferedImage ones = numbers.getFrame(onesVal);
-      drawX += ones.getWidth();
-      g.drawImage(ones, drawX, drawY, null);
+      drawX += icon.getWidth() + ATTR_TEXT_SPACING;
+      g.drawImage(text, drawX, drawY, null);
     }
   }
 

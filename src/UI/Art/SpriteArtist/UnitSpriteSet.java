@@ -206,12 +206,13 @@ public class UnitSpriteSet
     // Draw the unit, facing the appropriate direction.
     if( flipImage && isStateFlippable(state) )
     {
-      g2d.drawImage(frame, drawX - shiftX + (frame.getWidth()), drawY + shiftY, -frame.getWidth(), frame.getHeight(), null);
+      int flippedDrawX = drawX + SpriteLibrary.baseSpriteSize;
+      g2d.drawImage(frame, flippedDrawX - shiftX, drawY + shiftY, -frame.getWidth(), frame.getHeight(), null);
       if( drawBuff )
       {
         // Draw the buff overlay and reset the graphics composite.
         g2d.setComposite(buffComposite);
-        g2d.drawImage(buffFrame, drawX - shiftX + (buffFrame.getWidth()),
+        g2d.drawImage(buffFrame, flippedDrawX - shiftX,
             drawY + shiftY, -buffFrame.getWidth(), buffFrame.getHeight(), null);
         g2d.setComposite(oldComposite);
       }
@@ -239,8 +240,6 @@ public class UnitSpriteSet
    */
   public void drawUnitIcons(Graphics g, GameInstance game, Unit u, int animIndex, int drawX, int drawY)
   {
-    int unitHeight = sprites[0].getFrame(0).getHeight();
-
     ArrayList<BufferedImage> unitIcons = new ArrayList<BufferedImage>();
 
     // Draw the unit's HP if it is not at full health.
@@ -257,7 +256,7 @@ public class UnitSpriteSet
       }
       else
         num = SpriteLibrary.getMapUnitNumberSprites().getFrame(u.getHP());
-      g.drawImage(num, drawX, drawY + ((unitHeight) / 2), num.getWidth(), num.getHeight(), null);
+      g.drawImage(num, drawX, drawY + (SpriteLibrary.baseSpriteSize / 2), num.getWidth(), num.getHeight(), null);
     }
 
     // Evaluate/draw unit status effects.
@@ -300,8 +299,8 @@ public class UnitSpriteSet
       int iconIndex = (animIndex%(unitIcons.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK;
       BufferedImage icon = unitIcons.get(iconIndex);
 
-      int iconX = drawX + ((unitHeight) / 2);
-      int iconY = drawY + ((unitHeight) / 2);
+      int iconX = drawX + (SpriteLibrary.baseSpriteSize / 2);
+      int iconY = drawY + (SpriteLibrary.baseSpriteSize / 2);
       int iconW = icon.getWidth();
       int iconH = icon.getHeight();
 

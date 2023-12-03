@@ -84,7 +84,7 @@ public class MarkArtist
       return false;
     }
 
-    private ArrayList<UnitMarker> markers = new ArrayList<>();
+    public ArrayList<UnitMarker> markers = new ArrayList<>();
     private HashMap<XYCoord, ArrayList<MarkData>> placeMarks = new HashMap<>();
     private HashMap<Unit, ArrayList<MarkData>> unitMarks = new HashMap<>();
     private GameInstance game;
@@ -139,7 +139,7 @@ public class MarkArtist
       return output;
     }
 
-    private void setupMarkers()
+    public void setupMarkers()
     {
       if( null == game || markers.size() > 0 )
         return;
