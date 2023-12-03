@@ -8,8 +8,8 @@ import java.util.PriorityQueue;
 import CommandingOfficers.CommanderAbility;
 import Engine.Army;
 import Engine.GameAction;
+import Engine.GamePath;
 import Engine.UnitActionFactory;
-import Engine.Utils;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Terrain.GameMap;
@@ -155,7 +155,7 @@ public abstract class ModularAI implements AIController
       {
         XYCoord position = new XYCoord(unit.x, unit.y);
         ai.futureCapTargets.remove(position);
-        return new CaptureLifecycle.CaptureAction(map, unit, Utils.findShortestPath(unit, position, map));
+        return new CaptureLifecycle.CaptureAction(map, unit, GamePath.stayPut(position));
       }
       return null;
     }

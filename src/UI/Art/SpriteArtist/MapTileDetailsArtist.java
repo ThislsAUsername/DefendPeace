@@ -72,7 +72,7 @@ public class MapTileDetailsArtist
 
     // Get the terrain image to draw.
     TerrainSpriteSet tss = SpriteLibrary.getTerrainSpriteSet(loc);
-    int terrainSubIndex = TerrainSpriteSet.getTileVariation(coord.xCoord, coord.yCoord);
+    int terrainSubIndex = TerrainSpriteSet.getTileVariation(coord.x, coord.y);
     BufferedImage terrainSprite = tss.getTerrainSprite().getFrame(terrainSubIndex);
 
     // Collect terrain attributes to draw.

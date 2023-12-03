@@ -67,7 +67,7 @@ public abstract class TestCase
    */
   protected static Unit addUnit(MapMaster map, Commander co, String typename, XYCoord xyc)
   {
-    return addUnit(map, co, typename, xyc.xCoord, xyc.yCoord);
+    return addUnit(map, co, typename, xyc.x, xyc.y);
   }
 
   /**

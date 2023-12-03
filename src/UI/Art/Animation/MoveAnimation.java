@@ -71,10 +71,10 @@ public class MoveAnimation extends BaseUnitActionAnimation
     final XYCoord coord1 = path.getWaypoint( prevTileIndex ).GetCoordinates();
     final XYCoord coord2 = path.getWaypoint( nextTileIndex ).GetCoordinates();
 
-    final double diffX = coord2.xCoord - coord1.xCoord;
-    final double diffY = coord2.yCoord - coord1.yCoord;
-    final double currX = coord1.xCoord + tileDiff * diffX;
-    final double currY = coord1.yCoord + tileDiff * diffY;
+    final double diffX = coord2.x - coord1.x;
+    final double diffY = coord2.y - coord1.y;
+    final double currX = coord1.x + tileDiff * diffX;
+    final double currY = coord1.y + tileDiff * diffY;
 
     // Figure out which way the actor is going and where he is.
     AnimState actorAnimState = getAnimState(coord1, coord2);
@@ -87,8 +87,8 @@ public class MoveAnimation extends BaseUnitActionAnimation
 
   public AnimState getAnimState(final XYCoord coord1, final XYCoord coord2)
   {
-    final int diffX = coord2.xCoord - coord1.xCoord;
-    final int diffY = coord2.yCoord - coord1.yCoord;
+    final int diffX = coord2.x - coord1.x;
+    final int diffY = coord2.y - coord1.y;
 
     // Either x or y can be different. Check x offset.
     if( 0 != diffX )

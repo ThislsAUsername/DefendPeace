@@ -55,7 +55,7 @@ public class MapInfo implements IEnvironsProvider
   @Override
   public boolean isLocationValid(XYCoord coords)
   {
-    return (coords != null) && isLocationValid(coords.xCoord, coords.yCoord);
+    return (coords != null) && isLocationValid(coords.x, coords.y);
   }
   /**
    * Returns true if (x,y) lies within the GameMap, false else.
@@ -70,7 +70,7 @@ public class MapInfo implements IEnvironsProvider
   @Override
   public Environment getEnvironment(XYCoord coord)
   {
-    return getEnvironment(coord.xCoord, coord.yCoord);
+    return getEnvironment(coord.x, coord.y);
   }
   /** Returns the Environment of the specified tile, or null if that location does not exist. */
   @Override

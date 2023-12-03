@@ -234,7 +234,7 @@ public class UnitContext extends UnitState
     if( null != path )
       afterMoving = path.getPathLength() > 1;
     else if( null != unit && null != coord )
-      afterMoving = unit.x != coord.xCoord || unit.y != coord.yCoord;
+      afterMoving = unit.x != coord.x || unit.y != coord.y;
 
     chooseWeapon(targetType, range, afterMoving);
   }

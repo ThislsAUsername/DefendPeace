@@ -76,7 +76,7 @@ public class TestVisionMechanics extends TestCase
     GameAction resupplyBlind = new ResupplyLifecycle.ResupplyAction(fool, foolPath);
     testPassed &= validate(resupplyBlind.getEvents(testMap).size() == 1, "    Some fool was able to zoom straight through an invisible tank");
 
-    GamePath punchSit = Utils.findShortestPath(punch, punch.x, punch.y, strong.army.myView);
+    GamePath punchSit = GamePath.stayPut(punch);
     GameAction missBait = new BattleLifecycle.BattleAction(strong.army.myView, punch, punchSit, 6, 5);
     testPassed &= validate(missBait.getEvents(testMap).size() == 0, "    You can shoot things hidden in forests.");
     GameAction missMeat = new BattleLifecycle.BattleAction(strong.army.myView, punch, punchSit, 7, 5);

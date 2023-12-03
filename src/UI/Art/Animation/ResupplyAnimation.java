@@ -45,7 +45,7 @@ public class ResupplyAnimation extends BaseUnitActionAnimation
   @Override
   public boolean animate(Graphics g)
   {
-    if( isCancelled || mapLocation.xCoord < 0 || mapLocation.yCoord < 0 )
+    if( isCancelled || mapLocation.x < 0 || mapLocation.y < 0 )
     {
       return true;
     }
@@ -68,8 +68,8 @@ public class ResupplyAnimation extends BaseUnitActionAnimation
     final long signGone = 600;
 
     int tileSize = SpriteLibrary.baseSpriteSize;
-    int tileCenterX = (mapLocation.xCoord * tileSize) + (tileSize / 2);
-    int tileCenterY = (mapLocation.yCoord * tileSize) + (tileSize / 2);
+    int tileCenterX = (mapLocation.x * tileSize) + (tileSize / 2);
+    int tileCenterY = (mapLocation.y * tileSize) + (tileSize / 2);
 
     // Show the menu expanding from nothing, then disappearing
     BufferedImage menu = SpriteLibrary.createTransparentSprite(tileSize, tileSize);

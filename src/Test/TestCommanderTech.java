@@ -90,8 +90,8 @@ public class TestCommanderTech extends TestCase
     // Pull out the predicted/actual coordinates and sort them.
     List<XYCoord> predLocs = p_locs.stream().map((dp) -> dp.coords).collect(Collectors.toList());
     List<XYCoord> realLocs = r_locs.stream().map((ge) -> ge.getEndPoint()).collect(Collectors.toList());
-    predLocs.sort((xy1, xy2) -> xy1.xCoord - xy2.xCoord);
-    realLocs.sort((xy1, xy2) -> xy1.xCoord - xy2.xCoord);
+    predLocs.sort((xy1, xy2) -> xy1.x - xy2.x);
+    realLocs.sort((xy1, xy2) -> xy1.x - xy2.x);
 
     // Make some convenient shorthand names
     XYCoord p_xy0 = predLocs.get(0);

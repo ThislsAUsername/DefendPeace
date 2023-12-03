@@ -11,6 +11,7 @@ import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -173,10 +174,10 @@ public class InfantrySpamAI implements AIController
         do
         {
           goal = unownedProperties.get(index++);
-          path = Utils.findShortestPath(unit, goal, gameMap, true);
+          path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
           validTarget = (myArmy.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
                       && !capturingProperties.contains(goal)                // We aren't already capturing it.
-                      && (path.getPathLength() > 0));                       // We can reach it.
+                      && (path != null));                       // We can reach it.
           log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
         } while( !validTarget && (index < unownedProperties.size()) );      // Loop until we run out of properties to check.
 
@@ -184,7 +185,7 @@ public class InfantrySpamAI implements AIController
         {
           log("    Failed to find a path to a capturable property. Waiting");
           // We couldn't find a valid move point (are we on an island?). Just give up.
-          GameAction wait = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, unit.x, unit.y, gameMap));
+          GameAction wait = new WaitLifecycle.WaitAction(unit, GamePath.stayPut(unit));
           actions.offer(wait);
           break;
         }

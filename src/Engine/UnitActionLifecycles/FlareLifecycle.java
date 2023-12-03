@@ -102,7 +102,7 @@ public abstract class FlareLifecycle
       isValid &= (null != gameMap) && (gameMap.isLocationValid(launchLocation)) && gameMap.isLocationValid(moveCoord);
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
 
-      int range = Math.abs(moveCoord.xCoord - launchLocation.xCoord) + Math.abs(moveCoord.yCoord - launchLocation.yCoord);
+      int range = Math.abs(moveCoord.x - launchLocation.x) + Math.abs(moveCoord.y - launchLocation.y);
       isValid &= type.minRange <= range && range <= type.maxRange;
 
       if( isValid )

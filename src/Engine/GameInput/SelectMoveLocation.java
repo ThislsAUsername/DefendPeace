@@ -3,6 +3,7 @@ package Engine.GameInput;
 import java.util.ArrayList;
 
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameInput.GameInputHandler.InputType;
@@ -25,9 +26,10 @@ class SelectMoveLocation extends GameInputState<XYCoord>
   protected OptionSet initOptions()
   {
     // Get valid move locations and return our OptionSet.
-    ArrayList<XYCoord> moveLocations = 
-        Utils.findPossibleDestinations(myStateData.unitCoord, myStateData.unitActor,
-                                       myStateData.gameMap, canEndOnOccupied);
+    PathCalcParams pcp = new PathCalcParams(myStateData.unitActor, myStateData.gameMap);
+    pcp.start = myStateData.unitCoord;
+    pcp.includeOccupiedSpaces = canEndOnOccupied;
+    ArrayList<XYCoord> moveLocations = new ArrayList<>(pcp.findAllPaths()); // Need to build a new collection because the typechecker doesn't like children
     if (null != myStateData.unitLauncher)
       moveLocations.remove(myStateData.unitCoord); // Prevent returning to the spot of the launch
     buildMovePath(myStateData.unitCoord);
@@ -112,7 +114,9 @@ class SelectMoveLocation extends GameInputState<XYCoord>
     if( !myStateData.path.getWaypoint(0).GetCoordinates().equals(coord) || !Utils.isPathValid(actor, myStateData.path, myStateData.gameMap, canEndOnOccupied) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
-      myStateData.path = Utils.findShortestPath(coord, actor, end, myStateData.gameMap);
+      PathCalcParams pcp = new PathCalcParams(actor, myStateData.gameMap);
+      pcp.start = coord;
+      myStateData.path = pcp.findShortestPath(end);
     }
   }
 }

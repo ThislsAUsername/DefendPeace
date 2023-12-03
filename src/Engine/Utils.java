@@ -47,7 +47,7 @@ public class Utils
       for( int xOff = -maxRange; xOff <= maxRange; ++xOff )
       {
         int currentRange = Math.abs(xOff) + Math.abs(yOff);
-        XYCoord coord = new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff);
+        XYCoord coord = new XYCoord(origin.x + xOff, origin.y + yOff);
         if( currentRange >= minRange && currentRange <= maxRange && map.isLocationValid(coord) )
         {
           // Add this location to the set.
@@ -98,7 +98,7 @@ public class Utils
       {
         // Add any location that is empty and supports movement of the cargo unit.
         if( (map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport)
-            && cargoMoveType.canStandOn(map.getEnvironment(loc.xCoord, loc.yCoord)) )
+            && cargoMoveType.canStandOn(map.getEnvironment(loc.x, loc.y)) )
         {
           dropoffLocations.add(loc);
         }
@@ -106,73 +106,15 @@ public class Utils
     return dropoffLocations;
   }
 
-  /** Alias for {@link #findPossibleDestinations(XYCoord, Unit, GameMap) findPossibleDestinations()} **/
-  public static ArrayList<XYCoord> findPossibleDestinations(Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
+  // This is much less painful than rewriting all that test code
+  public static GamePath findShortestPath(Unit unit, int x, int y, GameMap gameMap)
   {
-    return findPossibleDestinations(new XYCoord(unit.x, unit.y), unit, gameMap, includeOccupiedSpaces);
+    GamePath path = new PathCalcParams(unit, gameMap).findShortestPath(x, y);
+    return path;
   }
-  /**
-   * Finds the area reachable this turn by input unit.
-   * Alias for {@link #findFloodFillArea(XYCoord, MoveType, int, GameMap, boolean) findFloodFillArea()}
-   */
-  public static ArrayList<XYCoord> findPossibleDestinations(XYCoord start, Unit unit, GameMap gameMap, boolean includeOccupiedSpaces)
+  public static GamePath findShortestPath(Unit unit, XYCoord dest, GameMap gameMap)
   {
-    boolean canTravelThroughEnemies = false;
-    return findFloodFillArea(start, unit, unit.CO.army, unit.getMoveFunctor(), Math.min(unit.getMovePower(gameMap), unit.fuel), gameMap, includeOccupiedSpaces, canTravelThroughEnemies);
-  }
-  /**
-   * @param start Initial location; will usually be in the output set.
-   * @param mover Identity of the unit that's moving; may be null
-   * @param team Affiliation of the unit that's moving; may be null
-   * @param fff Determines the cost to move from one tile to another.
-   * @param initialFillPower How much move juice we start with
-   * @param gameMap The map to search over.
-   * @param includeOccupiedSpaces Whether to include places that have units in them already; generally true if canTravelThroughEnemies is
-   * @param canTravelThroughEnemies Whether to allow pathing through enemies
-   * @return The list of XYCoords in gameMap reachable by the FloodFillFunctor from the start coord, given initialFillPower.
-   */
-  public static ArrayList<XYCoord> findFloodFillArea(XYCoord start, Unit mover, Army team, MoveType fff, int initialFillPower, GameMap gameMap, boolean includeOccupiedSpaces, boolean canTravelThroughEnemies)
-  {
-    ArrayList<XYCoord> reachableTiles = new ArrayList<XYCoord>();
-
-    if( null == fff || null == start || start.xCoord < 0 || start.yCoord < 0 )
-    {
-      System.out.println("WARNING! Finding destinations for ineligible unit!");
-      return reachableTiles;
-    }
-
-    // set all locations to unreachable
-    int[][] powerGrid = new int[gameMap.mapWidth][gameMap.mapHeight];
-    for( int i = 0; i < gameMap.mapWidth; i++ )
-    {
-      for( int j = 0; j < gameMap.mapHeight; j++ )
-      {
-        powerGrid[i][j] = -1;
-      }
-    }
-
-    // set up our search
-    SearchNode root = new SearchNode(start.xCoord, start.yCoord);
-    powerGrid[start.xCoord][start.yCoord] = initialFillPower;
-    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid));
-    searchQueue.add(root);
-    // do search
-    while (!searchQueue.isEmpty())
-    {
-      // pull out the next search node
-      SearchNode currentNode = searchQueue.poll();
-      XYCoord coord = new XYCoord(currentNode.x, currentNode.y);
-      if( fff.canStandOn(gameMap, coord, mover, includeOccupiedSpaces) )
-      {
-        reachableTiles.add(coord);
-      }
-
-      expandSearchNode(team, fff, gameMap, currentNode, searchQueue, powerGrid, canTravelThroughEnemies);
-
-      currentNode = null;
-    }
-
-    return reachableTiles;
+    return findShortestPath(unit, dest.x, dest.y, gameMap);
   }
 
   public static boolean isPathValid(Unit unit, GamePath path, GameMap map, boolean includeOccupiedSpaces)
@@ -212,154 +154,14 @@ public class Utils
     return fff.canStandOn(map, lastCoord, mover, includeOccupiedSpaces);
   }
 
-  public static GamePath findShortestPath(Unit unit, XYCoord end, GameMap map)
-  {
-    return findShortestPath(unit, end, map, false);
-  }
-  public static GamePath findShortestPath(Unit unit, int x, int y, GameMap map)
-  {
-    return findShortestPath(unit, new XYCoord(x, y), map, false);
-  }
-  public static GamePath findShortestPath(Unit unit, XYCoord end, GameMap map, boolean theoretical)
-  {
-    return findShortestPath(new XYCoord(unit), unit, end, map, theoretical);
-  }
-  public static GamePath findShortestPath(XYCoord start, Unit unit, XYCoord destination, GameMap map)
-  {
-    return findShortestPath(start, unit, destination, map, false);
-  }
-  /**
-   * @param theoretical If true, ignores other Units and move-power limitations.
-   */
-  public static GamePath findShortestPath(XYCoord start, Unit unit, XYCoord end, GameMap map, boolean theoretical)
-  {
-    // findShortestPath() is given a particular endpoint already, so it assumes that it is valid to end up there.
-    return findShortestPath(start, unit.CO.army, unit.getMoveFunctor(),
-                            (theoretical)? Integer.MAX_VALUE : Math.min(unit.getMovePower(map), unit.fuel),
-                            end.xCoord, end.yCoord, map, theoretical);
-  }
-  /**
-   * Calculate and return the minimum-cost path for the FloodFillFunctor from its current location to map(x, y).
-   * The Path will avoid non-allied units unless `theoretical` is true.
-   * If no valid path is found, an empty Path will be returned.
-   * @param start Initial location; will usually be in the output set.
-   * @param team The affiliation of the unit moving
-   * @param fff Determines the cost to move from one tile to another.
-   * @param initialFillPower How much move juice to start with
-   * @param x Final X coordinate
-   * @param y Final Y coordinate
-   * @param map The map to search over.
-   * @param canTravelThroughEnemies Whether to allow pathing through enemies
-   */
-  public static GamePath findShortestPath(XYCoord start, Army team, MoveType fff, int initialFillPower, int x, int y, GameMap map, boolean canTravelThroughEnemies)
-  {
-    if( null == start || null == fff || null == map || !map.isLocationValid(start.xCoord, start.yCoord) )
-    {
-      return null;
-    }
-
-    GamePath aPath = new GamePath();
-    if( !map.isLocationValid(x, y) )
-    {
-      // Unit is not in a valid place. No path can be found.
-      System.out.println("WARNING! Cannot find path for a unit that is not on the map.");
-      aPath.clear();
-      return aPath;
-    }
-
-    int[][] powerGrid = new int[map.mapWidth][map.mapHeight];
-    for( int i = 0; i < map.mapWidth; i++ )
-    {
-      for( int j = 0; j < map.mapHeight; j++ )
-      {
-        powerGrid[i][j] = -1;
-      }
-    }
-
-    // Set up search parameters.
-    SearchNode root = new SearchNode(start.xCoord, start.yCoord);
-    powerGrid[start.xCoord][start.yCoord] = initialFillPower;
-    Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid, x, y));
-    searchQueue.add(root);
-
-    ArrayList<SearchNode> waypointList = new ArrayList<SearchNode>();
-
-    // Find optimal route.
-    while (!searchQueue.isEmpty())
-    {
-      // Retrieve the next search node.
-      SearchNode currentNode = searchQueue.poll();
-
-      // If this node is our destination, we are done.
-      if( currentNode.x == x && currentNode.y == y )
-      {
-        // Add all of the points on the route to our waypoint list.
-        while (currentNode.parent != null)
-        {
-          waypointList.add(currentNode);
-          currentNode = currentNode.parent;
-        }
-        // Don't forget the starting node (no parent).
-        waypointList.add(currentNode);
-        break;
-      }
-
-      expandSearchNode(team, fff, map, currentNode, searchQueue, powerGrid, canTravelThroughEnemies);
-
-      currentNode = null;
-    }
-
-    // Clear and Populate the Path object.
-    aPath.clear();
-    // We added the waypoints to the list from end to beginning, so populate the Path in reverse order.
-    if( !waypointList.isEmpty() )
-    {
-      for( int j = waypointList.size() - 1; j >= 0; --j )
-      {
-        //System.out.println("Waypoint " + waypointList.get(j).x + ", " + waypointList.get(j).y + " over " + map.getEnvironment(waypointList.get(j).x, waypointList.get(j).y).terrainType);
-        aPath.addWaypoint(waypointList.get(j).x, waypointList.get(j).y);
-      }
-    }
-
-    return aPath;
-  }
-
-  /**
-   * Look at the nodes adjacent to currentNode; if there are any we can reach that we haven't found yet, or that we
-   * can reach more economically than previously discovered, update the cost grid and enqueue the node.
-   * @param theoretical If set, don't limit range using move power, and don't worry about other Units in the way.
-   */
-  private static void expandSearchNode(Army team, MoveType fff, GameMap map, SearchNode currentNode, Queue<SearchNode> searchQueue,
-      int[][] powerGrid, boolean canTravelThroughEnemies)
-  {
-    ArrayList<XYCoord> coordsToCheck = findLocationsInRange(map, currentNode.getCoordinates(), 1, 1);
-
-    for( XYCoord next : coordsToCheck )
-    {
-      // If we can move more cheaply than previously discovered,
-      // then update the power grid and re-queue the next node.
-      int oldPower = powerGrid[currentNode.x][currentNode.y];
-      int oldNextPower = powerGrid[next.xCoord][next.yCoord];
-      final int transitionCost = fff.getTransitionCost(map, currentNode.getCoordinates(), next, team, canTravelThroughEnemies);
-      int newNextPower = oldPower - transitionCost;
-
-      if( transitionCost < MoveType.IMPASSABLE && newNextPower > oldNextPower )
-      {
-        powerGrid[next.xCoord][next.yCoord] = newNextPower;
-        // Prevent wrong path generation due to updating the shared powerGrid
-        searchQueue.removeIf(node->next.equals(node.getCoordinates()));
-        searchQueue.add(new SearchNode(next, currentNode));
-      }
-    }
-  }
-
   /**
    * Utility class used for pathfinding. Optionally holds a
-   *   reference to a parent node for path reconstruction.
+   *   reference to a parent node for path reconstruction.<p>
+   * Caveat emptor: the SearchNode quacks like an XYCoord for equality checks
    */
-  private static class SearchNode
+  public static class SearchNode extends XYCoord
   {
-    public int x, y;
+    private static final long serialVersionUID = 2637721435469761667L;
     public SearchNode parent;
 
     public SearchNode(int x, int y)
@@ -369,61 +171,31 @@ public class Utils
 
     public SearchNode(XYCoord coord, SearchNode parent)
     {
-      this(coord.xCoord, coord.yCoord, parent);
+      this(coord.x, coord.y, parent);
     }
     public SearchNode(int x, int y, SearchNode parent)
     {
-      this.x = x;
-      this.y = y;
+      super(x, y);
       this.parent = parent;
     }
     public XYCoord getCoordinates()
     {
-      return new XYCoord(x, y);
+      return this;
     }
-    @Override
-    public String toString()
+    public GamePath getMyPath()
     {
-      return String.format("(%s, %s)", x, y);
-    }
-  }
+      GamePath aPath = new GamePath();
 
-  /**
-   * Compares SearchNodes based on the amount of movePower they possess, and optionally
-   *   the remaining distance to a destination.
-   */
-  private static class SearchNodeComparator implements Comparator<SearchNode>
-  {
-    int[][] powerGrid;
-    private final boolean hasDestination;
-    private int xDest;
-    private int yDest;
+      SearchNode currentNode = this;
+      // Add all of the points on the route to our waypoint list.
+      while (currentNode != null)
+      {
+        // Since we're iterating dest->start, each point is the new "first" point.
+        aPath.addWaypoint(0, currentNode.x, currentNode.y);
+        currentNode = currentNode.parent;
+      }
 
-    public SearchNodeComparator(int[][] powerGrid)
-    {
-      this.powerGrid = powerGrid;
-      hasDestination = false;
-      xDest = 0;
-      yDest = 0;
-    }
-
-    public SearchNodeComparator(int[][] powerGrid, int x, int y)
-    {
-      this.powerGrid = powerGrid;
-      hasDestination = true;
-      xDest = x;
-      yDest = y;
-    }
-
-    @Override
-    public int compare(SearchNode o1, SearchNode o2)
-    {
-      int firstDist = Math.abs(o1.x - xDest) + Math.abs(o1.y - yDest);
-      int secondDist = Math.abs(o2.x - xDest) + Math.abs(o2.y - yDest);
-
-      int firstPowerEstimate = powerGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
-      int secondPowerEstimate = powerGrid[o2.x][o2.y] - ((hasDestination) ? secondDist : 0);
-      return secondPowerEstimate - firstPowerEstimate;
+      return aPath;
     }
   }
 
@@ -477,7 +249,7 @@ public class Utils
    * @param center
    * @param mapLocations
    */
-  public static void sortLocationsByDistance(XYCoord center, ArrayList<XYCoord> mapLocations)
+  public static void sortLocationsByDistance(XYCoord center, ArrayList<? extends XYCoord> mapLocations)
   {
     ManhattanDistanceComparator mdc = new ManhattanDistanceComparator(center);
     Collections.sort(mapLocations, mdc);
@@ -531,11 +303,13 @@ public class Utils
         end = fixedEndpoint;
       }
 
-      final boolean theoretical = true;
-      final GamePath path = findShortestPath(start, myUnit, end, myMap, theoretical);
-      int distance = path.getFuelCost(myUnit, myMap);
-      if( 0 == path.getPathLength() )
-        distance = Integer.MAX_VALUE;
+      PathCalcParams pcp = new PathCalcParams(myUnit, myMap);
+      pcp.setTheoretical();
+      pcp.start = start;
+      final GamePath path = pcp.findShortestPath(end);
+      int distance = Integer.MAX_VALUE;
+      if( null != path )
+        distance = path.getFuelCost(myUnit, myMap);
       distCache.put(xyc, distance);
       return distance;
     }
@@ -604,7 +378,7 @@ public class Utils
       for( int xOff = -range; xOff <= range; ++xOff )
       {
         int currentRange = Math.abs(xOff) + Math.abs(yOff);
-        XYCoord coord = new XYCoord(origin.xCoord + xOff, origin.yCoord + yOff);
+        XYCoord coord = new XYCoord(origin.x + xOff, origin.y + yOff);
         if( currentRange <= range && map.isLocationValid(coord) )
         {
           // If we're adjacent, or we can see through cover, or it's *not* cover, we can see into it.

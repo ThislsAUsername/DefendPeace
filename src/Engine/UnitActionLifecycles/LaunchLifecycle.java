@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -41,16 +42,17 @@ public abstract class LaunchLifecycle
             cargo.x = actor.x;
             cargo.y = actor.y;
 
-            boolean canEndOnOccupied = true;
-            ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(cargo, map, canEndOnOccupied);
+            PathCalcParams pcp = new PathCalcParams(cargo, map);
+            pcp.includeOccupiedSpaces = true;
+            ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
             // Acting in place after a launch is a cool concept, but a little weird in execution
             // Also, allowing action in place would allow *launching*, and recursive launching isn't something I wanna bite off
             destinations.remove(moveLocation);
 
             // Build a launch action for each possible action the cargo can do after launch
-            for( XYCoord coord : destinations )
+            for( Utils.SearchNode coord : destinations )
             {
-              GamePath cargoMovePath = Utils.findShortestPath(cargo, coord, map);
+              GamePath cargoMovePath = coord.getMyPath();
               ArrayList<GameActionSet> cargoActions = cargo.getPossibleActions(map, cargoMovePath, ignoreResident);
 
               for( GameActionSet actionSet : cargoActions )

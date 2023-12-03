@@ -142,9 +142,9 @@ public abstract class BattleLifecycle
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
-        attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord) + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
+        attackRange = Math.abs(moveCoord.x - attackLocation.x) + Math.abs(moveCoord.y - attackLocation.y);
 
-        boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
+        boolean moved = attacker.x != moveCoord.x || attacker.y != moveCoord.y;
         isValid &= (gameMap.getLocation(attackLocation).getResident() == defender);
         isValid &= (null != defender) && attacker.canAttack(gameMap, defender.model, attackRange, moved);
         isValid &= (null != defender) && attacker.CO.isEnemy(defender.CO);
@@ -264,9 +264,9 @@ public abstract class BattleLifecycle
       isValid &= (movePath != null) && (movePath.getPathLength() > 0);
       if( isValid )
       {
-        attackRange = Math.abs(moveCoord.xCoord - attackLocation.xCoord) + Math.abs(moveCoord.yCoord - attackLocation.yCoord);
+        attackRange = Math.abs(moveCoord.x - attackLocation.x) + Math.abs(moveCoord.y - attackLocation.y);
 
-        boolean moved = attacker.x != moveCoord.xCoord || attacker.y != moveCoord.yCoord;
+        boolean moved = attacker.x != moveCoord.x || attacker.y != moveCoord.y;
         isValid &= (null != target) && attacker.canAttack(gameMap, target, attackRange, moved);
       }
 

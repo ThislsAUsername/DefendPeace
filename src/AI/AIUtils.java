@@ -13,6 +13,7 @@ import Engine.Army;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -51,13 +52,14 @@ public class AIUtils
   {
     Map<XYCoord, ArrayList<GameActionSet> > actions = new HashMap<XYCoord, ArrayList<GameActionSet> >();
 
-    // Find the possible destinations.
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedDestinations);
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
+    pcp.includeOccupiedSpaces = includeOccupiedDestinations;
+    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
-    for( XYCoord coord : destinations )
+    for( Utils.SearchNode coord : destinations )
     {
       // Figure out how to get here.
-      GamePath movePath = Utils.findShortestPath(unit, coord, gameMap);
+      GamePath movePath = coord.getMyPath();
 
       // Figure out what I can do here.
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedDestinations);
@@ -207,18 +209,19 @@ public class AIUtils
     GameAction move = null;
 
     // Find the full path that would get this unit to the destination, regardless of how long. 
-    GamePath path = Utils.findShortestPath(unit, destination, gameMap, true);
-    boolean includeOccupiedSpaces = false;
-    ArrayList<XYCoord> validMoves = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces); // Find the valid moves we can make.
+    GamePath path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(destination);
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
+    pcp.includeOccupiedSpaces = false;
+    ArrayList<Utils.SearchNode> validMoves = pcp.findAllPaths();
 
-    if( path.getPathLength() > 0 && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
+    if( null != path && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
     {
       path.snip(unit.getMovePower(gameMap)+1); // Trim the path so we go the right immediate direction.
       if( null != excludeDestinations) validMoves.removeAll(excludeDestinations);
       if( !validMoves.isEmpty() )
       {
         Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination.
-        move = new WaitLifecycle.WaitAction(unit, Utils.findShortestPath(unit, validMoves.get(0), gameMap)); // Move to best option.
+        move = new WaitLifecycle.WaitAction(unit, validMoves.get(0).getMyPath()); // Move to best option.
       }
     }
     return move;
@@ -334,7 +337,7 @@ public class AIUtils
   /**
    * Finds allied production centers in the input set
    */
-  public static Set<XYCoord> findAlliedIndustries(GameMap gameMap, Army co, Iterable<XYCoord> coords, boolean ignoreMyOwn)
+  public static Set<XYCoord> findAlliedIndustries(GameMap gameMap, Army co, Iterable<? extends XYCoord> coords, boolean ignoreMyOwn)
   {
     Set<XYCoord> result = new HashSet<XYCoord>();
     for( XYCoord coord : coords )

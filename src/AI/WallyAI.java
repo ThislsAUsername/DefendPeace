@@ -184,8 +184,7 @@ public class WallyAI extends ModularAI
       if( AIUtils.isFriendlyProduction(gameMap, myArmy, coord) || !unit.model.hasImmobileWeapon() )
         return bestAttack;
 
-      // Figure out how to get here.
-      GamePath movePath = Utils.findShortestPath(unit, coord, gameMap);
+      GamePath movePath = GamePath.stayPut(unit);
 
       // Figure out what I can do here.
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath);
@@ -317,7 +316,8 @@ public class WallyAI extends ModularAI
 
         damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CALC).defender.getPreciseHPDamage();
         ai.log(String.format("    %s brings the damage total to %s", unit.toStringWithLocation(), damageSum));
-        return new BattleLifecycle.BattleAction(gameMap, unit, Utils.findShortestPath(unit, xyc, gameMap), target.x, target.y);
+        GamePath path = new PathCalcParams(unit, gameMap).findShortestPath(xyc);
+        return new BattleLifecycle.BattleAction(gameMap, unit, path, target.x, target.y);
       }
       // If we're here, we're either done or we need to clear out friendly blockers
       for( XYCoord xyc : neededAttacks.keySet() )
@@ -410,8 +410,9 @@ public class WallyAI extends ModularAI
       XYCoord position = new XYCoord(unit.x, unit.y);
       MapLocation unitLoc = gameMap.getLocation(position);
 
-      boolean includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
-      ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
+      PathCalcParams pcp = new PathCalcParams(unit, gameMap);
+      pcp.includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
+      ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
       if( mustMove )
         destinations.remove(new XYCoord(unit.x, unit.y));
       destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, co.army, destinations, !avoidProduction));
@@ -419,13 +420,13 @@ public class WallyAI extends ModularAI
       Utils.sortLocationsByDistance(position, destinations);
       Collections.reverse(destinations);
 
-      for( XYCoord moveCoord : destinations )
+      for( Utils.SearchNode moveCoord : destinations )
       {
         // Figure out how to get here.
-        GamePath movePath = Utils.findShortestPath(unit, moveCoord, gameMap);
+        GamePath movePath = moveCoord.getMyPath();
 
         // Figure out what I can do here.
-        ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, includeOccupiedSpaces);
+        ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, pcp.includeOccupiedSpaces);
         for( GameActionSet actionSet : actionSets )
         {
           boolean spaceFree = gameMap.isLocationEmpty(unit, moveCoord);
@@ -602,7 +603,7 @@ public class WallyAI extends ModularAI
     boolean canResupply = stations.size() > 0;
     if( canResupply )
     {
-      toClosestStation = Utils.findShortestPath(unit, stations.get(0), gameMap, true);
+      toClosestStation = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(stations.get(0));
       canResupply &= null != toClosestStation;
     }
     if( canResupply )
@@ -637,7 +638,8 @@ public class WallyAI extends ModularAI
         UnitModel model = target.model;
         XYCoord targetCoord = new XYCoord(target.x, target.y);
         double effectiveness = findEffectiveness(unit.model, target.model);
-        if (Utils.findShortestPath(unit, targetCoord, gameMap, true) != null &&
+        GamePath path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(targetCoord);
+        if (path != null &&
             AGGRO_EFFECT_THRESHOLD < effectiveness)
         {
           valueMap.put(model, effectiveness*target.getCost());
@@ -745,9 +747,11 @@ public class WallyAI extends ModularAI
                         boolean ignoreSafety, boolean mustMove,
                         boolean avoidProduction )
   {
-    // Find the possible destinations.
     boolean ignoreResident = true;
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, ignoreResident);
+    // Find the possible destinations.
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
+    pcp.includeOccupiedSpaces = ignoreResident;
+    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
     destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, destinations, !avoidProduction));
 
     // TODO: Jump in a transport, if available, or join?
@@ -763,8 +767,8 @@ public class WallyAI extends ModularAI
 
     for( XYCoord target : validTargets )
     {
-      path = Utils.findShortestPath(unit, target, gameMap, true);
-      if( path.getPathLength() > 0 ) // We can reach it.
+      path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(target);
+      if( path != null ) // We can reach it.
       {
         goal = target;
         break;
@@ -786,7 +790,7 @@ public class WallyAI extends ModularAI
                           unit.toStringWithLocation(),
                           gameMap.getLocation(goal).getEnvironment().terrainType, goal,
                           pathPoint, mustMove, ignoreSafety));
-    for( XYCoord xyc : destinations )
+    for( Utils.SearchNode xyc : destinations )
     {
       log(String.format("    is it safe to go to %s?", xyc));
       if( !ignoreSafety && !canWallHere(gameMap, threatMap, unit, xyc) )
@@ -805,7 +809,7 @@ public class WallyAI extends ModularAI
       }
       log(String.format("    Yes"));
 
-      GamePath movePath = Utils.findShortestPath(unit, xyc, gameMap);
+      GamePath movePath = xyc.getMyPath();
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(gameMap, movePath, ignoreResident);
       if( actionSets.size() > 0 )
       {

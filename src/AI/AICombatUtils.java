@@ -15,6 +15,7 @@ import java.util.function.Function;
 import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
@@ -54,8 +55,8 @@ public class AICombatUtils
     }
     else
     {
-      StrikeParams params = CombatEngine.calculateTerrainDamage(unit,
-          Utils.findShortestPath(unit, action.getMoveLocation(), map), targetLoc, map);
+      GamePath path = Utils.findShortestPath(unit, action.getMoveLocation(), map); // Hmm. TODO: Add unit path getter to GameAction?
+      StrikeParams params = CombatEngine.calculateTerrainDamage(unit, path, targetLoc, map);
       score = demolishScorer.apply(targetLoc.getEnvironment().terrainType, params);
     }
 
@@ -73,8 +74,10 @@ public class AICombatUtils
   public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, XYCoord origin, UnitModel target)
   {
     Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
-    boolean includeOccupiedDestinations = true; // We assume the enemy knows how to manage positioning within his turn
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(origin, unit, gameMap, includeOccupiedDestinations);
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
+    pcp.start = origin;
+    pcp.includeOccupiedSpaces = true; // We assume the enemy knows how to manage positioning within his turn
+    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
     for( WeaponModel wep : unit.model.weapons )
     {
       double damage = (null == target)? 1 : wep.getDamage(target) * unit.getHPFactor();
@@ -93,9 +96,9 @@ public class AICombatUtils
         }
         else
         {
-          for( XYCoord dest : destinations )
+          for( Utils.SearchNode dest : destinations )
           {
-            UnitContext uc = new UnitContext(gameMap, unit, wep, Utils.findShortestPath(unit, dest, gameMap), dest);
+            UnitContext uc = new UnitContext(gameMap, unit, wep, dest.getMyPath(), dest);
             for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, uc))
             {
               double val = damage;
@@ -135,8 +138,11 @@ public class AICombatUtils
   {
     Set<XYCoord> targetLocs = new HashSet<XYCoord>();
     boolean allowEndingOnUnits = false; // We can't attack from on top of another unit.
-    ArrayList<XYCoord> moves = Utils.findPossibleDestinations(start, unit, gameMap, allowEndingOnUnits);
-    for( XYCoord move : moves )
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
+    pcp.start = start;
+    pcp.includeOccupiedSpaces = allowEndingOnUnits;
+    ArrayList<Utils.SearchNode> moves = pcp.findAllPaths();
+    for( Utils.SearchNode move : moves )
     {
       boolean moved = !move.equals(start);
 
@@ -146,7 +152,7 @@ public class AICombatUtils
         // is mobile or we don't care if it's mobile (because we aren't moving).
         if( wpn.loaded(unit) && (!moved || wpn.canFireAfterMoving) )
         {
-          UnitContext uc = new UnitContext(gameMap, unit, wpn, Utils.findShortestPath(unit, move, gameMap), move);
+          UnitContext uc = new UnitContext(gameMap, unit, wpn, move.getMyPath(), move);
           ArrayList<XYCoord> locations = Utils.findTargetsInRange(gameMap, uc, includeTerrain);
           targetLocs.addAll(locations);
         }
@@ -234,7 +240,7 @@ public class AICombatUtils
         if( !u.model.hasMobileWeapon() )
           continue;
 
-        canReach |= Utils.findShortestPath(u, xyc, gameMap).getPathLength() > 1;
+        canReach |= null != Utils.findShortestPath(u, xyc, gameMap);
         if( canReach )
           break;
       }
@@ -321,7 +327,7 @@ public class AICombatUtils
         // Figure out how to get here.
         GamePath movePath = Utils.findShortestPath(unit, xyc, gameMap);
 
-        if( movePath.getPathLength() > 0 )
+        if( movePath != null )
         {
           neededAttacks.put(xyc, unit);
           double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CalcType.PESSIMISTIC).defender.getPreciseHPDamage();

@@ -11,6 +11,7 @@ import CommandingOfficers.Commander;
 import Engine.Army;
 import Engine.GameAction;
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
@@ -99,7 +100,7 @@ public class CapPhaseAnalyzer implements Serializable
     {
       if( unit.getCaptureProgress() > 0 )
       {
-        return new CaptureLifecycle.CaptureAction(map, unit, Utils.findShortestPath(unit, position, map));
+        return new CaptureLifecycle.CaptureAction(map, unit, GamePath.stayPut(position));
       }
 
       while (!chain.isEmpty())
@@ -122,12 +123,14 @@ public class CapPhaseAnalyzer implements Serializable
   {
     XYCoord goal = chain.get(0).coord;
 
-    boolean includeOccupiedSpaces = false; // We assume that the area won't be cluttered
-    ArrayList<XYCoord> destinations = Utils.findPossibleDestinations(unit, gameMap, includeOccupiedSpaces);
+    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
+    pcp.includeOccupiedSpaces = false;
+    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
     // If we can get to our destination, go for it
-    if( destinations.contains(goal) )
-      return new CaptureLifecycle.CaptureAction(gameMap, unit, Utils.findShortestPath(unit, goal, gameMap));
+    int goalIndex = destinations.indexOf(goal);
+    if( goalIndex >= 0 )
+      return new CaptureLifecycle.CaptureAction(gameMap, unit, destinations.get(goalIndex).getMyPath());
 
     return AIUtils.moveTowardLocation(unit, goal, gameMap);
   }
@@ -178,8 +181,8 @@ public class CapPhaseAnalyzer implements Serializable
           continue; // Not yet owned
 
         final Unit inf = new Unit(owner, owner.getUnitModel(UnitModel.TROOP));
-        inf.x = ownedFac.xCoord;
-        inf.y = ownedFac.yCoord;
+        inf.x = ownedFac.x;
+        inf.y = ownedFac.y;
 
         final GamePath infPath = findFeasiblePath(inf, neutralFac, map);
         if( null == infPath || infPath.getPathLength() < 1 )
@@ -209,8 +212,8 @@ public class CapPhaseAnalyzer implements Serializable
           continue; // Don't barf in weird maps
 
         final Unit inf = new Unit(owner, owner.getUnitModel(UnitModel.TROOP));
-        inf.x = ownedFac.xCoord;
-        inf.y = ownedFac.yCoord;
+        inf.x = ownedFac.x;
+        inf.y = ownedFac.y;
 
         final GamePath infPath = findFeasiblePath(inf, propXYC, map);
         if( null == infPath || infPath.getPathLength() < 1 )
@@ -267,8 +270,8 @@ public class CapPhaseAnalyzer implements Serializable
       final Commander owner = factoryOwnership.get(start);
 
       final Unit inf = new Unit(owner, owner.getUnitModel(UnitModel.TROOP));
-      inf.x = start.xCoord;
-      inf.y = start.yCoord;
+      inf.x = start.x;
+      inf.y = start.y;
 
       final GamePath infPath = findFeasiblePath(inf, dest, map);
       if( null == infPath || infPath.getPathLength() < 1 )
@@ -313,8 +316,8 @@ public class CapPhaseAnalyzer implements Serializable
     final Unit inf = new Unit(viewer.cos[0], viewer.cos[0].getUnitModel(UnitModel.TROOP));
     if( startingFactories.size() > 0 )
     {
-      inf.x = startingFactories.get(0).xCoord;
-      inf.y = startingFactories.get(0).yCoord;
+      inf.x = startingFactories.get(0).x;
+      inf.y = startingFactories.get(0).y;
     }
     final int infMove = inf.getMovePower(map);
 
@@ -347,8 +350,8 @@ public class CapPhaseAnalyzer implements Serializable
 
           XYCoord start = last.coord;
 
-          inf.x = start.xCoord;
-          inf.y = start.yCoord;
+          inf.x = start.x;
+          inf.y = start.y;
           Utils.sortLocationsByTravelTime(inf, rightfulProps, map);
           XYCoord dest = rightfulProps.get(0);
 
@@ -392,11 +395,10 @@ public class CapPhaseAnalyzer implements Serializable
 
   public static GamePath findFeasiblePath(final Unit unit, final XYCoord destination, final GameMap map)
   {
-    final boolean theoretical = true;
-    return Utils.findShortestPath(new XYCoord(unit), unit.CO.army, unit.getMoveFunctor(),
-                                  unit.getMovePower(map) * (LOOKAHEAD_TURNS),
-                                  destination.xCoord, destination.yCoord,
-                                  map, theoretical);
+    PathCalcParams pcp = new PathCalcParams(unit, map);
+    pcp.initialMovePower = unit.getMovePower(map) * (LOOKAHEAD_TURNS);
+    pcp.canTravelThroughEnemies = true;
+    return pcp.findShortestPath(destination);
   }
 
   /**

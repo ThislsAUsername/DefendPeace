@@ -611,7 +611,7 @@ public class KaijuActions
     public List<XYCoord> getTargets(GameMap gameMap)
     {
       // Double the target coordinates and subtract the start coord to get start + offset*2
-      XYCoord secondTile = new XYCoord(target.xCoord * 2 - actor.x, target.yCoord * 2 - actor.y);
+      XYCoord secondTile = new XYCoord(target.x * 2 - actor.x, target.y * 2 - actor.y);
 
       List<XYCoord> output = new ArrayList<>();
       output.add(target);
@@ -850,7 +850,7 @@ public class KaijuActions
     public List<XYCoord> getTargets(GameMap gameMap)
     {
       // Double the target coordinates and subtract the start coord to get start + offset*2
-      XYCoord secondTile = new XYCoord(target.xCoord * 2 - actor.x, target.yCoord * 2 - actor.y);
+      XYCoord secondTile = new XYCoord(target.x * 2 - actor.x, target.y * 2 - actor.y);
 
       List<XYCoord> output = new ArrayList<>();
       output.add(target);

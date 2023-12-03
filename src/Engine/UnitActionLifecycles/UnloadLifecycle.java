@@ -30,9 +30,8 @@ public abstract class UnloadLifecycle
     public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
-      Unit resident = map.getLocation(moveLocation).getResident();
 
-      if( !ignoreResident && null != resident )
+      if( !ignoreResident && !map.isLocationEmpty(actor, moveLocation) )
         return null;
       if( actor.heldUnits.size() == 0 )
         return null;
@@ -240,7 +239,7 @@ public abstract class UnloadLifecycle
           && gameMap.getLocation(dropLoc).getResident() == null )
       {
         transport.heldUnits.remove(cargo);
-        gameMap.moveUnit(cargo, dropLoc.xCoord, dropLoc.yCoord);
+        gameMap.moveUnit(cargo, dropLoc.x, dropLoc.y);
         cargo.isTurnOver = true;
         transport.CO.army.myView.revealFog(cargo);
       }

@@ -68,14 +68,14 @@ public class OverlayArtist
           .putInt(viewWidth).putInt(viewHeight)
           .putInt(tileSize);
     if( planningMove )
-      params.putInt(moveLoc.xCoord).putInt(moveLoc.yCoord);
+      params.putInt(moveLoc.x).putInt(moveLoc.y);
     for( GameOverlay ov : overlays )
     {
       params.putInt(ov.area.size());
       if( null != ov.origin )
       {
-        params.putInt(ov.origin.xCoord);
-        params.putInt(ov.origin.yCoord);
+        params.putInt(ov.origin.x);
+        params.putInt(ov.origin.y);
       }
     }
     params.rewind(); // Push the buffer pointer to the start so "remaining elements" exists

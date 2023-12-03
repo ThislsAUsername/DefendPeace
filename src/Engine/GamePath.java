@@ -19,16 +19,30 @@ public class GamePath
 
   public GamePath()
   {
-    waypoints = new ArrayList<PathNode>();
+    waypoints = new ArrayList<>();
+  }
+  public static GamePath stayPut(Unit unit)
+  {
+    return stayPut(new XYCoord(unit));
+  }
+  public static GamePath stayPut(XYCoord xyc)
+  {
+    GamePath output = new GamePath();
+    output.addWaypoint(xyc);
+    return output;
   }
 
   public void addWaypoint(int x, int y)
   {
     waypoints.add(new PathNode(x, y));
   }
+  public void addWaypoint(int index, int x, int y)
+  {
+    waypoints.add(index, new PathNode(x, y));
+  }
   public void addWaypoint(XYCoord xyc)
   {
-    addWaypoint(xyc.xCoord, xyc.yCoord);
+    addWaypoint(xyc.x, xyc.y);
   }
 
   public ArrayList<PathNode> getWaypoints()
