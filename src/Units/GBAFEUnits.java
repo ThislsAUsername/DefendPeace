@@ -257,7 +257,7 @@ public class GBAFEUnits extends UnitModelScheme
     }
 
     @Override
-    public double getDamageRedirect(WeaponModel wm)
+    public int getDamageRedirect(WeaponModel wm)
     {
       return wm.getDamage(this);
     }
