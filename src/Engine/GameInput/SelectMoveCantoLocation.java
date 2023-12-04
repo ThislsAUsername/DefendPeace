@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
+import Engine.PathCalcParams;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -35,11 +36,11 @@ class SelectMoveCantoLocation extends SelectMoveLocation
     GamePath movePath = (null == oldPath)? myStateData.path : oldPath;
     Unit actor = myStateData.unitActor;
     // very We Enjoy Typing around here
-    boolean includeOccupiedDestinations = canEndOnOccupied;
-    boolean canTravelThroughEnemies = false;
-    int movePoints = actor.getMovePower(map) - movePath.getMoveCost(actor, map);
-    ArrayList<XYCoord> destinations = Utils.findFloodFillArea(movePath.getEndCoord(), actor, actor.CO.army, actor.getMoveFunctor(),
-                                   Math.min(movePoints, actor.fuel), map, includeOccupiedDestinations, canTravelThroughEnemies);
+    PathCalcParams pcp = new PathCalcParams(myStateData.unitActor, myStateData.gameMap);
+    pcp.start = myStateData.unitCoord;
+    pcp.includeOccupiedSpaces = canEndOnOccupied;
+    pcp.initialMovePower = actor.getMovePower(map) - movePath.getMoveCost(actor, map);
+    ArrayList<XYCoord> destinations = new ArrayList<>(pcp.findAllPaths()); // Need to build a new collection because the typechecker doesn't like children
 
     GameAction selectedAction = myStateData.actionSet.getSelected();
     if( GBAFEActions.RescueUnitFactory.instance != selectedAction.getType() )
