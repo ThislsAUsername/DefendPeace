@@ -231,7 +231,7 @@ public class GBAFEWeapons
     }
 
     @Override
-    public double getDamage(GBAFEUnitModel defender)
+    public int getDamage(GBAFEUnitModel defender)
     {
       if( !hitsAir && defender.isAirUnit() )
         return 0;
@@ -247,7 +247,7 @@ public class GBAFEWeapons
     }
 
     @Override
-    public double getDamage(TerrainType target)
+    public int getDamage(TerrainType target)
     {
       if( TerrainType.METEOR == target )
       {
