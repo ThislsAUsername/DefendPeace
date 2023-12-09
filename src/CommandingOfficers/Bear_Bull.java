@@ -128,7 +128,7 @@ public class Bear_Bull extends Commander
     private static final String UPTURN_NAME = "UpTurn";
     private static final String DOWNTURN_NAME = "DownTurn";
     private static final int DOWNUPTURN_COST = 3;
-    private static final int DOWNUPTURN_LIQUIDATION = 3;
+    private static final int DOWNUPTURN_LIQUIDATION = 30;
     final Bear_Bull COcast;
 
     UpDownTurnAbility(Bear_Bull commander)
@@ -185,7 +185,7 @@ public class Bear_Bull extends Commander
         output.add(new DamagePopup(
                        new XYCoord(victim.x, victim.y),
                        COcast.myColor,
-                       Math.min(victim.getHP()-1, DOWNUPTURN_LIQUIDATION)*10 + "%"));
+                       Math.min(victim.getHP()-1, DOWNUPTURN_LIQUIDATION) + "%"));
 
       return output;
     }

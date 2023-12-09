@@ -119,7 +119,7 @@ public class StrikeParams
     this.targetCoord = other.targetCoord;
   }
 
-  public double calculateDamage()
+  public int calculateDamage()
   {
     int luckDamage = getLuck();
     final int rawDamage = baseDamage * attackPower * damageMultiplier / 100 / 100;
@@ -128,16 +128,16 @@ public class StrikeParams
     int finalDefenseSubtraction = defenseSubtraction;
     int finalDefenseDivision    = defenseDivision;
     if( terrainGivesSubtraction )
-      finalDefenseSubtraction += terrainStars * defenderHP;
+      finalDefenseSubtraction += terrainStars * defenderHP / 10;
     else
-      finalDefenseDivision    += terrainStars * defenderHP;
+      finalDefenseDivision    += terrainStars * defenderHP / 10;
     final int subtractionMultiplier = 200 - finalDefenseSubtraction;
 
-    int overallPower = (rawDamage + luckDamage) * attackerHP / 10;
+    int overallPower = (rawDamage + luckDamage) * attackerHP / 100;
     overallPower = overallPower * subtractionMultiplier /        100;
     overallPower = overallPower *          100          / finalDefenseDivision;
 
-    return overallPower / 10.0; // original formula was % damage, now it must be HP of damage
+    return overallPower; // % damage
   }
 
   protected int getLuck()

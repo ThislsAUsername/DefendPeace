@@ -40,7 +40,7 @@ public class UnitDieEvent implements GameEvent
   {
     // Set HP to 0. One could make a UnitDieEvent on a healthy
     // unit, and we don't want any ambiguity after the fact.
-    unit.damageHP(unit.getHP()+1);
+    unit.damageHP(unit.getHP());
 
     // Remove the Unit from the map and from the CO list.
     gameMap.removeUnit(unit);

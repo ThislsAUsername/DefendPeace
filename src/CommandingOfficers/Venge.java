@@ -187,7 +187,7 @@ public class Venge extends Commander
     private static final String NAME = "Iron Will";
     private static final int COST = 4;
     private static final int IRONWILL_BOOST = 40;
-    private static final int IRONWILL_WOUND = 2;
+    private static final int IRONWILL_WOUND = 20;
     private final ArrayList<Unit> boostedUnits = new ArrayList<Unit>();
 
     IronWill(Venge venge)

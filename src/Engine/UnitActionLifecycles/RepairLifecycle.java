@@ -119,7 +119,7 @@ public abstract class RepairLifecycle
         if( Utils.enqueueMoveEvent(gameMap, benefactor, movePath, repairEvents) )
         {
           // No surprises in the fog.
-          repairEvents.add(new HealUnitEvent(beneficiary, 1, benefactor.CO.army)); // As this is a unit action, there's no usecase to vary this yet
+          repairEvents.add(new HealUnitEvent(beneficiary, 10, benefactor.CO.army)); // As this is a unit action, there's no usecase to vary this yet
           repairEvents.add(new ResupplyEvent(benefactor, beneficiary));
         }
       }

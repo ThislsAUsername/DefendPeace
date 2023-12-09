@@ -126,7 +126,7 @@ public class CombatContext
     return buildBattleParams(aClone, dClone, false);
   }
 
-  public BattleParams getCounterAttack(double damageDealt, boolean isSim)
+  public BattleParams getCounterAttack(int damageDealt, boolean isSim)
   {
     if( !canCounter )
       return null;

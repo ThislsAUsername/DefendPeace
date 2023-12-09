@@ -611,7 +611,7 @@ public class AWBWUnits extends UnitModelScheme
     private static final int MOVE_POWER = 9;
 
     private static final int EXPLODE_RADIUS = 3;
-    private static final int EXPLODE_POWER = 5;
+    private static final int EXPLODE_POWER = 50;
 
     private static final MoveType moveType = new Flight();
     private static final UnitActionFactory[] actions = UnitActionFactory.BASIC_ACTIONS;

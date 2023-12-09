@@ -197,7 +197,7 @@ public class Tech extends Commander
         final int maxPercent = UnitModel.MAXIMUM_HP*10;
         for( Unit u : unitsOverCharged.get(myCommander) )
         {
-          final int preciseHP = (int) (u.getPreciseHP() * 10);
+          final int preciseHP = u.health;
           if( preciseHP > maxPercent )
           {
             int deltaPercent = Math.min(preciseHP - maxPercent, healAmount * 10);

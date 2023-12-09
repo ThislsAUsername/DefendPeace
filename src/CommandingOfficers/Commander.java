@@ -285,7 +285,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   // TODO: determine if this needs parameters, and if so, what?
   public int getRepairPower()
   {
-    return 2;
+    return 20;
   }
 
   public ArrayList<GameOverlay> getMyOverlays(GameMap gameMap, boolean amIViewing)
@@ -300,15 +300,15 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     if( minion == null || enemy == null )
       return 0;
 
-    int myHPLoss  = minion.getHPDamage();
-    int myHPDealt = enemy.getHPDamage();
+    int myHPLoss  = minion.getHPDamage() / 10;
+    int myHPDealt =  enemy.getHPDamage() / 10;
 
     int power = 0; // value in funds of the charge we're getting
 
     // Add up the funds value of the damage done to both participants.
-    power += myHPLoss / UnitModel.MAXIMUM_HP * minion.unit.getCost();
+    power += myHPLoss * minion.unit.getCost() / 10;
     // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
-    power += myHPDealt / UnitModel.MAXIMUM_HP * enemy.unit.getCost() / 2;
+    power += myHPDealt * enemy.unit.getCost() / 10 / 2;
     // Add power based on HP damage dealt; rewards aggressiveness.
     power += myHPDealt * CHARGERATIO_HP;
 

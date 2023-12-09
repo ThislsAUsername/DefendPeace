@@ -134,17 +134,17 @@ public class KaijuWarsKaiju
     }
   }
 
-  public static final int BIRD_LAND_HP = 10; // Should match the first chunk below
+  public static final int BIRD_LAND_HP = 100; // Should match the first chunk below
   // These are the chunks of HP each Kaiju has in each tier of movement (they get slower as they take damage)
   // Index = move points
-  public static final int[] ALPHA_CHUNKS = { 0, 0, 12, 18,  8,  7,  6 };
-  public static final int[] BIRD_CHUNKS  = { 0, 0, 10, 10,  8,  4,  4 };
-  public static final int[] DONK_CHUNKS  = { 0, 0, 10, 12,  8,  9 };
-  public static final int[] SNEK_CHUNKS  = { 0, 0, 10, 15, 11 };
+  public static final int[] ALPHA_CHUNKS = { 0, 0, 120, 180,  80,  70,  60 };
+  public static final int[] BIRD_CHUNKS  = { 0, 0, 100, 100,  80,  40,  40 };
+  public static final int[] DONK_CHUNKS  = { 0, 0, 100, 120,  80,  90 };
+  public static final int[] SNEK_CHUNKS  = { 0, 0, 100, 150, 110 };
   // UFO starts at 3 move
-  public static final int[] UFO_CHUNKS   = { 0, 0,  0,  9,  4,  4,  3,  3 };
+  public static final int[] UFO_CHUNKS   = { 0, 0,  0,  90,  40,  40,  30,  30 };
   // From testing, it looks like everything beyond a certain point is just chunks of 8 for all Kaiju
-  public static final int DEFAULT_HP_CHUNK = 8;
+  public static final int DEFAULT_HP_CHUNK = 80;
 
   // Kaiju start with one ability, get a second, then the third/fourth in tandem
   public enum KaijuAbilityTier { BASIC, EXTRA, ALL }
@@ -153,11 +153,11 @@ public class KaijuWarsKaiju
   // These are the "base" HP values for each kaiju at the skill breakpoint turns
   // Note that the turn number will be added to this value, in all cases
   // Also, these are made up/customizable in game (as are the breakpoint turns), so can be used as balancing factors
-  public static final int[] ALPHA_HPBASES = { 5, 10, 13 };
-  public static final int[] BIRD_HPBASES  = { 5, 10, 13 };
-  public static final int[] DONK_HPBASES  = { 5,  5,  0 };
-  public static final int[] SNEK_HPBASES  = { 5,  5,  5 };
-  public static final int[] UFO_HPBASES   = { 5,  5,  0 };
+  public static final int[] ALPHA_HPBASES = { 50, 100, 130 };
+  public static final int[] BIRD_HPBASES  = { 50, 100, 130 };
+  public static final int[] DONK_HPBASES  = { 50,  50,   0 };
+  public static final int[] SNEK_HPBASES  = { 50,  50,  50 };
+  public static final int[] UFO_HPBASES   = { 50,  50,   0 };
 
   public static class Alphazaurus extends KaijuUnitModel
   {
@@ -180,7 +180,7 @@ public class KaijuWarsKaiju
       {
         // Setting the tracker state here feels wrong
         kaijuTracker.abilityUsedLong(self, Alphazaurus.class);
-        events.add(new HealUnitEvent(self, 3, null, true));
+        events.add(new HealUnitEvent(self, 30, null, true));
       }
       return events;
     }
@@ -254,10 +254,10 @@ public class KaijuWarsKaiju
       {
         // Setting the tracker state here feels wrong
         kaijuTracker.abilityUsedShort(self, BirdSwoopFactory.class);
-        events.add(new HealUnitEvent(self, 1, null, true));
+        events.add(new HealUnitEvent(self, 10, null, true));
         // If we're about to go above the land HP, become flying
         // TODO: Since this is only handled here and there's no HealUnitEvent listener, this won't account for healing CO powers
-        // ... nor, in fact, will healing CO powers actually heal the Kaiju over 10 HP by default
+        // ... nor, in fact, will healing CO powers actually heal the Kaiju over 100 HP by default
         if( self.getHP() == BIRD_LAND_HP )
           events.add(new TransformLifecycle.TransformEvent(self, airTurkey));
       }

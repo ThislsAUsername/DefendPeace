@@ -293,19 +293,19 @@ public class AICombatUtils
    * @param pDamage The cumulative base damage done by those mandatory attacks
    * @return The cumulative base damage of all attacks already in the neededAttacks
    */
-  public static double findMultiHitKill(
+  public static int findMultiHitKill(
                                 GameMap gameMap, Unit target,
                                 Collection<Unit> attackCandidates,
                                 Map<XYCoord, Unit> neededAttacks,
-                                double pDamage)
+                                int pDamage)
   {
     // Base case; we found a kill
-    if( pDamage >= target.getPreciseHP() )
+    if( pDamage >= target.getHP() )
     {
       return pDamage;
     }
 
-    double damage = pDamage;
+    int damage = pDamage;
     // Iterate through the attack spaces, and try filling all spaces recursively from each one
     for( XYCoord xyc : neededAttacks.keySet() )
     {
@@ -330,12 +330,12 @@ public class AICombatUtils
         if( movePath != null )
         {
           neededAttacks.put(xyc, unit);
-          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CalcType.PESSIMISTIC).defender.getPreciseHPDamage();
+          int thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CalcType.PESSIMISTIC).defender.getPreciseHPDamage();
 
           thisDamage = findMultiHitKill(gameMap, target, attackCandidates, neededAttacks, damage + thisDamage);
 
           // If we've found a kill, we're done
-          if( thisDamage >= target.getPreciseHP() )
+          if( thisDamage >= target.getHP() )
           {
             damage = thisDamage;
             break;

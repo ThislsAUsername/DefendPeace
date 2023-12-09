@@ -60,14 +60,14 @@ public class TestCombat extends TestCase
     mechA.initTurn(testMap); // Make sure he is ready to move.
 
     // Make sure the infantry will die with one attack
-    infB.damageHP(7);
+    infB.damageHP(70);
 
     // Execute inf- I mean, the action.
     performGameAction(new BattleLifecycle.BattleAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
         testGame);
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
-    boolean testPassed = validate(mechA.getPreciseHP() == 10, "    Attacker lost or gained health.");
+    boolean testPassed = validate(mechA.health == UnitModel.MAXIMUM_HP, "    Attacker lost or gained health.");
     testPassed &= validate(testMap.getLocation(1, 2).getResident() == null, "    Defender is still on the map.");
 
     // Clean up
@@ -88,14 +88,14 @@ public class TestCombat extends TestCase
     testCo2.army.team = 0;
 
     // Make sure the infantry will die with one attack
-    infB.damageHP(7);
+    infB.damageHP(70);
 
     // Hug the infantry in a friendly manner.
     performGameAction(new BattleLifecycle.BattleAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
         testGame);
 
     // Check that the mech is undamaged, and that the infantry is still with us.
-    boolean testPassed = validate(mechA.getPreciseHP() == 10, "    Attacker lost or gained health.");
+    boolean testPassed = validate(mechA.health == UnitModel.MAXIMUM_HP, "    Attacker lost or gained health.");
     testPassed &= validate(testMap.getLocation(1, 2).getResident() != null, "    Defender died.");
 
     // Clean up
@@ -119,20 +119,20 @@ public class TestCombat extends TestCase
     offender.initTurn(testMap); // Make sure he is ready to move.
     performGameAction(new BattleLifecycle.BattleAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 6),
         testGame);
-    boolean testPassed = validate(defender.getPreciseHP() == 10, "    Artillery dealt damage at range 1. Artillery range should be 2-3.");
+    boolean testPassed = validate(defender.health == UnitModel.MAXIMUM_HP, "    Artillery dealt damage at range 1. Artillery range should be 2-3.");
     
     // offender will attempt to move and fire. This should fail, since artillery cannot fire after moving.
     offender.initTurn(testMap);
     performGameAction(new BattleLifecycle.BattleAction(testMap, offender, Utils.findShortestPath(offender, 6, 4, testMap), 6, 6),
         testGame);
-    testPassed &= validate(defender.getPreciseHP() == 10, "    Artillery dealt damage despite moving before firing.");
+    testPassed &= validate(defender.health == UnitModel.MAXIMUM_HP, "    Artillery dealt damage despite moving before firing.");
 
     // offender will shoot victim.
     offender.initTurn(testMap); // Make sure he is ready to move.
     performGameAction(new BattleLifecycle.BattleAction(testMap, offender, Utils.findShortestPath(offender, 6, 5, testMap), 6, 7),
         testGame);
-    testPassed &= validate(victim.getPreciseHP() != 10, "    Artillery failed to do damage at a range of 2, without moving.");
-    testPassed &= validate(offender.getPreciseHP() == 10, "    Artillery received a counterattack from a range of 2. Counterattacks should only be possible at range 1.");
+    testPassed &= validate(victim  .health != UnitModel.MAXIMUM_HP, "    Artillery failed to do damage at a range of 2, without moving.");
+    testPassed &= validate(offender.health == UnitModel.MAXIMUM_HP, "    Artillery received a counterattack from a range of 2. Counterattacks should only be possible at range 1.");
 
     // defender will attack offender.
     defender.initTurn(testMap); // Make sure he is ready to move.
@@ -140,8 +140,8 @@ public class TestCombat extends TestCase
         testGame);
     
     // check that offender is damaged and defender is not.
-    testPassed &= validate(offender.getPreciseHP() != 10, "    Mech failed to deal damage to adjacent artillery.");
-    testPassed &= validate(defender.getPreciseHP() == 10, "    Mech receives a counterattack from artillery at range 1. Artillery range should be 2-3.");
+    testPassed &= validate(offender.health != UnitModel.MAXIMUM_HP, "    Mech failed to deal damage to adjacent artillery.");
+    testPassed &= validate(defender.health == UnitModel.MAXIMUM_HP, "    Mech receives a counterattack from artillery at range 1. Artillery range should be 2-3.");
 
     // Clean up
     testMap.removeUnit(offender);
@@ -163,8 +163,8 @@ public class TestCombat extends TestCase
     performGameAction(new BattleLifecycle.BattleAction(testMap, attacker, Utils.findShortestPath(attacker, 1, 2, testMap), 1, 3), testGame);
 
     // Check that the both units were hurt in the exchange.
-    boolean testPassed = validate(defender.getHP() < 10, "    Defender took no damage.");
-    testPassed &= validate(attacker.getHP() < 10, "    Attacker took no damage.");
+    boolean testPassed = validate(defender.health < UnitModel.MAXIMUM_HP, "    Defender took no damage.");
+    testPassed &= validate(attacker       .health < UnitModel.MAXIMUM_HP, "    Attacker took no damage.");
 
     // Clean up
     testMap.removeUnit(attacker);
@@ -189,7 +189,7 @@ public class TestCombat extends TestCase
 
     // We don't expect the tank to be hurt or the recon to lose ammo, so just
     // Verify that the recon was hurt and the tank expended ammo.
-    boolean testPassed = validate(attacker.getHP() < 10, "    Recon took no damage!");
+    boolean testPassed = validate(attacker.health < UnitModel.MAXIMUM_HP, "    Recon took no damage!");
     testPassed &= validate( defender.ammo == (defender.model.maxAmmo-1), "    Defender expended no ammo!" );
 
     // Clean up
@@ -211,7 +211,7 @@ public class TestCombat extends TestCase
     Unit infB = addUnit(testMap, testCo2, UnitModel.TROOP, 1, 2);
 
     // Make sure the infantry will die with one attack
-    infB.damageHP(7);
+    infB.damageHP(70);
 
     // Create the attack action so we can predict the unit will die, and his CO will therefore be defeated.
     mechA.initTurn(testMap); // Make sure he is ready to act.

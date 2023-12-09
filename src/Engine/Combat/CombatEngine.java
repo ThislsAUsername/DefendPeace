@@ -98,7 +98,7 @@ public class CombatEngine
 
     BattleParams attackInstance = context.getAttack();
 
-    double damage = attackInstance.calculateDamage();
+    int damage = attackInstance.calculateDamage();
     if( damage < 0 )
       damage = 0;
     unitStateMap.get(context.attacker).fire(context.attacker.weapon);
@@ -108,7 +108,7 @@ public class CombatEngine
     BattleParams defendInstance = context.getCounterAttack(damage, isSim);
     if( null != defendInstance )
     {
-      double counterDamage = defendInstance.calculateDamage();
+      int counterDamage = defendInstance.calculateDamage();
       unitStateMap.get(context.defender).fire(context.defender.weapon);
       unitStateMap.get(context.attacker).damageHP(counterDamage, isSim);
     }
@@ -123,7 +123,7 @@ public class CombatEngine
                              defender, unitStateMap.get(defender));
   }
 
-  public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
+  public static int calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
     if( attacker.model.weapons.size() < 1 )
       return 0;
