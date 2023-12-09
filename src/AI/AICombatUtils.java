@@ -270,7 +270,7 @@ public class AICombatUtils
           neededAttacks.remove(space);
           continue;
         }
-        double thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space, CalcType.PESSIMISTIC).defender.getPreciseHPDamage();
+        int thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space, CalcType.PESSIMISTIC).defender.getPreciseHPDamage();
         if( target.getHP() <= damage - thisShot )
         {
           neededAttacks.remove(space);
