@@ -10,7 +10,7 @@ public class UnitDelta implements Serializable
 
   public final UnitContext before, after;
   public final int deltaHP, deltaAmmo, deltaFuel, deltaMaterials;
-  public final double deltaPreciseHP;
+  public final int deltaPreciseHP;
 
   public final UnitModel model;
   public final Unit unit;
@@ -22,7 +22,7 @@ public class UnitDelta implements Serializable
     before = start;
     after = end;
     deltaHP = after.getHP() - before.getHP();
-    deltaPreciseHP = after.getPreciseHP() - before.getPreciseHP();
+    deltaPreciseHP = after.health - before.health;
     deltaAmmo = after.ammo - before.ammo;
     deltaFuel = after.fuel - before.fuel;
     deltaMaterials = after.materials - before.materials;
@@ -36,7 +36,7 @@ public class UnitDelta implements Serializable
   {
     return deltaHP * -1;
   }
-  public double getPreciseHPDamage()
+  public int getPreciseHPDamage()
   {
     return deltaPreciseHP * -1;
   }
