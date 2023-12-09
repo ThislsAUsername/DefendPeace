@@ -6,6 +6,7 @@ import CommandingOfficers.Strong;
 import Engine.Army;
 import Engine.GameAction;
 import Engine.GameInstance;
+import Engine.GamePath;
 import Engine.GameScenario;
 import Engine.Utils;
 import Engine.GameEvents.ArmyDefeatEvent;
@@ -63,7 +64,7 @@ public class TestCombat extends TestCase
     infB.damageHealth(70);
 
     // Execute inf- I mean, the action.
-    performGameAction(new BattleLifecycle.BattleAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
+    performGameAction(new BattleLifecycle.BattleAction(testMap, mechA, GamePath.stayPut(mechA), 1, 2),
         testGame);
 
     // Check that the mech is undamaged, and that the infantry is no longer with us.
@@ -95,7 +96,7 @@ public class TestCombat extends TestCase
     infB.damageHealth(70);
 
     // Hug the infantry in a friendly manner.
-    performGameAction(new BattleLifecycle.BattleAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
+    performGameAction(new BattleLifecycle.BattleAction(testMap, mechA, GamePath.stayPut(mechA), 1, 2),
         testGame);
 
     // Check that the mech is undamaged, and that the infantry is still with us.
