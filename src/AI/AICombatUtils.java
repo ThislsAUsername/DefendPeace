@@ -258,7 +258,7 @@ public class AICombatUtils
       neededAttacks.put(xyc, null);
     }
 
-    double damage = findMultiHitKill(gameMap, target, attackers, neededAttacks, 0);
+    int damage = findMultiHitKill(gameMap, target, attackers, neededAttacks, 0);
     if( damage >= target.getHP() )
     {
       // Prune excess attacks and empty attacking spaces
