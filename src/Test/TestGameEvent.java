@@ -75,8 +75,8 @@ public class TestGameEvent extends TestCase
 
     BattleLifecycle.BattleEvent event = new BattleLifecycle.BattleEvent(infA, infB, Utils.findShortestPath(infA, new XYCoord(2, 2), testMap), testMap);
     event.performEvent(testMap);
-    testPassed &= validate(infB.getHP() < 10, "    Defender Was not damaged");
-    testPassed &= validate(infA.getHP() < 10, "    Defender did not counter-attack");
+    testPassed &= validate(infB.getHP() < UnitModel.MAXIMUM_HP, "    Defender Was not damaged");
+    testPassed &= validate(infA.getHP() < UnitModel.MAXIMUM_HP, "    Defender did not counter-attack");
 
     // Clean up
     testMap.removeUnit(infA);

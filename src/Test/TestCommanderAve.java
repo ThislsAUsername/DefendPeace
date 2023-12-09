@@ -173,7 +173,7 @@ public class TestCommanderAve extends TestCase
     XYCoord inRange = new XYCoord(7,5);
     testPassed &= validate( testMap.getEnvironment(inRange).weatherType == Weathers.SNOW, "    inRange tile didn't refreeze!" );
     testPassed &= validate( testMap.getEnvironment(forestTile).terrainType == TerrainType.GRASS, "    " + forestTile + " was not cleared to GRASS!");
-    testPassed &= validate( patchInf.getHP() == 8, String.format("    Infantry has %s HP, but should have 8!", patchInf.getHP()));
+    testPassed &= validate( patchInf.getHP() == 80, String.format("    Infantry has %s HP, but should have 8!", patchInf.getHP()));
     //System.out.println("Snow map after Glacio:\n" + Ave.getSnowMapAsString());
     //Ave.log(false);
 
