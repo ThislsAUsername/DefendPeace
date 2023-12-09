@@ -155,17 +155,17 @@ public class Muriel implements AIController
     UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(myModel, otherModel));
     if( null != umami ) return umami;
 
-    double myDamage = CombatEngine.calculateOneStrikeDamage(myUnit, 1, otherUnit, myArmy.myView, 0, myUnit.model.hasMobileWeapon());
+    int myDamage = CombatEngine.calculateOneStrikeDamage(myUnit, 1, otherUnit, myArmy.myView, 0, myUnit.model.hasMobileWeapon());
 
     // Now go the other way.
-    double otherDamage = CombatEngine.calculateOneStrikeDamage(otherUnit, 1, myUnit, myArmy.myView, 0, false);
+    int otherDamage = CombatEngine.calculateOneStrikeDamage(otherUnit, 1, myUnit, myArmy.myView, 0, false);
 
     // Calculate and store the damage and cost-effectiveness ratios.
     double damageRatio = 0;
     double invRatio = 0;
     if( myDamage != 0 && otherDamage != 0)
     {
-      damageRatio = myDamage / otherDamage;
+      damageRatio = (double) (myDamage) / otherDamage;
       invRatio = 1/damageRatio;
     }
     if( myDamage == 0 ) damageRatio = 0;
