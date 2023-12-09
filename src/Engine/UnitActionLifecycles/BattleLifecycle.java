@@ -305,7 +305,7 @@ public abstract class BattleLifecycle
       // output any damage done, with the color of the one dealing the damage
       if( result.calculateDamage() > 0 )
         // grab the two most significant digits and convert to %
-        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (result.calculateDamage()*10) + "%"));
+        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, result.calculateDamage() + "%"));
 
       return output;
     }
@@ -424,7 +424,7 @@ public abstract class BattleLifecycle
       this.target = target;
       // Calculate the result of the battle immediately. This will allow us to plan the animation.
       result = CombatEngine.calculateTerrainDamage(attacker, path, target, map);
-      percentDamage = (int) (10 * result.calculateDamage());
+      percentDamage = result.calculateDamage();
     }
 
     public Unit getAttacker()
