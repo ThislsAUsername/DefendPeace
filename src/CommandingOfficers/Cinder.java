@@ -87,7 +87,7 @@ public class Cinder extends Commander
     XYCoord buildCoords = new XYCoord(unit.x, unit.y);
     if( this == unit.CO && army.myView.isLocationValid(buildCoords) )
     {
-      unit.alterHP(-2);
+      unit.alterHP(-20);
       unit.isTurnOver = false;
     }
     return null;
@@ -133,7 +133,7 @@ public class Cinder extends Commander
     private static final long serialVersionUID = 1L;
     private static final String SEAR_NAME = "Sear";
     private static final int SEAR_COST = 5;
-    private static final int SEAR_WOUND = -1;
+    private static final int SEAR_WOUND = -10;
 
     SearAbility(Cinder cinder)
     {

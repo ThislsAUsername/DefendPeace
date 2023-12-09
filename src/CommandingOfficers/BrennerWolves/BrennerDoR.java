@@ -67,7 +67,7 @@ public class BrennerDoR extends RuinedCommander
     {
       for( Unit u : myCommander.army.getUnits() )
       {
-        u.alterHP(3);
+        u.alterHP(30);
       }
       super.perform(gameMap);
     }
