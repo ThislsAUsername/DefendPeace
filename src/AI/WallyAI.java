@@ -365,10 +365,10 @@ public class WallyAI extends ModularAI
               // add each new threat to the existing threats
               ai.allThreats.add(threat);
               Map<XYCoord, Double> threatArea = ai.threatMap.get(um);
-              for( Entry<XYCoord, Double> newThreat : AICombatUtils.findThreatPower(gameMap, threat, um).entrySet() )
+              for( Entry<XYCoord, Integer> newThreat : AICombatUtils.findThreatPower(gameMap, threat, um).entrySet() )
               {
                 if( null == threatArea.get(newThreat.getKey()) )
-                  threatArea.put(newThreat.getKey(), newThreat.getValue());
+                  threatArea.put(newThreat.getKey(), (double)newThreat.getValue());
                 else
                   threatArea.put(newThreat.getKey(), newThreat.getValue() + threatArea.get(newThreat.getKey()));
               }

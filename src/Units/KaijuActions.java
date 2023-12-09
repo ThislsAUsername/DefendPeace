@@ -194,6 +194,7 @@ public class KaijuActions
             counterPercent = victimType.kaijuCounter;
             counterPercent += KaijuWarsWeapons.getCounterBoost(new UnitContext(victim), gameMap, location.getEnvironment().terrainType);
             counterPercent *= victim.getHPFactor();
+            counterPercent /= 10;
             if( kaijuState.model.isLandUnit()
                 && victimType.slowsLand )
               --kaijuState.movePower;

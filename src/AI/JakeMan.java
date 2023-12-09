@@ -216,7 +216,7 @@ public class JakeMan extends ModularAI
           if( !mapToFill.containsKey(um) )
             mapToFill.put(um, new HashMap<>());
           Map<XYCoord, Double> threatArea = mapToFill.get(um);
-          double newValue = threat.getHPFactor();
+          double newValue = (double)(threat.getHP()) / UnitModel.MAXIMUM_HP;
           // Square unit fraction so low-HP units aren't valued so much
           newValue *= newValue;
           for( XYCoord coord : AICombatUtils.findThreatPower(gameMap, threat, null).keySet() )
@@ -673,6 +673,7 @@ public class JakeMan extends ModularAI
               damage *= FIRSTSTRIKE_ON_THREAT_WEIGHT;
             // Value damage to hurt units less
             damage *= defender.getHPFactor();
+            damage /= 10;
 
             return (double)(damage - loss);
           }, (terrain, params) -> 0.00); // Don't attack terrain
@@ -730,7 +731,7 @@ public class JakeMan extends ModularAI
           if( unitMapFriendly.get(counter).containsKey(coord) )
             counterPower = unitMapFriendly.get(counter).get(coord);
           if( counterIsMeAndIAmPeaceful )
-            counterPower -= PEACEFUL_SELF_THREAT_RATIO * unit.getHPFactor();
+            counterPower -= (PEACEFUL_SELF_THREAT_RATIO * unit.getHPFactor()) / 10;
           counterPowerTotal += Math.max(0, counterPower);
         }
         final double counterPowerAverage = counterPowerTotal / counterCoords.size();

@@ -619,7 +619,7 @@ public class Muriel implements AIController
             if( threat.canTarget(unit.model) && shouldAttack(threat, unit, gameMap) )
             {
               // Add coordinates that `threat` could target to our "no-go" list.
-              Map<XYCoord, Double> threatMap = AICombatUtils.findThreatPower(gameMap, threat, unit.model);
+              Map<XYCoord, Integer> threatMap = AICombatUtils.findThreatPower(gameMap, threat, unit.model);
               noGoZone.addAll(threatMap.keySet()); // Ignore the valueMap of the return; we have already decided `threat` is dangerous.
             }
           }
