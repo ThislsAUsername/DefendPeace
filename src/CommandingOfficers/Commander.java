@@ -300,17 +300,17 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     if( minion == null || enemy == null )
       return 0;
 
-    int myHPLoss  = minion.getHPDamage() / 10;
-    int myHPDealt =  enemy.getHPDamage() / 10;
+    int guiHPLoss  = minion.getHPDamage() / 10;
+    int guiHPDealt =  enemy.getHPDamage() / 10;
 
     int power = 0; // value in funds of the charge we're getting
 
     // Add up the funds value of the damage done to both participants.
-    power += myHPLoss * minion.unit.getCost() / 10;
+    power += guiHPLoss * minion.unit.getCost() / 10;
     // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
-    power += myHPDealt * enemy.unit.getCost() / 10 / 2;
+    power += guiHPDealt * enemy.unit.getCost() / 10 / 2;
     // Add power based on HP damage dealt; rewards aggressiveness.
-    power += myHPDealt * CHARGERATIO_HP;
+    power += guiHPDealt * CHARGERATIO_HP;
 
     return power;
   }
