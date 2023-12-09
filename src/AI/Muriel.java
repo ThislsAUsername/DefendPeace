@@ -351,7 +351,7 @@ public class Muriel implements AIController
     //////////////////////////////////////////////////////////////////
     // If we are currently healing, stick around, unless that would stem the tide of reinforcements.
     MapLocation loc = gameMap.getLocation(unit.x, unit.y);
-    if( (unit.getHP() <= 8) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) && (loc.getOwner() == unit.CO) )
+    if( (unit.getHP() <= 80) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) && (loc.getOwner() == unit.CO) )
     {
       log(String.format("%s is damaged and on a repair tile. Will continue to repair for now.", unit.toStringWithLocation()));
       ArrayList<GameActionSet> actionSet = unit.getPossibleActions(gameMap, GamePath.stayPut(unit));
@@ -684,13 +684,13 @@ public class Muriel implements AIController
   private boolean shouldAttack(Unit unit, Unit target, GameMap gameMap)
   {
     // Calculate the cost of the damage we can do.
-    double damage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, gameMap.getEnvironment(target.x, target.y).terrainType.getDefLevel(), unit.model.hasMobileWeapon());
+    int damage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, gameMap.getEnvironment(target.x, target.y).terrainType.getDefLevel(), unit.model.hasMobileWeapon());
 
     UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
 
     // This attack is a good idea if our cost effectiveness is in the acceptable range, or if we can at least half-kill them.
     // The second check is needed because one glass cannon may not have a great overall ratio against another; whoever hits first wins, e.g. Mech vs Anti-Air.
-    return (umami.costEffectivenessRatio > COST_EFFECTIVENESS_MIN) || (damage > (target.getHP() / 2.0));
+    return (umami.costEffectivenessRatio > COST_EFFECTIVENESS_MIN) || (damage > (target.getHP() / 2));
   }
 
   private void queueUnitProductionActions(GameMap gameMap)
@@ -721,11 +721,11 @@ public class Muriel implements AIController
         // Count how many of each model of enemy units are in play.
         if( enemyUnitCounts.containsKey(coModel))
         {
-          enemyUnitCounts.put(coModel, enemyUnitCounts.get(coModel) + (u.getHP() / 10.0) );
+          enemyUnitCounts.put(coModel, enemyUnitCounts.get(coModel) + (u.getHP() / 100.0) );
         }
         else
         {
-          enemyUnitCounts.put(coModel, u.getHP() / 10.0 );
+          enemyUnitCounts.put(coModel, u.getHP() / 100.0 );
         }
       }
     }

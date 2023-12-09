@@ -246,16 +246,18 @@ public class UnitSpriteSet
     if( u.getHP() != UnitModel.MAXIMUM_HP )
     {
       BufferedImage num;
+      int guiHP = u.getHPFactor();
       if( u.getHP() > UnitModel.MAXIMUM_HP )
       {
-        int digit = Math.min(u.getHP() / 10, 9);
-        num = SpriteLibrary.getMapUnitNumberSprites().getFrame(digit); // Tens place.
+        int tensDigit = Math.min(guiHP / 10, 9);
+        num = SpriteLibrary.getMapUnitNumberSprites().getFrame(tensDigit); // Tens place.
 
         // Ones place shares space with the activity icons below if HP > 10.
-        unitIcons.add( SpriteLibrary.getMapUnitNumberSprites().getFrame((u.getHP()-UnitModel.MAXIMUM_HP)) );
+        int onesIndex = guiHP; // There are 10 digit sprites, so it naturally wraps at 10
+        unitIcons.add( SpriteLibrary.getMapUnitNumberSprites().getFrame(onesIndex) );
       }
       else
-        num = SpriteLibrary.getMapUnitNumberSprites().getFrame(u.getHP());
+        num = SpriteLibrary.getMapUnitNumberSprites().getFrame(guiHP);
       g.drawImage(num, drawX, drawY + (SpriteLibrary.baseSpriteSize / 2), num.getWidth(), num.getHeight(), null);
     }
 

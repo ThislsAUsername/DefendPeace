@@ -195,7 +195,7 @@ public abstract class JoinLifecycle
         unitRecipient.materials = Math.min(unitRecipient.model.maxMaterials, unitRecipient.materials + unitDonor.materials);
 
         // If we had extra HP, add that as income.
-        double costPerHP = unitDonor.getCost() / UnitModel.MAXIMUM_HP;
+        int costPerHP = unitDonor.getCost() / UnitModel.MAXIMUM_HP; // This truncation is cart-accurate to DS; even with discount skills, the "real" price of a unit never has tens/ones
         unitDonor.CO.army.money += (extraHP * costPerHP);
 
         // Reconcile cargo units.

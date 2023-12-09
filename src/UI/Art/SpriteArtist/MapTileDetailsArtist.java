@@ -139,7 +139,7 @@ public class MapTileDetailsArtist
     ArrayList<AttributeArtist> unitAttrs = new ArrayList<>();
     unitAttrCache.add(unitAttrs);
 
-    unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), unit.getHP()));
+    unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.HEART.getIcon(), unit.getHPFactor()));
     if( unit.model.needsFuel() )
       unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.FUEL.getIcon(), unit.fuel));
     if( unit.ammo >= 0 )

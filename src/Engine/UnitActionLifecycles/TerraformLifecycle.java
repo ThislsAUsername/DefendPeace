@@ -102,16 +102,16 @@ public abstract class TerraformLifecycle
   public static class TerraformEvent extends MapChangeEvent
   {
     private Unit unit = null;
-    final int captureAmount;
-    final int priorCaptureAmount;
+    final int terraformProgress;
+    final int priorTerraformAmount;
 
     public TerraformEvent(Unit u, XYCoord loc, TerrainType endType)
     {
       super(loc, Environment.getTile(endType, Weathers.CLEAR));
       unit = u;
       XYCoord unitXY = new XYCoord(u.x, u.y);
-      priorCaptureAmount = (unitXY.equals(loc) ? unit.getCaptureProgress() : 0);
-      captureAmount = unit.getHP(); // TODO: Apply CO buffs.
+      priorTerraformAmount = (unitXY.equals(loc) ? unit.getCaptureProgress() : 0);
+      terraformProgress = unit.getHPFactor(); // TODO: Apply CO buffs.
     }
 
     @Override

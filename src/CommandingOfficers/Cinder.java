@@ -213,8 +213,8 @@ public class Cinder extends Commander
       // Since an active CO was part of the fight, reactivate the attacker at the cost of HP.
       GameEventQueue results = new GameEventQueue();
       Unit minion = battleInfo.attacker.unit;
-      // Cost starts at 1, then adds one for each subsequent attack
-      int refreshCost = 1+attackCounts.getCountFor(army, minion);
+      // Cost starts at 10, then adds 10 for each subsequent attack
+      int refreshCost = 10 * (1+attackCounts.getCountFor(army, minion));
       int hp = minion.getHP();
       if( hp > refreshCost )
       {
