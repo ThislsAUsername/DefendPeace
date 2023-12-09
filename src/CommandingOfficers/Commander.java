@@ -47,7 +47,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public Color myColor;
   public Faction faction;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
-  public static final int CHARGERATIO_HP = 100; // Funds value of 1 HP damage dealt, for the purpose of power charge
+  public static final int CHARGERATIO_HP = 100; // Funds value of 10 HP damage dealt, for the purpose of power charge
   public int incomeAdjustment = 0; // Commander subclasses can increase/decrease income if needed.
   private int myAbilityPower = 0;
 

@@ -70,6 +70,10 @@ public class TestCombat extends TestCase
     boolean testPassed = validate(mechA.health == UnitModel.MAXIMUM_HP, "    Attacker lost or gained health.");
     testPassed &= validate(testMap.getLocation(1, 2).getResident() == null, "    Defender is still on the map.");
 
+    int expectedAttackerCharge = 3 * (infB.getCost() / 10 / 2 + Commander.CHARGERATIO_HP);
+    int expectedDefenderCharge = 3 * (infB.getCost() / 10);
+    testPassed &= validate(testCo1.getAbilityPower() == expectedAttackerCharge, "    Attacker got the wrong amount of charge.");
+    testPassed &= validate(testCo2.getAbilityPower() == expectedDefenderCharge, "    Defender got the wrong amount of charge.");
     // Clean up
     testMap.removeUnit(mechA);
 
