@@ -252,6 +252,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     myActiveAbility = ability;
   }
 
+  /** Do not use this unless you ask the Commander how much energy to input */
   public void modifyAbilityPower(int amount)
   {
     myAbilityPower += amount;
@@ -261,6 +262,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     if( myAbilityPower > maxPower )
       myAbilityPower = maxPower;
   }
+  /** Adds N power-fatigue-scaled stars' energy. */
   public void modifyAbilityStars(int stars)
   {
     if( myAbilities.size() < 1 )
