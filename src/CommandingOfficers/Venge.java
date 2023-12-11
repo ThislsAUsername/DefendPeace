@@ -76,7 +76,7 @@ public class Venge extends Commander
     addUnitModifier(new UnitFightStatModifier(-10));
 
     addCommanderAbility(myIronWill);
-    addCommanderAbility(new Retribution(this));
+    addCommanderAbility(new Retribution(this, myIronWill.costBasis));
   }
 
   public static CommanderInfo getInfo()
@@ -244,9 +244,9 @@ public class Venge extends Commander
     UnitModifier damageMod = null;
     UnitModifier defenseMod = null;
 
-    Retribution(Venge venge)
+    Retribution(Venge venge, CostBasis basis)
     {
-      super(venge, NAME, COST);
+      super(venge, NAME, COST, basis);
       damageMod = new UnitDamageModifier(RETRIBUTION_BUFF);
       defenseMod = new UnitDefenseModifier(-RETRIBUTION_NERF);
     }

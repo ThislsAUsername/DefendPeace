@@ -90,9 +90,10 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
       ca.deInitForGame(game);
   }
 
-  protected void addCommanderAbility(CommanderAbility ca)
+  protected CommanderAbility addCommanderAbility(CommanderAbility ca)
   {
     myAbilities.add(ca);
+    return ca;
   }
 
   public void endTurn()
