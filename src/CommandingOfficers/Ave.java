@@ -118,6 +118,7 @@ public class Ave extends Commander
   {
     super(coInfo, rules);
 
+    // Ave's abilities scale separately since they each have a very different way they want to scale
     addCommanderAbility(new NixAbility(this));
     addCommanderAbility(new GlacioAbility(this));
     addCommanderAbility(new OblidoAbility(this));
@@ -469,8 +470,6 @@ public class Ave extends Commander
     private static final int NIX_COST = 1;
     private static final int NIX_BUFF = 10; // Standard 10
 
-    private int numActivations = 0;
-
     Ave coCast;
     UnitModifier damageMod = null;
 
@@ -483,12 +482,11 @@ public class Ave extends Commander
     }
 
     @Override
-    protected void adjustCost()
+    public int getCost()
     {
       // Override default cost-increase behavior to make this get more expensive faster.
-      numActivations++;
-      int myStars = 1 + (numActivations*3);
-      myPowerCost = myStars * CHARGERATIO_FUNDS;
+      int myStars = 1 + (costBasis.numCasts*3);
+      return myStars * CHARGERATIO_FUNDS;
     }
 
     @Override
@@ -655,14 +653,10 @@ public class Ave extends Commander
       Ave = commander;
       damageMod = new UnitDamageModifier(OBLIDO_BUFF);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
-    }
-
-    @Override
-    protected void adjustCost()
-    {
       // One of the big benefits of this power is deforestation, since trees get in Ave's way.
       // Trees are only removed once, so we'll increase cost more slowly to counteract the decreased utility.
-      myPowerCost += 0.5 * CHARGERATIO_FUNDS;
+      costBasis.starRatioPerCast = 555; // 8 stars * 555 = +4440 per cast, vs the old 9000/2=4500 per cast
+      costBasis.maxStarRatio = costBasis.maxScalingCasts * costBasis.starRatioPerCast;
     }
 
     @Override

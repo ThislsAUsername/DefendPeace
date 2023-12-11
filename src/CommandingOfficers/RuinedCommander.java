@@ -304,8 +304,7 @@ public abstract class RuinedCommander extends DeployableCommander
 
     protected RuinedAbility(RuinedCommander commander, String name)
     {
-      super(commander, name, COST);
-      myPowerCost = COST * DOR_STAR_VALUE;
+      super(commander, name, COST, new CostBasis(DOR_STAR_VALUE));
       COcast = commander;
     }
 
