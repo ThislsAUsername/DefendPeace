@@ -260,10 +260,13 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     if( myAbilityPower > maxPower )
       myAbilityPower = maxPower;
   }
-  public void modifyAbilityStars(int amount)
+  public void modifyAbilityStars(int stars)
   {
-    // TODO: Make this scale with fatigue
-    modifyAbilityPower(amount * CHARGERATIO_FUNDS);
+    if( myAbilities.size() < 1 )
+      return;
+    // Just grab the first ability's star cost since I don't really want to consider what to do under variant star costs.
+    int starCost = myAbilities.get(0).costBasis.calcCostPerStar();
+    modifyAbilityPower(stars * starCost);
   }
 
   /**
