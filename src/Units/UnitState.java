@@ -22,10 +22,11 @@ public abstract class UnitState implements Serializable
   public Commander CO;
 
   /**
-   * HP determines the current actual durability of a unit.
-   * It's typically in range [1-10]. A unit at 0 HP is dead.
-   * Health is HP value as a percentage, thus ~10x the HP value.
-   * When determining HP, health must always be rounded up.
+   * HP/health determines the current durability of a unit.<p>
+   * It's typically in range [1,100]. A unit at 0 HP is dead.<p>
+   * HP is used to scale unit effectiveness, and normally rounds up to the next 10 for this purpose.<p>
+   * HP is also shown only in this [1,10] scale, so the last digit of the health number is considered hidden information.<p>
+   * As such, direct access of this value should only be used when you have a specific reason to choose it over getHP()<p>
    */
   public int health;
 
@@ -97,6 +98,7 @@ public abstract class UnitState implements Serializable
   {
     return roundHP(health) / 10;
   }
+  /** Rounds the input up to the nearest 10 (accounting for negatives) */
   public static int roundHP(int health)
   {
     if( health >= 0 )
@@ -130,9 +132,9 @@ public abstract class UnitState implements Serializable
   /**
    * Increases HP by the specified amount.
    * <p>Enforces a minimum of 1, and a maximum (optional) of MAXIMUM_HP.
-   * <p>When healing, rounds health up to a whole HP (e.g. 25 + 20 = 45 -> 50)
+   * <p>When healing, rounds up (optional) to the next 10 (e.g. 25 + 20 = 45 -> 50)
    * <p>Use this for most non-combat HP changes (mass damage/silos/healing).
-   * @return the change in HP
+   * @return the change in *rounded* health value (may be more or less than the actual change)
    */
   public int alterHP(int change)
   {
@@ -171,7 +173,7 @@ public abstract class UnitState implements Serializable
    * <p>Enforces a minimum of 1, and a maximum (optional) of MAXIMUM_HP.
    * <p>Does not round.
    * <p>Use this when you want precise non-combat health changes, or want to heal without rounding up.
-   * @return the change in HP
+   * @return the change in *rounded* health value (may be more or less than the actual change)
    */
   public int alterHealthPercent(int percentChange)
   {
