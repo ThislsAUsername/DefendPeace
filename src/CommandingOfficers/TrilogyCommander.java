@@ -60,5 +60,15 @@ public abstract class TrilogyCommander extends Commander
       modList.add(genericAttack);
       modList.add(genericDefense);
     }
+
+    @Override
+    protected void perform(MapMaster gameMap)
+    {
+      // Change my CO's energy such that it's as if this power cost the new cost rather than the actual cost
+      int oldCost = baseStars * costBasis.calcCostPerStar(costBasis.numCasts - 1);
+      int newCost = costBasis.calcCost(baseStars);
+      int costDelta = newCost - oldCost;
+      myCommander.modifyAbilityPower(-1 * costDelta);
+    }
   }
 }

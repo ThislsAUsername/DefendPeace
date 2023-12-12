@@ -39,7 +39,8 @@ public abstract class CommanderAbility implements Serializable
       maxScalingCasts = 10;
       maxStarRatio = maxScalingCasts * starRatioPerCast;
     }
-    public int calcCostPerStar()
+    public int calcCostPerStar() { return calcCostPerStar(numCasts); }
+    public int calcCostPerStar(int numCasts)
     {
       int cost = baseStarRatio;
       if( numCasts < maxScalingCasts )
