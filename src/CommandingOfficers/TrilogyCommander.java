@@ -46,7 +46,7 @@ public abstract class TrilogyCommander extends Commander
     UnitModifier genericAttack;
     UnitModifier genericDefense;
 
-    TrilogyAbility(int genericAtt, int genericDef, Commander commander, String name, int cost, CostBasis basis)
+    protected TrilogyAbility(int genericAtt, int genericDef, Commander commander, String name, int cost, CostBasis basis)
     {
       super(commander, name, cost, basis);
       genericAttack  = new UnitDamageModifier(genericAtt);

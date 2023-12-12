@@ -54,5 +54,13 @@ public abstract class CommanderInfo implements Serializable
       pageType = type;
       info = textContents;
     }
+    public InfoPage(CommanderAbility ability, String textContents)
+    {
+      this(PageType.BASIC, abilityHeader(ability) + textContents);
+    }
+    public static String abilityHeader(CommanderAbility ability)
+    {
+      return ability+" ("+ability.baseStars+"):\n";
+    }
   }
 }
