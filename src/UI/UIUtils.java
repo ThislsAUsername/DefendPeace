@@ -274,6 +274,14 @@ public class UIUtils
       return spec;
     }
 
+    @Override
+    public String toString()
+    {
+      if( paletteNames.containsKey(color) )
+        return getCanonicalFactionName(this);
+      return color.toString() + " " + faction.name;
+    }
+
     /**
      * Attempts to pull the key color for this canon faction from loaded resources.
      * <p>Falls back to Rose
