@@ -37,6 +37,7 @@ public class CommanderLibrary
     commanderList.add( NotACO.getInfo() );
     commanderList.add( CommandingOfficers.AW2.OS.Andy.getInfo() );
     commanderList.add( CommandingOfficers.AW3.OS.Andy.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.OS.Andy.getInfo() );
   }
 
   public static class NotACO extends Commander

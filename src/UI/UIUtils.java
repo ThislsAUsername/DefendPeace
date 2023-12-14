@@ -335,7 +335,7 @@ public class UIUtils
 
   public enum SourceGames
   {
-    AW1(OS), AW2(BM), AW3(GE), AW4(IDS), DEFEND_PEACE(RT); // More? :v
+    AW1(OS), AW2(BM), AW3(GE), AW4(IDS), AWBW(CO), DEFEND_PEACE(RT); // More? :v
 
     public final COSpriteSpec uiColorSpec;
     SourceGames(COSpriteSpec uiColorSpec)
