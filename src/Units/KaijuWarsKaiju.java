@@ -83,7 +83,7 @@ public class KaijuWarsKaiju
 
   private static final int KAIJU_COST = 0;
   private static final int MOVE_POWER = 2; // Dummy value
-  private static final double STAR_VALUE = 10.0;
+  private static final int STAR_VALUE = 50;
   private static final int MAX_FUEL = 99;
   private static final int IDLE_FUEL_BURN = 0;
   private static final int MAX_AMMO = -1;

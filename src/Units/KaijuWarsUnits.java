@@ -236,7 +236,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     public boolean isKaiju        = false;
 
     public KaijuWarsUnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] WEAPONS, double starValue)
+        int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] WEAPONS, int starValue)
     {
       super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, WEAPONS, starValue);
       fuelBurnPerTile = 0;
@@ -244,7 +244,7 @@ public class KaijuWarsUnits extends UnitModelScheme
       addUnitModifier(new KaijuWarsWeapons.KaijuWarsFightMod());
     }
     public KaijuWarsUnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> WEAPONS, double starValue)
+        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> WEAPONS, int starValue)
     {
       super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, WEAPONS, starValue);
       fuelBurnPerTile = 0;
@@ -289,7 +289,7 @@ public class KaijuWarsUnits extends UnitModelScheme
 
   // These go for all units that aren't experiments
   private static final int UNIT_COST = 3000;
-  private static final double STAR_VALUE = 1.0;
+  private static final int STAR_VALUE = 10;
   private static final int MAX_FUEL = 99;
   private static final int IDLE_FUEL_BURN = 0;
   private static final int MAX_AMMO = -1;

@@ -571,7 +571,7 @@ public class Tech extends Commander
     BattleMech.name = BATTLEMECH_NAME;
     BattleMech.role = BattleMech.role | UnitModel.SURFACE_TO_AIR;
     BattleMech.costBase = mdTank.costBase*2 + (antiAir.costBase/2);
-    BattleMech.abilityPowerValue = 2.0;
+    BattleMech.abilityPowerValue = 20;
     BattleMech.maxFuel = 30;
     BattleMech.maxAmmo = 10;
     BattleMech.visionRange = 2;
