@@ -37,7 +37,7 @@ public abstract class CommanderAbility implements Serializable
       baseStarRatio = chargeRatio;
       starRatioPerCast = chargeRatio / 5; // Default is 20% of base per cast, i.e. 1800 funds
       maxScalingCasts = 10;
-      maxStarRatio = maxScalingCasts * starRatioPerCast;
+      maxStarRatio = chargeRatio + maxScalingCasts * starRatioPerCast;
     }
     public int calcCostPerStar() { return calcCostPerStar(numCasts); }
     public int calcCostPerStar(int numCasts)
