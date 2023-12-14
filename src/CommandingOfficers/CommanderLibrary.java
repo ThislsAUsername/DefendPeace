@@ -2,7 +2,6 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 
-import CommandingOfficers.AW2.OS.*;
 import CommandingOfficers.BrennerWolves.*;
 import Engine.GameScenario;
 import Engine.GameScenario.GameRules;
@@ -36,7 +35,8 @@ public class CommanderLibrary
     commanderList.add( BrennerDoR.getInfo() );
     commanderList.add( DocLight.getInfo() );
     commanderList.add( NotACO.getInfo() );
-    commanderList.add( Andy.getInfo() );
+    commanderList.add( CommandingOfficers.AW2.OS.Andy.getInfo() );
+    commanderList.add( CommandingOfficers.AW3.OS.Andy.getInfo() );
   }
 
   public static class NotACO extends Commander
