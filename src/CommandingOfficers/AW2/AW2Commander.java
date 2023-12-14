@@ -11,6 +11,7 @@ public abstract class AW2Commander extends TrilogyCommander
   private static final long serialVersionUID = 1L;
   public static final InfoPage AW2_MECHANICS_BLURB = new InfoPage(
       "Gain +10 defense on activating a power.\n"
+    + "COP charge gained from combat is funds damage taken and half of funds damage dealt.\n"
     + TRILOGY_MECHANICS_BLURB.info
     );
 

@@ -15,9 +15,8 @@ public abstract class TrilogyCommander extends Commander
   private static final long serialVersionUID = 1L;
   public static final InfoPage TRILOGY_MECHANICS_BLURB = new InfoPage(
       "CO powers never charge while a power is active.\n"
-    + "COP charge gained from combat is funds damage taken and half of funds damage dealt.\n"
     + "On each power activation, each star in your meter costs 1/5 more of the base star cost.\n"
-    + "This continues for 9 activations, at which point the star cost settles at double the base star cost.\n"
+    + "This continues for 9 activations, after which the star cost settles at double the base star cost.\n"
     + "CO power activation deducts the *new* power cost rather than the old one.\n"
     );
 
