@@ -51,7 +51,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public int incomeAdjustment = 0; // Commander subclasses can increase/decrease income if needed.
   private int myAbilityPower = 0;
 
-  private ArrayList<CommanderAbility> myAbilities = null;
+  public ArrayList<CommanderAbility> myAbilities = null;
   private CommanderAbility myActiveAbility = null;
 
   public Commander(CommanderInfo info, GameScenario.GameRules rules)

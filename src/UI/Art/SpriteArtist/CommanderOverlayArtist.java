@@ -156,7 +156,9 @@ public class CommanderOverlayArtist
     if( 0 == abilityPoints.length )
       return SpriteLibrary.createTransparentSprite(1, 1);
 
-    final double pixelsPerPowerUnit = 3.0 / Commander.CHARGERATIO_FUNDS;
+    // Just grab the first ability's star cost since I don't really want to consider what to do under variant star costs.
+    int starCost = co.myAbilities.get(0).costBasis.baseStarRatio;
+    final double pixelsPerPowerUnit = 3.0 / starCost;
     final int animIndex = getAnimIndex();
     int slowAnimIndex = (animIndex/32) % 2;
 
