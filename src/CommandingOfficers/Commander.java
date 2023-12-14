@@ -50,6 +50,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public static final int CHARGERATIO_HP = 100; // Funds value of 10 HP damage dealt, for the purpose of power charge
   public int incomeAdjustment = 0; // Commander subclasses can increase/decrease income if needed.
   private int myAbilityPower = 0;
+  public boolean roundUpRepairs = true; // I blame AWBW
 
   public ArrayList<CommanderAbility> myAbilities = null;
   private CommanderAbility myActiveAbility = null;

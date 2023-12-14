@@ -27,6 +27,13 @@ public abstract class AWBWCommander extends Commander
   public AWBWCommander(CommanderInfo info, GameScenario.GameRules rules)
   {
     super(info, rules);
+    // Sauce: https://docs.google.com/document/d/e/2PACX-1vQUyQIFa3sLfKU3W1ijlXQ7s_453XaJCiLle9JeBAvkbkYGcIXqVsXnlNs9xpHktTIDpEEH8xG9e9W0/pub
+    // Repairing does not round up partial HP. (Note: Joining does round up partial HP)
+    //     Exception: if the heal can overheal, then the chip damage will be healed for free.
+    //     (8.1HP unit on city will heal to 10HP, costing 1HP of repair).
+    //     This only applies to cities/etc. & and not black boats.
+    // ...I'm going to pretend the exception's exception doesn't exist, since it's a niche case and blehhhhhh
+    roundUpRepairs = false;
   }
 
   @Override

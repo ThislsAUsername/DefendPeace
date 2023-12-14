@@ -45,7 +45,7 @@ public class HealUnitEvent implements GameEvent
   {
     if (null == payer)
     {
-      unit.alterHealth(repairPowerHealth, canOverheal);
+      unit.alterHealth(repairPowerHealth, unit.CO.roundUpRepairs, canOverheal);
       return;
     }
 
@@ -58,7 +58,7 @@ public class HealUnitEvent implements GameEvent
       actualRepair = Math.min(repairPowerHealth, affordableHealth);
     }
 
-    int deltaHealth = unit.alterHealth(actualRepair, canOverheal);
+    int deltaHealth = unit.alterHealth(actualRepair, unit.CO.roundUpRepairs, canOverheal);
     payer.money -= deltaHealth * costPerHealth;
   }
 
