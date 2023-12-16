@@ -102,7 +102,7 @@ public class CombatEngine
     if( damage < 0 )
       damage = 0;
     unitStateMap.get(context.attacker).fire(context.attacker.weapon);
-    unitStateMap.get(context.defender).damageHP(damage, isSim);
+    unitStateMap.get(context.defender).damageHealth(damage, isSim);
 
     // New battle instance with defender counter-attacking.
     BattleParams defendInstance = context.getCounterAttack(damage, isSim);
@@ -110,7 +110,7 @@ public class CombatEngine
     {
       int counterDamage = defendInstance.calculateDamage();
       unitStateMap.get(context.defender).fire(context.defender.weapon);
-      unitStateMap.get(context.attacker).damageHP(counterDamage, isSim);
+      unitStateMap.get(context.attacker).damageHealth(counterDamage, isSim);
     }
 
     // Consider throwing in a final hook here for UnitModifiers to change the result post-calculations.

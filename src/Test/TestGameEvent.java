@@ -108,7 +108,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(infA.getCaptureProgress() == 10, "    Infantry capture progress is not 10.");
 
     // Hurt the unit so he won't capture as fast.
-    infA.damageHP(50);
+    infA.damageHealth(50);
     captureEvent.performEvent(testMap);
     testPassed &= validate(infA.getCaptureProgress() == 15, "    Infantry capture progress is not 15.");
 
@@ -271,7 +271,7 @@ public class TestGameEvent extends TestCase
     // Add some units.
     Unit inf = addUnit(testMap, testCo1, UnitModel.TROOP, 2, 2);
     Unit mech = addUnit(testMap, testCo1, UnitModel.MECH, 2, 3);
-    mech.damageHP(50); // Just for some variation.
+    mech.damageHealth(50); // Just for some variation.
 
     // Knock 'em dead.
     new UnitDieEvent(inf).performEvent(testMap);
@@ -376,7 +376,7 @@ public class TestGameEvent extends TestCase
     int funds = testCo1.army.money;
 
     // Hurt the recipient.
-    recipient.damageHP(20);
+    recipient.damageHealth(20);
 
     // Verify health and readiness.
     testPassed &= validate(recipient.getHealth() == 80, "    Recipient has incorrect HP!");

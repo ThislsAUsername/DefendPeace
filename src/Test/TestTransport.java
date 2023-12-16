@@ -146,7 +146,7 @@ public class TestTransport extends TestCase
     Unit cargo2 = addUnit(testMap, testCo1, UnitModel.MECH, 2, 2);
 
     // Make sure the transports are joinable.
-    lander2.damageHP(50);
+    lander2.damageHealth(50);
 
     // Load up the transports.
     cargo1.initTurn(testMap);
@@ -172,7 +172,7 @@ public class TestTransport extends TestCase
 
     // Try to join again. This time it should fail.
     lander1.initTurn(testMap);
-    lander2.damageHP(50);
+    lander2.damageHealth(50);
     performGameAction(new JoinLifecycle.JoinAction(testMap, lander1, Utils.findShortestPath(lander1, 2, 1, testMap)), testGame);
     testPassed &= validate(testMap.getLocation(1, 1).getResident() == lander1, "    Lander1 is not on the map after failed join.");
     testPassed &= validate(lander1.heldUnits.size() == 1, "    Lander1 is not holding a unit after failed join.");
@@ -209,7 +209,7 @@ public class TestTransport extends TestCase
     Unit arty = addUnit(testMap, testCo2, UnitModel.SIEGE | UnitModel.TANK, 1, 3);
 
     // Make sure the lander is killable.
-    lander1.damageHP(80);
+    lander1.damageHealth(80);
 
     // Load up the transport.
     cargo1.initTurn(testMap);

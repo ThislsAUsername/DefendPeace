@@ -227,7 +227,7 @@ public class KaijuActions
         }
 
         crush.events.add(new MassDamageEvent(victim.CO, Arrays.asList(kaijuState.unit), counterPercent, isLethal));
-        kaijuState.damageHP(counterPercent);
+        kaijuState.damageHealth(counterPercent);
         // Counter damage previewed by caller
 
         // If there's enough counter damage to kill us, die

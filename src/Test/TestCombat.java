@@ -60,7 +60,7 @@ public class TestCombat extends TestCase
     mechA.initTurn(testMap); // Make sure he is ready to move.
 
     // Make sure the infantry will die with one attack
-    infB.damageHP(70);
+    infB.damageHealth(70);
 
     // Execute inf- I mean, the action.
     performGameAction(new BattleLifecycle.BattleAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
@@ -92,7 +92,7 @@ public class TestCombat extends TestCase
     testCo2.army.team = 0;
 
     // Make sure the infantry will die with one attack
-    infB.damageHP(70);
+    infB.damageHealth(70);
 
     // Hug the infantry in a friendly manner.
     performGameAction(new BattleLifecycle.BattleAction(testMap, mechA, Utils.findShortestPath(mechA, 1, 1, testMap), 1, 2),
@@ -215,7 +215,7 @@ public class TestCombat extends TestCase
     Unit infB = addUnit(testMap, testCo2, UnitModel.TROOP, 1, 2);
 
     // Make sure the infantry will die with one attack
-    infB.damageHP(70);
+    infB.damageHealth(70);
 
     // Create the attack action so we can predict the unit will die, and his CO will therefore be defeated.
     mechA.initTurn(testMap); // Make sure he is ready to act.

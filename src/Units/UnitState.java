@@ -93,14 +93,14 @@ public abstract class UnitState implements Serializable
   }
   public int getHealth()
   {
-    return roundHP(health);
+    return roundHealth(health);
   }
   public int getHPFactor()
   {
-    return roundHP(health) / 10;
+    return roundHealth(health) / 10;
   }
   /** Rounds the input up to the nearest 10 (accounting for negatives) */
-  public static int roundHP(int health)
+  public static int roundHealth(int health)
   {
     if( health >= 0 )
       //     "round up", then kill the last digit
@@ -115,11 +115,11 @@ public abstract class UnitState implements Serializable
    * <p>Use this for lethal damage, especially unit-on-unit violence. Do not use for healing.
    * @return the change in *rounded* health
    */
-  public int damageHP(int damage)
+  public int damageHealth(int damage)
   {
-    return damageHP(damage, false);
+    return damageHealth(damage, false);
   }
-  public int damageHP(int damage, boolean allowOverkill)
+  public int damageHealth(int damage, boolean allowOverkill)
   {
     if( damage < 0 )
       throw new ArithmeticException("Cannot inflict negative damage!");
@@ -169,10 +169,6 @@ public abstract class UnitState implements Serializable
     return getHealth() - oldHP;
   }
 
-  /**
-   * Increases health by the specified amount, without rounding up.
-   * @return the change in *rounded* health value (may be more or less than the actual change)
-   */
   public int alterHealthNoRound(int percentChange)
   {
     return alterHealth(percentChange, false, false);

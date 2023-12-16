@@ -61,7 +61,7 @@ public class TestHealing extends TestCase
     while (true)
     {
       iteration++;
-      victim.damageHP(25); // Hurt the victim.
+      victim.damageHealth(25); // Hurt the victim.
       prevMoney = testCo1.army.money; // Track money.
       prevHP = victim.getHealth(); // Track HP.
 
@@ -142,13 +142,13 @@ public class TestHealing extends TestCase
       testPassed &= validate(victim.getHealth() == UnitModel.MAXIMUM_HP, "    Unexpected starting HP value.");
       try
       {
-        victim.damageHP(-7);
+        victim.damageHealth(-7);
         testPassed = false;
         System.out.println("    damageHP() accepted a healing value.");
       }
       catch (Exception e) {} // expected case
 
-      testPassed &= validate(victim.damageHP(7) == 0, "    Fractional damage removed a whole HP.");
+      testPassed &= validate(victim.damageHealth(7) == 0, "    Fractional damage removed a whole HP.");
       testPassed &= validate(victim.getHealth() == UnitModel.MAXIMUM_HP, "    Fractional damage removed a whole HP.");
       testPassed &= validate(victim.health < UnitModel.MAXIMUM_HP, "    Fractional damage did nothing.");
 
@@ -156,11 +156,11 @@ public class TestHealing extends TestCase
       testPassed &= validate(victim.getHealth() == 70, "    Map damage did the wrong damage.");
       testPassed &= validate(victim.health < 70, "    Map damage rounded HP up.");
 
-      testPassed &= validate(victim.damageHP(420) == -70, "    Lethal damage did the wrong amount of damage.");
+      testPassed &= validate(victim.damageHealth(420) == -70, "    Lethal damage did the wrong amount of damage.");
       testPassed &= validate(victim.getHealth() == 0, "    Lethal damage didn't kill.");
       testPassed &= validate(victim.health == 0, "    Lethal damage didn't kill.");
 
-      testPassed &= validate(victim.damageHP(10, true) == -10, "    Overkill didn't overkill.");
+      testPassed &= validate(victim.damageHealth(10, true) == -10, "    Overkill didn't overkill.");
       testPassed &= validate(victim.getHealth() == -10, "    Overkill didn't overkill right.");
       testPassed &= validate(victim.health == -10, "    Overkill didn't overkill right.");
 
@@ -168,17 +168,17 @@ public class TestHealing extends TestCase
       testPassed &= validate(victim.getHealth() == UnitModel.MAXIMUM_HP, "    Overhealing allowed when not enabled.");
       testPassed &= validate(victim.health == UnitModel.MAXIMUM_HP, "    Failed overhealing didn't fill up HP.");
 
-      victim.damageHP(7);
+      victim.damageHealth(7);
       testPassed &= validate(victim.alterHealth(42) == 0, "    Overhealing allowed when not enabled.");
       testPassed &= validate(victim.getHealth() == UnitModel.MAXIMUM_HP, "    Overhealing allowed when not enabled.");
       testPassed &= validate(victim.health == UnitModel.MAXIMUM_HP, "    Failed overhealing didn't fill up HP.");
 
-      victim.damageHP(7);
+      victim.damageHealth(7);
       testPassed &= validate(victim.alterHealth(420, true) == 420, "    Overhealing failed when enabled.");
       testPassed &= validate(victim.getHealth() == 520, "    Overhealing failed when enabled.");
       testPassed &= validate(victim.health == 520, "    Overhealing didn't round up?");
 
-      victim.damageHP(7);
+      victim.damageHealth(7);
       testPassed &= validate(victim.alterHealth(42) == 0, "    Failed overhealing vs overhealed target did something.");
       testPassed &= validate(victim.getHealth() == 520, "    Failed overhealing vs overhealed target did something.");
       // I'm not sure if this case is something we specifically want, but I figured I'd document the case.
