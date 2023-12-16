@@ -246,7 +246,7 @@ public class UnitSpriteSet
     if( u.getHealth() != UnitModel.MAXIMUM_HP )
     {
       BufferedImage num;
-      int guiHP = u.getHPFactor();
+      int guiHP = u.getHP();
       if( u.getHealth() > UnitModel.MAXIMUM_HP )
       {
         int tensDigit = Math.min(guiHP / 10, 9);

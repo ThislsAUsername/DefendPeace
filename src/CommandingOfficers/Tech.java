@@ -353,7 +353,7 @@ public class Tech extends Commander
       for( Unit u : myCommander.army.getUnits() )
       {
         XYCoord uxy = new XYCoord(u.x, u.y);                       // Unit location
-        Integer uval = u.getCost() * u.getHPFactor();              // Unit value
+        Integer uval = u.getCost() * u.getHP();                    // Unit value
 
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, uxy, dropRange) )
         {
@@ -365,7 +365,7 @@ public class Tech extends Commander
       // Account for friendly influence of prior drops.
       for( XYCoord pdc : priorDrops )
       {
-        Integer uval = myCommander.getCost(unitModelToDrop) * techMech.getHPFactor();
+        Integer uval = myCommander.getCost(unitModelToDrop) * techMech.getHP();
 
         for( XYCoord xyc : Utils.findLocationsInRange(gameMap, pdc, dropRange) )
         {
@@ -389,7 +389,7 @@ public class Tech extends Commander
           continue; // Ignore enemies that are about to get pasted anyway.
 
         Unit nme = gameMap.getLocation(nmexy).getResident();          // Enemy unit
-        Integer nmeval = nme.getCost() * nme.getHPFactor();           // Enemy value
+        Integer nmeval = nme.getCost() * nme.getHP();                 // Enemy value
 
         for( XYCoord hqCoord : myCommander.army.HQLocations )
           if(nmexy.getDistance(hqCoord) <= nme.getMovePower(gameMap) && nme.hasActionType(UnitActionFactory.CAPTURE))
@@ -427,7 +427,7 @@ public class Tech extends Commander
             Unit t = gameMap.getLocation(targetxy).getResident();
             if( null == t ) continue; // We don't give a bonus for proximity to destructible terrain.
 
-            int tval = t.getCost() * t.getHPFactor();
+            int tval = t.getCost() * t.getHP();
             if( bestAttackVal < tval ) bestAttackVal = tval;
             if( log ) System.out.println(String.format("Could add %d to %s for %s", tval, nmexy, t.toStringWithLocation()));
           }

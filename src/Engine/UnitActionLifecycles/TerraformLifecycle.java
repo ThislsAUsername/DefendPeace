@@ -111,7 +111,7 @@ public abstract class TerraformLifecycle
       unit = u;
       XYCoord unitXY = new XYCoord(u.x, u.y);
       priorTerraformAmount = (unitXY.equals(loc) ? unit.getCaptureProgress() : 0);
-      terraformProgress = unit.getHPFactor(); // TODO: Apply CO buffs.
+      terraformProgress = unit.getHP(); // TODO: Apply CO buffs.
     }
 
     @Override

@@ -95,7 +95,7 @@ public abstract class UnitState implements Serializable
   {
     return roundHealth(health);
   }
-  public int getHPFactor()
+  public int getHP()
   {
     return roundHealth(health) / 10;
   }
@@ -184,7 +184,7 @@ public abstract class UnitState implements Serializable
       captureTarget = target;
       captureProgress = 0;
     }
-    captureProgress += getHPFactor();
+    captureProgress += getHP();
     if( captureProgress >= target.getEnvironment().terrainType.getCaptureThreshold() )
     {
       target.setOwner(CO);

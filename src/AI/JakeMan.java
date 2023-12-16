@@ -672,7 +672,7 @@ public class JakeMan extends ModularAI
             if( isThreatenedBy(unit.model, defender.model) )
               damage *= FIRSTSTRIKE_ON_THREAT_WEIGHT;
             // Value damage to hurt units less
-            damage *= defender.getHPFactor();
+            damage *= defender.getHP();
             damage /= 10;
 
             return (double)(damage - loss);
@@ -731,7 +731,7 @@ public class JakeMan extends ModularAI
           if( unitMapFriendly.get(counter).containsKey(coord) )
             counterPower = unitMapFriendly.get(counter).get(coord);
           if( counterIsMeAndIAmPeaceful )
-            counterPower -= (PEACEFUL_SELF_THREAT_RATIO * unit.getHPFactor()) / 10;
+            counterPower -= (PEACEFUL_SELF_THREAT_RATIO * unit.getHP()) / 10;
           counterPowerTotal += Math.max(0, counterPower);
         }
         final double counterPowerAverage = counterPowerTotal / counterCoords.size();
