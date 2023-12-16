@@ -189,7 +189,7 @@ public class TestTransport extends TestCase
     private static final long serialVersionUID = 1L;
     public int count = 0;
     @Override
-    public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+    public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer healthBeforeDeath)
     {
       count++;
       return null;

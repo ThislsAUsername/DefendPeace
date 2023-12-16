@@ -233,7 +233,7 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
    * Track unit deaths, so I know not to be threatened by them.
    */
   @Override
-  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer healthBeforeDeath)
   {
     threatsToOverlay.remove(victim);
     return null;

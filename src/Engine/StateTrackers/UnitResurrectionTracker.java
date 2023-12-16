@@ -19,7 +19,7 @@ public class UnitResurrectionTracker extends StateTracker
   public HashMap<UnitModel, UnitModel> resurrectionTypeMap = new HashMap<>();
 
   @Override
-  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer healthBeforeDeath)
   {
     if(!resurrectionTypeMap.containsKey(victim.model))
       return null;

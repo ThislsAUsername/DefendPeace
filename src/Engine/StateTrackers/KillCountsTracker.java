@@ -48,7 +48,7 @@ public class KillCountsTracker extends StateTracker
     return null;
   }
   @Override
-  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer healthBeforeDeath)
   {
     killCounts.resetCountFor(this.game, victim);
 

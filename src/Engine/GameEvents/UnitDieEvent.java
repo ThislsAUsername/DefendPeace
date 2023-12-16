@@ -10,7 +10,7 @@ public class UnitDieEvent implements GameEvent
 {
   private Unit unit;
   private XYCoord where;
-  private Integer hpBeforeDeath;
+  private Integer healthBeforeDeath;
 
   public UnitDieEvent(Unit unit)
   {
@@ -20,7 +20,7 @@ public class UnitDieEvent implements GameEvent
   {
     this.unit = unit;
     this.where = where;
-    this.hpBeforeDeath = unit.getHealth();
+    this.healthBeforeDeath = unit.getHealth();
   }
 
   @Override
@@ -32,7 +32,7 @@ public class UnitDieEvent implements GameEvent
   @Override
   public GameEventQueue sendToListener(GameEventListener listener)
   {
-    return listener.receiveUnitDieEvent( unit, where, hpBeforeDeath );
+    return listener.receiveUnitDieEvent( unit, where, healthBeforeDeath );
   }
 
   @Override

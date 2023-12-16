@@ -618,7 +618,7 @@ public class KaijuWarsKaiju
     // Resurrect Hell Turkey as an egg
     private static final int FUDGE_RADIUS = 2;
     @Override
-    public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+    public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer healthBeforeDeath)
     {
       // Stop tracking dead kaiju
       if( victim.model instanceof KaijuUnitModel )

@@ -84,7 +84,7 @@ public interface GameEventListener extends Serializable
   default public GameEventQueue receiveTurnEndEvent(Army co, int turn){ return null; };
   default public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){ return null; };
   default public GameEventQueue receiveResupplyEvent(ResupplyEvent event){ return null; };
-  default public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath){ return null; };
+  default public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer healthBeforeDeath){ return null; };
   default public GameEventQueue receiveUnloadEvent(UnloadLifecycle.UnloadEvent event){ return null; };
   default public GameEventQueue receiveUnitTransformEvent(Unit unit, UnitModel oldType){ return null; };
   default public GameEventQueue receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){ return null; };
@@ -116,7 +116,7 @@ public interface GameEventListener extends Serializable
     default public GameEventQueue receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){InvalidateCache(); return null; };
     default public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){InvalidateCache(); return null; };
     default public GameEventQueue receiveResupplyEvent(ResupplyEvent event){InvalidateCache(); return null; };
-    default public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath){InvalidateCache(); return null; };
+    default public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer healthBeforeDeath){InvalidateCache(); return null; };
     default public GameEventQueue receiveUnloadEvent(UnloadLifecycle.UnloadEvent event){InvalidateCache(); return null; };
     default public GameEventQueue receiveUnitTransformEvent(Unit unit, UnitModel oldType){InvalidateCache(); return null; };
     default public GameEventQueue receiveTerrainChangeEvent(ArrayList<EnvironmentAssignment> terrainChanges){InvalidateCache(); return null; };
