@@ -1552,20 +1552,20 @@ public class WallyAI extends ModularAI
   }
 
   /**
-   * @return The maximum expected HP loss
+   * @return The maximum expected health loss
    */
-  private double hpThreatAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
+  private int hpThreatAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
   {
     return hpThreatAt(gameMap, threatMap, new ModelForCO(unit), xyc, target);
   }
-  private double hpThreatAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, ModelForCO type, XYCoord xyc, Unit target)
+  private int hpThreatAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, ModelForCO type, XYCoord xyc, Unit target)
   {
     UnitContext myUnit = new UnitContext(type.co, type.um);
     myUnit.coord = xyc;
     myUnit.unit = new Unit(type.co, type.um); // Make stuff up so combat modifiers don't explode?
     myUnit.unit.x = xyc.x;
     myUnit.unit.y = xyc.y;
-    double threat = 0;
+    int threat = 0;
     ArrayList<TileThreat> tileThreats = threatMap[xyc.x][xyc.y];
     for( TileThreat tt : tileThreats )
     {
@@ -1594,7 +1594,7 @@ public class WallyAI extends ModularAI
         threatContext.setWeapon(wep);
 
         BattleSummary results = CombatEngine.simulateBattleResults(threatContext, myUnit, gameMap, CalcType.OPTIMISTIC);
-        double hpdamage = results.defender.getPreciseHealthDamage();
+        int hpdamage = results.defender.getPreciseHealthDamage();
 
         threat = Math.max(threat, hpdamage);
       }
@@ -1734,8 +1734,8 @@ public class WallyAI extends ModularAI
       {
         final ModelForCO mfc = new ModelForCO(loc.getOwner(), model);
 
-        double hpThreat = hpThreatAt(gameMap, threatMap, mfc, loc.getCoordinates(), null);
-        if( threatThreshold < hpThreat * 10 )
+        int hpThreat = hpThreatAt(gameMap, threatMap, mfc, loc.getCoordinates(), null);
+        if( threatThreshold < hpThreat )
           continue;
         // If we can get to a target...
         if( 0 < findCombatUnitDestinations(predMap, allThreats, loc.getCoordinates(), mfc)
