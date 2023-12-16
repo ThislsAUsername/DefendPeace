@@ -7,6 +7,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.*;
 import Engine.GamePath.PathNode;
+import Engine.Utils.SearchNode;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.Combat.CombatContext.CalcType;
@@ -149,6 +150,7 @@ public class WallyAI extends ModularAI
   {
     UnitContext identity;
     ArrayList<WeaponModel> relevantWeapons = new ArrayList<>();
+    ArrayList<Utils.SearchNode> hitFrom = new ArrayList<>();
   }
   /**
    * For each X/Y coordinate, stores the enemies that can threaten this tile and what weapon(s) they can do it with
@@ -828,45 +830,46 @@ public class WallyAI extends ModularAI
     PathCalcParams pcp = new PathCalcParams(threat, gameMap);
     pcp.includeOccupiedSpaces = true;
     pcp.canTravelThroughEnemies = ignoreFriendlyBlockers;
+    pcp.findAllValidParents = true;
+    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths(); // Calculate eagerly since arty are rare, and tanks have two weapons
+    // Throw in a check for all-immobile weapons here to remove the allpaths call??
 
-    for( WeaponModel wep : threat.model.weapons )
+    for( Utils.SearchNode dest : destinations )
     {
-      if( !wep.loaded(threat) )
-        continue; // Ignore it if it can't shoot
+      for( WeaponModel wep : threat.model.weapons )
+      {
+        if( !wep.loaded(threat) )
+          continue; // Ignore it if it can't shoot
+        if( !wep.canFireAfterMoving && !threat.coord.equals(dest) )
+          continue; // Ignore it if it can't shoot
 
-      threat.setWeapon(wep);
-      HashSet<XYCoord> wepTiles = new HashSet<>();
-      if( !wep.canFireAfterMoving )
-      {
-        wepTiles.addAll(Utils.findLocationsInRange(gameMap, threat.coord, threat));
-      }
-      else
-      {
-        ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
-        for( Utils.SearchNode dest : destinations )
+        UnitContext rangeContext = new UnitContext(threat);
+        rangeContext.setPath(dest.getMyPath());
+        rangeContext.setWeapon(wep);
+
+        ArrayList<XYCoord> hittableTiles = Utils.findLocationsInRange(gameMap, dest, rangeContext);
+        // We have our threatened tiles, now copy them to our cache
+        for( XYCoord xyc : hittableTiles )
         {
-          UnitContext rangeContext = new UnitContext(threat);
-          rangeContext.setPath(dest.getMyPath());
-          wepTiles.addAll(Utils.findLocationsInRange(gameMap, dest, rangeContext));
+          final TileThreat tt;
+          if( shootableTiles.containsKey(xyc) )
+            tt = shootableTiles.get(xyc);
+          else
+          {
+            tt = new TileThreat();
+            tt.identity = threat;
+            shootableTiles.put(xyc, tt);
+          }
+          if( !tt.relevantWeapons.contains(wep) )
+            tt.relevantWeapons.add(wep);
+          tt.hitFrom.add(dest);
         }
       }
-      // We have our threatened tiles, now copy them to our cache
-      for( XYCoord xyc : wepTiles )
-      {
-        final TileThreat tt;
-        if( shootableTiles.containsKey(xyc) )
-          tt = shootableTiles.get(xyc);
-        else
-        {
-          tt = new TileThreat();
-          tt.identity = threat;
-          shootableTiles.put(xyc, tt);
-        }
-        tt.relevantWeapons.add(wep);
-      }
-      for( XYCoord xyc : shootableTiles.keySet() )
-        threatMap[xyc.x][xyc.y].add(shootableTiles.get(xyc));
     }
+
+    // Copy our cache into the real threat map
+    for( XYCoord xyc : shootableTiles.keySet() )
+      threatMap[xyc.x][xyc.y].add(shootableTiles.get(xyc));
   } // ~populateTileThreats
 
   // Try to get unit value by capture or attack
@@ -1572,6 +1575,10 @@ public class WallyAI extends ModularAI
       if( target == threatContext.unit )
         continue; // We aren't scared of that which we're about to shoot
 
+      boolean viablePaths = canReachHitFromZone(predMap, tt);
+      if( !viablePaths )
+        continue; // He can't hit us if he's blocked
+
       // Collect planned damage so far
       int damagePercent = 0;
       final HashMap<ActionPlan, Integer> damageInstances = mapPlan[threatContext.coord.x][threatContext.coord.y].damageInstances;
@@ -1595,6 +1602,31 @@ public class WallyAI extends ModularAI
     }
 
     return threat;
+  }
+
+  private static boolean canReachHitFromZone(PredictionMap predMap, TileThreat tt)
+  {
+    ArrayList<SearchNode> tileCache = new ArrayList<>(tt.hitFrom);
+    HashSet<SearchNode> tilesVisited = new HashSet<>(tt.hitFrom); // We hate infinite loops
+    while (!tileCache.isEmpty())
+    {
+      SearchNode node = tileCache.remove(tileCache.size() - 1); // Remove at the tail for a DFS/less moving elements?
+
+      Unit resident = predMap.getResident(node);
+      if( null != resident && tt.identity.CO.isEnemy(resident.CO) )
+        continue; // Threat is blocked on this path
+
+      if( null == node.parent )
+        return true;
+      else
+        for( SearchNode parent : node.allParents )
+          if( !tilesVisited.contains(parent) )
+          {
+            tileCache.add(parent);
+            tilesVisited.add(parent);
+          }
+    }
+    return false;
   }
 
   /**
