@@ -132,7 +132,7 @@ public abstract class UnitState implements Serializable
 
   /**
    * Increases health by the specified amount.
-   * <p>Enforces a minimum of 1, and a maximum (optional) of MAXIMUM_HP.
+   * <p>Enforces a minimum of 1, and a maximum (optional) of MAXIMUM_HEALTH.
    * <p>When healing, rounds up (optional) to the next 10 (e.g. 25 + 20 = 45 -> 50)
    * <p>Use this for most non-combat HP changes (mass damage/silos/healing).
    * @return the change in *rounded* health value (may be more or less than the actual change)
@@ -147,18 +147,18 @@ public abstract class UnitState implements Serializable
   }
   public int alterHealth(int change, boolean roundUp, boolean allowOver)
   {
-    final int oldHP = getHealth();
+    final int oldHealth = getHealth();
     int realChange = change;
 
     // Only enforce the maximum HP if we're healing
     if( !allowOver && change > 0 )
     {
       // If we already have overhealing, treat current HP as the max to avoid e.g. heals reducing HP
-      final int capHP = Math.max(oldHP, UnitModel.MAXIMUM_HEALTH);
+      final int capHealth = Math.max(oldHealth, UnitModel.MAXIMUM_HEALTH);
       // Apply the cap as needed
-      final int newHP = Math.min(capHP, oldHP + change);
+      final int newHealth = Math.min(capHealth, oldHealth + change);
       // Figure out whether that reduces our healing
-      realChange = Math.min(change, newHP - health);
+      realChange = Math.min(change, newHealth - health);
     }
 
     health = Math.max(1, health + realChange);
@@ -166,7 +166,7 @@ public abstract class UnitState implements Serializable
     if( roundUp && change >= 0 )
       health = getHealth();
 
-    return getHealth() - oldHP;
+    return getHealth() - oldHealth;
   }
 
   public int alterHealthNoRound(int percentChange)
