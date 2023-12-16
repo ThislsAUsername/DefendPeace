@@ -124,7 +124,7 @@ public class UnitContext extends UnitState
   }
   public void initModel()
   {
-    maxHP = UnitModel.MAXIMUM_HP;
+    maxHP = UnitModel.MAXIMUM_HEALTH;
     attackPower = UnitModel.DEFAULT_STAT_RATIO;
     defensePower = UnitModel.DEFAULT_STAT_RATIO;
     movePower = model.baseMovePower;

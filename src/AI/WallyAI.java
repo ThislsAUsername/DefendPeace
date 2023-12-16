@@ -1049,7 +1049,7 @@ public class WallyAI extends ModularAI
       // there is not reason to consider it again on the next iteration.
       UnitModel enemyToCounter = enemyModels.poll().getKey();
       double enemyNumber = enemyUnitCounts.get(enemyToCounter);
-      log(String.format("Need a counter for %sx%s", enemyToCounter, enemyNumber / enemyToCounter.costBase / UnitModel.MAXIMUM_HP));
+      log(String.format("Need a counter for %sx%s", enemyToCounter, enemyNumber / enemyToCounter.costBase / UnitModel.MAXIMUM_HEALTH));
       log(String.format("Remaining budget: %s", budget));
 
       // Get our possible options for countermeasures.

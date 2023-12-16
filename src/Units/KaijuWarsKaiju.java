@@ -589,7 +589,7 @@ public class KaijuWarsKaiju
       KaijuUnitModel kaijuType = (KaijuUnitModel) unit.model;
       int hp = kaijuType.hpBases[tier.ordinal()];
       hp += turn;
-      int heal = hp - UnitModel.MAXIMUM_HP;
+      int heal = hp - UnitModel.MAXIMUM_HEALTH;
 
       GameEventQueue events = new GameEventQueue();
       events.add(new HealUnitEvent(unit, heal, null, true));

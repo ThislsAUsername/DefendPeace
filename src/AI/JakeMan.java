@@ -216,7 +216,7 @@ public class JakeMan extends ModularAI
           if( !mapToFill.containsKey(um) )
             mapToFill.put(um, new HashMap<>());
           Map<XYCoord, Double> threatArea = mapToFill.get(um);
-          double newValue = (double)(threat.getHealth()) / UnitModel.MAXIMUM_HP;
+          double newValue = (double)(threat.getHealth()) / UnitModel.MAXIMUM_HEALTH;
           // Square unit fraction so low-HP units aren't valued so much
           newValue *= newValue;
           for( XYCoord coord : AICombatUtils.findThreatPower(gameMap, threat, null).keySet() )
@@ -662,7 +662,7 @@ public class JakeMan extends ModularAI
 
             // Convert to abstract value
             int extraLoss = 0;
-            if( loss >= 1 && unit.getHealth() == UnitModel.MAXIMUM_HP )
+            if( loss >= 1 && unit.getHealth() == UnitModel.MAXIMUM_HEALTH )
               extraLoss += STAY_UNHURT_BIAS;
             if( loss >= unit.getHealth() )
               extraLoss += STAY_ALIVE_BIAS;

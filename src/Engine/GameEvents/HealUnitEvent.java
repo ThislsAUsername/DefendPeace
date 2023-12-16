@@ -47,7 +47,7 @@ public class HealUnitEvent implements GameEvent
       unit.alterHealth(repairPowerHP, canOverheal);
     else if( unit.isHurt() )
     {
-      int costPerHP = (int) (unit.getRepairCost() / UnitModel.MAXIMUM_HP);
+      int costPerHP = (int) (unit.getRepairCost() / UnitModel.MAXIMUM_HEALTH);
 
       int actualRepair = repairPowerHP;
       if( costPerHP > 0 )

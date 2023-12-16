@@ -43,7 +43,7 @@ public abstract class UnitState implements Serializable
     fuel = model.maxFuel;
     materials = model.maxMaterials;
     isTurnOver = true;
-    health = UnitModel.MAXIMUM_HP;
+    health = UnitModel.MAXIMUM_HEALTH;
     captureProgress = 0;
     captureTarget = null;
 
@@ -89,7 +89,7 @@ public abstract class UnitState implements Serializable
 
   public boolean isHurt()
   {
-    return getHealth() < UnitModel.MAXIMUM_HP;
+    return getHealth() < UnitModel.MAXIMUM_HEALTH;
   }
   public int getHealth()
   {
@@ -154,7 +154,7 @@ public abstract class UnitState implements Serializable
     if( !allowOver && change > 0 )
     {
       // If we already have overhealing, treat current HP as the max to avoid e.g. heals reducing HP
-      final int capHP = Math.max(oldHP, UnitModel.MAXIMUM_HP);
+      final int capHP = Math.max(oldHP, UnitModel.MAXIMUM_HEALTH);
       // Apply the cap as needed
       final int newHP = Math.min(capHP, oldHP + change);
       // Figure out whether that reduces our healing

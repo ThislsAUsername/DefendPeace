@@ -80,7 +80,7 @@ public class AICombatUtils
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
     for( WeaponModel wep : unit.model.weapons )
     {
-      int damage = (null == target)? 1 : wep.getDamage(target) * unit.getHealth() / UnitModel.MAXIMUM_HP;
+      int damage = (null == target)? 1 : wep.getDamage(target) * unit.getHealth() / UnitModel.MAXIMUM_HEALTH;
       if( null == target || unit.canTarget(target) )
       {
         if( !wep.canFireAfterMoving )

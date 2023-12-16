@@ -60,7 +60,7 @@ public class DamageDealtToIncomeConverter extends StateTracker
     int hpLoss = delta.getHPDamage();
     int unitCost = delta.unit.getCost();
     // Do the necessary math, then round to the nearest int.
-    int income = (int) (hpLoss * (unitCost / UnitModel.MAXIMUM_HP) * myIncomeRatio + 0.5);
+    int income = (int) (hpLoss * (unitCost / UnitModel.MAXIMUM_HEALTH) * myIncomeRatio + 0.5);
     return income;
   }
 }

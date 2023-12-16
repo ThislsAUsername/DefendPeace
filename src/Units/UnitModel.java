@@ -66,7 +66,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public static final int DEFAULT_STAT_RATIO = 100; // Accounts for firepower, defense, and cost
 
   // Dynamic modifications to any property below this line will require new additions to UnitContext and UnitModifier
-  public static final int MAXIMUM_HP = 100;
+  public static final int MAXIMUM_HEALTH = 100;
   public String name;
   public long role;
   public double abilityPowerValue;

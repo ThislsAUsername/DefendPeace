@@ -183,7 +183,7 @@ public abstract class JoinLifecycle
       {
         // Crunch the numbers we need up front.
         int donorHP = unitDonor.getHealth();
-        int neededHP = UnitModel.MAXIMUM_HP - unitRecipient.getHealth();
+        int neededHP = UnitModel.MAXIMUM_HEALTH - unitRecipient.getHealth();
         int extraHP = donorHP - neededHP;
         if( extraHP < 0 )
           extraHP = 0;
@@ -195,7 +195,7 @@ public abstract class JoinLifecycle
         unitRecipient.materials = Math.min(unitRecipient.model.maxMaterials, unitRecipient.materials + unitDonor.materials);
 
         // If we had extra HP, add that as income.
-        int costPerHP = unitDonor.getCost() / UnitModel.MAXIMUM_HP; // This truncation is cart-accurate to DS; even with discount skills, the "real" price of a unit never has tens/ones
+        int costPerHP = unitDonor.getCost() / UnitModel.MAXIMUM_HEALTH; // This truncation is cart-accurate to DS; even with discount skills, the "real" price of a unit never has tens/ones
         unitDonor.CO.army.money += (extraHP * costPerHP);
 
         // Reconcile cargo units.

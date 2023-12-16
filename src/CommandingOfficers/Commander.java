@@ -321,7 +321,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
 
     int power = 0; // value in funds of the charge we're getting
 
-    power += (lostHP * getCost(minion.model)) / UnitModel.MAXIMUM_HP;
+    power += (lostHP * getCost(minion.model)) / UnitModel.MAXIMUM_HEALTH;
 
     return power;
   }

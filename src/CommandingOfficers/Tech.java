@@ -179,8 +179,8 @@ public class Tech extends Commander
         if( typesToOverCharge.contains(u.model) )
         {
           // Track units that aren't already overhealed
-          if( u.getHealth() <= UnitModel.MAXIMUM_HP
-              && u.getHealth() + healAmount > UnitModel.MAXIMUM_HP )
+          if( u.getHealth() <= UnitModel.MAXIMUM_HEALTH
+              && u.getHealth() + healAmount > UnitModel.MAXIMUM_HEALTH )
             overCharged.add(u);
           u.alterHealth(healAmount, true);
         }
@@ -194,7 +194,7 @@ public class Tech extends Commander
       if( unitsOverCharged.containsKey(myCommander) )
       {
         // End Overcharge. Any units who still have > MAXIMUM_HP get reset to max.
-        final int maxPercent = UnitModel.MAXIMUM_HP;
+        final int maxPercent = UnitModel.MAXIMUM_HEALTH;
         for( Unit u : unitsOverCharged.get(myCommander) )
         {
           final int preciseHP = u.health;
