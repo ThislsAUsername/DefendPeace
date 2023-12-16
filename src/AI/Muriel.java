@@ -91,6 +91,13 @@ public class Muriel implements AIController
   private final double COST_EFFECTIVENESS_HIGH = 1.25;
   private final double INFANTRY_PROPORTION = 0.5;
 
+  private class UnitHealthThresholds
+  {
+    static final int HEALTHY = 80;
+    static final int ACTION_READY = 70;
+    static final int MIN_USABLE_HEALTH = 60;
+  }
+
   private ArrayList<XYCoord> nonAlliedProperties; // set from AIUtils.
 
   public Muriel(Army co)
@@ -351,7 +358,7 @@ public class Muriel implements AIController
     //////////////////////////////////////////////////////////////////
     // If we are currently healing, stick around, unless that would stem the tide of reinforcements.
     MapLocation loc = gameMap.getLocation(unit.x, unit.y);
-    if( (unit.getHealth() <= 80) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) && (loc.getOwner() == unit.CO) )
+    if( (unit.getHealth() <= UnitHealthThresholds.HEALTHY) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) && (loc.getOwner() == unit.CO) )
     {
       log(String.format("%s is damaged and on a repair tile. Will continue to repair for now.", unit.toStringWithLocation()));
       ArrayList<GameActionSet> actionSet = unit.getPossibleActions(gameMap, GamePath.stayPut(unit));
@@ -388,7 +395,7 @@ public class Muriel implements AIController
       shouldResupply = true;
     }
     // If we are low on HP, go heal.
-    if( unit.getHealth() < 6 ) // Arbitrary threshold
+    if( unit.getHealth() < UnitHealthThresholds.MIN_USABLE_HEALTH ) // Arbitrary threshold
     {
       log(String.format("%s is damaged (%s health).", unit.toStringWithLocation(), unit.getHealth()));
       shouldResupply = true;
@@ -495,7 +502,7 @@ public class Muriel implements AIController
 
     //////////////////////////////////////////////////////////////////
     // See if there's something to capture (but only if we are moderately healthy).
-    if( unit.getHealth() > 7 )
+    if( unit.getHealth() >= UnitHealthThresholds.ACTION_READY )
     {
       ArrayList<GameAction> captureActions = unitActionsByType.get(UnitActionFactory.CAPTURE);
       if( null != captureActions && !captureActions.isEmpty() )
@@ -550,7 +557,7 @@ public class Muriel implements AIController
     //////////////////////////////////////////////////////////////////
     // We didn't find an immediate ATTACK or CAPTURE action we can do.
     // Things that can capture; go find something to capture, if you are moderately healthy.
-    if( unit.hasActionType(UnitActionFactory.CAPTURE) && (unit.getHealth() >= 7) )
+    if( unit.hasActionType(UnitActionFactory.CAPTURE) && (unit.getHealth() >= UnitHealthThresholds.ACTION_READY) )
     {
       log(String.format("Seeking capture target for %s", unit.toStringWithLocation()));
       XYCoord unitCoords = new XYCoord(unit.x, unit.y);
