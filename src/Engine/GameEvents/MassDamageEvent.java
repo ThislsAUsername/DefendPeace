@@ -19,7 +19,7 @@ import Units.Unit;
 public class MassDamageEvent implements GameEvent
 {
   private final Commander attacker;
-  // Records how many HP each victim lost; doubles as our victim storage area
+  // Records how much health each victim lost; doubles as our victim storage area
   private Map<Unit, Integer> victims = new HashMap<Unit, Integer>();
   public final int damage;
   public final boolean lethal;
