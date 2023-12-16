@@ -36,8 +36,9 @@ public class WallyAI extends ModularAI
             new FreeRealEstate(army, this, false, false), // prioritize non-eviction
             new FreeRealEstate(army, this, true,  false), // evict if necessary
             new BuildStuff(army, this),
-            new Travel(army, this),
+            new Travel(army, this, false),
             new SiegeTravel(army, this),
+            new Travel(army, this, true),
             new FreeRealEstate(army, this, true,  true), // step on industries we're not using
             new Eviction(army, this, false), // Getting dudes out of the way
 
@@ -1028,10 +1029,11 @@ public class WallyAI extends ModularAI
         evictionValue = valueAction(ai, gameMap, evicterPlan);
       boolean avoidProduction = false;
       boolean shouldWander = false;
+      boolean canEvictSiege = true;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
                                           this, gameMap, ai.threatMap,
                                           unit, avoidProduction, shouldWander,
-                                          evictionValue, EVICTION_DEPTH);
+                                          canEvictSiege, evictionValue, EVICTION_DEPTH);
 
       if( null == travelPlans )
         return null;
@@ -1046,9 +1048,11 @@ public class WallyAI extends ModularAI
   public static class Travel extends UnitActionFinder<WallyAI>
   {
     private static final long serialVersionUID = 1L;
-    public Travel(Army co, WallyAI ai)
+    boolean canEvictSiege;
+    public Travel(Army co, WallyAI ai, boolean canEvictSiege)
     {
       super(co, ai);
+      this.canEvictSiege = canEvictSiege;
     }
 
     @Override
@@ -1071,7 +1075,7 @@ public class WallyAI extends ModularAI
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
                                           this, gameMap, ai.threatMap,
                                           unit, avoidProduction, shouldWander,
-                                          evictionValue, EVICTION_DEPTH);
+                                          canEvictSiege, evictionValue, EVICTION_DEPTH);
 
       if( null == travelPlans )
         return null;
@@ -1113,10 +1117,11 @@ public class WallyAI extends ModularAI
         evictionValue = valueAction(ai, gameMap, evicterPlan);
       boolean avoidProduction = false;
       boolean shouldWander = false;
+      boolean canEvictSiege = true;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
                                           this, gameMap, ai.threatMap,
                                           unit, avoidProduction, shouldWander,
-                                          evictionValue, EVICTION_DEPTH);
+                                          canEvictSiege, evictionValue, EVICTION_DEPTH);
 
       if( null == travelPlans )
         return null;
@@ -1319,7 +1324,7 @@ public class WallyAI extends ModularAI
                         AIModule whodunit, GameMap gameMap,
                         ArrayList<TileThreat>[][] threatMap, Unit unit,
                         boolean avoidProduction, boolean shouldWander,
-                        int evictionValue, int recurseDepth)
+                        boolean canEvictSiege, int evictionValue, int recurseDepth)
   {
     if( evictionStack.contains(unit) )
       return null;
@@ -1412,6 +1417,8 @@ public class WallyAI extends ModularAI
           continue;
         boolean residentIsEvictable = !currentResident.isTurnOver && currentResident.CO.army == myArmy;
 
+        if( !canEvictSiege && currentResident.model.hasImmobileWeapon() )
+          continue;
         if( !residentIsEvictable || recurseDepth <= 0 )
           continue;
       } // ~if resident
@@ -1535,7 +1542,7 @@ public class WallyAI extends ModularAI
         ArrayList<ActionPlan> evictionPlans = planTravelActions(
                                               whodunit, gameMap, threatMap,
                                               currentResident, avoidProduction, true, // Always enable wandering
-                                              planEvictionValue, recurseDepth - 1);
+                                              canEvictSiege, planEvictionValue, recurseDepth - 1);
         evictionStack.remove(unit);
         if( null == evictionPlans )
           continue;
