@@ -49,7 +49,7 @@ public class Venge extends Commander
           "Only affects units that have not yet acted.\n" +
           "Grants +"+IronWill.IRONWILL_BOOST+" offense and defense\n" +
           "Your units resist damage and counterattack as if at full HP.\n" +
-          "When the power ends, your units lose "+IronWill.IRONWILL_WOUND+" HP (nonlethal)\n"));
+          "When the power ends, your units lose "+IronWill.IRONWILL_WOUND+" health (nonlethal)\n"));
       infoPages.add(new InfoPage(
           Retribution.NAME+" ("+Retribution.COST+"):\n" +
           "Gives an attack boost of +"+Retribution.RETRIBUTION_BUFF+"%\n" +

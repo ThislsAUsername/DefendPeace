@@ -139,12 +139,12 @@ public class KaijuActions
         } // ~node loop
 
         // If we took any damage, throw the total up on our own head
-        final int finalHP = kaijuState.health;
-        final int startHP = actor.health;
-        if( finalHP != startHP )
+        final int finalHealth = kaijuState.health;
+        final int startHealth = actor.health;
+        if( finalHealth != startHealth )
         {
-          String sign = "" + (finalHP - startHP);
-          if( finalHP == 0 )
+          String sign = "" + (finalHealth - startHealth);
+          if( finalHealth == 0 )
             sign = "LETHAL";
           crush.popups.add(new DamagePopup(new XYCoord(actor), actor.CO.myColor, sign));
         }

@@ -97,7 +97,7 @@ public class KaijuWarsKaiju
   public static class KaijuUnitModel extends KaijuWarsUnitModel
   {
     private static final long serialVersionUID = 1L;
-    public final int[] hpChunks, hpBases;
+    public final int[] healthChunks, healthBases;
     public boolean regenOnBuildingKill  = false;
     public boolean chargeOnBuildingKill = false;
     public boolean hasRamSkill          = false;
@@ -105,21 +105,21 @@ public class KaijuWarsKaiju
     // Used by Big Donk and Duggemundr to get a new type on spawn
     public UnitModel promotesToAtAllSkills = null;
 
-    public KaijuUnitModel(String pName, long pRole, int[] pHPchunks, int[] pHPbases)
+    public KaijuUnitModel(String pName, long pRole, int[] pHealthChunks, int[] pHealthBases)
     {
       super(pName, pRole, KAIJU_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, KAIJU_MOVE, KAIJU_ACTIONS, new WeaponModel[0], STAR_VALUE);
 
       resistsKaiju = true;
       isKaiju      = true;
-      hpChunks     = pHPchunks;
-      hpBases      = pHPbases;
+      healthChunks = pHealthChunks;
+      healthBases  = pHealthBases;
     }
 
     @Override
     public UnitModel clone()
     {
       // Create a new model with the given attributes.
-      KaijuUnitModel newModel = new KaijuUnitModel(name, role, hpChunks, hpBases);
+      KaijuUnitModel newModel = new KaijuUnitModel(name, role, healthChunks, healthBases);
 
       newModel.copyValues(this);
       return newModel;
@@ -135,7 +135,7 @@ public class KaijuWarsKaiju
   }
 
   public static final int BIRD_LAND_HEALTH = 100; // Should match the first chunk below
-  // These are the chunks of HP each Kaiju has in each tier of movement (they get slower as they take damage)
+  // These are the chunks of health each Kaiju has in each tier of movement (they get slower as they take damage)
   // Index = move points
   public static final int[] ALPHA_CHUNKS = { 0, 0, 120, 180,  80,  70,  60 };
   public static final int[] BIRD_CHUNKS  = { 0, 0, 100, 100,  80,  40,  40 };
@@ -143,14 +143,14 @@ public class KaijuWarsKaiju
   public static final int[] SNEK_CHUNKS  = { 0, 0, 100, 150, 110 };
   // UFO starts at 3 move
   public static final int[] UFO_CHUNKS   = { 0, 0,  0,  90,  40,  40,  30,  30 };
-  // From testing, it looks like everything beyond a certain point is just chunks of 8 for all Kaiju
-  public static final int DEFAULT_HP_CHUNK = 80;
+  // From testing, it looks like everything beyond a certain point is just chunks of 8 HP for all Kaiju
+  public static final int DEFAULT_HEALTH_CHUNK = 80;
 
   // Kaiju start with one ability, get a second, then the third/fourth in tandem
   public enum KaijuAbilityTier { BASIC, EXTRA, ALL }
   public static final int EXTRA_SKILL_TURN = 5;
   public static final int ALL_SKILLS_TURN  = 20;
-  // These are the "base" HP values for each kaiju at the skill breakpoint turns
+  // These are the "base" health values for each kaiju at the skill breakpoint turns
   // Note that the turn number will be added to this value, in all cases
   // Also, these are made up/customizable in game (as are the breakpoint turns), so can be used as balancing factors
   public static final int[] ALPHA_HPBASES = { 50, 100, 130 };
@@ -257,7 +257,7 @@ public class KaijuWarsKaiju
         events.add(new HealUnitEvent(self, 10, null, true));
         // If we're about to go above the land HP, become flying
         // TODO: Since this is only handled here and there's no HealUnitEvent listener, this won't account for healing CO powers
-        // ... nor, in fact, will healing CO powers actually heal the Kaiju over 100 HP by default
+        // ... nor, in fact, will healing CO powers actually heal the Kaiju over 10 HP by default
         if( self.getHealth() == BIRD_LAND_HEALTH )
           events.add(new TransformLifecycle.TransformEvent(self, airTurkey));
       }
@@ -587,9 +587,9 @@ public class KaijuWarsKaiju
       kaijuAbilityTier.put(unit, tier);
 
       KaijuUnitModel kaijuType = (KaijuUnitModel) unit.model;
-      int hp = kaijuType.hpBases[tier.ordinal()];
-      hp += turn;
-      int heal = hp - UnitModel.MAXIMUM_HEALTH;
+      int health = kaijuType.healthBases[tier.ordinal()];
+      health += turn;
+      int heal = health - UnitModel.MAXIMUM_HEALTH;
 
       GameEventQueue events = new GameEventQueue();
       events.add(new HealUnitEvent(unit, heal, null, true));
@@ -600,7 +600,7 @@ public class KaijuWarsKaiju
       }
 
       // Make the birb sit if he's low HP
-      if( hp <= KaijuWarsKaiju.BIRD_LAND_HEALTH )
+      if( health <= KaijuWarsKaiju.BIRD_LAND_HEALTH )
         tryDevolveHellTurkey(unit, events);
 
       XYCoord buildCoords = new XYCoord(unit);
@@ -741,16 +741,16 @@ public class KaijuWarsKaiju
         return;
 
       KaijuUnitModel kaijuType = (KaijuUnitModel) uc.model;
-      int[] hpChunks = kaijuType.hpChunks;
-      int hpBudget = uc.getHealth();
+      int[] healthChunks = kaijuType.healthChunks;
+      int healthBudget = uc.getHealth();
       int move = 0;
-      while (hpBudget > 0)
+      while (healthBudget > 0)
       {
         ++move;
-        int chunk = DEFAULT_HP_CHUNK;
-        if( hpChunks.length > move )
-          chunk = hpChunks[move];
-        hpBudget -= chunk;
+        int chunk = DEFAULT_HEALTH_CHUNK;
+        if( healthChunks.length > move )
+          chunk = healthChunks[move];
+        healthBudget -= chunk;
       }
       uc.movePower = move;
     }

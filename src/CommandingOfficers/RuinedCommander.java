@@ -148,7 +148,7 @@ public abstract class RuinedCommander extends DeployableCommander
     return power;
   }
   @Override
-  public int calculateMassDamageCharge(Unit minion, int lostHP)
+  public int calculateMassDamageCharge(Unit minion, int lostHealth)
   {
     return 0;
   }
