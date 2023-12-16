@@ -77,8 +77,8 @@ public class TestCombatMods extends TestCase
     BattleSummary normalCounter = CombatEngine.simulateBattleResults(infPassive, meaty, testMap, 8, 5, CalcType.NO_LUCK);
 
     // Check that Venge's passive ability works on both attack and defense
-    boolean testPassed = validate(vengeful.defender.deltaHP < normal.defender.deltaHP, "    Being angry didn't help Venge attack extra hard.");
-    testPassed &= validate(vengefulCounter.attacker.deltaHP < normalCounter.attacker.deltaHP, "    Being angry didn't help Venge defend extra hard.");
+    boolean testPassed = validate(vengeful.defender.deltaHealth < normal.defender.deltaHealth, "    Being angry didn't help Venge attack extra hard.");
+    testPassed &= validate(vengefulCounter.attacker.deltaHealth < normalCounter.attacker.deltaHealth, "    Being angry didn't help Venge defend extra hard.");
 
     // Clean up
     testMap.removeUnit(infActive);
@@ -109,11 +109,11 @@ public class TestCombatMods extends TestCase
     // Check that Venge's Iron Will works properly without breaking things (other than balance)
     boolean testPassed = true;
     // First, check the logic of A->B
-    testPassed &= validate(normalAB.defender.deltaPreciseHP < normalAB.attacker.deltaPreciseHP, "    First strike didn't work properly for Cinder.");
+    testPassed &= validate(normalAB.defender.deltaPreciseHealth < normalAB.attacker.deltaPreciseHealth, "    First strike didn't work properly for Cinder.");
 
     testPassed &= validate(ironAB.attacker.unit == infA, "    infA attacked, but isn't the attacker.");
     testPassed &= validate(ironAB.defender.unit == infB, "    infB was attacked, but isn't the defender.");
-    testPassed &= validate(ironAB.defender.deltaPreciseHP > ironAB.attacker.deltaPreciseHP, "    Venge didn't defend better, or didn't get Iron Will's buff.");
+    testPassed &= validate(ironAB.defender.deltaPreciseHealth > ironAB.attacker.deltaPreciseHealth, "    Venge didn't defend better, or didn't get Iron Will's buff.");
 
     // Clean up
     testMap.removeUnit(infA);
@@ -145,19 +145,19 @@ public class TestCombatMods extends TestCase
     boolean testPassed = true;
 
     // First, check the logic of A->B
-    testPassed &= validate(normalAB.defender.deltaHP < normalAB.attacker.deltaHP, "    First strike didn't work properly for Cinder.");
+    testPassed &= validate(normalAB.defender.deltaHealth < normalAB.attacker.deltaHealth, "    First strike didn't work properly for Cinder.");
 
     testPassed &= validate(retribAB.attacker.unit == infA, "    infA attacked, but isn't the attacker.");
     testPassed &= validate(retribAB.defender.unit == infB, "    infB was attacked, but isn't the defender.");
-    testPassed &= validate(retribAB.defender.deltaHP > retribAB.attacker.deltaHP, "    Cinder got first strike when Retribution should have stolen it.");
+    testPassed &= validate(retribAB.defender.deltaHealth > retribAB.attacker.deltaHealth, "    Cinder got first strike when Retribution should have stolen it.");
 
     // Now do B->A
-    testPassed &= validate(normalBA.defender.deltaHP < normalBA.attacker.deltaHP, "    First strike didn't work properly for Venge.");
-    testPassed &= validate(normalBA.defender.deltaHP > retribBA.defender.deltaHP, "    Venge didn't deal more damage with buffed offense.");
+    testPassed &= validate(normalBA.defender.deltaHealth < normalBA.attacker.deltaHealth, "    First strike didn't work properly for Venge.");
+    testPassed &= validate(normalBA.defender.deltaHealth > retribBA.defender.deltaHealth, "    Venge didn't deal more damage with buffed offense.");
 
     testPassed &= validate(retribBA.attacker.unit == infB, "    infB attacked, but isn't the attacker.");
     testPassed &= validate(retribBA.defender.unit == infA, "    infA was attacked, but isn't the defender.");
-    testPassed &= validate(retribBA.defender.deltaHP < retribBA.attacker.deltaHP, "    Retribution somehow deprived Venge of first strike?");
+    testPassed &= validate(retribBA.defender.deltaHealth < retribBA.attacker.deltaHealth, "    Retribution somehow deprived Venge of first strike?");
 
     // Clean up
     testMap.removeUnit(infA);

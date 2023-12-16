@@ -199,7 +199,7 @@ public class WallyAI extends ModularAI
             MapLocation loc = gameMap.getLocation(action.getTargetLocation());
             Unit target = loc.getResident();
             if( null == target ) continue; // Ignore terrain
-            double damage = valueUnit(target, loc, false) * Math.min(target.getHealth(), CombatEngine.simulateBattleResults(unit, target, gameMap, movePath, CALC).defender.getPreciseHPDamage());
+            double damage = valueUnit(target, loc, false) * Math.min(target.getHealth(), CombatEngine.simulateBattleResults(unit, target, gameMap, movePath, CALC).defender.getPreciseHealthDamage());
             if( damage > bestDamage )
             {
               bestDamage = damage;
@@ -314,7 +314,7 @@ public class WallyAI extends ModularAI
         if( unit.isTurnOver || !gameMap.isLocationEmpty(unit, xyc) )
           continue;
 
-        damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CALC).defender.getPreciseHPDamage();
+        damageSum += CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CALC).defender.getPreciseHealthDamage();
         ai.log(String.format("    %s brings the damage total to %s", unit.toStringWithLocation(), damageSum));
         GamePath path = new PathCalcParams(unit, gameMap).findShortestPath(xyc);
         return new BattleLifecycle.BattleAction(gameMap, unit, path, target.x, target.y);
@@ -445,8 +445,8 @@ public class WallyAI extends ModularAI
                 continue;
               BattleSummary results =
                   CombatEngine.simulateBattleResults(unit, target, gameMap, movePath, CALC);
-              double loss   = Math.min(unit  .getHealth(), (int)results.attacker.getPreciseHPDamage());
-              double damage = Math.min(target.getHealth(), (int)results.defender.getPreciseHPDamage());
+              double loss   = Math.min(unit  .getHealth(), (int)results.attacker.getPreciseHealthDamage());
+              double damage = Math.min(target.getHealth(), (int)results.defender.getPreciseHealthDamage());
               
               boolean goForIt = false;
               if( valueUnit(target, targetLoc, false) * Math.floor(damage) * AGGRO_FUNDS_WEIGHT > valueUnit(unit, unitLoc, true) )
@@ -823,8 +823,8 @@ public class WallyAI extends ModularAI
             {
               double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
                   (results) -> {
-                    double loss   = Math.min(unit                 .getHealth(), (int)results.attacker.getPreciseHPDamage());
-                    double damage = Math.min(results.defender.unit.getHealth(), (int)results.defender.getPreciseHPDamage());
+                    double loss   = Math.min(unit                 .getHealth(), (int)results.attacker.getPreciseHealthDamage());
+                    double damage = Math.min(results.defender.unit.getHealth(), (int)results.defender.getPreciseHealthDamage());
 
                     if( damage > loss ) // only shoot that which you hurt more than it hurts you
                       return damage * results.defender.unit.getCost();

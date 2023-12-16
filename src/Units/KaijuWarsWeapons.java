@@ -480,8 +480,8 @@ public class KaijuWarsWeapons
         stunDefender = canStunType(defModel, atkModel);
 
       // Stun on dealing damage
-      stunAttacker &= summary.attacker.deltaPreciseHP < 0;
-      stunDefender &= summary.defender.deltaPreciseHP < 0;
+      stunAttacker &= summary.attacker.deltaPreciseHealth < 0;
+      stunDefender &= summary.defender.deltaPreciseHealth < 0;
 
       if (!stunAttacker && !stunDefender)
         return null;

@@ -139,7 +139,7 @@ public abstract class RuinedCommander extends DeployableCommander
     if( !isInZone(chargeSource) )
       return 0;
 
-    int guiHPDealt = enemy.getHPDamage() / 10;
+    int guiHPDealt = enemy.getHealthDamage() / 10;
 
     int power = 0; // value in funds of the charge we're getting
 

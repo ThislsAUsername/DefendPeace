@@ -657,8 +657,8 @@ public class JakeMan extends ModularAI
       double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
           (results) -> {
             final Unit defender = results.defender.unit;
-            int loss   = Math.min(unit    .getHealth(), results.attacker.getPreciseHPDamage());
-            int damage = Math.min(defender.getHealth(), results.defender.getPreciseHPDamage());
+            int loss   = Math.min(unit    .getHealth(), results.attacker.getPreciseHealthDamage());
+            int damage = Math.min(defender.getHealth(), results.defender.getPreciseHealthDamage());
 
             // Convert to abstract value
             int extraLoss = 0;

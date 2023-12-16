@@ -180,8 +180,8 @@ public abstract class BattleLifecycle
       CalcType calcType = CalcType.values()[InputOptionsController.damagePreviewTypeOption.getSelectedObject().ordinal()];
       BattleSummary summary = CombatEngine.simulateBattleResults(attacker, defender, map, movePath, calcType);
 
-      int attackerHealthLoss = summary.attacker.getPreciseHPDamage();
-      int defenderHealthLoss = summary.defender.getPreciseHPDamage();
+      int attackerHealthLoss = summary.attacker.getPreciseHealthDamage();
+      int defenderHealthLoss = summary.defender.getPreciseHealthDamage();
       // output any damage done, with the color of the one dealing the damage
       if( attackerHealthLoss > 0 )
         output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, attackerHealthLoss + "%"));
