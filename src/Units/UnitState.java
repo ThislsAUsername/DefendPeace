@@ -175,7 +175,7 @@ public abstract class UnitState implements Serializable
    * <p>Use this when you want precise non-combat health changes, or want to heal without rounding up.
    * @return the change in *rounded* health value (may be more or less than the actual change)
    */
-  public int alterHealthPercent(int percentChange)
+  public int alterHealthNoRound(int percentChange)
   {
     return alterHealth(percentChange, false, false);
   }

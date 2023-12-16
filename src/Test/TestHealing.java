@@ -107,15 +107,15 @@ public class TestHealing extends TestCase
       UnitState victim = new Unit(testCo1, testCo1.getUnitModel(UnitModel.TROOP, false));
       testPassed &= validate(victim.getHealth() == UnitModel.MAXIMUM_HP, "    Unexpected starting HP value.");
 
-      testPassed &= validate(victim.alterHealthPercent(-7) == 0, "    Fractional damage removed a whole HP.");
+      testPassed &= validate(victim.alterHealthNoRound(-7) == 0, "    Fractional damage removed a whole HP.");
       testPassed &= validate(victim.getHealth() == UnitModel.MAXIMUM_HP, "    Fractional damage removed a whole HP.");
       testPassed &= validate(victim.health < UnitModel.MAXIMUM_HP, "    Fractional damage did nothing.");
 
-      testPassed &= validate(victim.alterHealthPercent(3) == 0, "    Fractional healing added a whole HP.");
+      testPassed &= validate(victim.alterHealthNoRound(3) == 0, "    Fractional healing added a whole HP.");
       testPassed &= validate(victim.getHealth() == UnitModel.MAXIMUM_HP, "    Fractional healing added a whole HP.");
       testPassed &= validate(victim.health < UnitModel.MAXIMUM_HP, "    Fractional healing rounded up.");
 
-      testPassed &= validate(victim.alterHealthPercent(42) == 0, "    Overhealing allowed when not enabled.");
+      testPassed &= validate(victim.alterHealthNoRound(42) == 0, "    Overhealing allowed when not enabled.");
       testPassed &= validate(victim.getHealth() == UnitModel.MAXIMUM_HP, "    Overhealing allowed when not enabled.");
       testPassed &= validate(victim.health == UnitModel.MAXIMUM_HP, "    Failed overhealing didn't fill up HP.");
 
@@ -123,16 +123,16 @@ public class TestHealing extends TestCase
       testPassed &= validate(victim.getHealth() == 150, "    Overhealing failed when enabled.");
       testPassed &= validate(victim.health < 150, "    alterHealthPercent rounded up when it shouldn't.");
 
-      testPassed &= validate(victim.alterHealthPercent(42) == 0, "    Failed overhealing vs overhealed target did something.");
+      testPassed &= validate(victim.alterHealthNoRound(42) == 0, "    Failed overhealing vs overhealed target did something.");
       testPassed &= validate(victim.getHealth() == 150, "    Failed overhealing vs overhealed target did something.");
       // I'm not sure if this case is something we specifically want, but I figured I'd document the case.
       testPassed &= validate(victim.health == 150, "    Failed overhealing vs overhealed target didn't round up.");
 
-      testPassed &= validate(victim.alterHealthPercent(-420) == -140, "    Dropping HP didn't work.");
+      testPassed &= validate(victim.alterHealthNoRound(-420) == -140, "    Dropping HP didn't work.");
       testPassed &= validate(victim.getHealth() == 10, "    Dropping HP produced unexpected value.");
       testPassed &= validate(victim.health == 1, "    Dropping HP produced unexpected value.");
 
-      testPassed &= validate(victim.alterHealthPercent(-420) == 0, "    Dropping HP while at 1 worked.");
+      testPassed &= validate(victim.alterHealthNoRound(-420) == 0, "    Dropping HP while at 1 worked.");
       testPassed &= validate(victim.getHealth() == 10, "    Dropping HP produced unexpected value.");
       testPassed &= validate(victim.health == 1, "    Dropping HP produced unexpected value.");
     }

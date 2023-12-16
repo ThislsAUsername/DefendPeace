@@ -201,7 +201,7 @@ public class Tech extends Commander
           if( preciseHP > maxPercent )
           {
             int deltaPercent = Math.min(preciseHP - maxPercent, healAmount * 10);
-            u.alterHealthPercent(-1 * deltaPercent);
+            u.alterHealthNoRound(-1 * deltaPercent);
           }
         }
         unitsOverCharged.remove(myCommander);
