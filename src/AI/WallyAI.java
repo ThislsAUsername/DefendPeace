@@ -1090,14 +1090,11 @@ public class WallyAI extends ModularAI
   public static class SiegeTravel extends UnitActionFinder<WallyAI>
   {
     private static final long serialVersionUID = 1L;
-    ArrayList<TileThreat>[][] blockedThreats;
     public SiegeTravel(Army co, WallyAI ai)
     {
       super(co, ai);
     }
 
-    @Override
-    public void initTurn(GameMap gameMap) { blockedThreats = null; }
     @Override
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
@@ -1106,13 +1103,6 @@ public class WallyAI extends ModularAI
       boolean isSiege = unit.model.hasImmobileWeapon();
       if( !isSiege )
         return null;
-
-      if( null == blockedThreats )
-      {
-        Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, gameMap);
-        boolean ignoreFriendlyBlockers = false;
-        blockedThreats = buildThreatMap(ai.predMap, unitLists, ai.mapPlan, myArmy, ignoreFriendlyBlockers);
-      }
 
       ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
       final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
@@ -1123,7 +1113,7 @@ public class WallyAI extends ModularAI
       boolean avoidProduction = false;
       boolean shouldWander = false;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
-                                          this, gameMap, blockedThreats,
+                                          this, gameMap, ai.threatMap,
                                           unit, avoidProduction, shouldWander,
                                           evictionValue, EVICTION_DEPTH);
 
