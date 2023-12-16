@@ -182,7 +182,7 @@ public class Tech extends Commander
           if( u.getHealth() <= UnitModel.MAXIMUM_HP
               && u.getHealth() + healAmount > UnitModel.MAXIMUM_HP )
             overCharged.add(u);
-          u.alterHP(healAmount, true);
+          u.alterHealth(healAmount, true);
         }
       }
       unitsOverCharged.put(myCommander, overCharged);

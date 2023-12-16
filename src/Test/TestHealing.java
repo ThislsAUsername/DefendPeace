@@ -119,7 +119,7 @@ public class TestHealing extends TestCase
       testPassed &= validate(victim.getHealth() == UnitModel.MAXIMUM_HP, "    Overhealing allowed when not enabled.");
       testPassed &= validate(victim.health == UnitModel.MAXIMUM_HP, "    Failed overhealing didn't fill up HP.");
 
-      testPassed &= validate(victim.alterHP(42, false, true) == 50, "    Overhealing failed when enabled.");
+      testPassed &= validate(victim.alterHealth(42, false, true) == 50, "    Overhealing failed when enabled.");
       testPassed &= validate(victim.getHealth() == 150, "    Overhealing failed when enabled.");
       testPassed &= validate(victim.health < 150, "    alterHealthPercent rounded up when it shouldn't.");
 
@@ -152,7 +152,7 @@ public class TestHealing extends TestCase
       testPassed &= validate(victim.getHealth() == UnitModel.MAXIMUM_HP, "    Fractional damage removed a whole HP.");
       testPassed &= validate(victim.health < UnitModel.MAXIMUM_HP, "    Fractional damage did nothing.");
 
-      testPassed &= validate(victim.alterHP(-30) == -30, "    Map damage didn't deal damage.");
+      testPassed &= validate(victim.alterHealth(-30) == -30, "    Map damage didn't deal damage.");
       testPassed &= validate(victim.getHealth() == 70, "    Map damage did the wrong damage.");
       testPassed &= validate(victim.health < 70, "    Map damage rounded HP up.");
 
@@ -164,31 +164,31 @@ public class TestHealing extends TestCase
       testPassed &= validate(victim.getHealth() == -10, "    Overkill didn't overkill right.");
       testPassed &= validate(victim.health == -10, "    Overkill didn't overkill right.");
 
-      testPassed &= validate(victim.alterHP(420) == 110, "    Overhealing allowed when not enabled.");
+      testPassed &= validate(victim.alterHealth(420) == 110, "    Overhealing allowed when not enabled.");
       testPassed &= validate(victim.getHealth() == UnitModel.MAXIMUM_HP, "    Overhealing allowed when not enabled.");
       testPassed &= validate(victim.health == UnitModel.MAXIMUM_HP, "    Failed overhealing didn't fill up HP.");
 
       victim.damageHP(7);
-      testPassed &= validate(victim.alterHP(42) == 0, "    Overhealing allowed when not enabled.");
+      testPassed &= validate(victim.alterHealth(42) == 0, "    Overhealing allowed when not enabled.");
       testPassed &= validate(victim.getHealth() == UnitModel.MAXIMUM_HP, "    Overhealing allowed when not enabled.");
       testPassed &= validate(victim.health == UnitModel.MAXIMUM_HP, "    Failed overhealing didn't fill up HP.");
 
       victim.damageHP(7);
-      testPassed &= validate(victim.alterHP(420, true) == 420, "    Overhealing failed when enabled.");
+      testPassed &= validate(victim.alterHealth(420, true) == 420, "    Overhealing failed when enabled.");
       testPassed &= validate(victim.getHealth() == 520, "    Overhealing failed when enabled.");
       testPassed &= validate(victim.health == 520, "    Overhealing didn't round up?");
 
       victim.damageHP(7);
-      testPassed &= validate(victim.alterHP(42) == 0, "    Failed overhealing vs overhealed target did something.");
+      testPassed &= validate(victim.alterHealth(42) == 0, "    Failed overhealing vs overhealed target did something.");
       testPassed &= validate(victim.getHealth() == 520, "    Failed overhealing vs overhealed target did something.");
       // I'm not sure if this case is something we specifically want, but I figured I'd document the case.
       testPassed &= validate(victim.health == 520, "    Failed overhealing vs overhealed target didn't round up.");
 
-      testPassed &= validate(victim.alterHP(-900) == -510, "    Dropping HP didn't work.");
+      testPassed &= validate(victim.alterHealth(-900) == -510, "    Dropping HP didn't work.");
       testPassed &= validate(victim.getHealth() == 10, "    Dropping HP produced unexpected value.");
       testPassed &= validate(victim.health == 1, "    Dropping HP produced unexpected value.");
 
-      testPassed &= validate(victim.alterHP(-42) == 0, "    Dropping HP while at 1 worked.");
+      testPassed &= validate(victim.alterHealth(-42) == 0, "    Dropping HP while at 1 worked.");
       testPassed &= validate(victim.getHealth() == 10, "    Dropping HP produced unexpected value.");
       testPassed &= validate(victim.health == 1, "    Dropping HP produced unexpected value.");
     }

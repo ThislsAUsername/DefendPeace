@@ -66,7 +66,7 @@ public class MassDamageEvent implements GameEvent
       if( lethal )
         deltaHP = victim.damageHP(damage);
       else
-        deltaHP = victim.alterHP(-1 * damage);
+        deltaHP = victim.alterHealth(-1 * damage);
       int lostHP = -deltaHP;
 
       if( shouldStun )

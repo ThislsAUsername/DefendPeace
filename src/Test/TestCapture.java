@@ -95,13 +95,13 @@ public class TestCapture extends TestCase
 
     // Make sure that attacking someone else does not reset capture progress.
     Unit infB = addUnit(testMap, testCo2, UnitModel.TROOP, 1, 2); // Make an enemy adjacent to the city.
-    infB.alterHP( -80 ); // Make sure he will die without retaliating.
+    infB.alterHealth( -80 ); // Make sure he will die without retaliating.
     infA.initTurn(testMap);
     performGameAction(new BattleLifecycle.BattleAction(testMap, infA, Utils.findShortestPath(infA, 2, 2, testMap), 1, 2), testGame); // Bop him on the head.
     testPassed &= validate( infA.getCaptureProgress() == 10, "    Infantry should not stop capturing after stationary ATTACK.");
 
     // See if we can actually capture this thing.
-    infA.alterHP( -60 ); // Make it take three attempts to capture the property.
+    infA.alterHealth( -60 ); // Make it take three attempts to capture the property.
     infA.initTurn(testMap);
     performGameAction( captureAction, testGame );
     testPassed &= validate( infA.getCaptureProgress() == 14, "    Infantry has wrong capture progress (" +

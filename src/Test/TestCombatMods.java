@@ -174,7 +174,7 @@ public class TestCombatMods extends TestCase
 
     Unit aa = addUnit(testMap, cinder, UnitModel.SURFACE_TO_AIR, 7, 3);
     // juice aa to be extra angry and get overkills
-    aa.alterHP(10, true);
+    aa.alterHealth(10, true);
     aa.addUnitModifier(new UnitDamageModifier(42));
     final GamePath aaPath = Utils.findShortestPath(aa, 7, 3, testMap);
 

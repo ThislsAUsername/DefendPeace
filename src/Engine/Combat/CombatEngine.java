@@ -81,8 +81,8 @@ public class CombatEngine
 
     if (isSim) // When simulating, round up unit HP to avoid leaking precise health info
     {
-      context.attacker.alterHP(0);
-      context.defender.alterHP(0);
+      context.attacker.alterHealth(0);
+      context.defender.alterHealth(0);
     }
 
     // Provides a simple way to correlate start state and end state of each combatant.

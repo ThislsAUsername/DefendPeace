@@ -87,7 +87,7 @@ public class Cinder extends Commander
     XYCoord buildCoords = new XYCoord(unit.x, unit.y);
     if( this == unit.CO && army.myView.isLocationValid(buildCoords) )
     {
-      unit.alterHP(-20);
+      unit.alterHealth(-20);
       unit.isTurnOver = false;
     }
     return null;
@@ -150,7 +150,7 @@ public class Cinder extends Commander
         {
           unit.resupply(); // the missing HP has to go somewhere...
         }
-        unit.alterHP(SEAR_WOUND);
+        unit.alterHealth(SEAR_WOUND);
         unit.isTurnOver = false;
       }
     }
@@ -218,7 +218,7 @@ public class Cinder extends Commander
       int hp = minion.getHealth();
       if( hp > refreshCost )
       {
-        minion.alterHP(-refreshCost);
+        minion.alterHealth(-refreshCost);
         minion.isTurnOver = false;
         attackCounts.incrementCount(army, minion);
       }

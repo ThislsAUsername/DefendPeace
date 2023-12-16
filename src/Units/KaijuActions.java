@@ -266,7 +266,7 @@ public class KaijuActions
           {
             int heal = 20;
             crush.events.add(new HealUnitEvent(kaijuState.unit, heal, null, true));
-            kaijuState.alterHP(heal, true); // previewed by caller
+            kaijuState.alterHealth(heal, true); // previewed by caller
           }
           if( stomperType.chargeOnBuildingKill && location.isCaptureable() )
           {

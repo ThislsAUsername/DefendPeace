@@ -136,15 +136,15 @@ public abstract class UnitState implements Serializable
    * <p>Use this for most non-combat HP changes (mass damage/silos/healing).
    * @return the change in *rounded* health value (may be more or less than the actual change)
    */
-  public int alterHP(int change)
+  public int alterHealth(int change)
   {
-    return alterHP(change, true, false);
+    return alterHealth(change, true, false);
   }
-  public int alterHP(int change, boolean allowOver)
+  public int alterHealth(int change, boolean allowOver)
   {
-    return alterHP(change, true, allowOver);
+    return alterHealth(change, true, allowOver);
   }
-  public int alterHP(int change, boolean roundUp, boolean allowOver)
+  public int alterHealth(int change, boolean roundUp, boolean allowOver)
   {
     final int oldHP = getHealth();
     int realChange = change;
@@ -177,7 +177,7 @@ public abstract class UnitState implements Serializable
    */
   public int alterHealthPercent(int percentChange)
   {
-    return alterHP(percentChange, false, false);
+    return alterHealth(percentChange, false, false);
   }
 
 
