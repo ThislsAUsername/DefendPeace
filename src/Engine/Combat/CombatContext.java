@@ -135,7 +135,7 @@ public class CombatContext
     aClone.damageHP(damageDealt, isSim);
 
     // If the counterattacker is dead, there's no counterattack
-    if( 1 > aClone.getHP() )
+    if( 1 > aClone.getHealth() )
       return null;
 
     UnitContext dClone = new UnitContext(attacker);

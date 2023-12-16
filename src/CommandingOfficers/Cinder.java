@@ -215,7 +215,7 @@ public class Cinder extends Commander
       Unit minion = battleInfo.attacker.unit;
       // Cost starts at 10, then adds 10 for each subsequent attack
       int refreshCost = 10 * (1+attackCounts.getCountFor(army, minion));
-      int hp = minion.getHP();
+      int hp = minion.getHealth();
       if( hp > refreshCost )
       {
         minion.alterHP(-refreshCost);

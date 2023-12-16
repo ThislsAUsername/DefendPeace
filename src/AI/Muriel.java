@@ -195,7 +195,7 @@ public class Muriel implements AIController
     // Order the units by cost.
     final ArrayList<Unit> armyUnits = myArmy.getUnits();
     Collections.sort(armyUnits, (Unit u1, Unit u2) ->
-      (int)(u2.getCost()*u2.getHP() - u1.getCost()*u1.getHP()));
+      (int)(u2.getCost()*u2.getHealth() - u1.getCost()*u1.getHealth()));
 
     // If we are already capturing any of these properties, remove them from the list.
     for( Unit unit : armyUnits )
@@ -351,7 +351,7 @@ public class Muriel implements AIController
     //////////////////////////////////////////////////////////////////
     // If we are currently healing, stick around, unless that would stem the tide of reinforcements.
     MapLocation loc = gameMap.getLocation(unit.x, unit.y);
-    if( (unit.getHP() <= 80) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) && (loc.getOwner() == unit.CO) )
+    if( (unit.getHealth() <= 80) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) && (loc.getOwner() == unit.CO) )
     {
       log(String.format("%s is damaged and on a repair tile. Will continue to repair for now.", unit.toStringWithLocation()));
       ArrayList<GameActionSet> actionSet = unit.getPossibleActions(gameMap, GamePath.stayPut(unit));
@@ -388,9 +388,9 @@ public class Muriel implements AIController
       shouldResupply = true;
     }
     // If we are low on HP, go heal.
-    if( unit.getHP() < 6 ) // Arbitrary threshold
+    if( unit.getHealth() < 6 ) // Arbitrary threshold
     {
-      log(String.format("%s is damaged (%s HP).", unit.toStringWithLocation(), unit.getHP()));
+      log(String.format("%s is damaged (%s HP).", unit.toStringWithLocation(), unit.getHealth()));
       shouldResupply = true;
     }
     // If we are out of ammo.
@@ -495,7 +495,7 @@ public class Muriel implements AIController
 
     //////////////////////////////////////////////////////////////////
     // See if there's something to capture (but only if we are moderately healthy).
-    if( unit.getHP() > 7 )
+    if( unit.getHealth() > 7 )
     {
       ArrayList<GameAction> captureActions = unitActionsByType.get(UnitActionFactory.CAPTURE);
       if( null != captureActions && !captureActions.isEmpty() )
@@ -507,7 +507,7 @@ public class Muriel implements AIController
           {
             // If this unit action would prevent another one, and isn't better than
             // the other one, then don't do this action.
-            if( !isBestCurrentAction(unit, capture, unit.getHP()))
+            if( !isBestCurrentAction(unit, capture, unit.getHealth()))
               continue;
 
             queuedActions.add(capture);
@@ -517,7 +517,7 @@ public class Muriel implements AIController
             continue; // We can't displace the obstacle unit; find something else to do.
           else
           {
-            displaceUnit(gameMap, unit, capture, unit.getHP(), obst);
+            displaceUnit(gameMap, unit, capture, unit.getHealth(), obst);
             return false;
           }
         }
@@ -550,7 +550,7 @@ public class Muriel implements AIController
     //////////////////////////////////////////////////////////////////
     // We didn't find an immediate ATTACK or CAPTURE action we can do.
     // Things that can capture; go find something to capture, if you are moderately healthy.
-    if( unit.hasActionType(UnitActionFactory.CAPTURE) && (unit.getHP() >= 7) )
+    if( unit.hasActionType(UnitActionFactory.CAPTURE) && (unit.getHealth() >= 7) )
     {
       log(String.format("Seeking capture target for %s", unit.toStringWithLocation()));
       XYCoord unitCoords = new XYCoord(unit.x, unit.y);
@@ -579,7 +579,7 @@ public class Muriel implements AIController
             continue; // We can't displace the obstacle unit; need a different destination.
           else
           {
-            displaceUnit(gameMap, unit, ga, unit.getHP(), obstacle);
+            displaceUnit(gameMap, unit, ga, unit.getHealth(), obstacle);
             return false;
           }
         }
@@ -690,7 +690,7 @@ public class Muriel implements AIController
 
     // This attack is a good idea if our cost effectiveness is in the acceptable range, or if we can at least half-kill them.
     // The second check is needed because one glass cannon may not have a great overall ratio against another; whoever hits first wins, e.g. Mech vs Anti-Air.
-    return (umami.costEffectivenessRatio > COST_EFFECTIVENESS_MIN) || (damage > (target.getHP() / 2));
+    return (umami.costEffectivenessRatio > COST_EFFECTIVENESS_MIN) || (damage > (target.getHealth() / 2));
   }
 
   private void queueUnitProductionActions(GameMap gameMap)
@@ -721,11 +721,11 @@ public class Muriel implements AIController
         // Count how many of each model of enemy units are in play.
         if( enemyUnitCounts.containsKey(coModel))
         {
-          enemyUnitCounts.put(coModel, enemyUnitCounts.get(coModel) + (u.getHP() / 100.0) );
+          enemyUnitCounts.put(coModel, enemyUnitCounts.get(coModel) + (u.getHealth() / 100.0) );
         }
         else
         {
-          enemyUnitCounts.put(coModel, u.getHP() / 100.0 );
+          enemyUnitCounts.put(coModel, u.getHealth() / 100.0 );
         }
       }
     }
@@ -738,11 +738,11 @@ public class Muriel implements AIController
       // Count how many of each model I have.
       if( myUnitCounts.containsKey(coModel))
       {
-        myUnitCounts.put(coModel, myUnitCounts.get(coModel) + (u.getHP() / 10.0) );
+        myUnitCounts.put(coModel, myUnitCounts.get(coModel) + (u.getHealth() / 10.0) );
       }
       else
       {
-        myUnitCounts.put(coModel, u.getHP() / 10.0 );
+        myUnitCounts.put(coModel, u.getHealth() / 10.0 );
       }
     }
     log("My Forces:");
@@ -758,7 +758,7 @@ public class Muriel implements AIController
     double enemyArmyHP = 0; // Count up the total size of the enemy forces.
     for( Commander key : unitLists.keySet() )
     {
-      for( Unit u : unitLists.get(key) ) enemyArmyHP += u.getHP();
+      for( Unit u : unitLists.get(key) ) enemyArmyHP += u.getHealth();
     }
 
     // Build a map of how threatened I am by each enemy unit type.

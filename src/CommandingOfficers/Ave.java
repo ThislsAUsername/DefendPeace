@@ -716,7 +716,7 @@ public class Ave extends Commander
           output.add(new DamagePopup(
                          coord,
                          myCommander.myColor,
-                         Math.min(victim.getHP()-1, OBLIDO_DAMAGE) + "%"));
+                         Math.min(victim.getHealth()-1, OBLIDO_DAMAGE) + "%"));
       }
       for( XYCoord coord : affectedTiles )
         if( gameMap.getEnvironment(coord).terrainType == TerrainType.FOREST )

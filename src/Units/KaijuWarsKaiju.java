@@ -250,7 +250,7 @@ public class KaijuWarsKaiju
       KaijuStateTracker kaijuTracker = StateTracker.instance(map.game, KaijuStateTracker.class);
       // If we have Swoop and are in heal mode
       if( kaijuTracker.kaijuAbilityTier.get(self) != KaijuAbilityTier.BASIC
-          && BIRD_LAND_HP >= self.getHP() )
+          && BIRD_LAND_HP >= self.getHealth() )
       {
         // Setting the tracker state here feels wrong
         kaijuTracker.abilityUsedShort(self, BirdSwoopFactory.class);
@@ -258,7 +258,7 @@ public class KaijuWarsKaiju
         // If we're about to go above the land HP, become flying
         // TODO: Since this is only handled here and there's no HealUnitEvent listener, this won't account for healing CO powers
         // ... nor, in fact, will healing CO powers actually heal the Kaiju over 100 HP by default
-        if( self.getHP() == BIRD_LAND_HP )
+        if( self.getHealth() == BIRD_LAND_HP )
           events.add(new TransformLifecycle.TransformEvent(self, airTurkey));
       }
       return events;
@@ -655,7 +655,7 @@ public class KaijuWarsKaiju
         abilityUsedShort(victim, SnekMod.class);
       }
 
-      if( summary.defender.after.getHP() > KaijuWarsKaiju.BIRD_LAND_HP )
+      if( summary.defender.after.getHealth() > KaijuWarsKaiju.BIRD_LAND_HP )
         return null;
 
       GameEventQueue events = new GameEventQueue();
@@ -672,7 +672,7 @@ public class KaijuWarsKaiju
         final Unit victim = pair.getKey();
         if( !(victim.model instanceof KaijuUnitModel) )
           continue;
-        if( pair.getValue() + KaijuWarsKaiju.BIRD_LAND_HP < victim.getHP() )
+        if( pair.getValue() + KaijuWarsKaiju.BIRD_LAND_HP < victim.getHealth() )
           continue;
         tryDevolveHellTurkey(victim, events);
       }
@@ -742,7 +742,7 @@ public class KaijuWarsKaiju
 
       KaijuUnitModel kaijuType = (KaijuUnitModel) uc.model;
       int[] hpChunks = kaijuType.hpChunks;
-      int hpBudget = uc.getHP();
+      int hpBudget = uc.getHealth();
       int move = 0;
       while (hpBudget > 0)
       {

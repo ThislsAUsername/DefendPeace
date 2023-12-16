@@ -75,8 +75,8 @@ public class TestGameEvent extends TestCase
 
     BattleLifecycle.BattleEvent event = new BattleLifecycle.BattleEvent(infA, infB, Utils.findShortestPath(infA, new XYCoord(2, 2), testMap), testMap);
     event.performEvent(testMap);
-    testPassed &= validate(infB.getHP() < UnitModel.MAXIMUM_HP, "    Defender Was not damaged");
-    testPassed &= validate(infA.getHP() < UnitModel.MAXIMUM_HP, "    Defender did not counter-attack");
+    testPassed &= validate(infB.getHealth() < UnitModel.MAXIMUM_HP, "    Defender Was not damaged");
+    testPassed &= validate(infA.getHealth() < UnitModel.MAXIMUM_HP, "    Defender did not counter-attack");
 
     // Clean up
     testMap.removeUnit(infA);
@@ -379,7 +379,7 @@ public class TestGameEvent extends TestCase
     recipient.damageHP(20);
 
     // Verify health and readiness.
-    testPassed &= validate(recipient.getHP() == 80, "    Recipient has incorrect HP!");
+    testPassed &= validate(recipient.getHealth() == 80, "    Recipient has incorrect HP!");
     testPassed &= validate(!recipient.isTurnOver, "    Donor's turn is over despite not having moved!");
     testPassed &= validate(!donor.isTurnOver, "    Recipient's turn is over despite not having moved!");
 

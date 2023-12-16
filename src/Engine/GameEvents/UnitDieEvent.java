@@ -20,7 +20,7 @@ public class UnitDieEvent implements GameEvent
   {
     this.unit = unit;
     this.where = where;
-    this.hpBeforeDeath = unit.getHP();
+    this.hpBeforeDeath = unit.getHealth();
   }
 
   @Override
@@ -40,7 +40,7 @@ public class UnitDieEvent implements GameEvent
   {
     // Set HP to 0. One could make a UnitDieEvent on a healthy
     // unit, and we don't want any ambiguity after the fact.
-    unit.damageHP(unit.getHP());
+    unit.damageHP(unit.getHealth());
 
     // Remove the Unit from the map and from the CO list.
     gameMap.removeUnit(unit);

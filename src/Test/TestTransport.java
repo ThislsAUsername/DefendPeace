@@ -108,7 +108,7 @@ public class TestTransport extends TestCase
 
     // Try to init a damaged unit inside the transport.
     cargo.alterHP(-50);
-    testPassed &= validate( cargo.health == 50, "    Cargo has the wrong amount of HP(" + cargo.getHP() + ")");
+    testPassed &= validate( cargo.health == 50, "    Cargo has the wrong amount of HP(" + cargo.getHealth() + ")");
     cargo.initTurn(testMap);
     performGameAction(new LoadLifecycle.LoadAction(testMap, cargo, Utils.findShortestPath(cargo, 7, 4, testMap)), testGame);
     testPassed &= validate(testMap.getLocation(7, 4).getResident() != cargo, "    Cargo is not in the APC.");

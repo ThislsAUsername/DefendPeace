@@ -180,7 +180,7 @@ public class TestAIBehavior extends TestCase
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
     } while( null != act && testPassed );
 
-    testPassed &= validate(nmeCopter.getHP() < 10, "    "+ai.getName()+" failed to attack enemy copter!");
+    testPassed &= validate(nmeCopter.getHealth() < 10, "    "+ai.getName()+" failed to attack enemy copter!");
     testPassed &= validate(!testMap.isLocationEmpty(facPos), "    "+ai.getName()+" failed to start capping the factory!");
 
     // Clean up
@@ -309,7 +309,7 @@ public class TestAIBehavior extends TestCase
       } while( null != act && testPassed );
     }
 
-    testPassed &= validate(nmeArty.getHP() <= 0, "    "+ai.getName()+" failed to kill the artillery!");
+    testPassed &= validate(nmeArty.getHealth() <= 0, "    "+ai.getName()+" failed to kill the artillery!");
     testPassed &= validate(testMap.getResident(9, 0).CO == inf.CO, "    "+ai.getName()+" failed to move infantry onto HQ!");
     testPassed &= validate(testMap.getLocation(9, 0).getOwner() == inf.CO, "    "+ai.getName()+" failed to capture the HQ!");
 

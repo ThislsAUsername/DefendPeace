@@ -368,7 +368,7 @@ public abstract class BattleLifecycle
     }
     public boolean attackerDies()
     {
-      return battleInfo.attacker.after.getHP() <= 0;
+      return battleInfo.attacker.after.getHealth() <= 0;
     }
 
     public Unit getDefender()
@@ -377,7 +377,7 @@ public abstract class BattleLifecycle
     }
     public boolean defenderDies()
     {
-      return battleInfo.defender.after.getHP() <= 0;
+      return battleInfo.defender.after.getHealth() <= 0;
     }
 
     @Override

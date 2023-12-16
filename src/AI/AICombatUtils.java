@@ -80,7 +80,7 @@ public class AICombatUtils
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
     for( WeaponModel wep : unit.model.weapons )
     {
-      int damage = (null == target)? 1 : wep.getDamage(target) * unit.getHP() / UnitModel.MAXIMUM_HP;
+      int damage = (null == target)? 1 : wep.getDamage(target) * unit.getHealth() / UnitModel.MAXIMUM_HP;
       if( null == target || unit.canTarget(target) )
       {
         if( !wep.canFireAfterMoving )
@@ -177,7 +177,7 @@ public class AICombatUtils
                                    Collection<Unit> attackCandidates,
                                    Collection<XYCoord> excludedSpaces)
   {
-    if( target.getHP() < 1 ) // Try not to pick fights with zombies
+    if( target.getHealth() < 1 ) // Try not to pick fights with zombies
       return null;
     if( attackCandidates.size() < 1 )
       return null;
@@ -259,7 +259,7 @@ public class AICombatUtils
     }
 
     int damage = findMultiHitKill(gameMap, target, attackers, neededAttacks, 0);
-    if( damage >= target.getHP() )
+    if( damage >= target.getHealth() )
     {
       // Prune excess attacks and empty attacking spaces
       for( XYCoord space : new ArrayList<XYCoord>(neededAttacks.keySet()) )
@@ -271,7 +271,7 @@ public class AICombatUtils
           continue;
         }
         int thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space, CalcType.PESSIMISTIC).defender.getPreciseHPDamage();
-        if( target.getHP() <= damage - thisShot )
+        if( target.getHealth() <= damage - thisShot )
         {
           neededAttacks.remove(space);
           damage -= thisShot;
@@ -300,7 +300,7 @@ public class AICombatUtils
                                 int pDamage)
   {
     // Base case; we found a kill
-    if( pDamage >= target.getHP() )
+    if( pDamage >= target.getHealth() )
     {
       return pDamage;
     }
@@ -335,7 +335,7 @@ public class AICombatUtils
           thisDamage = findMultiHitKill(gameMap, target, attackCandidates, neededAttacks, damage + thisDamage);
 
           // If we've found a kill, we're done
-          if( thisDamage >= target.getHP() )
+          if( thisDamage >= target.getHealth() )
           {
             damage = thisDamage;
             break;

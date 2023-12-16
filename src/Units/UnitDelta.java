@@ -21,7 +21,7 @@ public class UnitDelta implements Serializable
     super();
     before = start;
     after = end;
-    deltaHP = after.getHP() - before.getHP();
+    deltaHP = after.getHealth() - before.getHealth();
     deltaPreciseHP = after.health - before.health;
     deltaAmmo = after.ammo - before.ammo;
     deltaFuel = after.fuel - before.fuel;

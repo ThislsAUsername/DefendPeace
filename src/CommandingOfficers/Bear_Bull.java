@@ -168,7 +168,7 @@ public class Bear_Bull extends Commander
       int valueDrained = 0;
       for( Unit victim : victims )
       {
-        valueDrained += (Math.min(DOWNUPTURN_LIQUIDATION, victim.getHP()) * victim.getCost()) / UnitModel.MAXIMUM_HP;
+        valueDrained += (Math.min(DOWNUPTURN_LIQUIDATION, victim.getHealth()) * victim.getCost()) / UnitModel.MAXIMUM_HP;
       }
 
       powerEvents.add( new ModifyFundsEvent(COcast.army, valueDrained) ); // Collect profits
@@ -185,7 +185,7 @@ public class Bear_Bull extends Commander
         output.add(new DamagePopup(
                        new XYCoord(victim.x, victim.y),
                        COcast.myColor,
-                       Math.min(victim.getHP()-1, DOWNUPTURN_LIQUIDATION) + "%"));
+                       Math.min(victim.getHealth()-1, DOWNUPTURN_LIQUIDATION) + "%"));
 
       return output;
     }

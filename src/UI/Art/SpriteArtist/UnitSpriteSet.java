@@ -243,11 +243,11 @@ public class UnitSpriteSet
     ArrayList<BufferedImage> unitIcons = new ArrayList<BufferedImage>();
 
     // Draw the unit's HP if it is not at full health.
-    if( u.getHP() != UnitModel.MAXIMUM_HP )
+    if( u.getHealth() != UnitModel.MAXIMUM_HP )
     {
       BufferedImage num;
       int guiHP = u.getHPFactor();
-      if( u.getHP() > UnitModel.MAXIMUM_HP )
+      if( u.getHealth() > UnitModel.MAXIMUM_HP )
       {
         int tensDigit = Math.min(guiHP / 10, 9);
         num = SpriteLibrary.getMapUnitNumberSprites().getFrame(tensDigit); // Tens place.

@@ -199,7 +199,7 @@ public class WallyAI extends ModularAI
             MapLocation loc = gameMap.getLocation(action.getTargetLocation());
             Unit target = loc.getResident();
             if( null == target ) continue; // Ignore terrain
-            double damage = valueUnit(target, loc, false) * Math.min(target.getHP(), CombatEngine.simulateBattleResults(unit, target, gameMap, movePath, CALC).defender.getPreciseHPDamage());
+            double damage = valueUnit(target, loc, false) * Math.min(target.getHealth(), CombatEngine.simulateBattleResults(unit, target, gameMap, movePath, CALC).defender.getPreciseHPDamage());
             if( damage > bestDamage )
             {
               bestDamage = damage;
@@ -445,14 +445,14 @@ public class WallyAI extends ModularAI
                 continue;
               BattleSummary results =
                   CombatEngine.simulateBattleResults(unit, target, gameMap, movePath, CALC);
-              double loss   = Math.min(unit  .getHP(), (int)results.attacker.getPreciseHPDamage());
-              double damage = Math.min(target.getHP(), (int)results.defender.getPreciseHPDamage());
+              double loss   = Math.min(unit  .getHealth(), (int)results.attacker.getPreciseHPDamage());
+              double damage = Math.min(target.getHealth(), (int)results.defender.getPreciseHPDamage());
               
               boolean goForIt = false;
               if( valueUnit(target, targetLoc, false) * Math.floor(damage) * AGGRO_FUNDS_WEIGHT > valueUnit(unit, unitLoc, true) )
               {
                 ai.log(String.format("  %s is going aggro on %s", unit.toStringWithLocation(), target.toStringWithLocation()));
-                ai.log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.getCost() * damage - unit.getCost() * unit.getHP())/10));
+                ai.log(String.format("    He plans to deal %s HP damage for a net gain of %s funds", damage, (target.getCost() * damage - unit.getCost() * unit.getHealth())/10));
                 goForIt = true;
               }
               else if( damage > loss
@@ -608,7 +608,7 @@ public class WallyAI extends ModularAI
     }
     if( canResupply )
     {
-      shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHOLD;
+      shouldResupply = unit.getHealth() <= UNIT_HEAL_THRESHOLD;
       shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHOLD
           * toClosestStation.getFuelCost(unit, gameMap);
       shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHOLD;
@@ -823,8 +823,8 @@ public class WallyAI extends ModularAI
             {
               double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
                   (results) -> {
-                    double loss   = Math.min(unit                 .getHP(), (int)results.attacker.getPreciseHPDamage());
-                    double damage = Math.min(results.defender.unit.getHP(), (int)results.defender.getPreciseHPDamage());
+                    double loss   = Math.min(unit                 .getHealth(), (int)results.attacker.getPreciseHPDamage());
+                    double damage = Math.min(results.defender.unit.getHealth(), (int)results.defender.getPreciseHPDamage());
 
                     if( damage > loss ) // only shoot that which you hurt more than it hurts you
                       return damage * results.defender.unit.getCost();
@@ -897,7 +897,7 @@ public class WallyAI extends ModularAI
       value += valueTerrain(unit.CO, locale.getEnvironment().terrainType); // Strongly value units that threaten capture
 
     if( includeCurrentHealth )
-      value *= unit.getHP();
+      value *= unit.getHealth();
     value -= locale.getEnvironment().terrainType.getDefLevel(); // Value things on lower terrain more, so we wall for equal units if we can get on better terrain
 
     return value;
@@ -930,9 +930,9 @@ public class WallyAI extends ModularAI
     {
       if( unit.model == model )
       {
-        totalX += unit.x * unit.getHP();
-        totalY += unit.y * unit.getHP();
-        totalPoints += unit.getHP();
+        totalX += unit.x * unit.getHealth();
+        totalY += unit.y * unit.getHealth();
+        totalPoints += unit.getHealth();
       }
     }
 
@@ -997,11 +997,11 @@ public class WallyAI extends ModularAI
           // Count how many of each model of enemy units are in play.
           if( enemyUnitCounts.containsKey(u.model) )
           {
-            enemyUnitCounts.put(u.model, enemyUnitCounts.get(u.model) + (u.getHP() / 10));
+            enemyUnitCounts.put(u.model, enemyUnitCounts.get(u.model) + (u.getHealth() / 10));
           }
           else
           {
-            enemyUnitCounts.put(u.model, u.getHP() / 10.0);
+            enemyUnitCounts.put(u.model, u.getHealth() / 10.0);
           }
         }
       }
@@ -1014,11 +1014,11 @@ public class WallyAI extends ModularAI
       // Count how many of each model of enemy units are in play.
       if( myUnitCounts.containsKey(u.model) )
       {
-        myUnitCounts.put(u.model, myUnitCounts.get(u.model) + (u.getHP() / 10));
+        myUnitCounts.put(u.model, myUnitCounts.get(u.model) + (u.getHealth() / 10));
       }
       else
       {
-        myUnitCounts.put(u.model, u.getHP() / 10.0);
+        myUnitCounts.put(u.model, u.getHealth() / 10.0);
       }
     }
 

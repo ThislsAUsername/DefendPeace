@@ -96,7 +96,7 @@ public class StrikeParams
     this.battleRange = battleRange;
 
     this.baseDamage = baseDamage;
-    this.attackerHP = attacker.getHP();
+    this.attackerHP = attacker.getHealth();
     this.attackPower = attacker.attackPower;
     this.luckRolled = attacker.CO.luck;
     this.isCounter = isCounter;
@@ -159,7 +159,7 @@ public class StrikeParams
       this.combatContext = combatContext;
       this.defender = defender;
 
-      defenderHP = defender.getHP();
+      defenderHP = defender.getHealth();
       this.defenseSubtraction = defender.defensePower;
       this.terrainStars = defender.terrainStars;
     }

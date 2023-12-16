@@ -182,8 +182,8 @@ public abstract class JoinLifecycle
       if( null != unitRecipient && unitRecipient.isHurt() )
       {
         // Crunch the numbers we need up front.
-        int donorHP = unitDonor.getHP();
-        int neededHP = UnitModel.MAXIMUM_HP - unitRecipient.getHP();
+        int donorHP = unitDonor.getHealth();
+        int neededHP = UnitModel.MAXIMUM_HP - unitRecipient.getHealth();
         int extraHP = donorHP - neededHP;
         if( extraHP < 0 )
           extraHP = 0;

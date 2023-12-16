@@ -88,9 +88,9 @@ public abstract class UnitState implements Serializable
 
   public boolean isHurt()
   {
-    return getHP() < UnitModel.MAXIMUM_HP;
+    return getHealth() < UnitModel.MAXIMUM_HP;
   }
-  public int getHP()
+  public int getHealth()
   {
     return roundHP(health);
   }
@@ -122,11 +122,11 @@ public abstract class UnitState implements Serializable
   {
     if( damage < 0 )
       throw new ArithmeticException("Cannot inflict negative damage!");
-    int before = getHP();
+    int before = getHealth();
     health = health - damage;
     if( !allowOverkill )
       health = Math.max(0, health);
-    return getHP() - before;
+    return getHealth() - before;
   }
 
   /**
@@ -146,7 +146,7 @@ public abstract class UnitState implements Serializable
   }
   public int alterHP(int change, boolean roundUp, boolean allowOver)
   {
-    final int oldHP = getHP();
+    final int oldHP = getHealth();
     int realChange = change;
 
     // Only enforce the maximum HP if we're healing
@@ -163,9 +163,9 @@ public abstract class UnitState implements Serializable
     health = Math.max(1, health + realChange);
     // Round HP up, if healing
     if( roundUp && change >= 0 )
-      health = getHP();
+      health = getHealth();
 
-    return getHP() - oldHP;
+    return getHealth() - oldHP;
   }
 
   /**

@@ -179,8 +179,8 @@ public class Tech extends Commander
         if( typesToOverCharge.contains(u.model) )
         {
           // Track units that aren't already overhealed
-          if( u.getHP() <= UnitModel.MAXIMUM_HP
-              && u.getHP() + healAmount > UnitModel.MAXIMUM_HP )
+          if( u.getHealth() <= UnitModel.MAXIMUM_HP
+              && u.getHealth() + healAmount > UnitModel.MAXIMUM_HP )
             overCharged.add(u);
           u.alterHP(healAmount, true);
         }

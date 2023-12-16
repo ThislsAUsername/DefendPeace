@@ -216,7 +216,7 @@ public class JakeMan extends ModularAI
           if( !mapToFill.containsKey(um) )
             mapToFill.put(um, new HashMap<>());
           Map<XYCoord, Double> threatArea = mapToFill.get(um);
-          double newValue = (double)(threat.getHP()) / UnitModel.MAXIMUM_HP;
+          double newValue = (double)(threat.getHealth()) / UnitModel.MAXIMUM_HP;
           // Square unit fraction so low-HP units aren't valued so much
           newValue *= newValue;
           for( XYCoord coord : AICombatUtils.findThreatPower(gameMap, threat, null).keySet() )
@@ -428,7 +428,7 @@ public class JakeMan extends ModularAI
     }
     if( canResupply )
     {
-      shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHOLD;
+      shouldResupply = unit.getHealth() <= UNIT_HEAL_THRESHOLD;
       shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHOLD
           * toClosestStation.getFuelCost(unit, gameMap);
       shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHOLD;
@@ -657,14 +657,14 @@ public class JakeMan extends ModularAI
       double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
           (results) -> {
             final Unit defender = results.defender.unit;
-            int loss   = Math.min(unit    .getHP(), results.attacker.getPreciseHPDamage());
-            int damage = Math.min(defender.getHP(), results.defender.getPreciseHPDamage());
+            int loss   = Math.min(unit    .getHealth(), results.attacker.getPreciseHPDamage());
+            int damage = Math.min(defender.getHealth(), results.defender.getPreciseHPDamage());
 
             // Convert to abstract value
             int extraLoss = 0;
-            if( loss >= 1 && unit.getHP() == UnitModel.MAXIMUM_HP )
+            if( loss >= 1 && unit.getHealth() == UnitModel.MAXIMUM_HP )
               extraLoss += STAY_UNHURT_BIAS;
-            if( loss >= unit.getHP() )
+            if( loss >= unit.getHealth() )
               extraLoss += STAY_ALIVE_BIAS;
             loss *= unit.getCost();
             loss += extraLoss;
