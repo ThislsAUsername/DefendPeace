@@ -11,18 +11,18 @@ import Units.UnitModel;
 public class HealUnitEvent implements GameEvent
 {
   private Unit unit;
-  public final int repairPowerHP;
+  public final int repairPowerHealth;
   public final Army payer;
   public final boolean canOverheal;
 
-  public HealUnitEvent(Unit aTarget, int HP, Army pPayer)
+  public HealUnitEvent(Unit aTarget, int health, Army pPayer)
   {
-    this(aTarget, HP, pPayer, false);
+    this(aTarget, health, pPayer, false);
   }
-  public HealUnitEvent(Unit aTarget, int HP, Army pPayer, boolean canOverheal)
+  public HealUnitEvent(Unit aTarget, int health, Army pPayer, boolean canOverheal)
   {
     unit = aTarget;
-    repairPowerHP = HP;
+    repairPowerHealth = health;
     payer = pPayer;
     this.canOverheal = canOverheal;
   }
@@ -44,21 +44,22 @@ public class HealUnitEvent implements GameEvent
   public void performEvent(MapMaster gameMap)
   {
     if (null == payer)
-      unit.alterHealth(repairPowerHP, canOverheal);
-    else if( unit.isHurt() )
     {
-      int costPerHP = (int) (unit.getRepairCost() / UnitModel.MAXIMUM_HEALTH);
-
-      int actualRepair = repairPowerHP;
-      if( costPerHP > 0 )
-      {
-        int affordableHP = payer.money / costPerHP;
-        actualRepair = Math.min(repairPowerHP, affordableHP);
-      }
-
-      int deltaHP = unit.alterHealth(actualRepair, canOverheal);
-      payer.money -= deltaHP * costPerHP;
+      unit.alterHealth(repairPowerHealth, canOverheal);
+      return;
     }
+
+    int costPerHealth = unit.getRepairCost() / UnitModel.MAXIMUM_HEALTH;
+
+    int actualRepair = repairPowerHealth;
+    if( costPerHealth > 0 )
+    {
+      int affordableHealth = payer.money / costPerHealth;
+      actualRepair = Math.min(repairPowerHealth, affordableHealth);
+    }
+
+    int deltaHealth = unit.alterHealth(actualRepair, canOverheal);
+    payer.money -= deltaHealth * costPerHealth;
   }
 
   @Override
