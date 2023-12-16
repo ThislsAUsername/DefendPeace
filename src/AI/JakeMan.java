@@ -54,7 +54,7 @@ public class JakeMan extends ModularAI
   private static final int    STAY_ALIVE_BIAS = 2000;
   // Fraction of the unit to remove from the counter-threat power of my unit type if I'm not attacking
   private static final double PEACEFUL_SELF_THREAT_RATIO = 1;
-  private static final int    UNIT_HEAL_THRESHOLD = 60; // HP at which units heal
+  private static final int    UNIT_HEAL_THRESHOLD = 60; // Health at which units heal
   private static final double UNIT_REFUEL_THRESHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
 

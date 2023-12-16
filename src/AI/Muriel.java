@@ -390,7 +390,7 @@ public class Muriel implements AIController
     // If we are low on HP, go heal.
     if( unit.getHealth() < 6 ) // Arbitrary threshold
     {
-      log(String.format("%s is damaged (%s HP).", unit.toStringWithLocation(), unit.getHealth()));
+      log(String.format("%s is damaged (%s health).", unit.toStringWithLocation(), unit.getHealth()));
       shouldResupply = true;
     }
     // If we are out of ammo.
@@ -452,10 +452,10 @@ public class Muriel implements AIController
         // Sift through all attack actions we can perform.
         double damageValue = AICombatUtils.scoreAttackAction(unit, action, gameMap,
             (results) -> {
-              double hpDamage = Math.min(results.defender.getPreciseHealthDamage(), results.defender.unit.health);
+              double healthDamage = Math.min(results.defender.getPreciseHealthDamage(), results.defender.unit.health);
 
               if( shouldAttack(unit, results.defender.unit, gameMap) )
-                return (results.defender.unit.getCost() / 10) * hpDamage;
+                return (results.defender.unit.getCost() / 10) * healthDamage;
 
               return 0.;
             }, (terrain, params) -> 0.); // Don't mess with terrain
@@ -721,11 +721,11 @@ public class Muriel implements AIController
         // Count how many of each model of enemy units are in play.
         if( enemyUnitCounts.containsKey(coModel))
         {
-          enemyUnitCounts.put(coModel, enemyUnitCounts.get(coModel) + (u.getHealth() / 100.0) );
+          enemyUnitCounts.put(coModel, enemyUnitCounts.get(coModel) + (u.getHP() / 10.0) );
         }
         else
         {
-          enemyUnitCounts.put(coModel, u.getHealth() / 100.0 );
+          enemyUnitCounts.put(coModel, u.getHP() / 10.0 );
         }
       }
     }
@@ -738,11 +738,11 @@ public class Muriel implements AIController
       // Count how many of each model I have.
       if( myUnitCounts.containsKey(coModel))
       {
-        myUnitCounts.put(coModel, myUnitCounts.get(coModel) + (u.getHealth() / 10.0) );
+        myUnitCounts.put(coModel, myUnitCounts.get(coModel) + (u.getHP() / 10.0) );
       }
       else
       {
-        myUnitCounts.put(coModel, u.getHealth() / 10.0 );
+        myUnitCounts.put(coModel, u.getHP() / 10.0 );
       }
     }
     log("My Forces:");
@@ -758,7 +758,7 @@ public class Muriel implements AIController
     double enemyArmyHP = 0; // Count up the total size of the enemy forces.
     for( Commander key : unitLists.keySet() )
     {
-      for( Unit u : unitLists.get(key) ) enemyArmyHP += u.getHealth();
+      for( Unit u : unitLists.get(key) ) enemyArmyHP += u.getHP();
     }
 
     // Build a map of how threatened I am by each enemy unit type.
