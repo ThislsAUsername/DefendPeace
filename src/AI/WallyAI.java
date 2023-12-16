@@ -10,6 +10,7 @@ import Engine.GamePath.PathNode;
 import Engine.Utils.SearchNode;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
+import Engine.Combat.StrikeParams;
 import Engine.Combat.CombatContext.CalcType;
 import Engine.UnitActionLifecycles.BattleLifecycle.BattleAction;
 import Engine.UnitActionLifecycles.CaptureLifecycle.CaptureAction;
@@ -952,7 +953,7 @@ public class WallyAI extends ModularAI
               // Just... be aware, future me, in case that's a problem
               actor.setWeapon(null);
               target.setWeapon(null);
-              final AttackValue results = new AttackValue(ai, actor, target, ai.predMap);
+              final AttackValue results = new AttackValue(ai, actor, target, ai.predMap, true); // TODO true?
               final int fundsDelta = results.fundsDelta;
               if( fundsDelta <= bestFundsDelta )
                 continue;
@@ -1369,7 +1370,8 @@ public class WallyAI extends ModularAI
     // Choose the point on the path just out of our range as our 'goal', and try to move there.
     // This will allow us to navigate around large obstacles that require us to move away
     // from our intended long-term goal.
-    path.snip(unit.getMovePower(predMap) + 1); // Trim the path approximately down to size.
+    int unitMove = unit.getMovePower(predMap);
+    path.snip(unitMove + 1); // Trim the path approximately down to size.
     XYCoord pathPoint = path.getEndCoord(); // Set the last location as our goal.
 
     // Sort my currently-reachable move locations by distance from the goal,
@@ -1385,6 +1387,7 @@ public class WallyAI extends ModularAI
         new PriorityQueue<>(13, new EntryValueComparator<>());
 
     int minFundsDelta = -1 * evictionValue;
+    boolean ignoreWallValue = !avoidProduction;
     for( Utils.SearchNode xyc : destinations )
     {
 //      log(String.format("    is it safe to go to %s?", xyc));
@@ -1435,7 +1438,11 @@ public class WallyAI extends ModularAI
           continue;
       }
 
-      int wallGain = wallFundsValue(predMap, threatMap, unit, xyc, null);
+      int bonusPoints = 0;
+      if( xyc.equals(goal))
+        bonusPoints += 9001;
+      UnitContext actor = new UnitContext(gameMap, unit);
+      actor.setPath(movePath);
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(predMap, movePath, ignoreResident);
       // Since we're moving anyway, might as well try shooting the scenery
       for( GameActionSet actionSet : actionSets )
@@ -1445,28 +1452,27 @@ public class WallyAI extends ModularAI
         {
           for( GameAction attack : actionSet.getGameActions() )
           {
-            double damageValue = AICombatUtils.scoreAttackAction(unit, attack, predMap,
-                (results) -> {
-                  double loss   = Math.min(unit                 .getHP(), (int)results.attacker.getPreciseHPDamage());
-                  double damage = Math.min(results.defender.unit.getHP(), (int)results.defender.getPreciseHPDamage());
+            final AttackValue results;
 
-                  if( damage > loss ) // only shoot that which you hurt more than it hurts you
-                    return damage * results.defender.unit.getCost() / 10;
+            XYCoord targetXYC = attack.getTargetLocation();
+            Unit targetUnit = predMap.getResident(targetXYC);
+            if( null != targetUnit )
+              results = new AttackValue(this, actor, new UnitContext(targetUnit), predMap, ignoreWallValue);
+            else
+              results = new AttackValue(this, actor, targetXYC                  , predMap, ignoreWallValue);
+            final int fundsDelta = results.fundsDelta;
 
-                  return 0.;
-                }, (terrain, params) -> 0.01); // Attack terrain, but don't prioritize it over units
-
-            final int thisDelta = (int) damageValue + wallGain;
+            final int thisDelta = (int) fundsDelta + bonusPoints;
             if( thisDelta > minFundsDelta )
             {
-              log(String.format("      Best en passant attack deals %s", damageValue));
+              log(String.format("      Best en passant attack deals %s", fundsDelta));
               ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), attack);
               plan.path = movePath;
               plan.purpose = travelPurpose;
               plan.isAttack = true;
               plan.fromEviction = mustMove;
-              Unit target = gameMap.getResident(attack.getTargetLocation());
-              int defLevel = gameMap.getEnvironment(attack.getTargetLocation()).terrainType.getDefLevel();
+              Unit target = gameMap.getResident(targetXYC);
+              int defLevel = gameMap.getEnvironment(targetXYC).terrainType.getDefLevel();
               int range = attack.getMoveLocation().getDistance(target);
               boolean attackerMoved = 0 < attack.getMoveLocation().getDistance(unit);
               double hpDamage = CombatEngine.calculateOneStrikeDamage(unit, range, target, gameMap, defLevel, attackerMoved);
@@ -1482,8 +1488,11 @@ public class WallyAI extends ModularAI
           {
             int startDist = new XYCoord(unit).getDistance(pathPoint);
             int endDist   = movePath.getEndCoord().getDistance(pathPoint);
-            int walkGain  = startDist - endDist;
-            int waitScore = wallGain + walkGain;
+            int walkGain = startDist - endDist;
+            int wallPoints = 0;
+            if( !ignoreWallValue )
+              wallPoints = wallFundsValue(predMap, threatMap, unit, xyc, null);
+            int waitScore = movePath.getPathLength() + wallPoints + walkGain + bonusPoints;
             if( minFundsDelta < waitScore && movePath.getPathLength() > 1 ) // Just wait if we can't do anything cool
             {
               ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), move);
@@ -2025,7 +2034,18 @@ public class WallyAI extends ModularAI
     final int hploss, hpdamage, loss, damage;
     final int fundsDelta;
 
-    public AttackValue(WallyAI ai, UnitContext actor, UnitContext target, GameMap gameMap)
+    // Terrain-attack constructor
+    public AttackValue(WallyAI ai, UnitContext actor, XYCoord target, GameMap map, boolean ignoreWallValue)
+    {
+      MapLocation targetLoc = map.getLocation(target);
+      StrikeParams params = CombatEngine.calculateTerrainDamage(actor.unit, actor.path, targetLoc, map);
+      hploss     = 0;
+      hpdamage   = (int) params.calculateDamage();
+      loss       = 0;
+      damage     = 0;
+      fundsDelta = 1;
+    }
+    public AttackValue(WallyAI ai, UnitContext actor, UnitContext target, GameMap gameMap, boolean ignoreWallValue)
     {
       final int actorCost = actor.CO.getCost(actor.model);
       int targetValue = target.unit.getCost();
@@ -2044,7 +2064,7 @@ public class WallyAI extends ModularAI
       fundsDelta = (int) (damage*AGGRO_FUNDS_WEIGHT + wallValue)    -   loss    - (int) (actorCost*AGGRO_CHEAPER_WEIGHT);
       // This double-values counterdamage on units that aren't safe, but that seems pretty harmless?
     }
-    public static AttackValue forPlannedAttack(WallyAI ai, BattleAction ga, GameMap gameMap)
+    public static AttackValue forPlannedAttack(WallyAI ai, GameAction ga, GameMap gameMap, boolean ignoreWallValue)
     {
       XYCoord moveCoord = ga.getMoveLocation();
       XYCoord targetXYC = ga.getTargetLocation();
@@ -2055,10 +2075,13 @@ public class WallyAI extends ModularAI
       {
         // TODO: Consider evaluating this as a oneshot
         Unit tu = gameMap.getResident(targetXYC);
-        target = new UnitContext(gameMap, tu);
+        if( null != tu )
+          target = new UnitContext(gameMap, tu);
+        else
+          return new AttackValue(ai, actor, targetXYC, gameMap, ignoreWallValue);
       }
 
-      return new AttackValue(ai, actor, target, gameMap);
+      return new AttackValue(ai, actor, target, gameMap, ignoreWallValue);
     }
   }
   public int valueCapture(CaptureAction ga, GameMap gameMap)
@@ -2089,7 +2112,7 @@ public class WallyAI extends ModularAI
     int opportunityCost = 0;
     final UnitActionFactory apType = ap.action.getType();
     if( apType == UnitActionFactory.ATTACK )
-      opportunityCost = AttackValue.forPlannedAttack(ai, (BattleAction) ap.action, gameMap).fundsDelta;
+      opportunityCost = AttackValue.forPlannedAttack(ai, ap.action, gameMap, false).fundsDelta;
     if( apType == UnitActionFactory.CAPTURE )
       opportunityCost = ai.valueCapture((CaptureAction) ap.action, gameMap);
     if( apType == UnitActionFactory.WAIT )
