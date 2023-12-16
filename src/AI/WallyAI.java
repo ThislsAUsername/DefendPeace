@@ -528,7 +528,7 @@ public class WallyAI extends ModularAI
             tileCleared = true;
           else // If not, track state to find out if it's a kill
           {
-            target.damageHP(percentDamage / 10.0, true); // Destructively modifying the planning state is fine and convenient at this stage
+            target.damageHealth(percentDamage, true); // Destructively modifying the planning state is fine and convenient at this stage
             if( 1 > target.getHP() )
               tileCleared = true; // If we're already planning to put some
           }
@@ -604,7 +604,7 @@ public class WallyAI extends ModularAI
 
       // Figure out what I can do here.
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(ai.predMap, movePath);
-      double bestDamage = 0;
+      int bestDamage = 0;
       for( GameActionSet actionSet : actionSets )
       {
         // See if we have the option to attack.
@@ -616,12 +616,12 @@ public class WallyAI extends ModularAI
             Unit target = loc.getResident();
             if( null == target ) continue; // Ignore terrain
             final BattleSummary results = CombatEngine.simulateBattleResults(unit, target, gameMap, movePath, CALC);
-            double damage = valueUnit(target, loc, false) * Math.min(target.getHP(), results.defender.getPreciseHPDamage());
+            int damage = valueUnit(target, loc, false) * Math.min(target.getHealth(), results.defender.getPreciseHealthDamage()) / 10;
             if( damage > bestDamage )
             {
               bestDamage = damage;
               bestAttack = action;
-              percentDamage = (int) (10 * results.defender.getPreciseHPDamage());
+              percentDamage = results.defender.getPreciseHealthDamage();
             }
           }
         }
@@ -714,7 +714,7 @@ public class WallyAI extends ModularAI
           attacker.setPath(movePath);
 
           BattleSummary results = CombatEngine.simulateBattleResults(attacker, target, ai.predMap, CALC);
-          final int percentDamage = (int) (10 * results.defender.getPreciseHPDamage());
+          final int percentDamage = results.defender.getPreciseHealthDamage();
           damageTotal += percentDamage;
           ai.log(String.format("    %s hits for %s, total: %s", unit.toStringWithLocation(), percentDamage, target));
 
@@ -723,7 +723,7 @@ public class WallyAI extends ModularAI
 
           ai.updatePlan(this, unit, movePath, attack, isAttack, percentDamage);
           attackerOptions.remove(unit);
-          if( damageTotal >= target.getHP() * UnitModel.MAXIMUM_HP )
+          if( damageTotal >= target.getHealth() )
             break;
         }
       }
@@ -1587,14 +1587,14 @@ public class WallyAI extends ModularAI
       // Apply that damage knowledge
       if( threatContext.getHP() * 10 <= damagePercent )
         continue; // Dead people don't usually shoot
-      threatContext.alterHealthPercent(-1 * damagePercent);
+      threatContext.alterHealthNoRound(-1 * damagePercent);
 
       for( WeaponModel wep : tt.relevantWeapons )
       {
         threatContext.setWeapon(wep);
 
         BattleSummary results = CombatEngine.simulateBattleResults(threatContext, myUnit, gameMap, CalcType.OPTIMISTIC);
-        double hpdamage = results.defender.getPreciseHPDamage();
+        double hpdamage = results.defender.getPreciseHealthDamage();
 
         threat = Math.max(threat, hpdamage);
       }
@@ -1834,7 +1834,7 @@ public class WallyAI extends ModularAI
     {
       ModelForCO tmco = ent.getKey();
       // We don't currently have any huge cost-shift COs, so this isn't a big deal at present.
-      ent.setValue(ent.getValue() * tmco.co.getCost(tmco.um) / UnitModel.MAXIMUM_HP);
+      ent.setValue(ent.getValue() * tmco.co.getCost(tmco.um) / 10);
     }
 
     Queue<Entry<ModelForCO, Integer>> enemyModels =
@@ -2056,8 +2056,8 @@ public class WallyAI extends ModularAI
       BattleSummary results = CombatEngine.simulateBattleResults(actor, target, gameMap, CALC);
       hploss   = actor .getHP() - Math.max(0, results.attacker.after.getHP());
       hpdamage = target.getHP() - Math.max(0, results.defender.after.getHP());
-      loss     = (hploss   * actorCost  ) / UnitModel.MAXIMUM_HP;
-      damage   = (hpdamage * targetValue) / UnitModel.MAXIMUM_HP + captureValue;
+      loss     = (hploss   * actorCost  ) / 10;
+      damage   = (hpdamage * targetValue) / 10 + captureValue;
 
       int wallValue = ai.wallFundsValue(gameMap, ai.threatMap, actor.unit, actor.coord, target.unit);
       //                                 funds "gained"              funds lost     term to favor using cheaper units
@@ -2096,9 +2096,9 @@ public class WallyAI extends ModularAI
     if( success )
       return Integer.MAX_VALUE/42; // I can't think of very many good reasons to skip finishing a capture
 
-    double yeetFactor = valueTerrain(unit.CO, gameMap.getEnvironment(moveCoord).terrainType);
+    int yeetFactor = valueTerrain(unit.CO, gameMap.getEnvironment(moveCoord).terrainType);
     // Since we can't be certain of a capture, ballpark a day's income per full HP inf's worth of capping
-    return (int) (capValue * yeetFactor) / UnitModel.MAXIMUM_HP;
+    return (int) (capValue * yeetFactor) / 10;
   }
 
   private static int valueAction(WallyAI ai, GameMap gameMap, ActionPlan ap)
@@ -2155,8 +2155,8 @@ public class WallyAI extends ModularAI
       int damagePercent = 0;
       for( int hit : mapPlan[x][y].damageInstances.values() )
         damagePercent += hit;
-      int realHP = resSource.getHP();
-      if( damagePercent >= realHP * UnitModel.MAXIMUM_HP )
+      int realHealth = resSource.getHealth();
+      if( damagePercent >= realHealth )
         return returnLoc; // If we think it will be dead, don't report its presence
 
       Unit resident = resSource.unit;
