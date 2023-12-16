@@ -147,14 +147,14 @@ public class Venge extends Commander
     {
       if( params.isCounter )
       {
-        params.attackerHP = UnitModel.MAXIMUM_HEALTH;
+        params.attackerHealth = UnitModel.MAXIMUM_HEALTH;
       }
       params.attackPower += buff;
     }
     @Override
     public void modifyUnitDefenseAgainstUnit(BattleParams params)
     {
-      params.defenderHP = UnitModel.MAXIMUM_HEALTH;
+      params.defenderHealth = UnitModel.MAXIMUM_HEALTH;
       params.defenseSubtraction += buff;
     }
   }

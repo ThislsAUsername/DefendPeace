@@ -31,7 +31,7 @@ public class CombatEngine
 
   /**
    * Assuming Commanders get weird, this allows for you to check the results of combat without perfect map info.
-   * This also provides un-capped damage estimates, so perfect HP info isn't revealed by the map.
+   * This also provides un-capped damage estimates, so perfect health info isn't revealed by the map.
    */
   public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY, CalcType calcType )
   {
@@ -79,7 +79,7 @@ public class CombatEngine
     context.applyModifiers();
     boolean isSim = context.calcType.isSim();
 
-    if (isSim) // When simulating, round up unit HP to avoid leaking precise health info
+    if (isSim) // When simulating, round up unit health to avoid leaking precise health info
     {
       context.attacker.alterHealth(0);
       context.defender.alterHealth(0);
