@@ -22,11 +22,12 @@ public abstract class UnitState implements Serializable
   public Commander CO;
 
   /**
-   * HP/health determines the current durability of a unit.<p>
-   * It's typically in range [1,100]. A unit at 0 HP is dead.<p>
-   * HP is used to scale unit effectiveness, and normally rounds up to the next 10 for this purpose.<p>
-   * HP is also shown only in this [1,10] scale, so the last digit of the health number is considered hidden information.<p>
-   * As such, direct access of this value should only be used when you have a specific reason to choose it over getHP()<p>
+   * Health determines the current durability of a unit.<p>
+   * Health is typically in range [1,100]. A unit at 0 health is dead.<p>
+   * Health is used to scale unit effectiveness, and normally rounds up to the next 10 for this purpose.<p>
+   * The final digit is truncated for display (to a nominal [1,10] scale), and values in this scale are known as "HP"<p>
+   * Because the GUI does not show the final digit, it is considered hidden information.<p>
+   * As such, direct access of this value should only be done when you have a specific reason to choose it over getHealth()/getHP()<p>
    */
   public int health;
 
@@ -109,10 +110,10 @@ public abstract class UnitState implements Serializable
   }
 
   /**
-   * Reduces HP by the specified amount.
+   * Reduces health by the specified amount.
    * <p>Enforces a minimum (optional) of 0.
    * <p>Use this for lethal damage, especially unit-on-unit violence. Do not use for healing.
-   * @return the change in *rounded* HP
+   * @return the change in *rounded* health
    */
   public int damageHP(int damage)
   {
@@ -130,7 +131,7 @@ public abstract class UnitState implements Serializable
   }
 
   /**
-   * Increases HP by the specified amount.
+   * Increases health by the specified amount.
    * <p>Enforces a minimum of 1, and a maximum (optional) of MAXIMUM_HP.
    * <p>When healing, rounds up (optional) to the next 10 (e.g. 25 + 20 = 45 -> 50)
    * <p>Use this for most non-combat HP changes (mass damage/silos/healing).
@@ -169,10 +170,7 @@ public abstract class UnitState implements Serializable
   }
 
   /**
-   * Increases health by the specified amount.
-   * <p>Enforces a minimum of 1, and a maximum (optional) of MAXIMUM_HP.
-   * <p>Does not round.
-   * <p>Use this when you want precise non-combat health changes, or want to heal without rounding up.
+   * Increases health by the specified amount, without rounding up.
    * @return the change in *rounded* health value (may be more or less than the actual change)
    */
   public int alterHealthNoRound(int percentChange)
