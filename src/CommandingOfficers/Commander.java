@@ -314,14 +314,14 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
 
     return power;
   }
-  public int calculateMassDamageCharge(Unit minion, int lostHP)
+  public int calculateMassDamageCharge(Unit minion, int lostHealth)
   {
     if( minion == null )
       return 0;
 
     int power = 0; // value in funds of the charge we're getting
 
-    power += (lostHP * getCost(minion.model)) / UnitModel.MAXIMUM_HEALTH;
+    power += (lostHealth * getCost(minion.model)) / UnitModel.MAXIMUM_HEALTH;
 
     return power;
   }

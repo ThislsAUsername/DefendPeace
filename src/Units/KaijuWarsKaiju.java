@@ -134,7 +134,7 @@ public class KaijuWarsKaiju
     }
   }
 
-  public static final int BIRD_LAND_HP = 100; // Should match the first chunk below
+  public static final int BIRD_LAND_HEALTH = 100; // Should match the first chunk below
   // These are the chunks of HP each Kaiju has in each tier of movement (they get slower as they take damage)
   // Index = move points
   public static final int[] ALPHA_CHUNKS = { 0, 0, 120, 180,  80,  70,  60 };
@@ -250,7 +250,7 @@ public class KaijuWarsKaiju
       KaijuStateTracker kaijuTracker = StateTracker.instance(map.game, KaijuStateTracker.class);
       // If we have Swoop and are in heal mode
       if( kaijuTracker.kaijuAbilityTier.get(self) != KaijuAbilityTier.BASIC
-          && BIRD_LAND_HP >= self.getHealth() )
+          && BIRD_LAND_HEALTH >= self.getHealth() )
       {
         // Setting the tracker state here feels wrong
         kaijuTracker.abilityUsedShort(self, BirdSwoopFactory.class);
@@ -258,7 +258,7 @@ public class KaijuWarsKaiju
         // If we're about to go above the land HP, become flying
         // TODO: Since this is only handled here and there's no HealUnitEvent listener, this won't account for healing CO powers
         // ... nor, in fact, will healing CO powers actually heal the Kaiju over 100 HP by default
-        if( self.getHealth() == BIRD_LAND_HP )
+        if( self.getHealth() == BIRD_LAND_HEALTH )
           events.add(new TransformLifecycle.TransformEvent(self, airTurkey));
       }
       return events;
@@ -600,7 +600,7 @@ public class KaijuWarsKaiju
       }
 
       // Make the birb sit if he's low HP
-      if( hp <= KaijuWarsKaiju.BIRD_LAND_HP )
+      if( hp <= KaijuWarsKaiju.BIRD_LAND_HEALTH )
         tryDevolveHellTurkey(unit, events);
 
       XYCoord buildCoords = new XYCoord(unit);
@@ -655,7 +655,7 @@ public class KaijuWarsKaiju
         abilityUsedShort(victim, SnekMod.class);
       }
 
-      if( summary.defender.after.getHealth() > KaijuWarsKaiju.BIRD_LAND_HP )
+      if( summary.defender.after.getHealth() > KaijuWarsKaiju.BIRD_LAND_HEALTH )
         return null;
 
       GameEventQueue events = new GameEventQueue();
@@ -664,15 +664,15 @@ public class KaijuWarsKaiju
     }
     // Land Hell Turkey if it takes too much damage
     @Override
-    public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP)
+    public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHealth)
     {
       GameEventQueue events = new GameEventQueue();
-      for( Entry<Unit, Integer> pair : lostHP.entrySet() )
+      for( Entry<Unit, Integer> pair : lostHealth.entrySet() )
       {
         final Unit victim = pair.getKey();
         if( !(victim.model instanceof KaijuUnitModel) )
           continue;
-        if( pair.getValue() + KaijuWarsKaiju.BIRD_LAND_HP < victim.getHealth() )
+        if( pair.getValue() + KaijuWarsKaiju.BIRD_LAND_HEALTH < victim.getHealth() )
           continue;
         tryDevolveHellTurkey(victim, events);
       }

@@ -319,14 +319,14 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
    * Track mass damage done to my units, and get ability power based on it.
    */
   @Override
-  public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHP)
+  public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHealth)
   {
     if( attacker != null && this == attacker.army )
       return null; // Punching yourself shouldn't make you angry
     if( awbwDeniesCharge() )
       return null;
 
-    for( Entry<Unit, Integer> damageEntry : lostHP.entrySet() )
+    for( Entry<Unit, Integer> damageEntry : lostHealth.entrySet() )
     {
       Unit minion = damageEntry.getKey();
       if( this != minion.CO.army )

@@ -218,7 +218,7 @@ public class KaijuActions
 
         // If we're Hell Turkey and we'll drop below the landing threshold, land.
         if( kaijuState.model instanceof HellTurkey &&
-            KaijuWarsKaiju.BIRD_LAND_HP >= kaijuState.getHealth() )
+            KaijuWarsKaiju.BIRD_LAND_HEALTH >= kaijuState.getHealth() )
         {
           HellTurkeyLand devolveToType = ((HellTurkey) kaijuState.model).turkeyLand;
           crush.events.add(new TransformLifecycle.TransformEvent(kaijuState.unit, devolveToType));
