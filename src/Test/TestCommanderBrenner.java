@@ -114,10 +114,10 @@ public class TestCommanderBrenner extends TestCase
 
     performGameAction(new BattleLifecycle.BattleAction(testMap, mech, GamePath.stayPut(mech), 1, 2), game);
 
-    testPassed &= validate(mech.health < UnitModel.MAXIMUM_HP, "    Mech took no counter.");
+    testPassed &= validate(mech.health < UnitModel.MAXIMUM_HEALTH, "    Mech took no counter.");
     testPassed &= validate(Brenner.getAbilityPower() == 0, "    Brenner got charge with no zone involvement.");
 
-    int expectedAttackerCharge = inf.getHPFactor();
+    int expectedAttackerCharge = inf.getHP();
     performGameAction(new BattleLifecycle.BattleAction(testMap, aa, GamePath.stayPut(aa), 1, 2), game);
     testPassed &= validate(Brenner.getAbilityPower() == expectedAttackerCharge, "    Brenner got the wrong amount of charge.");
     testPassed &= validate(testMap.getLocation(1, 2).getResident() == null, "    Defender is still on the map.");
@@ -133,8 +133,8 @@ public class TestCommanderBrenner extends TestCase
 
     Unit mech = addUnit(testMap, Brenner, UnitModel.MECH, 3, 2);
     Unit COU  = addUnit(testMap, Brenner, UnitModel.TRANSPORT, 4, 2);
-    mech.damageHP(20);
-    COU .damageHP(20);
+    mech.damageHealth(20);
+    COU .damageHealth(20);
     UseAbilityFactory abilityer = new RuinedCommander.UseAbilityFactory(Brenner.myAbilities.get(0));
 
     Brenner.initTurn(testMap);
@@ -156,8 +156,8 @@ public class TestCommanderBrenner extends TestCase
     performGameAction(abilityer.getPossibleActions(testMap, GamePath.stayPut(COU), COU).getSelected(), game);
 
     // Check that the ability did what it was supposed to.
-    testPassed &= validate( COU .getHP() == UnitModel.MAXIMUM_HP, "    Brenner failed to heal himself.");
-    testPassed &= validate( mech.getHP() == UnitModel.MAXIMUM_HP, "    Brenner failed to heal a loaded unit.");
+    testPassed &= validate( COU .getHealth() == UnitModel.MAXIMUM_HEALTH, "    Brenner failed to heal himself.");
+    testPassed &= validate( mech.getHealth() == UnitModel.MAXIMUM_HEALTH, "    Brenner failed to heal a loaded unit.");
 
     return testPassed;
   }
