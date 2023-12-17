@@ -252,7 +252,7 @@ public abstract class GameAction
           ArrayList<Unit> ary = new ArrayList<Unit>();
           ary.add(obstacle);
           boolean fatal = true;
-          MassDamageEvent mde = new MassDamageEvent(who, ary, obstacle.getHP() + 1, fatal);
+          MassDamageEvent mde = new MassDamageEvent(who, ary, obstacle.getHealth() + 1, fatal);
           buildEvents.add(mde);
           // Poor sap died; Check if his CO lost the game. Stomping your own unit is silly, but won't cause a loss.
           final boolean canLose = who != obstacle.CO;
@@ -444,7 +444,7 @@ public abstract class GameAction
         ArrayList<Unit> ary = new ArrayList<Unit>();
         ary.add(obstacle);
         boolean fatal = true;
-        MassDamageEvent mde = new MassDamageEvent(unit.CO, ary, obstacle.getHP()+1, fatal);
+        MassDamageEvent mde = new MassDamageEvent(unit.CO, ary, obstacle.getHealth()+1, fatal);
         subEvents.add(mde);
         Utils.enqueueDeathEvent(obstacle, subEvents);
       }
@@ -455,7 +455,7 @@ public abstract class GameAction
         ArrayList<Unit> ary = new ArrayList<Unit>();
         ary.add(unit);
         boolean fatal = true;
-        MassDamageEvent mde = new MassDamageEvent(unit.CO, ary, unit.getHP()+1, fatal);
+        MassDamageEvent mde = new MassDamageEvent(unit.CO, ary, unit.getHealth()+1, fatal);
         subEvents.add(mde);
         Utils.enqueueDeathEvent(unit, subEvents);
       }

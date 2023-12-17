@@ -10,7 +10,7 @@ public class UnitDieEvent implements GameEvent
 {
   private Unit unit;
   private XYCoord where;
-  private Integer hpBeforeDeath;
+  private Integer healthBeforeDeath;
 
   public UnitDieEvent(Unit unit)
   {
@@ -20,7 +20,7 @@ public class UnitDieEvent implements GameEvent
   {
     this.unit = unit;
     this.where = where;
-    this.hpBeforeDeath = unit.getHP();
+    this.healthBeforeDeath = unit.getHealth();
   }
 
   @Override
@@ -32,7 +32,7 @@ public class UnitDieEvent implements GameEvent
   @Override
   public GameEventQueue sendToListener(GameEventListener listener)
   {
-    return listener.receiveUnitDieEvent( unit, where, hpBeforeDeath );
+    return listener.receiveUnitDieEvent( unit, where, healthBeforeDeath );
   }
 
   @Override
@@ -40,7 +40,7 @@ public class UnitDieEvent implements GameEvent
   {
     // Set HP to 0. One could make a UnitDieEvent on a healthy
     // unit, and we don't want any ambiguity after the fact.
-    unit.damageHP(unit.getHP()+1);
+    unit.damageHealth(unit.getHealth());
 
     // Remove the Unit from the map and from the CO list.
     gameMap.removeUnit(unit);

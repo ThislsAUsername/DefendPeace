@@ -87,7 +87,7 @@ public class Cinder extends Commander
     XYCoord buildCoords = new XYCoord(unit.x, unit.y);
     if( this == unit.CO && army.myView.isLocationValid(buildCoords) )
     {
-      unit.alterHP(-2);
+      unit.alterHealth(-20);
       unit.isTurnOver = false;
     }
     return null;
@@ -133,7 +133,7 @@ public class Cinder extends Commander
     private static final long serialVersionUID = 1L;
     private static final String SEAR_NAME = "Sear";
     private static final int SEAR_COST = 5;
-    private static final int SEAR_WOUND = -1;
+    private static final int SEAR_WOUND = -10;
 
     SearAbility(Cinder cinder)
     {
@@ -150,7 +150,7 @@ public class Cinder extends Commander
         {
           unit.resupply(); // the missing HP has to go somewhere...
         }
-        unit.alterHP(SEAR_WOUND);
+        unit.alterHealth(SEAR_WOUND);
         unit.isTurnOver = false;
       }
     }
@@ -213,12 +213,12 @@ public class Cinder extends Commander
       // Since an active CO was part of the fight, reactivate the attacker at the cost of HP.
       GameEventQueue results = new GameEventQueue();
       Unit minion = battleInfo.attacker.unit;
-      // Cost starts at 1, then adds one for each subsequent attack
-      int refreshCost = 1+attackCounts.getCountFor(army, minion);
-      int hp = minion.getHP();
-      if( hp > refreshCost )
+      // Cost starts at 10, then adds 10 for each subsequent attack
+      int refreshCost = 10 * (1+attackCounts.getCountFor(army, minion));
+      int health = minion.getHealth();
+      if( health > refreshCost )
       {
-        minion.alterHP(-refreshCost);
+        minion.alterHealth(-refreshCost);
         minion.isTurnOver = false;
         attackCounts.incrementCount(army, minion);
       }

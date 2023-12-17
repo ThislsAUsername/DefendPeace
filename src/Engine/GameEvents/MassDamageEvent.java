@@ -10,29 +10,28 @@ import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
-import Units.UnitState;
 
 /**
- * Deals damage to an arbitrary number of units, without invoking combat
- * Lethality only affects whether to expect units to die, and thus allow all of their HP to be put into the victim map
+ * Deals damage to an arbitrary number of units, without invoking combat<p>
+ * Lethality only affects whether to *expect* units to die, and thus allow all of their health to be put into the victim map<p>
  * Note: Damage dealt will not be tracked correctly if the event is executed twice
  */
 public class MassDamageEvent implements GameEvent
 {
   private final Commander attacker;
-  // Records how many HP each victim lost; doubles as our victim storage area
+  // Records how much health each victim lost; doubles as our victim storage area
   private Map<Unit, Integer> victims = new HashMap<Unit, Integer>();
-  public final double damage;
+  public final int damage;
   public final boolean lethal;
   public final boolean shouldStun;
 
   public MassDamageEvent(Commander attacker, Collection<Unit> pVictims,
-      double pDamage, boolean isLethal)
+      int pDamage, boolean isLethal)
   {
     this(attacker, pVictims, pDamage, isLethal, false);
   }
   public MassDamageEvent(Commander attacker, Collection<Unit> pVictims,
-      double pDamage, boolean isLethal, boolean pStun)
+      int pDamage, boolean isLethal, boolean pStun)
   {
     if( pDamage < 0 )
       throw new ArithmeticException("Cannot inflict negative damage!");
@@ -63,17 +62,17 @@ public class MassDamageEvent implements GameEvent
   {
     for (Unit victim : victims.keySet())
     {
-      int deltaHP = 0;
+      int deltaHealth = 0;
       if( lethal )
-        deltaHP = victim.damageHP(damage);
+        deltaHealth = victim.damageHealth(damage);
       else
-        deltaHP = victim.alterHealthPercent(-1 * UnitState.healthFromHP(damage));
-      int lostHP = -deltaHP;
+        deltaHealth = victim.alterHealth(-1 * damage);
+      int lostHealth = -deltaHealth;
 
       if( shouldStun )
         victim.isStunned = true;
 
-      victims.put(victim, lostHP);
+      victims.put(victim, lostHealth);
     }
   }
 

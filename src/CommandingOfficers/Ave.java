@@ -644,7 +644,7 @@ public class Ave extends Commander
     private static final int OBLIDO_COST = 8;
     private static final int OBLIDO_BUFF = 20;
     private static final int OBLIDO_RANGE = 2;
-    private static final int OBLIDO_DAMAGE = 2;
+    private static final int OBLIDO_DAMAGE = 20;
 
     UnitModifier damageMod = null;
     Ave Ave;
@@ -716,7 +716,7 @@ public class Ave extends Commander
           output.add(new DamagePopup(
                          coord,
                          myCommander.myColor,
-                         Math.min(victim.getHP()-1, OBLIDO_DAMAGE)*10 + "%"));
+                         Math.min(victim.getHealth()-1, OBLIDO_DAMAGE) + "%"));
       }
       for( XYCoord coord : affectedTiles )
         if( gameMap.getEnvironment(coord).terrainType == TerrainType.FOREST )

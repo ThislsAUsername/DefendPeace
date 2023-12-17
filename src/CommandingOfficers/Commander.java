@@ -47,7 +47,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public Color myColor;
   public Faction faction;
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
-  public static final int CHARGERATIO_HP = 100; // Funds value of 1 HP damage dealt, for the purpose of power charge
+  public static final int CHARGERATIO_HP = 100; // Funds value of 10 HP damage dealt, for the purpose of power charge
   public int incomeAdjustment = 0; // Commander subclasses can increase/decrease income if needed.
   private int myAbilityPower = 0;
 
@@ -285,7 +285,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   // TODO: determine if this needs parameters, and if so, what?
   public int getRepairPower()
   {
-    return 2;
+    return 20;
   }
 
   public ArrayList<GameOverlay> getMyOverlays(GameMap gameMap, boolean amIViewing)
@@ -300,28 +300,28 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     if( minion == null || enemy == null )
       return 0;
 
-    int myHPLoss  = minion.getHPDamage();
-    int myHPDealt = enemy.getHPDamage();
+    int guiHPLoss  = minion.getHealthDamage() / 10;
+    int guiHPDealt =  enemy.getHealthDamage() / 10;
 
     int power = 0; // value in funds of the charge we're getting
 
     // Add up the funds value of the damage done to both participants.
-    power += myHPLoss / UnitModel.MAXIMUM_HP * minion.unit.getCost();
+    power += guiHPLoss * minion.unit.getCost() / 10;
     // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
-    power += myHPDealt / UnitModel.MAXIMUM_HP * enemy.unit.getCost() / 2;
+    power += guiHPDealt * enemy.unit.getCost() / 10 / 2;
     // Add power based on HP damage dealt; rewards aggressiveness.
-    power += myHPDealt * CHARGERATIO_HP;
+    power += guiHPDealt * CHARGERATIO_HP;
 
     return power;
   }
-  public int calculateMassDamageCharge(Unit minion, int lostHP)
+  public int calculateMassDamageCharge(Unit minion, int lostHealth)
   {
     if( minion == null )
       return 0;
 
     int power = 0; // value in funds of the charge we're getting
 
-    power += (lostHP * getCost(minion.model)) / UnitModel.MAXIMUM_HP;
+    power += (lostHealth * getCost(minion.model)) / UnitModel.MAXIMUM_HEALTH;
 
     return power;
   }

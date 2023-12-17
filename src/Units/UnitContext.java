@@ -28,7 +28,6 @@ public class UnitContext extends UnitState
   public GamePath path;
   public XYCoord coord;
 
-  public int maxHP;
   public int attackPower;
   public int defensePower;
   public int movePower;
@@ -112,7 +111,6 @@ public class UnitContext extends UnitState
     unit = other.unit;
     path = other.path;
     coord = other.coord;
-    maxHP = other.maxHP;
     attackPower = other.attackPower;
     defensePower = other.defensePower;
     env = other.env;
@@ -124,7 +122,6 @@ public class UnitContext extends UnitState
   }
   public void initModel()
   {
-    maxHP = UnitModel.MAXIMUM_HP;
     attackPower = UnitModel.DEFAULT_STAT_RATIO;
     defensePower = UnitModel.DEFAULT_STAT_RATIO;
     movePower = model.baseMovePower;

@@ -9,8 +9,8 @@ public class UnitDelta implements Serializable
   private static final long serialVersionUID = 1L;
 
   public final UnitContext before, after;
-  public final int deltaHP, deltaAmmo, deltaFuel, deltaMaterials;
-  public final double deltaPreciseHP;
+  public final int deltaHealth, deltaAmmo, deltaFuel, deltaMaterials;
+  public final int deltaPreciseHealth;
 
   public final UnitModel model;
   public final Unit unit;
@@ -21,8 +21,8 @@ public class UnitDelta implements Serializable
     super();
     before = start;
     after = end;
-    deltaHP = after.getHP() - before.getHP();
-    deltaPreciseHP = after.getPreciseHP() - before.getPreciseHP();
+    deltaHealth = after.getHealth() - before.getHealth();
+    deltaPreciseHealth = after.health - before.health;
     deltaAmmo = after.ammo - before.ammo;
     deltaFuel = after.fuel - before.fuel;
     deltaMaterials = after.materials - before.materials;
@@ -32,12 +32,12 @@ public class UnitDelta implements Serializable
     CO = after.CO;
   }
 
-  public int getHPDamage()
+  public int getHealthDamage()
   {
-    return deltaHP * -1;
+    return deltaHealth * -1;
   }
-  public double getPreciseHPDamage()
+  public int getPreciseHealthDamage()
   {
-    return deltaPreciseHP * -1;
+    return deltaPreciseHealth * -1;
   }
 }

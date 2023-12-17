@@ -22,12 +22,14 @@ public abstract class UnitState implements Serializable
   public Commander CO;
 
   /**
-   * HP determines the current actual durability of a unit.
-   * It's typically in range [1-10]. A unit at 0 HP is dead.
-   * Health is HP value as a percentage, thus ~10x the HP value.
-   * When determining HP, health must always be rounded up.
+   * Health determines the current durability of a unit.<p>
+   * Health is typically in range [1,100]. A unit at 0 health is dead.<p>
+   * Health is used to scale unit effectiveness, and normally rounds up to the next 10 for this purpose.<p>
+   * The final digit is truncated for display (to a nominal [1,10] scale), and values in this scale are known as "HP"<p>
+   * Because the GUI does not show the final digit, it is considered hidden information.<p>
+   * As such, direct access of this value should only be done when you have a specific reason to choose it over getHealth()/getHP()<p>
    */
-  protected int health;
+  public int health;
 
   protected int captureProgress;
   protected MapLocation captureTarget;
@@ -41,7 +43,7 @@ public abstract class UnitState implements Serializable
     fuel = model.maxFuel;
     materials = model.maxMaterials;
     isTurnOver = true;
-    health = healthFromHP(UnitModel.MAXIMUM_HP);
+    health = UnitModel.MAXIMUM_HEALTH;
     captureProgress = 0;
     captureTarget = null;
 
@@ -87,118 +89,89 @@ public abstract class UnitState implements Serializable
 
   public boolean isHurt()
   {
-    return health < healthFromHP(UnitModel.MAXIMUM_HP);
+    return getHealth() < UnitModel.MAXIMUM_HEALTH;
+  }
+  public int getHealth()
+  {
+    return roundHealth(health);
   }
   public int getHP()
   {
-    return (int) Math.ceil(healthToHP(health));
+    return roundHealth(health) / 10;
   }
-  /** @return value in range [0-1.0]; represents the unit's current effectiveness */
-  public double getHPFactor()
+  /** Rounds the input up to the nearest 10 (accounting for negatives) */
+  public static int roundHealth(int health)
   {
-    return getHP() / (double) UnitModel.MAXIMUM_HP;
-  }
-  /** @return un-rounded HP */
-  public double getPreciseHP()
-  {
-    return healthToHP(health);
-  }
-  public static double healthToHP(int input)
-  {
-    return ((double) input) / 10;
-  }
-  public static int healthFromHP(double input)
-  {
-    return (int) (input * 10);
+    if( health >= 0 )
+      //     "round up", then kill the last digit
+      return (health + 9) / 10 * 10;
+    // Truncation rounds toward zero, so we need to round down for negative values
+    return (health - 9) / 10 * 10;
   }
 
   /**
-   * Reduces HP by the specified amount.
+   * Reduces health by the specified amount.
    * <p>Enforces a minimum (optional) of 0.
    * <p>Use this for lethal damage, especially unit-on-unit violence. Do not use for healing.
-   * @return the change in HP
+   * @return the change in *rounded* health
    */
-  public int damageHP(double damage)
+  public int damageHealth(int damage)
   {
-    return damageHP(damage, false);
+    return damageHealth(damage, false);
   }
-  public int damageHP(double damage, boolean allowOverkill)
+  public int damageHealth(int damage, boolean allowOverkill)
   {
     if( damage < 0 )
       throw new ArithmeticException("Cannot inflict negative damage!");
-    int before = getHP();
-    health = health - healthFromHP(damage);
+    int before = getHealth();
+    health = health - damage;
     if( !allowOverkill )
       health = Math.max(0, health);
-    return getHP() - before;
+    return getHealth() - before;
   }
 
   /**
-   * Increases HP by the specified amount.
-   * <p>Enforces a minimum of 0.1, and a maximum (optional) of MAXIMUM_HP.
-   * <p>When healing, rounds health up to a whole HP (e.g. 2.5 + 2 = 4.5 -> 5.0)
+   * Increases health by the specified amount.
+   * <p>Enforces a minimum of 1, and a maximum (optional) of MAXIMUM_HEALTH.
+   * <p>When healing, rounds up (optional) to the next 10 (e.g. 25 + 20 = 45 -> 50)
    * <p>Use this for most non-combat HP changes (mass damage/silos/healing).
-   * @return the change in HP
+   * @return the change in *rounded* health value (may be more or less than the actual change)
    */
-  public int alterHP(int change)
+  public int alterHealth(int change)
   {
-    return alterHP(change, false);
+    return alterHealth(change, true, false);
   }
-  public int alterHP(int change, boolean allowOver)
+  public int alterHealth(int change, boolean allowOver)
   {
-    final int oldHP = getHP();
+    return alterHealth(change, true, allowOver);
+  }
+  public int alterHealth(int change, boolean roundUp, boolean allowOver)
+  {
+    final int oldHealth = getHealth();
     int realChange = change;
 
     // Only enforce the maximum HP if we're healing
     if( !allowOver && change > 0 )
     {
       // If we already have overhealing, treat current HP as the max to avoid e.g. heals reducing HP
-      final int capHP = Math.max(oldHP, UnitModel.MAXIMUM_HP);
+      final int capHealth = Math.max(oldHealth, UnitModel.MAXIMUM_HEALTH);
       // Apply the cap as needed
-      final int newHP = Math.min(capHP, oldHP + change);
+      final int newHealth = Math.min(capHealth, oldHealth + change);
       // Figure out whether that reduces our healing
-      realChange = Math.min(change, newHP - oldHP);
+      realChange = Math.min(change, newHealth - health);
     }
 
-    health = Math.max(1, health + healthFromHP(realChange));
+    health = Math.max(1, health + realChange);
     // Round HP up, if healing
-    if( change >= 0 )
-      health = healthFromHP(getHP());
+    if( roundUp && change >= 0 )
+      health = getHealth();
 
-    return getHP() - oldHP;
+    return getHealth() - oldHealth;
   }
 
-  /**
-   * Increases *fractional health* by the specified amount.
-   * <p>Enforces a minimum of 0.1, and a maximum (optional) of MAXIMUM_HP.
-   * <p>Does not round.
-   * <p>Use this when you want precise non-combat health changes, or want to heal without rounding up.
-   * @return the change in HP
-   */
-  public int alterHealthPercent(int percentChange)
+  public int alterHealthNoRound(int percentChange)
   {
-    return alterHealthPercent(percentChange, false);
-  }
-  public int alterHealthPercent(int percentChange, boolean allowOver)
-  {
-    final int oldHP = getHP();
-    final int changeHP = (int) Math.ceil(healthToHP(percentChange));;
-    int realPercentChange = percentChange;
-
-    // Only enforce the maximum HP if we're healing
-    if( !allowOver && percentChange > 0 )
-    {
-      // If we already have overhealing, treat current HP as the max to avoid e.g. heals reducing HP
-      final int capHP = Math.max(oldHP, UnitModel.MAXIMUM_HP);
-      // Apply the cap as needed
-      final int newHP = Math.min(capHP, oldHP + changeHP);
-      // Figure out whether that reduces our healing
-      realPercentChange = Math.min(realPercentChange, healthFromHP(newHP) - health);
-    }
-
-    health = Math.max(1, health + realPercentChange);
-
-    return getHP() - oldHP;
+    return alterHealth(percentChange, false, false);
   }
 
 

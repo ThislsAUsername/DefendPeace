@@ -91,6 +91,13 @@ public class Muriel implements AIController
   private final double COST_EFFECTIVENESS_HIGH = 1.25;
   private final double INFANTRY_PROPORTION = 0.5;
 
+  private class UnitHealthThresholds
+  {
+    static final int HEALTHY = 80;
+    static final int ACTION_READY = 70;
+    static final int MIN_USABLE_HEALTH = 60;
+  }
+
   private ArrayList<XYCoord> nonAlliedProperties; // set from AIUtils.
 
   public Muriel(Army co)
@@ -155,17 +162,17 @@ public class Muriel implements AIController
     UnitMatchupAndMetaInfo umami = myUnitEffectMap.get(new UnitModelPair(myModel, otherModel));
     if( null != umami ) return umami;
 
-    double myDamage = CombatEngine.calculateOneStrikeDamage(myUnit, 1, otherUnit, myArmy.myView, 0, myUnit.model.hasMobileWeapon());
+    int myDamage = CombatEngine.calculateOneStrikeDamage(myUnit, 1, otherUnit, myArmy.myView, 0, myUnit.model.hasMobileWeapon());
 
     // Now go the other way.
-    double otherDamage = CombatEngine.calculateOneStrikeDamage(otherUnit, 1, myUnit, myArmy.myView, 0, false);
+    int otherDamage = CombatEngine.calculateOneStrikeDamage(otherUnit, 1, myUnit, myArmy.myView, 0, false);
 
     // Calculate and store the damage and cost-effectiveness ratios.
     double damageRatio = 0;
     double invRatio = 0;
     if( myDamage != 0 && otherDamage != 0)
     {
-      damageRatio = myDamage / otherDamage;
+      damageRatio = (double) (myDamage) / otherDamage;
       invRatio = 1/damageRatio;
     }
     if( myDamage == 0 ) damageRatio = 0;
@@ -195,7 +202,7 @@ public class Muriel implements AIController
     // Order the units by cost.
     final ArrayList<Unit> armyUnits = myArmy.getUnits();
     Collections.sort(armyUnits, (Unit u1, Unit u2) ->
-      (int)(u2.getCost()*u2.getHP() - u1.getCost()*u1.getHP()));
+      (int)(u2.getCost()*u2.getHealth() - u1.getCost()*u1.getHealth()));
 
     // If we are already capturing any of these properties, remove them from the list.
     for( Unit unit : armyUnits )
@@ -351,7 +358,7 @@ public class Muriel implements AIController
     //////////////////////////////////////////////////////////////////
     // If we are currently healing, stick around, unless that would stem the tide of reinforcements.
     MapLocation loc = gameMap.getLocation(unit.x, unit.y);
-    if( (unit.getHP() <= 8) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) && (loc.getOwner() == unit.CO) )
+    if( (unit.getHealth() <= UnitHealthThresholds.HEALTHY) && unit.model.canRepairOn(loc) && (loc.getEnvironment().terrainType != TerrainType.FACTORY) && (loc.getOwner() == unit.CO) )
     {
       log(String.format("%s is damaged and on a repair tile. Will continue to repair for now.", unit.toStringWithLocation()));
       ArrayList<GameActionSet> actionSet = unit.getPossibleActions(gameMap, GamePath.stayPut(unit));
@@ -388,9 +395,9 @@ public class Muriel implements AIController
       shouldResupply = true;
     }
     // If we are low on HP, go heal.
-    if( unit.getHP() < 6 ) // Arbitrary threshold
+    if( unit.getHealth() < UnitHealthThresholds.MIN_USABLE_HEALTH ) // Arbitrary threshold
     {
-      log(String.format("%s is damaged (%s HP).", unit.toStringWithLocation(), unit.getHP()));
+      log(String.format("%s is damaged (%s health).", unit.toStringWithLocation(), unit.getHealth()));
       shouldResupply = true;
     }
     // If we are out of ammo.
@@ -452,10 +459,10 @@ public class Muriel implements AIController
         // Sift through all attack actions we can perform.
         double damageValue = AICombatUtils.scoreAttackAction(unit, action, gameMap,
             (results) -> {
-              double hpDamage = Math.min(results.defender.getPreciseHPDamage(), results.defender.unit.getPreciseHP());
+              double healthDamage = Math.min(results.defender.getPreciseHealthDamage(), results.defender.unit.health);
 
               if( shouldAttack(unit, results.defender.unit, gameMap) )
-                return (results.defender.unit.getCost() / 10) * hpDamage;
+                return (results.defender.unit.getCost() / 10) * healthDamage;
 
               return 0.;
             }, (terrain, params) -> 0.); // Don't mess with terrain
@@ -495,7 +502,7 @@ public class Muriel implements AIController
 
     //////////////////////////////////////////////////////////////////
     // See if there's something to capture (but only if we are moderately healthy).
-    if( unit.getHP() > 7 )
+    if( unit.getHealth() >= UnitHealthThresholds.ACTION_READY )
     {
       ArrayList<GameAction> captureActions = unitActionsByType.get(UnitActionFactory.CAPTURE);
       if( null != captureActions && !captureActions.isEmpty() )
@@ -507,7 +514,7 @@ public class Muriel implements AIController
           {
             // If this unit action would prevent another one, and isn't better than
             // the other one, then don't do this action.
-            if( !isBestCurrentAction(unit, capture, unit.getHP()))
+            if( !isBestCurrentAction(unit, capture, unit.getHealth()))
               continue;
 
             queuedActions.add(capture);
@@ -517,7 +524,7 @@ public class Muriel implements AIController
             continue; // We can't displace the obstacle unit; find something else to do.
           else
           {
-            displaceUnit(gameMap, unit, capture, unit.getHP(), obst);
+            displaceUnit(gameMap, unit, capture, unit.getHealth(), obst);
             return false;
           }
         }
@@ -550,7 +557,7 @@ public class Muriel implements AIController
     //////////////////////////////////////////////////////////////////
     // We didn't find an immediate ATTACK or CAPTURE action we can do.
     // Things that can capture; go find something to capture, if you are moderately healthy.
-    if( unit.hasActionType(UnitActionFactory.CAPTURE) && (unit.getHP() >= 7) )
+    if( unit.hasActionType(UnitActionFactory.CAPTURE) && (unit.getHealth() >= UnitHealthThresholds.ACTION_READY) )
     {
       log(String.format("Seeking capture target for %s", unit.toStringWithLocation()));
       XYCoord unitCoords = new XYCoord(unit.x, unit.y);
@@ -579,7 +586,7 @@ public class Muriel implements AIController
             continue; // We can't displace the obstacle unit; need a different destination.
           else
           {
-            displaceUnit(gameMap, unit, ga, unit.getHP(), obstacle);
+            displaceUnit(gameMap, unit, ga, unit.getHealth(), obstacle);
             return false;
           }
         }
@@ -619,7 +626,7 @@ public class Muriel implements AIController
             if( threat.canTarget(unit.model) && shouldAttack(threat, unit, gameMap) )
             {
               // Add coordinates that `threat` could target to our "no-go" list.
-              Map<XYCoord, Double> threatMap = AICombatUtils.findThreatPower(gameMap, threat, unit.model);
+              Map<XYCoord, Integer> threatMap = AICombatUtils.findThreatPower(gameMap, threat, unit.model);
               noGoZone.addAll(threatMap.keySet()); // Ignore the valueMap of the return; we have already decided `threat` is dangerous.
             }
           }
@@ -684,13 +691,13 @@ public class Muriel implements AIController
   private boolean shouldAttack(Unit unit, Unit target, GameMap gameMap)
   {
     // Calculate the cost of the damage we can do.
-    double damage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, gameMap.getEnvironment(target.x, target.y).terrainType.getDefLevel(), unit.model.hasMobileWeapon());
+    int damage = CombatEngine.calculateOneStrikeDamage(unit, 1, target, gameMap, gameMap.getEnvironment(target.x, target.y).terrainType.getDefLevel(), unit.model.hasMobileWeapon());
 
     UnitMatchupAndMetaInfo umami = getUnitMatchupInfo(unit, target);
 
     // This attack is a good idea if our cost effectiveness is in the acceptable range, or if we can at least half-kill them.
     // The second check is needed because one glass cannon may not have a great overall ratio against another; whoever hits first wins, e.g. Mech vs Anti-Air.
-    return (umami.costEffectivenessRatio > COST_EFFECTIVENESS_MIN) || (damage > (target.getHP() / 2.0));
+    return (umami.costEffectivenessRatio > COST_EFFECTIVENESS_MIN) || (damage > (target.getHealth() / 2));
   }
 
   private void queueUnitProductionActions(GameMap gameMap)

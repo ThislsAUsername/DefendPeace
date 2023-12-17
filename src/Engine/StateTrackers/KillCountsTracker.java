@@ -27,10 +27,10 @@ public class KillCountsTracker extends StateTracker
   @Override
   public GameEventQueue receiveBattleEvent(BattleSummary summary)
   {
-    if( summary.attacker.after.getHP() < 1 )
+    if( summary.attacker.after.getHealth() < 1 )
       killCounts.incrementCount(this.game, summary.defender.unit);
 
-    if( summary.defender.after.getHP() < 1 )
+    if( summary.defender.after.getHealth() < 1 )
       killCounts.incrementCount(this.game, summary.attacker.unit);
 
     return null;
@@ -48,7 +48,7 @@ public class KillCountsTracker extends StateTracker
     return null;
   }
   @Override
-  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer healthBeforeDeath)
   {
     killCounts.resetCountFor(this.game, victim);
 

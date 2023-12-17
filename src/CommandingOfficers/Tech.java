@@ -96,7 +96,7 @@ public class Tech extends Commander
   private static final String OVERCHARGE_NAME = "Overcharge";
   private static final int OVERCHARGE_COST = 5;
   private static final int OVERCHARGE_BUFF = 10;
-  private static final int OVERCHARGE_HEAL = 3;
+  private static final int OVERCHARGE_HEAL = 30;
 
   private static final String STEEL_HAIL_NAME = "Steel Hail";
   private static final int STEEL_HAIL_COST = 14;
@@ -179,10 +179,10 @@ public class Tech extends Commander
         if( typesToOverCharge.contains(u.model) )
         {
           // Track units that aren't already overhealed
-          if( u.getHP() <= UnitModel.MAXIMUM_HP
-              && u.getHP() + healAmount > UnitModel.MAXIMUM_HP )
+          if( u.getHealth() <= UnitModel.MAXIMUM_HEALTH
+              && u.getHealth() + healAmount > UnitModel.MAXIMUM_HEALTH )
             overCharged.add(u);
-          u.alterHP(healAmount, true);
+          u.alterHealth(healAmount, true);
         }
       }
       unitsOverCharged.put(myCommander, overCharged);
@@ -194,14 +194,14 @@ public class Tech extends Commander
       if( unitsOverCharged.containsKey(myCommander) )
       {
         // End Overcharge. Any units who still have > MAXIMUM_HP get reset to max.
-        final int maxPercent = UnitModel.MAXIMUM_HP*10;
+        final int maxPercent = UnitModel.MAXIMUM_HEALTH;
         for( Unit u : unitsOverCharged.get(myCommander) )
         {
-          final int preciseHP = (int) (u.getPreciseHP() * 10);
+          final int preciseHP = u.health;
           if( preciseHP > maxPercent )
           {
             int deltaPercent = Math.min(preciseHP - maxPercent, healAmount * 10);
-            u.alterHealthPercent(-1 * deltaPercent);
+            u.alterHealthNoRound(-1 * deltaPercent);
           }
         }
         unitsOverCharged.remove(myCommander);

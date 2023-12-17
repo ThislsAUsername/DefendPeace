@@ -49,7 +49,7 @@ public class Venge extends Commander
           "Only affects units that have not yet acted.\n" +
           "Grants +"+IronWill.IRONWILL_BOOST+" offense and defense\n" +
           "Your units resist damage and counterattack as if at full HP.\n" +
-          "When the power ends, your units lose "+IronWill.IRONWILL_WOUND+" HP (nonlethal)\n"));
+          "When the power ends, your units lose "+IronWill.IRONWILL_WOUND+" health (nonlethal)\n"));
       infoPages.add(new InfoPage(
           Retribution.NAME+" ("+Retribution.COST+"):\n" +
           "Gives an attack boost of +"+Retribution.RETRIBUTION_BUFF+"%\n" +
@@ -147,14 +147,14 @@ public class Venge extends Commander
     {
       if( params.isCounter )
       {
-        params.attackerHP = UnitModel.MAXIMUM_HP;
+        params.attackerHealth = UnitModel.MAXIMUM_HEALTH;
       }
       params.attackPower += buff;
     }
     @Override
     public void modifyUnitDefenseAgainstUnit(BattleParams params)
     {
-      params.defenderHP = UnitModel.MAXIMUM_HP;
+      params.defenderHealth = UnitModel.MAXIMUM_HEALTH;
       params.defenseSubtraction += buff;
     }
   }
@@ -187,7 +187,7 @@ public class Venge extends Commander
     private static final String NAME = "Iron Will";
     private static final int COST = 4;
     private static final int IRONWILL_BOOST = 40;
-    private static final int IRONWILL_WOUND = 2;
+    private static final int IRONWILL_WOUND = 20;
     private final ArrayList<Unit> boostedUnits = new ArrayList<Unit>();
 
     IronWill(Venge venge)

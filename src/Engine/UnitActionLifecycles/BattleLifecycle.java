@@ -180,8 +180,8 @@ public abstract class BattleLifecycle
       CalcType calcType = CalcType.values()[InputOptionsController.damagePreviewTypeOption.getSelectedObject().ordinal()];
       BattleSummary summary = CombatEngine.simulateBattleResults(attacker, defender, map, movePath, calcType);
 
-      int attackerHealthLoss = (int) (10 * summary.attacker.getPreciseHPDamage());
-      int defenderHealthLoss = (int) (10 * summary.defender.getPreciseHPDamage());
+      int attackerHealthLoss = summary.attacker.getPreciseHealthDamage();
+      int defenderHealthLoss = summary.defender.getPreciseHealthDamage();
       // output any damage done, with the color of the one dealing the damage
       if( attackerHealthLoss > 0 )
         output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, attackerHealthLoss + "%"));
@@ -305,7 +305,7 @@ public abstract class BattleLifecycle
       // output any damage done, with the color of the one dealing the damage
       if( result.calculateDamage() > 0 )
         // grab the two most significant digits and convert to %
-        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, (int) (result.calculateDamage()*10) + "%"));
+        output.add(new DamagePopup(attackLocation, attacker.CO.myColor, result.calculateDamage() + "%"));
 
       return output;
     }
@@ -368,7 +368,7 @@ public abstract class BattleLifecycle
     }
     public boolean attackerDies()
     {
-      return battleInfo.attacker.after.getHP() <= 0;
+      return battleInfo.attacker.after.getHealth() <= 0;
     }
 
     public Unit getDefender()
@@ -377,7 +377,7 @@ public abstract class BattleLifecycle
     }
     public boolean defenderDies()
     {
-      return battleInfo.defender.after.getHP() <= 0;
+      return battleInfo.defender.after.getHealth() <= 0;
     }
 
     @Override
@@ -424,7 +424,7 @@ public abstract class BattleLifecycle
       this.target = target;
       // Calculate the result of the battle immediately. This will allow us to plan the animation.
       result = CombatEngine.calculateTerrainDamage(attacker, path, target, map);
-      percentDamage = (int) (10 * result.calculateDamage());
+      percentDamage = result.calculateDamage();
     }
 
     public Unit getAttacker()

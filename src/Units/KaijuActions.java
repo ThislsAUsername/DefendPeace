@@ -139,12 +139,12 @@ public class KaijuActions
         } // ~node loop
 
         // If we took any damage, throw the total up on our own head
-        final int finalHP = (int) (kaijuState.getPreciseHP() * 10);
-        final int startHP = (int) (actor.getPreciseHP() * 10);
-        if( finalHP != startHP )
+        final int finalHealth = kaijuState.health;
+        final int startHealth = actor.health;
+        if( finalHealth != startHealth )
         {
-          String sign = "" + (finalHP - startHP);
-          if( finalHP == 0 )
+          String sign = "" + (finalHealth - startHealth);
+          if( finalHealth == 0 )
             sign = "LETHAL";
           crush.popups.add(new DamagePopup(new XYCoord(actor), actor.CO.myColor, sign));
         }
@@ -164,12 +164,12 @@ public class KaijuActions
       {
         KaijuWarsUnitModel victimType = (KaijuWarsUnitModel) victim.model;
         int counterPercent = 0;
-        int stompDamage = victim.getHP();
+        int stompDamage = victim.getHealth();
         if( victimType.isKaiju )
         {
           // When stomping another kaiju, at least one of us dies
-          counterPercent += 10 * victim.getHP();
-          stompDamage = kaijuState.getHP();
+          counterPercent += victim.getHealth();
+          stompDamage = kaijuState.getHealth();
         }
         else
         {
@@ -194,6 +194,7 @@ public class KaijuActions
             counterPercent = victimType.kaijuCounter;
             counterPercent += KaijuWarsWeapons.getCounterBoost(new UnitContext(victim), gameMap, location.getEnvironment().terrainType);
             counterPercent *= victim.getHP();
+            counterPercent /= 10;
             if( kaijuState.model.isLandUnit()
                 && victimType.slowsLand )
               --kaijuState.movePower;
@@ -209,7 +210,7 @@ public class KaijuActions
 
         crush.events.add(new MassDamageEvent(kaijuState.CO, stompable, stompDamage, isLethal));
         tileToast = "-" + (stompDamage);
-        if( stompDamage >= victim.getHP() )
+        if( stompDamage >= victim.getHealth() )
         {
           Utils.enqueueDeathEvent(victim, crush.events);
           tileToast = "KILL";
@@ -217,7 +218,7 @@ public class KaijuActions
 
         // If we're Hell Turkey and we'll drop below the landing threshold, land.
         if( kaijuState.model instanceof HellTurkey &&
-            KaijuWarsKaiju.BIRD_LAND_HP >= kaijuState.getHP() )
+            KaijuWarsKaiju.BIRD_LAND_HEALTH >= kaijuState.getHealth() )
         {
           HellTurkeyLand devolveToType = ((HellTurkey) kaijuState.model).turkeyLand;
           crush.events.add(new TransformLifecycle.TransformEvent(kaijuState.unit, devolveToType));
@@ -225,13 +226,12 @@ public class KaijuActions
           kaijuState.model = devolveToType;
         }
 
-        final double counterDamage = counterPercent / 10.0;
-        crush.events.add(new MassDamageEvent(victim.CO, Arrays.asList(kaijuState.unit), counterDamage, isLethal));
-        kaijuState.damageHP(counterDamage);
+        crush.events.add(new MassDamageEvent(victim.CO, Arrays.asList(kaijuState.unit), counterPercent, isLethal));
+        kaijuState.damageHealth(counterPercent);
         // Counter damage previewed by caller
 
         // If there's enough counter damage to kill us, die
-        if( kaijuState.getHP() < 1 )
+        if( kaijuState.getHealth() < 1 )
         {
           // Kaiju dies at his current position on the path
           Utils.enqueueDeathEvent(kaijuState.unit, kaijuState.coord, true, crush.events);
@@ -264,9 +264,9 @@ public class KaijuActions
 
           if( stomperType.regenOnBuildingKill && location.isCaptureable() )
           {
-            int heal = 2;
+            int heal = 20;
             crush.events.add(new HealUnitEvent(kaijuState.unit, heal, null, true));
-            kaijuState.alterHP(heal, true); // previewed by caller
+            kaijuState.alterHealth(heal, true); // previewed by caller
           }
           if( stomperType.chargeOnBuildingKill && location.isCaptureable() )
           {
@@ -368,7 +368,7 @@ public class KaijuActions
       {
         ArrayList<Unit> stompable = new ArrayList<>();
         stompable.add(victim);
-        events.add(new MassDamageEvent(kaiju.CO, stompable, victim.getHP(), true));
+        events.add(new MassDamageEvent(kaiju.CO, stompable, victim.getHealth(), true));
         Utils.enqueueDeathEvent(victim, events);
       }
     }
@@ -921,8 +921,9 @@ public class KaijuActions
     {
       GameEventQueue events = new GameEventQueue();
       enqueueKaijuKillEvents(gameMap, actor, target, events);
-      events.add(new MassDamageEvent(actor.CO, Arrays.asList(actor), 1, true));
-      if(actor.getHP() < 2)
+      int damage = 10;
+      events.add(new MassDamageEvent(actor.CO, Arrays.asList(actor), damage, true));
+      if(actor.getHealth() <= damage)
         Utils.enqueueDeathEvent(actor, events);
 
       KaijuStateTracker kaijuTracker = StateTracker.instance(gameMap.game, KaijuStateTracker.class);

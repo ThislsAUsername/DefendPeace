@@ -66,21 +66,21 @@ public class AICombatUtils
   /**
    * @return The area and severity of threat from the unit, against the specified target type
    */
-  public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, UnitModel target)
+  public static Map<XYCoord, Integer> findThreatPower(GameMap gameMap, Unit unit, UnitModel target)
   {
     XYCoord origin = new XYCoord(unit.x, unit.y);
     return findThreatPower(gameMap, unit, origin, target);
   }
-  public static Map<XYCoord, Double> findThreatPower(GameMap gameMap, Unit unit, XYCoord origin, UnitModel target)
+  public static Map<XYCoord, Integer> findThreatPower(GameMap gameMap, Unit unit, XYCoord origin, UnitModel target)
   {
-    Map<XYCoord, Double> shootableTiles = new HashMap<XYCoord, Double>();
+    Map<XYCoord, Integer> shootableTiles = new HashMap<>();
     PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.start = origin;
     pcp.includeOccupiedSpaces = true; // We assume the enemy knows how to manage positioning within his turn
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
     for( WeaponModel wep : unit.model.weapons )
     {
-      double damage = (null == target)? 1 : wep.getDamage(target) * unit.getHPFactor();
+      int damage = (null == target)? 1 : wep.getDamage(target) * unit.getHealth() / UnitModel.MAXIMUM_HEALTH;
       if( null == target || unit.canTarget(target) )
       {
         if( !wep.canFireAfterMoving )
@@ -88,7 +88,7 @@ public class AICombatUtils
           UnitContext uc = new UnitContext(gameMap, unit, wep, null, origin);
           for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, uc))
           {
-            double val = damage;
+            int val = damage;
             if (shootableTiles.containsKey(xyc))
               val = Math.max(val, shootableTiles.get(xyc));
             shootableTiles.put(xyc, val);
@@ -101,7 +101,7 @@ public class AICombatUtils
             UnitContext uc = new UnitContext(gameMap, unit, wep, dest.getMyPath(), dest);
             for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, uc))
             {
-              double val = damage;
+              int val = damage;
               if (shootableTiles.containsKey(xyc))
                 val = Math.max(val, shootableTiles.get(xyc));
               shootableTiles.put(xyc, val);
@@ -177,7 +177,7 @@ public class AICombatUtils
                                    Collection<Unit> attackCandidates,
                                    Collection<XYCoord> excludedSpaces)
   {
-    if( target.getHP() < 1 ) // Try not to pick fights with zombies
+    if( target.getHealth() < 1 ) // Try not to pick fights with zombies
       return null;
     if( attackCandidates.size() < 1 )
       return null;
@@ -258,8 +258,8 @@ public class AICombatUtils
       neededAttacks.put(xyc, null);
     }
 
-    double damage = findMultiHitKill(gameMap, target, attackers, neededAttacks, 0);
-    if( damage >= target.getHP() )
+    int damage = findMultiHitKill(gameMap, target, attackers, neededAttacks, 0);
+    if( damage >= target.getHealth() )
     {
       // Prune excess attacks and empty attacking spaces
       for( XYCoord space : new ArrayList<XYCoord>(neededAttacks.keySet()) )
@@ -270,8 +270,8 @@ public class AICombatUtils
           neededAttacks.remove(space);
           continue;
         }
-        double thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space, CalcType.PESSIMISTIC).defender.getPreciseHPDamage();
-        if( target.getHP() <= damage - thisShot )
+        int thisShot = CombatEngine.simulateBattleResults(attacker, target, gameMap, space, CalcType.PESSIMISTIC).defender.getPreciseHealthDamage();
+        if( target.getHealth() <= damage - thisShot )
         {
           neededAttacks.remove(space);
           damage -= thisShot;
@@ -293,19 +293,19 @@ public class AICombatUtils
    * @param pDamage The cumulative base damage done by those mandatory attacks
    * @return The cumulative base damage of all attacks already in the neededAttacks
    */
-  public static double findMultiHitKill(
+  public static int findMultiHitKill(
                                 GameMap gameMap, Unit target,
                                 Collection<Unit> attackCandidates,
                                 Map<XYCoord, Unit> neededAttacks,
-                                double pDamage)
+                                int pDamage)
   {
     // Base case; we found a kill
-    if( pDamage >= target.getPreciseHP() )
+    if( pDamage >= target.getHealth() )
     {
       return pDamage;
     }
 
-    double damage = pDamage;
+    int damage = pDamage;
     // Iterate through the attack spaces, and try filling all spaces recursively from each one
     for( XYCoord xyc : neededAttacks.keySet() )
     {
@@ -330,12 +330,12 @@ public class AICombatUtils
         if( movePath != null )
         {
           neededAttacks.put(xyc, unit);
-          double thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CalcType.PESSIMISTIC).defender.getPreciseHPDamage();
+          int thisDamage = CombatEngine.simulateBattleResults(unit, target, gameMap, xyc, CalcType.PESSIMISTIC).defender.getPreciseHealthDamage();
 
           thisDamage = findMultiHitKill(gameMap, target, attackCandidates, neededAttacks, damage + thisDamage);
 
           // If we've found a kill, we're done
-          if( thisDamage >= target.getPreciseHP() )
+          if( thisDamage >= target.getHealth() )
           {
             damage = thisDamage;
             break;

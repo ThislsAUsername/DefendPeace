@@ -54,7 +54,7 @@ public class JakeMan extends ModularAI
   private static final int    STAY_ALIVE_BIAS = 2000;
   // Fraction of the unit to remove from the counter-threat power of my unit type if I'm not attacking
   private static final double PEACEFUL_SELF_THREAT_RATIO = 1;
-  private static final int    UNIT_HEAL_THRESHOLD = 6; // HP at which units heal
+  private static final int    UNIT_HEAL_THRESHOLD = 60; // Health at which units heal
   private static final double UNIT_REFUEL_THRESHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
 
@@ -216,7 +216,7 @@ public class JakeMan extends ModularAI
           if( !mapToFill.containsKey(um) )
             mapToFill.put(um, new HashMap<>());
           Map<XYCoord, Double> threatArea = mapToFill.get(um);
-          double newValue = threat.getHPFactor();
+          double newValue = (double)(threat.getHealth()) / UnitModel.MAXIMUM_HEALTH;
           // Square unit fraction so low-HP units aren't valued so much
           newValue *= newValue;
           for( XYCoord coord : AICombatUtils.findThreatPower(gameMap, threat, null).keySet() )
@@ -428,7 +428,7 @@ public class JakeMan extends ModularAI
     }
     if( canResupply )
     {
-      shouldResupply = unit.getHP() <= UNIT_HEAL_THRESHOLD;
+      shouldResupply = unit.getHealth() <= UNIT_HEAL_THRESHOLD;
       shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHOLD
           * toClosestStation.getFuelCost(unit, gameMap);
       shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHOLD;
@@ -657,14 +657,14 @@ public class JakeMan extends ModularAI
       double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
           (results) -> {
             final Unit defender = results.defender.unit;
-            int loss   = Math.min(unit    .getHP(), (int)results.attacker.getPreciseHPDamage());
-            int damage = Math.min(defender.getHP(), (int)results.defender.getPreciseHPDamage());
+            int loss   = Math.min(unit    .getHealth(), results.attacker.getPreciseHealthDamage());
+            int damage = Math.min(defender.getHealth(), results.defender.getPreciseHealthDamage());
 
             // Convert to abstract value
             int extraLoss = 0;
-            if( loss >= 1 && unit.getHP() == UnitModel.MAXIMUM_HP )
+            if( loss >= 1 && unit.getHealth() == UnitModel.MAXIMUM_HEALTH )
               extraLoss += STAY_UNHURT_BIAS;
-            if( loss >= unit.getHP() )
+            if( loss >= unit.getHealth() )
               extraLoss += STAY_ALIVE_BIAS;
             loss *= unit.getCost();
             loss += extraLoss;
@@ -672,7 +672,8 @@ public class JakeMan extends ModularAI
             if( isThreatenedBy(unit.model, defender.model) )
               damage *= FIRSTSTRIKE_ON_THREAT_WEIGHT;
             // Value damage to hurt units less
-            damage *= defender.getHPFactor();
+            damage *= defender.getHP();
+            damage /= 10;
 
             return (double)(damage - loss);
           }, (terrain, params) -> 0.00); // Don't attack terrain
@@ -730,7 +731,7 @@ public class JakeMan extends ModularAI
           if( unitMapFriendly.get(counter).containsKey(coord) )
             counterPower = unitMapFriendly.get(counter).get(coord);
           if( counterIsMeAndIAmPeaceful )
-            counterPower -= PEACEFUL_SELF_THREAT_RATIO * unit.getHPFactor();
+            counterPower -= (PEACEFUL_SELF_THREAT_RATIO * unit.getHP()) / 10;
           counterPowerTotal += Math.max(0, counterPower);
         }
         final double counterPowerAverage = counterPowerTotal / counterCoords.size();

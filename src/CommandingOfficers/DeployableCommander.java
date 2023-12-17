@@ -100,7 +100,7 @@ public abstract class DeployableCommander extends Commander
   }
 
   @Override
-  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer hpBeforeDeath)
+  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer healthBeforeDeath)
   {
     // COUs die when they are killed
     if( COUs.contains(victim) )
@@ -108,7 +108,7 @@ public abstract class DeployableCommander extends Commander
       COUsLost.add(victim);
       onCOULost(victim);
     }
-    return super.receiveUnitDieEvent(victim, grave, hpBeforeDeath);
+    return super.receiveUnitDieEvent(victim, grave, healthBeforeDeath);
   }
   @Override
   public GameEventQueue receiveUnitJoinEvent(JoinEvent join)

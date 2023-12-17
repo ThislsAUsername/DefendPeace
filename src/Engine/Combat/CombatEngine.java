@@ -31,7 +31,7 @@ public class CombatEngine
 
   /**
    * Assuming Commanders get weird, this allows for you to check the results of combat without perfect map info.
-   * This also provides un-capped damage estimates, so perfect HP info isn't revealed by the map.
+   * This also provides un-capped damage estimates, so perfect health info isn't revealed by the map.
    */
   public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, int attackerX, int attackerY, CalcType calcType )
   {
@@ -79,10 +79,10 @@ public class CombatEngine
     context.applyModifiers();
     boolean isSim = context.calcType.isSim();
 
-    if (isSim) // When simulating, round up unit HP to avoid leaking precise health info
+    if (isSim) // When simulating, round up unit health to avoid leaking precise health info
     {
-      context.attacker.alterHP(0);
-      context.defender.alterHP(0);
+      context.attacker.alterHealth(0);
+      context.defender.alterHealth(0);
     }
 
     // Provides a simple way to correlate start state and end state of each combatant.
@@ -98,19 +98,19 @@ public class CombatEngine
 
     BattleParams attackInstance = context.getAttack();
 
-    double damage = attackInstance.calculateDamage();
+    int damage = attackInstance.calculateDamage();
     if( damage < 0 )
       damage = 0;
     unitStateMap.get(context.attacker).fire(context.attacker.weapon);
-    unitStateMap.get(context.defender).damageHP(damage, isSim);
+    unitStateMap.get(context.defender).damageHealth(damage, isSim);
 
     // New battle instance with defender counter-attacking.
     BattleParams defendInstance = context.getCounterAttack(damage, isSim);
     if( null != defendInstance )
     {
-      double counterDamage = defendInstance.calculateDamage();
+      int counterDamage = defendInstance.calculateDamage();
       unitStateMap.get(context.defender).fire(context.defender.weapon);
-      unitStateMap.get(context.attacker).damageHP(counterDamage, isSim);
+      unitStateMap.get(context.attacker).damageHealth(counterDamage, isSim);
     }
 
     // Consider throwing in a final hook here for UnitModifiers to change the result post-calculations.
@@ -123,7 +123,7 @@ public class CombatEngine
                              defender, unitStateMap.get(defender));
   }
 
-  public static double calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
+  public static int calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )
   {
     if( attacker.model.weapons.size() < 1 )
       return 0;

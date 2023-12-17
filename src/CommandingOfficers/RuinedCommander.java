@@ -139,16 +139,16 @@ public abstract class RuinedCommander extends DeployableCommander
     if( !isInZone(chargeSource) )
       return 0;
 
-    double myHPDealt = enemy.getHPDamage();
+    int guiHPDealt = enemy.getHealthDamage() / 10;
 
     int power = 0; // value in funds of the charge we're getting
 
-    power += myHPDealt * CHARGERATIO_HP;
+    power += guiHPDealt * CHARGERATIO_HP;
 
     return power;
   }
   @Override
-  public int calculateMassDamageCharge(Unit minion, int lostHP)
+  public int calculateMassDamageCharge(Unit minion, int lostHealth)
   {
     return 0;
   }

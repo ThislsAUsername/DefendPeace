@@ -67,7 +67,7 @@ public class StrikeParams
   public final int battleRange;
 
   public int baseDamage;
-  public int attackerHP;
+  public int attackerHealth;
   public int attackPower;
 // These three variables are needed to simulate different games' luck implementations - 1 RN vs 2 RNs
   public int luckBase = 0; // Luck value if you roll 0
@@ -77,7 +77,7 @@ public class StrikeParams
 
   public int damageMultiplier = 100;
 
-  public int defenderHP = 0;
+  public int defenderHealth = 0;
   public final XYCoord targetCoord;
   public int defenseSubtraction = 100;
   public int defenseDivision    = 100;
@@ -96,7 +96,7 @@ public class StrikeParams
     this.battleRange = battleRange;
 
     this.baseDamage = baseDamage;
-    this.attackerHP = attacker.getHP();
+    this.attackerHealth = attacker.getHealth();
     this.attackPower = attacker.attackPower;
     this.luckRolled = attacker.CO.luck;
     this.isCounter = isCounter;
@@ -111,7 +111,7 @@ public class StrikeParams
     this.battleRange = other.battleRange;
 
     this.baseDamage = other.baseDamage;
-    this.attackerHP = other.attackerHP;
+    this.attackerHealth = other.attackerHealth;
     this.attackPower = other.attackPower;
     this.luckRolled = other.luckRolled;
     this.isCounter = other.isCounter;
@@ -119,7 +119,7 @@ public class StrikeParams
     this.targetCoord = other.targetCoord;
   }
 
-  public double calculateDamage()
+  public int calculateDamage()
   {
     int luckDamage = getLuck();
     final int rawDamage = baseDamage * attackPower * damageMultiplier / 100 / 100;
@@ -128,16 +128,16 @@ public class StrikeParams
     int finalDefenseSubtraction = defenseSubtraction;
     int finalDefenseDivision    = defenseDivision;
     if( terrainGivesSubtraction )
-      finalDefenseSubtraction += terrainStars * defenderHP;
+      finalDefenseSubtraction += terrainStars * defenderHealth / 10;
     else
-      finalDefenseDivision    += terrainStars * defenderHP;
+      finalDefenseDivision    += terrainStars * defenderHealth / 10;
     final int subtractionMultiplier = 200 - finalDefenseSubtraction;
 
-    int overallPower = (rawDamage + luckDamage) * attackerHP / 10;
+    int overallPower = (rawDamage + luckDamage) * attackerHealth / 100;
     overallPower = overallPower * subtractionMultiplier /        100;
     overallPower = overallPower *          100          / finalDefenseDivision;
 
-    return overallPower / 10.0; // original formula was % damage, now it must be HP of damage
+    return overallPower; // % damage
   }
 
   protected int getLuck()
@@ -159,7 +159,7 @@ public class StrikeParams
       this.combatContext = combatContext;
       this.defender = defender;
 
-      defenderHP = defender.getHP();
+      defenderHealth = defender.getHealth();
       this.defenseSubtraction = defender.defensePower;
       this.terrainStars = defender.terrainStars;
     }

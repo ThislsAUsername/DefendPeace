@@ -128,7 +128,7 @@ public class Bear_Bull extends Commander
     private static final String UPTURN_NAME = "UpTurn";
     private static final String DOWNTURN_NAME = "DownTurn";
     private static final int DOWNUPTURN_COST = 3;
-    private static final int DOWNUPTURN_LIQUIDATION = 3;
+    private static final int DOWNUPTURN_LIQUIDATION = 30;
     final Bear_Bull COcast;
 
     UpDownTurnAbility(Bear_Bull commander)
@@ -168,7 +168,7 @@ public class Bear_Bull extends Commander
       int valueDrained = 0;
       for( Unit victim : victims )
       {
-        valueDrained += (Math.min(DOWNUPTURN_LIQUIDATION, victim.getHP()) * victim.getCost()) / UnitModel.MAXIMUM_HP;
+        valueDrained += (Math.min(DOWNUPTURN_LIQUIDATION, victim.getHealth()) * victim.getCost()) / UnitModel.MAXIMUM_HEALTH;
       }
 
       powerEvents.add( new ModifyFundsEvent(COcast.army, valueDrained) ); // Collect profits
@@ -185,7 +185,7 @@ public class Bear_Bull extends Commander
         output.add(new DamagePopup(
                        new XYCoord(victim.x, victim.y),
                        COcast.myColor,
-                       Math.min(victim.getHP()-1, DOWNUPTURN_LIQUIDATION)*10 + "%"));
+                       Math.min(victim.getHealth()-1, DOWNUPTURN_LIQUIDATION) + "%"));
 
       return output;
     }

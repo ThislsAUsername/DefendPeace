@@ -127,7 +127,7 @@ public class TestTeleport extends TestCase
     }
 
     @Override
-    public GameEventQueue receiveUnitDieEvent(Unit unit, XYCoord grave, Integer hpLost)
+    public GameEventQueue receiveUnitDieEvent(Unit unit, XYCoord grave, Integer healthBeforeDeath)
     {
       death = true;
       return null;

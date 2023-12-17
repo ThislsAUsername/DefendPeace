@@ -94,7 +94,8 @@ public abstract class ExplodeLifecycle
       ArrayList<DamagePopup> output = new ArrayList<DamagePopup>();
 
       for( Unit victim : findVictims(map) )
-        output.add(new DamagePopup(new XYCoord(victim.x, victim.y), actor.CO.myColor, Math.min(victim.getHP()-1, type.damage)*10 + "%"));
+        // Should be obviously non-lethal
+        output.add(new DamagePopup(new XYCoord(victim.x, victim.y), actor.CO.myColor, Math.min(victim.getHealth()-10, type.damage) + "%"));
 
       return output;
     }
