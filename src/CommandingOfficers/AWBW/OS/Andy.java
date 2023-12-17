@@ -71,7 +71,7 @@ public class Andy extends AWBWCommander
     {
       for( Unit u : myCommander.army.getUnits() )
       {
-        u.alterHealthPercent(HEAL*10);
+        u.alterHealthNoRound(HEAL*10);
       }
       super.perform(gameMap);
     }
@@ -108,7 +108,7 @@ public class Andy extends AWBWCommander
     {
       for( Unit u : myCommander.army.getUnits() )
       {
-        u.alterHealthPercent(HEAL*10);
+        u.alterHealthNoRound(HEAL*10);
       }
       super.perform(gameMap);
     }

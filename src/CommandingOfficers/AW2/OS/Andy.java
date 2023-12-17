@@ -76,7 +76,7 @@ public class Andy extends AW2Commander
     {
       for( Unit u : myCommander.army.getUnits() )
       {
-        u.alterHP(HEAL*10);
+        u.alterHealth(HEAL*10);
       }
       super.perform(gameMap);
     }
@@ -113,7 +113,7 @@ public class Andy extends AW2Commander
     {
       for( Unit u : myCommander.army.getUnits() )
       {
-        u.alterHP(HEAL*10);
+        u.alterHealth(HEAL*10);
       }
       super.perform(gameMap);
     }
