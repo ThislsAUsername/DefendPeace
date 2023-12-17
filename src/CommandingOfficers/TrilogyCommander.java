@@ -30,8 +30,20 @@ public abstract class TrilogyCommander extends Commander
   {
     if( null != getActiveAbility() )
       return 0;
-    // TODO: Copy/paste super's code and delete the HP-based bit once the parent PR settles down.
-    return super.calculateCombatCharge(minion, enemy, isCounter);
+    if( minion == null || enemy == null )
+      return 0;
+
+    int guiHPLoss  = minion.getHealthDamage() / 10;
+    int guiHPDealt =  enemy.getHealthDamage() / 10;
+
+    int power = 0; // value in funds of the charge we're getting
+
+    // Add up the funds value of the damage done to both participants.
+    power += guiHPLoss * minion.unit.getCost() / 10;
+    // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
+    power += guiHPDealt * enemy.unit.getCost() / 10 / 2;
+
+    return power;
   }
   @Override
   public int calculateMassDamageCharge(Unit minion, int lostHP)
