@@ -2,6 +2,7 @@ package CommandingOfficers;
 
 import Engine.GameScenario;
 import Engine.UnitMods.UnitDamageModifier;
+import Engine.UnitMods.UnitDefenseModifier;
 import Engine.UnitMods.UnitModifier;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -61,7 +62,7 @@ public abstract class TrilogyCommander extends Commander
     {
       super(commander, name, cost, basis);
       genericAttack  = new UnitDamageModifier(genericAtt);
-      genericDefense = new UnitDamageModifier(genericDef);
+      genericDefense = new UnitDefenseModifier(genericDef);
       basis.maxStarRatio = basis.baseStarRatio * 2; // 18k per star
     }
 
