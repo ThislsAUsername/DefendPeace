@@ -76,11 +76,11 @@ public abstract class TrilogyCommander extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      // Change my CO's energy such that it's as if this power cost the new cost rather than the actual cost
-      int oldCost = baseStars * costBasis.calcCostPerStar(costBasis.numCasts - 1);
-      int newCost = costBasis.calcCost(baseStars);
-      int costDelta = newCost - oldCost;
-      myCommander.modifyAbilityPower(-1 * costDelta);
+      // Change my CO's energy such that it's as if this power cost the activation cost of the next power rather than the actual cost
+      int costAtActivation = baseStars * costBasis.calcCostPerStar(costBasis.numCasts - 1);
+      int costForNextCast  = costBasis.calcCost(baseStars);
+      int extraEnergyCost  = costForNextCast - costAtActivation; // Will be negative on cast 9
+      myCommander.modifyAbilityPower(-1 * extraEnergyCost);
     }
   }
 }
