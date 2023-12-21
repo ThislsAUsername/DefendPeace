@@ -169,7 +169,7 @@ public class GBAFEWeapons
       {
         for (int swing = 2; swing <= hitCount; ++swing)
         {
-          int nHits = feGUIdamage * swing;
+          int allSwingDamage = feGUIdamage * swing;
 
           int mustHitSwings = swing - 1; // The first swing is assumed to hit
           int combinations = combinations(mustHitSwings, hitCount - 1);
@@ -180,12 +180,12 @@ public class GBAFEWeapons
           int missChance = 100 - trueHitPercent;
           for( int i = 0; i < mustMissSwings; i++ )
             chanceOfCombination = chanceOfCombination * missChance / 100;
-          chanceOfKill = extraChance(chanceOfKill, chanceOfCombination, nHits);
+          chanceOfKill = extraChance(chanceOfKill, chanceOfCombination, allSwingDamage);
         }
       }
       if( feGUIcrit > 0 )
       {
-        int critDamage = attack*3;
+        int critDamage = feGUIdamage*3;
         peakFEDamage = Math.max(peakFEDamage, critDamage * hitCount);
         int chanceOfOne = chanceOfAny(feGUIcrit, hitCount);
         chanceOfKill = extraChance(chanceOfKill, chanceOfOne, critDamage);
@@ -202,7 +202,8 @@ public class GBAFEWeapons
       if( pavise ) // Pavise/Great Shield takes priority over sources of ordinary damage, but cannot stop Silencer/Lethality
       {
         int shieldFailChance = 100 - SKILL_ACTIVATION_PERCENT;
-        chanceOfKill = chanceOfKill * shieldFailChance / 100;
+        for( int i = 0; i < hitCount; i++ )
+          chanceOfKill = chanceOfKill * shieldFailChance / 100;
       }
       if( lethality )
       {
@@ -220,12 +221,13 @@ public class GBAFEWeapons
     private int extraChance(int ctkInitial, int chance, int rareDamage)
     {
       int chanceToLive = 100 - ctkInitial;
+      int chanceToHit  = chance;
       if( rareDamage < hp )
       {
         int chanceOfKillOnHit = scaleDamage(FE_WOUND_MAX, rareDamage, hp);
-        chance = chance * chanceOfKillOnHit / 100;
+        chanceToHit = chanceToHit * chanceOfKillOnHit / 100;
       }
-      int chanceToMiss = 100 - chance;
+      int chanceToMiss = 100 - chanceToHit;
       chanceToLive = chanceToLive * chanceToMiss / 100;
       return 100 - chanceToLive;
     }
