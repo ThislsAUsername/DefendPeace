@@ -809,6 +809,7 @@ public class GBAFEUnits extends UnitModelScheme
     private static GBAFEStats buildStats()
     {
       ClassStatsBuilder bases = new ClassStatsBuilder();
+      bases.pavise = true;
       bases.baseHP  = 21;
       bases.baseStr =  8;
       bases.baseSkl =  4;
