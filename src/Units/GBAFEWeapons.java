@@ -19,6 +19,17 @@ public class GBAFEWeapons
 
   public final static int TERRAIN_DURABILITY = 99;
 
+  public final static int FE_WOUND_MAX  = 50; // Max % you can get from not quite killing your target
+  public final static int FE_CHANCE_MAX = 50; // Max % you can get from a 100% chance to kill
+  public final static int FE_PEAK_BONUS = 10; // % you get based on your maximum possible FE damage per engagement
+  // Damage should be, roughly, wound + chance + peak bonus, so a max of 110 per engagement
+
+  // Assuming that "a unit that gets a guaranteed counterkill is basically a Megatank vs inf", we calc damage twice for a peak possible damage of 220.
+  // These two stats are used as a boost for the defender on the second damage calc.
+  // The specific values are from mountain/hill stats in FE6-7. Forests give 20 avo.
+  public final static int AGGRO_DEF_BOOST = 1;
+  public final static int AGGRO_AVO_BOOST = 30;
+
   // Since units can have more than one weapon type available to them, we need to scale between maximum WTA and none
   // Also, "Might" is right - it applies to effective damage
   public enum WTATier
@@ -55,6 +66,7 @@ public class GBAFEWeapons
     public boolean sureShot  = false;
     public boolean pierce    = false;
     public boolean lethality = false;
+    public boolean isMagic   = false;
     // Defender attributes
     public int hp        = 0;
     public int defense   = 0;
@@ -87,6 +99,7 @@ public class GBAFEWeapons
       result.sureShot  = wep.stats.sureShot ;
       result.pierce    = wep.stats.pierce   ;
       result.lethality = wep.stats.lethality;
+      result.isMagic     = wep.isMagic();
       if( wep.canCounter && (wep.stats.Spd - defender.stats.Spd) >= PURSUIT_THRESHOLD )
         result.hitCount = 2;
       result.hp        = defender.stats.HP;
@@ -106,14 +119,26 @@ public class GBAFEWeapons
 
     public int calcDamage()
     {
-      final int feGUIhit = Math.min(100, Math.max(0, hit - avoid));
+      int normalDamage = calcDamage(0, 0);
+      // The idea is that if you're counterkilling stuff, they'll take better terrain
+      // ...and/or a real person would have issues hitting an arbitrary number of targets in a fixed amount of time.
+      int aggroDamage  = calcDamage(AGGRO_DEF_BOOST, AGGRO_AVO_BOOST);
+      return normalDamage + aggroDamage;
+    }
+    private int calcDamage(int bonusDef, int bonusAvo)
+    {
+      int avo = avoid + bonusAvo;
+      final int feGUIhit = Math.min(100, Math.max(0, hit - avo));
       int trueHitPercent = calcTrueHit(feGUIhit);
       if( sureShot )
         trueHitPercent += (100 - trueHitPercent) * SKILL_ACTIVATION_PERCENT/100;
 
-      int rawDamage = calcRawDamage();
-      int finalDamage = rawDamage * trueHitPercent/100;
-      if( rawDamage > 0 && feGUIhit > 0 )
+      int rawDamage = calcRawDamage(bonusDef, trueHitPercent);
+
+      int oneHitChance = chanceOfAny(trueHitPercent, hitCount);
+
+      int finalDamage = rawDamage * oneHitChance/100;
+      if( attack > defense && feGUIhit > 0 )
         return Math.max(1, finalDamage);
       return finalDamage;
     }
@@ -124,39 +149,113 @@ public class GBAFEWeapons
         return (2*hit*hit + hit) / 100;
       return (-2*hit*hit  + 399*hit - 9900) / 100;
     }
-    private int calcRawDamage()
+    // Badly calcs chance to kill assuming at least one hit
+    private int calcRawDamage(int bonusDef, int trueHitPercent)
     {
-      final int feGUIdamage = Math.max(0, attack - defense);
-      int damage = feGUIdamage;
+      int def = defense;
+      if( !isMagic )
+        def += bonusDef;
+      final int feGUIdamage = Math.max(0, attack - def);
+      if( feGUIdamage >= hp )
+        return FE_WOUND_MAX + FE_CHANCE_MAX + FE_PEAK_BONUS;
+
+      int woundDamage = scaleDamage(FE_WOUND_MAX, feGUIdamage, hp);
+      int peakFEDamage = feGUIdamage * hitCount;
+      int chanceOfKill = 0;
 
       final int feGUIcrit = Math.min(100, Math.max(0, crit - critAvoid));
-      damage = diluteInDamage(feGUIdamage, feGUIcrit, feGUIdamage*3);
 
+      if( hitCount > 1 )
+      {
+        for (int swing = 2; swing <= hitCount; ++swing)
+        {
+          int nHits = feGUIdamage * swing;
+
+          int mustHitSwings = swing - 1; // The first swing is assumed to hit
+          int combinations = combinations(mustHitSwings, hitCount - 1);
+          int mustMissSwings = hitCount - swing;
+          int chanceOfCombination = combinations * 100;
+          for( int i = 0; i < mustHitSwings; i++ )
+            chanceOfCombination = chanceOfCombination * trueHitPercent / 100;
+          int missChance = 100 - trueHitPercent;
+          for( int i = 0; i < mustMissSwings; i++ )
+            chanceOfCombination = chanceOfCombination * missChance / 100;
+          chanceOfKill = extraChance(chanceOfKill, chanceOfCombination, nHits);
+        }
+      }
+      if( feGUIcrit > 0 )
+      {
+        int critDamage = attack*3;
+        peakFEDamage = Math.max(peakFEDamage, critDamage * hitCount);
+        int chanceOfOne = chanceOfAny(feGUIcrit, hitCount);
+        chanceOfKill = extraChance(chanceOfKill, chanceOfOne, critDamage);
+      }
       if( pierce )
       {
         int pierceDamage = attack;
-        pierceDamage = diluteInDamage(attack, feGUIcrit, attack*3); // Account for pierce-crits
-        damage = diluteInDamage(damage, SKILL_ACTIVATION_PERCENT, pierceDamage);
+        peakFEDamage = Math.max(peakFEDamage, pierceDamage * hitCount);
+        int chanceOfOne = chanceOfAny(SKILL_ACTIVATION_PERCENT, hitCount);
+        chanceOfKill = extraChance(chanceOfKill, chanceOfOne,     pierceDamage);
+        int chanceOfOneCrit = chanceOfAny(SKILL_ACTIVATION_PERCENT * feGUIcrit/100, hitCount);
+        chanceOfKill = extraChance(chanceOfKill, chanceOfOneCrit, pierceDamage*3);
       }
-      if( pavise ) // Pavise/Great Shield takes priority over sources of ordinary damage, but cannot stop Silencer
+      if( pavise ) // Pavise/Great Shield takes priority over sources of ordinary damage, but cannot stop Silencer/Lethality
       {
-        damage = diluteInDamage(damage, SKILL_ACTIVATION_PERCENT, 0);
+        int shieldFailChance = 100 - SKILL_ACTIVATION_PERCENT;
+        chanceOfKill = chanceOfKill * shieldFailChance / 100;
       }
-      if( lethality && hp > feGUIdamage*3 )
+      if( lethality )
       {
-        int lethalDamage = hp;
         int lethalChance = feGUIcrit/2;
-        damage = diluteInDamage(damage, lethalChance, lethalDamage);
+        peakFEDamage = Math.max(peakFEDamage, hp);
+        int chanceOfOne = chanceOfAny(lethalChance, hitCount);
+        chanceOfKill = extraChance(chanceOfKill, chanceOfOne, hp);
       }
 
-      return damage * hitCount * 100/hp;
+      int chanceDamage = scaleDamage(FE_CHANCE_MAX, chanceOfKill, 100);
+      int peakBonus    = scaleDamage(FE_PEAK_BONUS, peakFEDamage, hp);
+      return woundDamage + chanceDamage + peakBonus;
     }
-    // Returns the initial damage modified by the expected change in damage when you do rareDamage chance% of the time 
-    private static int diluteInDamage(int damage, int chance, int rareDamage)
+    // Returns the initial chance to kill modified by the expected change when you do rareDamage chance% of the time
+    private int extraChance(int ctkInitial, int chance, int rareDamage)
     {
-      int damageDiff = rareDamage - damage;
-      int modifiedDamage = damage + (damageDiff * chance/100);
-      return modifiedDamage;
+      int chanceToLive = 100 - ctkInitial;
+      if( rareDamage < hp )
+      {
+        int chanceOfKillOnHit = scaleDamage(FE_WOUND_MAX, rareDamage, hp);
+        chance = chance * chanceOfKillOnHit / 100;
+      }
+      int chanceToMiss = 100 - chance;
+      chanceToLive = chanceToLive * chanceToMiss / 100;
+      return 100 - chanceToLive;
+    }
+    private static int combinations(int occurances, int trials)
+    {
+      int numerator = 1;
+      for( int i = 0; i < occurances; ++i )
+      {
+        numerator *= trials - i;
+      }
+      int denominator = 1;
+      for( int i = 0; i < occurances; ++i )
+      {
+        denominator *= occurances - i;
+      }
+
+      return numerator / denominator;
+    }
+    private static int chanceOfAny(int chance, int hitCount)
+    {
+      int missChance = 100 - chance;
+      int allMissChance = 100;
+      for( int i = 0; i < hitCount; i++ )
+        allMissChance = allMissChance * missChance / 100;
+      int oneHitChance = 100 - allMissChance;
+      return oneHitChance;
+    }
+    private static int scaleDamage(int max, int damage, int hp)
+    {
+      return Math.min(max, damage * max / hp);
     }
   }
 
