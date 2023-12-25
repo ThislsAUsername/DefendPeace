@@ -53,12 +53,21 @@ public class FEMoveTypes
       setMoveCost(TerrainType.FOREST, 2);
       setMoveCost(TerrainType.DUNES, 2);
       setMoveCost(TerrainType.MOUNTAIN, 4); // Treating these as hills, not "peaks"
-      setMoveCost(TerrainType.RIVER, 5);
+      setMoveCost(TerrainType.RIVER, MoveType.IMPASSABLE);
 
       setMoveCost(Weathers.SNOW, TerrainType.GRASS, 2);
       setMoveCost(Weathers.RAIN, TerrainType.GRASS, 2);
 
       setMoveCost(Weathers.SANDSTORM, TerrainType.DUNES, 3);
+    }
+  }
+  public static class FEFootPlus extends FEFoot // Thieves, lords, promoted foot
+  {
+    private static final long serialVersionUID = 1L;
+
+    public FEFootPlus()
+    {
+      setMoveCost(TerrainType.RIVER, 5);
     }
   }
   public static class FEFootArmor extends FEFoot
@@ -69,7 +78,6 @@ public class FEMoveTypes
     {
       setMoveCost(TerrainType.DUNES, 3);
       setMoveCost(TerrainType.MOUNTAIN, MoveType.IMPASSABLE);
-      setMoveCost(TerrainType.RIVER, MoveType.IMPASSABLE);
 
       setMoveCost(Weathers.SANDSTORM, TerrainType.DUNES, 4);
     }
@@ -82,7 +90,6 @@ public class FEMoveTypes
     {
       setMoveCost(TerrainType.DUNES, 3);
       setMoveCost(TerrainType.MOUNTAIN, 3);
-      setMoveCost(TerrainType.RIVER, MoveType.IMPASSABLE);
 
       setMoveCost(Weathers.SANDSTORM, TerrainType.DUNES, 4);
     }
@@ -94,7 +101,6 @@ public class FEMoveTypes
     public FEFootMage()
     {
       setMoveCost(TerrainType.DUNES, 1);
-      setMoveCost(TerrainType.RIVER, MoveType.IMPASSABLE);
 
       setMoveCost(Weathers.SANDSTORM, TerrainType.DUNES, 2);
     }
