@@ -17,9 +17,8 @@ public abstract class AWBWCommander extends Commander
 {
   private static final long serialVersionUID = 1L;
   public static final InfoPage AWBW_MECHANICS_BLURB = new InfoPage(
-      "Gain +10 attack and defense on activating a power.\n"
-    + "CO powers never charge while a power is active.\n"
-    + "COP charge gained from combat is funds damage taken and half of funds damage dealt.\n"
+      "COP charge gained from combat is funds damage taken and half of funds damage dealt.\n"
+    + "CO powers don't charge while a power is active.\n"
     + "On each power activation, each star in your meter costs 1/5 more of the base star cost.\n"
     + "This continues for 10 activations, at which point the star cost settles at triple the base star cost.\n"
     );

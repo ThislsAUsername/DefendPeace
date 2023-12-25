@@ -33,10 +33,12 @@ public class Andy extends AW2Commander
           + "A mechanical boy wonder. Impulsive to a fault, he’s fiercely protective of friends.\n"
           + "No real weaknesses. Proficient with air, sea, and land units. Ready to fight wherever and whenever.\n"));
       infoPages.add(new InfoPage(new HyperRepair(null, new CostBasis(CHARGERATIO_FUNDS)),
-          "Restores 2 HP to all units."));
+            "Restores 2 HP to all units.\n"
+          + "+10 defense.\n"));
       infoPages.add(new InfoPage(new HyperUpgrade(null, new CostBasis(CHARGERATIO_FUNDS)),
             "Restores "+HyperUpgrade.HEAL+" HP to all units.\n"
-          + "Firepower rises (+"+HyperUpgrade.BUFF+"), and unit movement increases by 1 space."));
+          + "Firepower rises (+"+HyperUpgrade.BUFF+"), and unit movement increases by 1 space.\n"
+          + "+10 defense.\n"));
       infoPages.add(new InfoPage(
             "Hit: Mechanics\n"
           + "Miss: Waking up early"));

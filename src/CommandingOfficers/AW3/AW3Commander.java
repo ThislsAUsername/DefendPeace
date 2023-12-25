@@ -2,17 +2,17 @@ package CommandingOfficers.AW3;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.TrilogyCommander;
+import CommandingOfficers.BuggedEnergyCostCommander;
 import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.GameScenario;
 import Units.UnitDelta;
 
-public abstract class AW3Commander extends TrilogyCommander
+public abstract class AW3Commander extends BuggedEnergyCostCommander
 {
   private static final long serialVersionUID = 1L;
   public static final InfoPage AW3_MECHANICS_BLURB = new InfoPage(
-      "Gain +10 attack and defense on activating a power.\n"
-    + "Power charge is not based on funds, but is a specific stat for each unit type.\n"
+      "Power charge is not based on funds, but is a separate stat.\n"
+    + "Energy gain is still halved for damage dealt, though.\n"
     + TRILOGY_MECHANICS_BLURB.info
     );
   public static final int CHARGERATIO_AW3 = 100;

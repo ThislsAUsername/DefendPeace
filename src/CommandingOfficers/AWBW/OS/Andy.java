@@ -32,9 +32,11 @@ public class Andy extends AWBWCommander
             "Andy (AWBW)\n"
           + "No day-to-day abilities.\n"));
       infoPages.add(new InfoPage(new HyperRepair(null, new CostBasis(CHARGERATIO_FUNDS)),
-          "All units gain +2 HP."));
+            "All units gain +2 HP.\n"
+          + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(new HyperUpgrade(null, new CostBasis(CHARGERATIO_FUNDS)),
-            "All units gain +"+HyperUpgrade.HEAL+"HP, +"+HyperUpgrade.BUFF+"% attack, and +1 movement.\n"));
+            "All units gain +"+HyperUpgrade.HEAL+"HP, +"+HyperUpgrade.BUFF+"% attack, and +1 movement.\n"
+          + "+10 attack and defense.\n"));
       infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override

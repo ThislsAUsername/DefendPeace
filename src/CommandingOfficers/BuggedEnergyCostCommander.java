@@ -5,51 +5,23 @@ import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitDefenseModifier;
 import Engine.UnitMods.UnitModifier;
 import Terrain.MapMaster;
-import Units.Unit;
-import Units.UnitDelta;
 import java.util.ArrayList;
 import CommandingOfficers.CommanderInfo.InfoPage;
 
 /** Base class for AW2/3 COs (AW1 is special) */
-public abstract class TrilogyCommander extends Commander
+public abstract class BuggedEnergyCostCommander extends Commander
 {
   private static final long serialVersionUID = 1L;
   public static final InfoPage TRILOGY_MECHANICS_BLURB = new InfoPage(
-      "CO powers never charge while a power is active.\n"
+      "CO powers don't charge while a power is active.\n"
     + "On each power activation, each star in your meter costs 1/5 more of the base star cost.\n"
     + "This continues for 9 activations, after which the star cost settles at double the base star cost.\n"
-    + "CO power activation deducts the *new* power cost rather than the old one.\n"
+    + "Using a power costs the energy required for the next activation of that power, rather than the advertized cost.\n"
     );
 
-  public TrilogyCommander(CommanderInfo info, GameScenario.GameRules rules)
+  public BuggedEnergyCostCommander(CommanderInfo info, GameScenario.GameRules rules)
   {
     super(info, rules);
-  }
-
-  @Override
-  public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy, boolean isCounter)
-  {
-    if( null != getActiveAbility() )
-      return 0;
-    if( minion == null || enemy == null )
-      return 0;
-
-    int guiHPLoss  = minion.getHealthDamage() / 10;
-    int guiHPDealt =  enemy.getHealthDamage() / 10;
-
-    int power = 0; // value in funds of the charge we're getting
-
-    // Add up the funds value of the damage done to both participants.
-    power += guiHPLoss * minion.unit.getCost() / 10;
-    // The damage we deal is worth half as much as the damage we take, to help powers be a comeback mechanic.
-    power += guiHPDealt * enemy.unit.getCost() / 10 / 2;
-
-    return power;
-  }
-  @Override
-  public int calculateMassDamageCharge(Unit minion, int lostHP)
-  {
-    return 0;
   }
 
   protected abstract static class TrilogyAbility extends CommanderAbility
