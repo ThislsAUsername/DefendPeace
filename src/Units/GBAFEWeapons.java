@@ -13,8 +13,7 @@ public class GBAFEWeapons
   // Effective-damage weapon might multiplier
   // (Nerfed to 2x in some of the games... in English; 2x always goes for dragons, but I don't believe in dragons)
   public final static int SLAYER_BONUS          = 3;
-  // Go with the FE6 value for the memes (it's 15 in the other two)
-  public final static int CRIT_BOOST_BONUS      = 30;
+  public final static int CRIT_BOOST_BONUS      = 15; // 30 in FE6
   public final static int SKILL_ACTIVATION_PERCENT = 20;
 
   public final static int TERRAIN_DURABILITY = 99;
@@ -629,6 +628,25 @@ public class GBAFEWeapons
       // 80 hit in FE6
       super(stats, 9, 75, 30);
       sword = true;
+    }
+  }
+  public static class KillerLance extends GBAFEWeapon
+  {
+    private static final long serialVersionUID = 1L;
+    public KillerLance(GBAFEStats stats)
+    {
+      // 75 hit in FE6
+      super(stats, 10, 70, 30);
+      lance = true;
+    }
+  }
+  public static class KillerAxe extends GBAFEWeapon
+  {
+    private static final long serialVersionUID = 1L;
+    public KillerAxe(GBAFEStats stats)
+    {
+      super(stats, 11, 65, 30);
+      axe = true;
     }
   }
   public static class KillerBow extends GBAFEWeapon

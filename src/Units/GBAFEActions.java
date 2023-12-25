@@ -36,7 +36,9 @@ import Units.GBAFEUnits.GBAFEUnitModel;
 public class GBAFEActions
 {
   public static final boolean VARIABLE_PROMO_COST = false;
-  public static final int PROMOTION_COST = 5000;
+  public static final int PROMOTION_COST       = 10000;
+  public static final int BALLISTA_COST        =  3000;
+  public static final int KILLER_BALLISTA_COST =  5000;
   public static final boolean PROMOTION_REQUIRES_LEVELS = true;
 
   public static class GBAFEExperienceTracker extends StateTracker
@@ -177,10 +179,16 @@ public class GBAFEActions
   {
     private static final long serialVersionUID = 1L;
     public final UnitModel destType;
+    private final int promoCost;
 
     public PromotionFactory(UnitModel type)
     {
+      this(type, PROMOTION_COST);
+    }
+    public PromotionFactory(UnitModel type, int cost)
+    {
       destType = type;
+      promoCost = cost;
     }
 
     @Override
@@ -213,7 +221,7 @@ public class GBAFEActions
     {
       if( VARIABLE_PROMO_COST )
         return destType.costBase - actor.model.costBase;
-      return PROMOTION_COST;
+      return promoCost;
     }
   }
 
