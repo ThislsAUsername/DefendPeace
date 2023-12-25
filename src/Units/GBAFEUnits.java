@@ -17,7 +17,7 @@ public class GBAFEUnits extends UnitModelScheme
   private static final long serialVersionUID = 1L;
   private static final boolean SORT_PROMOTED_UNITS_LAST = true;
   private static final boolean USE_GROWTHS              = true;
-  private static final int     PROMOTION_LEVEL_BOOST    = 9; // 7/8 Easy use 9; all others use 19, but 19 is nuts
+  private static final int     PROMOTION_LEVEL_BOOST    = 19; // 7/8 Easy use 9; all others use 19
 
   @Override
   public String toString()
@@ -45,6 +45,8 @@ public class GBAFEUnits extends UnitModelScheme
 
     // Define everything we can build from a Factory.
     factoryModels.add(new Soldier());
+    Brigand brigand = new Brigand();
+    factoryModels.add(brigand);
     factoryModels.add(new Myrmidon());
     factoryModels.add(new Thief());
     factoryModels.add(new Axeman());
@@ -70,7 +72,8 @@ public class GBAFEUnits extends UnitModelScheme
     airportModels.add(new Summoner());
 
     // Record those units we can get from a Seaport.
-    shipModels.add(new Pirate());
+    Pirate pirate = new Pirate();
+    shipModels.add(pirate);
     shipModels.add(new Fleet());
     shipModels.add(new SiegeBoat());
     shipModels.add(new CloisterBoat());
@@ -93,9 +96,11 @@ public class GBAFEUnits extends UnitModelScheme
     for (int i = 0; i < feModels.unitModels.size(); ++i)
       ((GBAFEUnitModel) feModels.unitModels.get(i)).addVariants(feModels, i);
 
-    // Do this after adding all the models, since we don't want two Bishop entries
+    // Do this after adding all the models, since we don't want two copies or entries of promoted class types
     priest.promotesTo = monk.promotesTo;
     priest.baseActions.add(new GBAFEActions.PromotionFactory(priest.promotesTo));
+    pirate.promotesTo = brigand.promotesTo;
+    pirate.baseActions.add(new GBAFEActions.PromotionFactory(pirate.promotesTo));
 
     return feModels;
   }
@@ -340,6 +345,7 @@ public class GBAFEUnits extends UnitModelScheme
   private static final MoveType wheel      = new FEMoveTypes.FEWheel();
   private static final MoveType boat       = new FEMoveTypes.FEBoat();
   private static final MoveType foot       = new FEMoveTypes.FEFoot();
+  private static final MoveType footPlus   = new FEMoveTypes.FEFootPlus();
   private static final MoveType footAxe    = new FEMoveTypes.FEFootAxe();
   private static final MoveType footMage   = new FEMoveTypes.FEFootMage();
   private static final MoveType footArmor  = new FEMoveTypes.FEFootArmor();
@@ -386,15 +392,15 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  12; // 25 in 7/8
       bases.growthDef =  10; // 12 in 7/8
       bases.growthRes =  25; // 15 in 7/8
-      return bases.build(0);
+      return bases.build(4);
     }
   }
   public static class Halberdier extends FootUnit
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 10000;
-    private static final double STAR_VALUE = 1.0;
+    private static final int UNIT_COST = 22000;
+    private static final double STAR_VALUE = 2.2;
     private static final int MOVE_POWER = 6; // PoR standardizes on 7; might be amusing
 
     private static final GBAFEStats static_stats = buildStats();
@@ -423,7 +429,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  25;// + 15 - 25;
       bases.growthDef =  45;// + 10 - 35;
       bases.growthRes =  40;// + 13 - 15;
-      return bases.build(true, 9);
+      return bases.build(true, 0);
     }
 
     @Override
@@ -440,11 +446,98 @@ public class GBAFEUnits extends UnitModelScheme
     }
   }
 
+  public static class Brigand extends FootUnit
+  {
+    private static final long serialVersionUID = 1L;
+
+    private static final int UNIT_COST = 500;
+    private static final double STAR_VALUE = 0.4;
+    private static final int MOVE_POWER = 5;
+
+    private static final GBAFEStats static_stats = buildStats();
+    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronAxe(static_stats) };
+
+    public Brigand()
+    {
+      super("Brigand", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
+      promotesTo = new Berserker();
+      baseMoveType = footAxe; // Peaks don't exist
+    }
+    private static GBAFEStats buildStats()
+    {
+      ClassStatsBuilder bases = new ClassStatsBuilder();
+      bases.baseHP  = 20;
+      bases.baseStr =  5;
+      bases.baseSkl =  1;
+      bases.baseSpd =  5;
+      bases.baseDef =  3;
+      bases.baseRes =  0;
+      bases.growthHP  =  82;
+      bases.growthStr =  50;
+      bases.growthSkl =  30;
+      bases.growthSpd =  20;
+      bases.growthLck =  15;
+      bases.growthDef =  10;
+      bases.growthRes =  10; // 13 in 7/8
+      return bases.build(0);
+    }
+  }
+  public static class Berserker extends FootUnit
+  {
+    private static final long serialVersionUID = 1L;
+
+    private static final int UNIT_COST = 11000;
+    private static final double STAR_VALUE = 1.2;
+    private static final int MOVE_POWER = 6;
+
+    private static final GBAFEStats static_stats = buildStats();
+    private static final WeaponModel[] weapons = { new GBAFEWeapons.KillerAxe(static_stats), new GBAFEWeapons.HandAxe(static_stats) };
+
+    public Berserker()
+    {
+      super("Berserker", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
+      baseMoveType = footPirate;
+      role |= ASSAULT;
+    }
+    private static GBAFEStats buildStats()
+    {
+      ClassStatsBuilder bases = new ClassStatsBuilder();
+      bases.critBoost = true;
+      bases.baseHP  = 24;
+      bases.baseStr =  7;
+      bases.baseSkl =  6;
+      bases.baseSpd =  7;
+      bases.baseDef =  6;
+      bases.baseRes =  0;
+      bases.growthHP  =  75; // 58 in 6
+      bases.growthStr =  50; // 35 in 6
+      bases.growthSkl =  35; // 25 in 6
+      bases.growthSpd =  25; // 12 in 6
+      bases.growthLck =  15;
+      bases.growthDef =  10;
+      bases.growthRes =  13; // 10 in 6
+      return bases.build(true, 0);
+    }
+
+    @Override
+    public void addVariants(GameReadyModels feModels, int yourIndex)
+    {
+      if( !hidden )
+      {
+        super.addVariants(feModels, yourIndex);
+        UnitModel rangedOnly = new Berserker();
+        rangedOnly.weapons.remove(0);
+        rangedOnly.hidden = true; // for visual distinctiveness
+        feModels.unitModels.add(yourIndex + 1, rangedOnly);
+      }
+    }
+  }
+
   public static class Myrmidon extends FootUnit
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 3000;
+    private static final int UNIT_COST = 2500;
     private static final double STAR_VALUE = 0.6;
     private static final int MOVE_POWER = 5;
 
@@ -455,7 +548,6 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Myrmidon", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       promotesTo = new Swordmaster();
-      role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
     {
@@ -473,7 +565,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  30;
       bases.growthDef =  15;
       bases.growthRes =  20; // 17 in 6
-      return bases.build(2);
+      return bases.build(4);
     }
   }
   public static class Swordmaster extends FootUnit
@@ -491,6 +583,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Swordmaster", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       role |= ASSAULT;
+      baseMoveType = footPlus;
     }
     private static GBAFEStats buildStats()
     {
@@ -509,7 +602,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  25; // 15 in 6
       bases.growthDef =  15; // 12 in 6
       bases.growthRes =  22; // 25 in 6
-      return bases.build(true, 9);
+      return bases.build(true, 0);
     }
   }
 
@@ -517,7 +610,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 3000;
+    private static final int UNIT_COST = 2500;
     private static final double STAR_VALUE = 0.6;
     private static final int MOVE_POWER = 6;
 
@@ -528,6 +621,7 @@ public class GBAFEUnits extends UnitModelScheme
     {
       super("Thief", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
       promotesTo = new Assassin();
+      baseMoveType = footPlus;
       visionRange = VISION_THIEF;
       classRelativePower = 2;
       role |= RECON;
@@ -565,6 +659,7 @@ public class GBAFEUnits extends UnitModelScheme
     public Assassin()
     {
       super("Assassin", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
+      baseMoveType = footPlus;
       visionRange = VISION_THIEF;
       reducedPromoKillBonus = true;
       role |= ASSAULT | RECON;
@@ -586,7 +681,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  40;
       bases.growthDef =   5;
       bases.growthRes =  20;
-      return bases.build(true, 19);
+      return bases.build(true, 19); // Blatant favoritism, and barely enough
     }
   }
 
@@ -661,7 +756,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  15;
       bases.growthDef =  16;
       bases.growthRes =  17; // 7 in 6
-      return bases.build(true, 9);
+      return bases.build(true, 0);
     }
 
     @Override
@@ -718,8 +813,8 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 12000;
-    private static final double STAR_VALUE = 1.0;
+    private static final int UNIT_COST = 16000;
+    private static final double STAR_VALUE = 1.6;
     private static final int MOVE_POWER = 6;
 
     private static final GBAFEStats static_stats = buildStats();
@@ -728,6 +823,7 @@ public class GBAFEUnits extends UnitModelScheme
     public Hero()
     {
       super("Hero", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
+      baseMoveType = footPlus;
       role |= ASSAULT;
     }
     private static GBAFEStats buildStats()
@@ -746,7 +842,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  25;
       bases.growthDef =  20;
       bases.growthRes =  20; // 10 in 6
-      return bases.build(true, 9);
+      return bases.build(true, 0);
     }
   }
 
@@ -823,7 +919,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  20;
       bases.growthDef =  23;
       bases.growthRes =  25; // 15 in 6
-      return bases.build(true, 2);
+      return bases.build(true, 0);
     }
 
     @Override
@@ -882,7 +978,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 5000;
+    private static final int UNIT_COST = 4000;
     private static final double STAR_VALUE = 1.2;
     private static final int MOVE_POWER = 7;
 
@@ -1015,7 +1111,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  35;
       bases.growthDef =  15;
       bases.growthRes =  20; // 10 in 6, 15 female
-      return bases.build(14); // Wow, this class's stats are bad
+      return bases.build(9); // Wow, this class's stats are bad
     }
 
     @Override
@@ -1030,7 +1126,7 @@ public class GBAFEUnits extends UnitModelScheme
         feModels.unitModels.add(yourIndex + 1, rangedOnly);
 
         UnitModel ballista = new ArcherInBallista();
-        baseActions.add(new GBAFEActions.PromotionFactory(ballista));
+        baseActions.add(new GBAFEActions.PromotionFactory(ballista, GBAFEActions.BALLISTA_COST));
         ballista.baseActions.add(new TransformLifecycle.TransformFactory(this, "DISMOUNT"));
         feModels.unitModels.add(yourIndex + 2, ballista);
       }
@@ -1067,6 +1163,7 @@ public class GBAFEUnits extends UnitModelScheme
     public Sniper()
     {
       super("Sniper", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
+      baseMoveType = footPlus;
       role |= SURFACE_TO_AIR;
     }
     private static GBAFEStats buildStats()
@@ -1086,7 +1183,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  30;
       bases.growthDef =  15;
       bases.growthRes =  20; // 15 in 6
-      return bases.build(true, 9);
+      return bases.build(true, 0);
     }
 
     @Override
@@ -1101,7 +1198,7 @@ public class GBAFEUnits extends UnitModelScheme
         feModels.unitModels.add(yourIndex + 1, rangedOnly);
 
         UnitModel killerBallista = new SniperInBallista();
-        baseActions.add(new GBAFEActions.PromotionFactory(killerBallista));
+        baseActions.add(new GBAFEActions.PromotionFactory(killerBallista, GBAFEActions.KILLER_BALLISTA_COST));
         killerBallista   .baseActions.add(new TransformLifecycle.TransformFactory(this, "DISMOUNT"));
         feModels.unitModels.add(yourIndex + 2, killerBallista);
       }
@@ -1150,7 +1247,7 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 6000;
+    private static final int UNIT_COST = 4000;
     private static final double STAR_VALUE = 0.8;
     private static final int MOVE_POWER = 7;
 
@@ -1216,7 +1313,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  40;
       bases.growthDef =  10;
       bases.growthRes =  40; // 20 in 6, but 8's uses light, so IDK
-      return bases.build(true, 4);
+      return bases.build(true, 0);
     }
   }
 
@@ -1224,8 +1321,8 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 5000;
-    private static final double STAR_VALUE = 0.8;
+    private static final int UNIT_COST = 2000;
+    private static final double STAR_VALUE = 0.6;
     private static final int MOVE_POWER = 5;
 
     private static final GBAFEStats static_stats = buildStats();
@@ -1253,7 +1350,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  20;
       bases.growthDef =   5;
       bases.growthRes =  30; // 35 in 6, 40 female
-      return bases.build(4);
+      return bases.build(3);
     }
   }
   public static class Sage extends FootUnit
@@ -1290,7 +1387,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  15;
       bases.growthDef =  10;
       bases.growthRes =  40; // 25 in 6
-      return bases.build(true, 9);
+      return bases.build(true, 0);
     }
 
     @Override
@@ -1316,7 +1413,7 @@ public class GBAFEUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Flux(static_stats) };
+    private static final WeaponModel[] weapons = { new GBAFEWeapons.Flux(static_stats), new GBAFEWeapons.Luna(static_stats) };
 
     public Shaman()
     {
@@ -1341,7 +1438,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  20;
       bases.growthDef =  10;
       bases.growthRes =  30; // 37 in 6, 40 female
-      return bases.build(6);
+      return bases.build(7);
     }
   }
   public static class Druid extends FootUnit
@@ -1378,7 +1475,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  20;
       bases.growthDef =  10;
       bases.growthRes =  35; // 37 in 6
-      return bases.build(true, 14);
+      return bases.build(true, 0);
     }
   }
 
@@ -1451,7 +1548,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  40;
       bases.growthDef =   8;
       bases.growthRes =  40;
-      return bases.build(true, 9);
+      return bases.build(true, 0);
     }
   }
 
@@ -1524,7 +1621,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  25;
       bases.growthDef =  12;
       bases.growthRes =  20; // 17 in 6, 25 for female
-      return bases.build(true, 9);
+      return bases.build(true, 0);
     }
   }
 
@@ -1644,7 +1741,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  30;
       bases.growthDef =  12;
       bases.growthRes =  30; // 20 in FE6
-      return bases.build(true, 9);
+      return bases.build(true, 0);
     }
 
     @Override
@@ -1729,7 +1826,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  20;
       bases.growthDef =  20;
       bases.growthRes =  17; // 7 in FE6
-      return bases.build(true, 6);
+      return bases.build(true, 0);
     }
   }
 
@@ -1865,12 +1962,12 @@ public class GBAFEUnits extends UnitModelScheme
     private static final int MOVE_POWER = 5;
 
     private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.HandAxe(static_stats) };
+    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronAxe(static_stats), new GBAFEWeapons.HandAxe(static_stats) };
 
     public Pirate()
     {
       super("Pirate", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new Berserker();
+      // Promotion is set by the caller
       baseMoveType = footPirate;
     }
     private static GBAFEStats buildStats()
@@ -1889,45 +1986,20 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  10; // 15 in 7/8
       bases.growthDef =  10;
       bases.growthRes =  15; // 13 in 7/8
-      return bases.build(0);
+      return bases.build(5);
     }
-  }
-  public static class Berserker extends FootUnit
-  {
-    private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 16000;
-    private static final double STAR_VALUE = 1.0;
-    private static final int MOVE_POWER = 6;
-
-    private static final GBAFEStats static_stats = buildStats();
-    // TODO: Killer axe?
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.HandAxe(static_stats) };
-
-    public Berserker()
+    @Override
+    public void addVariants(GameReadyModels feModels, int yourIndex)
     {
-      super("Berserker", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = footPirate;
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.critBoost = true;
-      bases.baseHP  = 24;
-      bases.baseStr =  7;
-      bases.baseSkl =  6;
-      bases.baseSpd =  7;
-      bases.baseDef =  6;
-      bases.baseRes =  0;
-      bases.growthHP  =  75; // 58 in 6
-      bases.growthStr =  50; // 35 in 6
-      bases.growthSkl =  35; // 25 in 6
-      bases.growthSpd =  25; // 12 in 6
-      bases.growthLck =  15;
-      bases.growthDef =  10;
-      bases.growthRes =  13; // 10 in 6
-      return bases.build(true, 9);
+      if( !hidden )
+      {
+        super.addVariants(feModels, yourIndex);
+        UnitModel rangedOnly = new Pirate();
+        rangedOnly.weapons.remove(0);
+        rangedOnly.hidden = true; // for visual distinctiveness
+        feModels.unitModels.add(yourIndex + 1, rangedOnly);
+      }
     }
   }
 
@@ -1951,7 +2023,7 @@ public class GBAFEUnits extends UnitModelScheme
     private static final long serialVersionUID = 1L;
     private static final long ROLE = SHIP | SEA | SURFACE_TO_AIR;
 
-    private static final int UNIT_COST = 10000;
+    private static final int UNIT_COST = 8000;
     private static final double STAR_VALUE = 1.8;
     private static final int MAX_AMMO = 5;
     private static final int VISION_RANGE = VISION_NORMAL;
@@ -2021,7 +2093,7 @@ public class GBAFEUnits extends UnitModelScheme
     private static final long serialVersionUID = 1L;
     private static final long ROLE = SHIP | SEA;
 
-    private static final int UNIT_COST = 24000;
+    private static final int UNIT_COST = 13000;
     private static final double STAR_VALUE = 1.8;
     private static final int MAX_AMMO = 5;
     private static final int VISION_RANGE = VISION_NORMAL;
@@ -2047,7 +2119,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.baseStr =  1;
       bases.baseSkl =  1;
       bases.baseSpd =  2;
-      bases.baseDef = 11; // Armor boat gooo
+      bases.baseDef =  8; // Armor boat gooo
       bases.baseRes =  0;
       bases.growthHP  =  75;
       bases.growthStr =  35;
@@ -2056,7 +2128,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  15;
       bases.growthDef =  15;
       bases.growthRes =  15;
-      return bases.build(true, 9);
+      return bases.build(14);
     }
 
     @Override
@@ -2128,7 +2200,7 @@ public class GBAFEUnits extends UnitModelScheme
       bases.growthLck =  15;
       bases.growthDef =  15;
       bases.growthRes =  35; // to match Pegasus Knight
-      return bases.build(true, 14);
+      return bases.build(14);
     }
 
     @Override
