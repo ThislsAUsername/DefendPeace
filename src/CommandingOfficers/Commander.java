@@ -253,7 +253,13 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     myActiveAbility = ability;
   }
 
-  /** Do not use this unless you ask the Commander how much energy to input */
+  /**
+   * Changes the underlying raw energy value for this Commander.<p>
+   * If you can use modifyAbilityStars() instead, you probably should.<p>
+   * When invoking this, make sure you have knowledge of the right value scale -
+   * calling calculateCombatCharge() is a good example of how to get that.<p>
+   * If you need more fidelity than "stars" and don't want to write a hook, ask one of the abilities to calcCostPerStar()<p>
+   */
   public void modifyAbilityPower(int amount)
   {
     myAbilityPower += amount;
