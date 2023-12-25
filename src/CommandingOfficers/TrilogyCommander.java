@@ -76,7 +76,9 @@ public abstract class TrilogyCommander extends Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      // Change my CO's energy such that it's as if this power cost the activation cost of the next power rather than the actual cost
+      // AW2 and 3 have a bug(?) where the energy cost is modified before it is deducted.
+      // To implement that behavior, change my CO's energy such that it's as if this power cost
+      //   the next activation's cost rather than the advertized cost.
       int costAtActivation = baseStars * costBasis.calcCostPerStar(costBasis.numCasts - 1);
       int costForNextCast  = costBasis.calcCost(baseStars);
       int extraEnergyCost  = costForNextCast - costAtActivation; // Will be negative on cast 9
