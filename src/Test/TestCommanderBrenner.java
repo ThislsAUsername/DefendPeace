@@ -92,14 +92,18 @@ public class TestCommanderBrenner extends TestCase
     return testPassed;
   }
 
+  /**
+   * Verifies that the zone is the only place Brenner gets energy.<p>
+   * The charge bug (combat initiator must be in your zone, not your unit) is not checked here.
+   */
   private boolean testAttackCharge()
   {
     setupTest();
 
     // Add our combatants
-    Unit mech = addUnit(testMap, Brenner, UnitModel.MECH, 1, 1);
+    Unit mech = addUnit(testMap, Brenner, UnitModel.MECH, 1, 1); // 4 tiles from COU, so not in zone
     Unit COU  = addUnit(testMap, Brenner, UnitModel.TRANSPORT, 4, 2);
-    Unit aa   = addUnit(testMap, Brenner, UnitModel.SURFACE_TO_AIR, 2, 2);
+    Unit aa   = addUnit(testMap, Brenner, UnitModel.SURFACE_TO_AIR, 2, 2); // 2 tiles from COU, so in zone
 
     // And our victim
     Unit inf = addUnit(testMap, Patch, UnitModel.TROOP, 1, 2);
@@ -107,7 +111,8 @@ public class TestCommanderBrenner extends TestCase
     Brenner.initTurn(testMap);
     Brenner.army.money = 9001;
     boolean testPassed = true;
-    
+
+    // Note: COUing on this tile is not normally valid, but we're skipping the logic that enforces that.
     performGameAction(new DeployableCommander.DeployCOUAction(Brenner.deployAction, COU), game);
     testPassed &= validate(Brenner.COUs.contains(COU), "    COUing didn't COU the COU?");
     testPassed &= validate(9001 - Brenner.army.money == COU.getCost()/2, "    COUing didn't cost the expected amount.");
