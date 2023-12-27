@@ -92,15 +92,6 @@ public abstract class CommanderAbility implements Serializable
     return myName;
   }
 
-  /** Provides a hook to increase the ability's cost for its next invocation.
-   * Being in its own function allows an easy way for individual abilities
-   * to change the cost function if needed.
-   */
-  protected void adjustCost()
-  {
-    costBasis.numCasts += 1;
-  }
-
   /** Final method to do some bookkeeping, and then call
    * perform() do do the actual work. This allows us to
    * manage global Ability side-effects in one place. */
@@ -114,7 +105,7 @@ public abstract class CommanderAbility implements Serializable
     myCommander.activateAbility(this, gameMap);
     applyUnitModifiers(gameMap);
 
-    adjustCost();
+    costBasis.numCasts += 1;
     perform(gameMap);
   }
   private final void applyUnitModifiers(MapMaster gameMap)
