@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import CommandingOfficers.Tech;
 import CommandingOfficers.DefendPeace.CyanOcean.Patch;
+import CommandingOfficers.DefendPeace.RoseThorn.Tech;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.Army;

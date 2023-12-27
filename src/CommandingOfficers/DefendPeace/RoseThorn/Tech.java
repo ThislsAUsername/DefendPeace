@@ -1,4 +1,4 @@
-package CommandingOfficers;
+package CommandingOfficers.DefendPeace.RoseThorn;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,6 +11,11 @@ import java.util.Set;
 
 import AI.AICombatUtils;
 import AI.AIUtils;
+import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
+import CommandingOfficers.CommanderInfo;
+import CommandingOfficers.CommanderAbility.CostBasis;
+import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.GameAction.UnitSpawnAction;
 import Engine.GameScenario;
 import Engine.UnitActionFactory;

@@ -7,8 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import CommandingOfficers.Commander;
-import CommandingOfficers.Strong;
 import CommandingOfficers.DefendPeace.CyanOcean.Patch;
+import CommandingOfficers.DefendPeace.RoseThorn.Strong;
 import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
