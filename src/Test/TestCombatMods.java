@@ -2,7 +2,7 @@ package Test;
 
 import CommandingOfficers.Cinder;
 import CommandingOfficers.Commander;
-import CommandingOfficers.Venge;
+import CommandingOfficers.DefendPeace.misc.Venge;
 import Engine.Army;
 import Engine.GameInstance;
 import Engine.GamePath;

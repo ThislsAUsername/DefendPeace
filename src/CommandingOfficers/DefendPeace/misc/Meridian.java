@@ -1,8 +1,13 @@
-package CommandingOfficers;
+package CommandingOfficers.DefendPeace.misc;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
+import CommandingOfficers.CommanderInfo;
+import CommandingOfficers.CommanderAbility.CostBasis;
+import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;

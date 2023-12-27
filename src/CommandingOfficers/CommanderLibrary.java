@@ -3,6 +3,11 @@ package CommandingOfficers;
 import java.util.ArrayList;
 
 import CommandingOfficers.AW4.BrennerWolves.*;
+import CommandingOfficers.DefendPeace.misc.Bear_Bull;
+import CommandingOfficers.DefendPeace.misc.DocLight;
+import CommandingOfficers.DefendPeace.misc.Meridian;
+import CommandingOfficers.DefendPeace.misc.Qis;
+import CommandingOfficers.DefendPeace.misc.Venge;
 import Engine.GameScenario;
 import Engine.GameScenario.GameRules;
 import UI.UIUtils;
