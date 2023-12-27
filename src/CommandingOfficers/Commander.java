@@ -50,8 +50,9 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public static final int CHARGERATIO_HP = 100; // Funds value of 10 HP damage dealt, for the purpose of power charge
   public int incomeAdjustment = 0; // Commander subclasses can increase/decrease income if needed.
   private int myAbilityPower = 0;
+  public boolean roundUpRepairs = true; // I blame AWBW
 
-  private ArrayList<CommanderAbility> myAbilities = null;
+  public ArrayList<CommanderAbility> myAbilities = null;
   private CommanderAbility myActiveAbility = null;
 
   public Commander(CommanderInfo info, GameScenario.GameRules rules)
@@ -90,9 +91,10 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
       ca.deInitForGame(game);
   }
 
-  protected void addCommanderAbility(CommanderAbility ca)
+  protected CommanderAbility addCommanderAbility(CommanderAbility ca)
   {
     myAbilities.add(ca);
+    return ca;
   }
 
   public void endTurn()
@@ -251,6 +253,13 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     myActiveAbility = ability;
   }
 
+  /**
+   * Changes the underlying raw energy value for this Commander.<p>
+   * If you can use modifyAbilityStars() instead, you probably should.<p>
+   * When invoking this, make sure you have knowledge of the right value scale -
+   * calling calculateCombatCharge() is a good example of how to get that.<p>
+   * If you need more fidelity than "stars" and don't want to write a hook, ask one of the abilities to calcCostPerStar()<p>
+   */
   public void modifyAbilityPower(int amount)
   {
     myAbilityPower += amount;
@@ -260,10 +269,14 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     if( myAbilityPower > maxPower )
       myAbilityPower = maxPower;
   }
-  public void modifyAbilityStars(int amount)
+  /** Adds N power-fatigue-scaled stars' energy. */
+  public void modifyAbilityStars(int stars)
   {
-    // TODO: Make this scale with fatigue
-    modifyAbilityPower(amount * CHARGERATIO_FUNDS);
+    if( myAbilities.size() < 1 )
+      return;
+    // Just grab the first ability's star cost since I don't really want to consider what to do under variant star costs.
+    int starCost = myAbilities.get(0).costBasis.calcCostPerStar();
+    modifyAbilityPower(stars * starCost);
   }
 
   /**

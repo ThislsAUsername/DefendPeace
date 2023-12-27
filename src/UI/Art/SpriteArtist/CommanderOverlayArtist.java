@@ -156,7 +156,10 @@ public class CommanderOverlayArtist
     if( 0 == abilityPoints.length )
       return SpriteLibrary.createTransparentSprite(1, 1);
 
-    final double pixelsPerPowerUnit = 3.0 / Commander.CHARGERATIO_FUNDS;
+    final double pixelsPerStar = 3.0;
+    // Just grab the first ability's star cost since I don't really want to consider what to do under variant star costs.
+    int starCost = co.myAbilities.get(0).costBasis.baseStarRatio;
+    final double pixelsPerPowerPlanck = pixelsPerStar / starCost;
     final int animIndex = getAnimIndex();
     int slowAnimIndex = (animIndex/32) % 2;
 
@@ -169,7 +172,7 @@ public class CommanderOverlayArtist
     final int imageBufferW = 2;
 
     // Unfortunately, the power bar is a "some assembly required" kinda deal, so we have to put it together here.
-    BufferedImage powerBar = SpriteLibrary.getCoOverlayPowerBar(co, maxAP, currentPower, pixelsPerPowerUnit);
+    BufferedImage powerBar = SpriteLibrary.getCoOverlayPowerBar(co, maxAP, currentPower, pixelsPerPowerPlanck);
     Sprite powerBarPieces = SpriteLibrary.getCoOverlayPowerBarAPs(co);
 
     // Make a new BufferedImage to hold the composited power bar, and set it all transparent to start.
@@ -192,7 +195,7 @@ public class CommanderOverlayArtist
               : ((diff > 0) ? powerBarPieces.getFrame(2)               // 2/3 full
                   : ((slowAnimIndex == 0) ? powerBarPieces.getFrame(3) // filled
                       : powerBarPieces.getFrame(4))) );                // blinking
-      int drawLoc = ((int) (requiredPower*pixelsPerPowerUnit)) - imageBufferW - 3; // -3 to center the image around the power level.
+      int drawLoc = ((int) (requiredPower*pixelsPerPowerPlanck)) - imageBufferW - 3; // -3 to center the image around the power level.
       barGfx.drawImage(segment, drawLoc, 0, null);
     }
     

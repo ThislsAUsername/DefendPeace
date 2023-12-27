@@ -125,13 +125,13 @@ public class DoRUnits extends UnitModelScheme
     public DoRUnitEnum type;
 
     public DoRUnitModel(String pName, DoRUnitEnum pType, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] weapons, double starValue)
+        int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] weapons, int starValue)
     {
       super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
       type = pType;
     }
     public DoRUnitModel(String pName, DoRUnitEnum pType, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> weapons, double starValue)
+        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> weapons, int starValue)
     {
       super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
       type = pType;
@@ -161,7 +161,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = TROOP | LAND;
     
     private static final int UNIT_COST = 1500;
-    private static final double STAR_VALUE = 0.4;
+    private static final int STAR_VALUE = 4;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = -1;
@@ -185,7 +185,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = TROOP | MECH | LAND;
     
     private static final int UNIT_COST = 2500;
-    private static final double STAR_VALUE = 0.4;
+    private static final int STAR_VALUE = 4;
     private static final int MAX_FUEL = 70;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = 3;
@@ -209,7 +209,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = TROOP | TANK | LAND;
     
     private static final int UNIT_COST = 2500;
-    private static final double STAR_VALUE = 0.4;
+    private static final int STAR_VALUE = 4;
     private static final int MAX_FUEL = 70;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = -1;
@@ -233,7 +233,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = RECON | TANK | LAND;
     
     private static final int UNIT_COST = 4000;
-    private static final double STAR_VALUE = 1.0;
+    private static final int STAR_VALUE = 10;
     private static final int MAX_FUEL = 80;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = -1;
@@ -257,7 +257,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = RECON | TANK | LAND;
     
     private static final int UNIT_COST = 5000;
-    private static final double STAR_VALUE = 1.0;
+    private static final int STAR_VALUE = 10;
     private static final int MAX_FUEL = 60;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = 3;
@@ -282,7 +282,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = SURFACE_TO_AIR | TANK | LAND;
     
     private static final int UNIT_COST = 7000;
-    private static final double STAR_VALUE = 1.0;
+    private static final int STAR_VALUE = 10;
     private static final int MAX_FUEL = 60;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = 6;
@@ -305,7 +305,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = ASSAULT | TANK | LAND;
     
     private static final int UNIT_COST = 7000;
-    private static final double STAR_VALUE = 1.0;
+    private static final int STAR_VALUE = 10;
     private static final int MAX_FUEL = 70;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = 6;
@@ -329,7 +329,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = ASSAULT | TANK | LAND;
     
     private static final int UNIT_COST = 12000;
-    private static final double STAR_VALUE = 1.4;
+    private static final int STAR_VALUE = 14;
     private static final int MAX_FUEL = 50;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = 5;
@@ -353,7 +353,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = ASSAULT | TANK | LAND;
     
     private static final int UNIT_COST = 16000;
-    private static final double STAR_VALUE = 1.6;
+    private static final int STAR_VALUE = 16;
     private static final int MAX_FUEL = 50;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = 5;
@@ -377,7 +377,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = SIEGE | TANK | LAND;
     
     private static final int UNIT_COST = 6000;
-    private static final double STAR_VALUE = 1.0;
+    private static final int STAR_VALUE = 10;
     private static final int MAX_FUEL = 50;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = 6;
@@ -401,7 +401,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = SIEGE | TANK | LAND;
     
     private static final int UNIT_COST = 11000;
-    private static final double STAR_VALUE = 1.4;
+    private static final int STAR_VALUE = 14;
     private static final int MAX_FUEL = 50;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = 6;
@@ -425,7 +425,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = SIEGE | TANK | LAND;
     
     private static final int UNIT_COST = 15000;
-    private static final double STAR_VALUE = 1.4;
+    private static final int STAR_VALUE = 14;
     private static final int MAX_FUEL = 50;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = 5;
@@ -449,7 +449,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = SIEGE | SURFACE_TO_AIR | TANK | LAND;
     
     private static final int UNIT_COST = 12000;
-    private static final double STAR_VALUE = 1.4;
+    private static final int STAR_VALUE = 14;
     private static final int MAX_FUEL = 50;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = 5;
@@ -473,7 +473,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = TRANSPORT | TANK | LAND;
     
     private static final int UNIT_COST = 5000;
-    private static final double STAR_VALUE = 0.8;
+    private static final int STAR_VALUE = 8;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 0;
     private static final int MAX_AMMO = -1;
@@ -506,7 +506,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = AIR_TO_AIR | JET | AIR_HIGH;
     
     private static final int UNIT_COST = 20000;
-    private static final double STAR_VALUE = 1.8;
+    private static final int STAR_VALUE = 18;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 5;
     private static final int MAX_AMMO = 6;
@@ -530,7 +530,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = AIR_TO_SURFACE | ASSAULT | JET | AIR_HIGH;
     
     private static final int UNIT_COST = 20000;
-    private static final double STAR_VALUE = 1.8;
+    private static final int STAR_VALUE = 18;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 5;
     private static final int MAX_AMMO = 6;
@@ -554,7 +554,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = AIR_TO_SURFACE | AIR_TO_AIR | ASSAULT | JET | AIR_HIGH;
     
     private static final int UNIT_COST = 15000;
-    private static final double STAR_VALUE = 1.4;
+    private static final int STAR_VALUE = 14;
     private static final int MAX_FUEL = 40;
     private static final int IDLE_FUEL_BURN = 5;
     private static final int MAX_AMMO = 3;
@@ -578,7 +578,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = AIR_TO_AIR | JET | AIR_HIGH;
     
     private static final int UNIT_COST = 13000;
-    private static final double STAR_VALUE = 1.4;
+    private static final int STAR_VALUE = 14;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 5;
     private static final int MAX_AMMO = 9;
@@ -602,7 +602,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = AIR_TO_SURFACE | ASSAULT | HOVER | AIR_LOW;
     
     private static final int UNIT_COST = 9000;
-    private static final double STAR_VALUE = 1.2;
+    private static final int STAR_VALUE = 12;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 2;
     private static final int MAX_AMMO = 6;
@@ -626,7 +626,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = TRANSPORT | HOVER | AIR_LOW;
     
     private static final int UNIT_COST = 5000;
-    private static final double STAR_VALUE = 1.0;
+    private static final int STAR_VALUE = 10;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 2;
     private static final int MAX_AMMO = -1;
@@ -654,7 +654,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = TRANSPORT | SHIP | SEA;
     
     private static final int UNIT_COST = 6000;
-    private static final double STAR_VALUE = 1.0;
+    private static final int STAR_VALUE = 10;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 1;
     private static final int MAX_AMMO = 1;
@@ -682,7 +682,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = SURFACE_TO_AIR | TRANSPORT | SHIP | SEA;
     
     private static final int UNIT_COST = 16000;
-    private static final double STAR_VALUE = 1.6;
+    private static final int STAR_VALUE = 16;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 1;
     private static final int MAX_AMMO = 9;
@@ -719,7 +719,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = SHIP | SEA;
     
     private static final int UNIT_COST = 20000;
-    private static final double STAR_VALUE = 1.8;
+    private static final int STAR_VALUE = 18;
     private static final int MAX_FUEL = 70;
     private static final int IDLE_FUEL_BURN = 1;
     private static final int MAX_AMMO = 6;
@@ -758,7 +758,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = SURFACE_TO_AIR | TRANSPORT | SHIP | SEA;
     
     private static final int UNIT_COST = 28000;
-    private static final double STAR_VALUE = 2.2;
+    private static final int STAR_VALUE = 22;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 1;
     private static final int MAX_AMMO = -1;
@@ -800,7 +800,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = SIEGE | SHIP | SEA;
     
     private static final int UNIT_COST = 25000;
-    private static final double STAR_VALUE = 2.0;
+    private static final int STAR_VALUE = 20;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 1;
     private static final int MAX_AMMO = 6;
@@ -824,7 +824,7 @@ public class DoRUnits extends UnitModelScheme
     private static final long ROLE = TRANSPORT | SHIP | SEA;
     
     private static final int UNIT_COST = 10000;
-    private static final double STAR_VALUE = 1.2;
+    private static final int STAR_VALUE = 12;
     private static final int MAX_FUEL = 99;
     private static final int IDLE_FUEL_BURN = 1;
     private static final int MAX_AMMO = -1;

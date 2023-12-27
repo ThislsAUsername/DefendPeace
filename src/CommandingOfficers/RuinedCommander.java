@@ -304,13 +304,11 @@ public abstract class RuinedCommander extends DeployableCommander
 
     protected RuinedAbility(RuinedCommander commander, String name)
     {
-      super(commander, name, COST);
-      myPowerCost = COST * DOR_STAR_VALUE;
+      super(commander, name, COST, new CostBasis(DOR_STAR_VALUE));
       COcast = commander;
+      costBasis.maxStarRatio = costBasis.baseStarRatio;
+      costBasis.starRatioPerCast = 0;
     }
-
-    @Override
-    protected void adjustCost() {}
     
     @Override
     protected void perform(MapMaster gameMap)

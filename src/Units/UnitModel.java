@@ -69,7 +69,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public static final int MAXIMUM_HEALTH = 100;
   public String name;
   public long role;
-  public double abilityPowerValue;
+  public int abilityPowerValue; // In percent of a star's value per GUI HP
   public int maxAmmo;
   public int maxFuel;
   public int fuelBurnIdle;
@@ -86,7 +86,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public Set<TerrainType> unloadExclusionTerrain = new HashSet<TerrainType>();
 
   public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] pWeapons, double powerValue)
+      MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] pWeapons, int powerValue)
   {
     this(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
 
@@ -101,7 +101,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   }
 
   public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> pWeapons, double powerValue)
+      MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> pWeapons, int powerValue)
   {
     this(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
     baseActions.addAll(actions);
@@ -109,7 +109,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   }
 
   private UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, double powerValue)
+      MoveType pPropulsion, int powerValue)
   {
     name = pName;
     role = pRole;

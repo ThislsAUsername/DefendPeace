@@ -72,8 +72,9 @@ public class Qis extends Commander
   {
     super(coInfo, rules);
 
-    addCommanderAbility(new GroovinMovin(this));
-    addCommanderAbility(new TrailOfChill(this));
+    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    addCommanderAbility(new GroovinMovin(this, cb));
+    addCommanderAbility(new TrailOfChill(this, cb));
   }
 
   @Override
@@ -160,9 +161,9 @@ public class Qis extends Commander
     UnitModifier statMod = new UnitFightStatModifier(10);
     UnitModifier moveMod;
 
-    NyoomAbility(Qis commander, String name, int cost, int buff)
+    NyoomAbility(Qis commander, String name, int cost, int buff, CostBasis basis)
     {
-      super(commander, name, cost);
+      super(commander, name, cost, basis);
       moveMod = new UnitMovementModifier(buff);
       coCast = commander;
       AIFlags = PHASE_TURN_START;
@@ -183,9 +184,9 @@ public class Qis extends Commander
     private static final int COST = 3;
     private static final int BUFF = 1;
 
-    GroovinMovin(Qis commander)
+    GroovinMovin(Qis commander, CostBasis basis)
     {
-      super(commander, NAME, COST, BUFF);
+      super(commander, NAME, COST, BUFF, basis);
       coCast = commander;
       AIFlags = PHASE_TURN_START;
     }
@@ -205,9 +206,9 @@ public class Qis extends Commander
     private static final int BUFF = 2;
     private static final int DURATION = 3;
 
-    TrailOfChill(Qis commander)
+    TrailOfChill(Qis commander, CostBasis basis)
     {
-      super(commander, NAME, COST, BUFF);
+      super(commander, NAME, COST, BUFF, basis);
       coCast = commander;
       AIFlags = PHASE_TURN_START;
     }

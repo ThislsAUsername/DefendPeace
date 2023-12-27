@@ -63,8 +63,9 @@ public class Patch extends Commander
   {
     super(coInfo, rules);
 
-    addCommanderAbility(new PatchAbility(this, PLUNDER_NAME, PLUNDER_COST, PLUNDER_INCOME, PLUNDER_ATTACK_BUFF));
-    addCommanderAbility(new PatchAbility(this, PILLAGE_NAME, PILLAGE_COST, PILLAGE_INCOME, PILLAGE_ATTACK_BUFF));
+    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    addCommanderAbility(new PatchAbility(this, cb, PLUNDER_NAME, PLUNDER_COST, PLUNDER_INCOME, PLUNDER_ATTACK_BUFF));
+    addCommanderAbility(new PatchAbility(this, cb, PILLAGE_NAME, PILLAGE_COST, PILLAGE_INCOME, PILLAGE_ATTACK_BUFF));
   }
 
   @Override
@@ -122,9 +123,9 @@ public class Patch extends Commander
     private final double myIncomeRatio;
     private DamageDealtToIncomeConverter tracker;
 
-    PatchAbility(Patch patch, String abilityName, int abilityCost, double incomeRatio, int unitBuff)
+    PatchAbility(Patch patch, CostBasis basis, String abilityName, int abilityCost, double incomeRatio, int unitBuff)
     {
-      super(patch, abilityName, abilityCost);
+      super(patch, abilityName, abilityCost, basis);
 
       myIncomeRatio = incomeRatio;
 

@@ -520,10 +520,11 @@ public class PlayerSetupCommanderArtist
     ArrayList<Integer>[][] allCmdrLists;
     ArrayList<COSpriteSpec> outerBinColorSpec = new ArrayList<>();
     ArrayList<COSpriteSpec> binColorSpec = new ArrayList<>();
-    int outerMax, outerSel;
+    int outerMax, outerSel, innerMax;
     if( sortByGameThenFaction )
     {
       outerMax = UIUtils.SourceGames.values().length;
+      innerMax = myControl.canonFactions.length;
       outerSel = selectedInfo.game.ordinal();
 
       // outer bin = game
@@ -537,6 +538,7 @@ public class PlayerSetupCommanderArtist
     else
     {
       outerMax = myControl.canonFactions.length;
+      innerMax = UIUtils.SourceGames.values().length;
       outerSel = 0;
       for( ; outerSel < myControl.canonFactions.length; ++outerSel )
         if( selectedInfo.baseFaction == myControl.canonFactions[outerSel] )
@@ -565,7 +567,7 @@ public class PlayerSetupCommanderArtist
       }
       OuterCategoryPanel outerCategory = new OuterCategoryPanel(outerPalette, outerName);
 
-      for( int innerIndex = 0; innerIndex < allCmdrLists.length; ++innerIndex )
+      for( int innerIndex = 0; innerIndex < innerMax; ++innerIndex )
       {
         if( 0 >= allCmdrLists[outerIndex][innerIndex].size() )
           continue;
@@ -604,18 +606,18 @@ public class PlayerSetupCommanderArtist
     outerMax = cmdrBins.size();
     outerCategorySelector = new OptionSelector(outerMax, outerSel);
 
-    int innerMax = cmdrBins.get(outerSel).panels.size();
+    int selectedBinSize = cmdrBins.get(outerSel).panels.size();
     int innerSel = 0;
     ArrayList<Integer> innerSelBin = null;
     int cmdrInBinSel = -1;
-    for( ; innerSel < innerMax; ++innerSel )
+    for( ; innerSel < selectedBinSize; ++innerSel )
     {
       innerSelBin = cmdrBins.get(outerSel).panels.get(innerSel).cmdrs;
       cmdrInBinSel = innerSelBin.indexOf(selectedCO);
       if( -1 != cmdrInBinSel )
         break;
     }
-    innerCategorySelector = new OptionSelector(innerMax, innerSel);
+    innerCategorySelector = new OptionSelector(selectedBinSize, innerSel);
 
     tagIndexSelector = new OptionSelector(1);
     syncTagIndexSelector();

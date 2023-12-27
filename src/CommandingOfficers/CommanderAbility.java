@@ -18,26 +18,72 @@ public abstract class CommanderAbility implements Serializable
   public static final int PHASE_TURN_END = PHASE_BUY << 1;
   public final Commander myCommander;
   protected String myName;
-  /** in funds */
-  protected int myPowerCost;
+
+  /** A separate class that enables sharing of cost-basis information across multiple powers. */
+  public static class CostBasis implements Serializable
+  {
+    private static final long serialVersionUID = 1L;
+    public int numCasts; // How many times the power has been used.
+    public final int baseStarRatio; // The starting energy cost of each star; all abilities for a given Commander should use the same charge units
+    public int starRatioPerCast; // Extra energy cost per star per cast
+    public int maxScalingCasts; // Cap on cast scaling
+    /** The ratio used when numCasts >= maxScalingCasts.<p>
+     * Cart logic is buggy, so not necessarily == maxScalingCasts * starRatioPerCast
+     */
+    public int maxStarRatio;
+    public CostBasis(int chargeRatio)
+    {
+      numCasts = 0;
+      baseStarRatio = chargeRatio;
+      starRatioPerCast = chargeRatio / 5; // Default is 20% of base per cast, i.e. 1800 funds
+      maxScalingCasts = 10;
+      maxStarRatio = chargeRatio + maxScalingCasts * starRatioPerCast;
+    }
+    public int calcCostPerStar() { return calcCostPerStar(numCasts); }
+    public int calcCostPerStar(int numCasts)
+    {
+      int cost = baseStarRatio;
+      if( numCasts < maxScalingCasts )
+        cost += numCasts * starRatioPerCast;
+      else
+        cost = maxStarRatio;
+      return cost;
+    }
+    public int calcCost(int stars)
+    {
+      int costRatio = calcCostPerStar();
+      return stars * costRatio;
+    }
+  }
+  public final CostBasis costBasis;
+  public final int baseStars; // The number of "stars" this power initially cost
   public int AIFlags = PHASE_TURN_START;
   private ArrayList<UnitModifier> modsApplied = new ArrayList<>();
 
   public CommanderAbility(Commander commander, String abilityName, int stars)
   {
+    this(commander, abilityName, stars, Commander.CHARGERATIO_FUNDS);
+  }
+  public CommanderAbility(Commander commander, String abilityName, int stars, int chargeRatio)
+  {
+    this(commander, abilityName, stars, new CostBasis(chargeRatio));
+  }
+  public CommanderAbility(Commander commander, String abilityName, int stars, CostBasis basis)
+  {
     myCommander = commander;
     myName = abilityName;
-    myPowerCost = stars * Commander.CHARGERATIO_FUNDS;
+    baseStars = stars;
+    costBasis = basis;
   }
   public void initForGame(GameInstance game)
   {}
   public void deInitForGame(GameInstance game)
   {}
 
-  /** in funds */
+  /** in funds... normally */
   public int getCost()
   {
-    return myPowerCost;
+    return costBasis.calcCost(baseStars);
   }
 
   @Override
@@ -46,24 +92,12 @@ public abstract class CommanderAbility implements Serializable
     return myName;
   }
 
-  /** Provides a hook to increase the ability's cost for its next invocation.
-   * Being in its own function allows an easy way for individual abilities
-   * to change the cost function if needed.
-   */
-  protected void adjustCost()
-  {
-    // Increase the cost of this ability for next time to mitigate spam and
-    // accommodate the presumably-growing battlefront.
-    // Cost grows by at least one, and at most 10% of the current cost.
-    myPowerCost += Math.max(myPowerCost*0.1, 1);
-  }
-
   /** Final method to do some bookkeeping, and then call
    * perform() do do the actual work. This allows us to
    * manage global Ability side-effects in one place. */
   public final void activate(MapMaster gameMap)
   {
-    if( myCommander.getAbilityPower() < myPowerCost )
+    if( myCommander.getAbilityPower() < getCost() )
     {
       System.out.println("WARNING!: Performing ability with insufficient ability power!");
     }
@@ -71,7 +105,7 @@ public abstract class CommanderAbility implements Serializable
     myCommander.activateAbility(this, gameMap);
     applyUnitModifiers(gameMap);
 
-    adjustCost();
+    costBasis.numCasts += 1;
     perform(gameMap);
   }
   private final void applyUnitModifiers(MapMaster gameMap)

@@ -62,8 +62,8 @@ public class Cinder extends Commander
   {
     super(coInfo, rules);
 
-    addCommanderAbility(new SearAbility(this));
-    addCommanderAbility(new WitchFireAbility(this));
+    CommanderAbility ab = addCommanderAbility(new SearAbility(this));
+    addCommanderAbility(new WitchFireAbility(this, ab.costBasis));
   }
 
   @Override
@@ -166,9 +166,9 @@ public class Cinder extends Commander
     private static final int WITCHFIRE_COST = 9;
     private WitchFireTracker tracker;
 
-    WitchFireAbility(Cinder cinder)
+    WitchFireAbility(Cinder cinder, CostBasis basis)
     {
-      super(cinder, WITCHFIRE_NAME, WITCHFIRE_COST);
+      super(cinder, WITCHFIRE_NAME, WITCHFIRE_COST, basis);
     }
     @Override
     public void initForGame(GameInstance game)

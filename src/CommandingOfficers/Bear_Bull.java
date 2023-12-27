@@ -80,8 +80,8 @@ public class Bear_Bull extends Commander
     isBull = true;
     swapD2Ds(true);
 
-    addCommanderAbility(new UpDownTurnAbility(this));
-    addCommanderAbility(new BustBoomAbility(this));
+    CommanderAbility ab = addCommanderAbility(new UpDownTurnAbility(this));
+    addCommanderAbility(new BustBoomAbility(this, ab.costBasis));
   }
 
   public void swapD2Ds(boolean setIncome)
@@ -222,10 +222,10 @@ public class Bear_Bull extends Commander
     private static final int BOOMBUST_BUFF = 20;
     Bear_Bull COcast;
 
-    BustBoomAbility(Bear_Bull commander)
+    BustBoomAbility(Bear_Bull commander, CostBasis basis)
     {
       // as we start in Bear form, Boom is the correct starting name
-      super(commander, BOOM_NAME, BOOMBUST_COST);
+      super(commander, BOOM_NAME, BOOMBUST_COST, basis);
       COcast = commander;
     }
 

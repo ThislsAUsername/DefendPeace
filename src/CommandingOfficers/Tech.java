@@ -112,9 +112,9 @@ public class Tech extends Commander
     super(coInfo, rules);
 
     BattleMechModel = UnitModelScheme.getModelFromString(BATTLEMECH_NAME, unitModels);
-    addCommanderAbility(new TechdropAbility(this, TECHDROP_NAME, TECHDROP_COST, BattleMechModel, TECHDROP_BUFF, TECHDROP_NUM, TECHDROP_RANGE));
-    addCommanderAbility(new OverchargeAbility(this, OVERCHARGE_NAME, OVERCHARGE_COST, OVERCHARGE_BUFF, OVERCHARGE_HEAL));
-    addCommanderAbility(new TechdropAbility(this, STEEL_HAIL_NAME, STEEL_HAIL_COST, BattleMechModel, STEEL_HAIL_BUFF, STEEL_HAIL_NUM, STEEL_HAIL_RANGE));
+    CommanderAbility ab = addCommanderAbility(new OverchargeAbility(this, OVERCHARGE_NAME, OVERCHARGE_COST, OVERCHARGE_BUFF, OVERCHARGE_HEAL));
+    addCommanderAbility(new TechdropAbility(this, ab.costBasis, TECHDROP_NAME, TECHDROP_COST, BattleMechModel, TECHDROP_BUFF, TECHDROP_NUM, TECHDROP_RANGE));
+    addCommanderAbility(new TechdropAbility(this, ab.costBasis, STEEL_HAIL_NAME, STEEL_HAIL_COST, BattleMechModel, STEEL_HAIL_BUFF, STEEL_HAIL_NUM, STEEL_HAIL_RANGE));
   }
 
   public static CommanderInfo getInfo()
@@ -222,9 +222,9 @@ public class Tech extends Commander
     UnitTypeFilter damageBuff = null;
     UnitModifier defenseBuff = null;
 
-    TechdropAbility(Tech tech, String abilityName, int abilityCost, UnitModel unitToDrop, int buff, int num, int abilityRange)
+    TechdropAbility(Tech tech, CostBasis basis, String abilityName, int abilityCost, UnitModel unitToDrop, int buff, int num, int abilityRange)
     {
-      super(tech, abilityName, abilityCost);
+      super(tech, abilityName, abilityCost, basis);
 
       unitModelToDrop = unitToDrop;
 
@@ -571,7 +571,7 @@ public class Tech extends Commander
     BattleMech.name = BATTLEMECH_NAME;
     BattleMech.role = BattleMech.role | UnitModel.SURFACE_TO_AIR;
     BattleMech.costBase = mdTank.costBase*2 + (antiAir.costBase/2);
-    BattleMech.abilityPowerValue = 2.0;
+    BattleMech.abilityPowerValue = 20;
     BattleMech.maxFuel = 30;
     BattleMech.maxAmmo = 10;
     BattleMech.visionRange = 2;

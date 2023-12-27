@@ -83,8 +83,8 @@ public class Strong extends Commander
     damageModTroop.allOf = UnitModel.TROOP;
     addUnitModifier(damageModTroop);
 
-    addCommanderAbility(new StrongArmAbility(this));
-    addCommanderAbility(new MobilizeAbility(this));
+    CommanderAbility ab = addCommanderAbility(new StrongArmAbility(this));
+    addCommanderAbility(new MobilizeAbility(this, ab.costBasis));
   }
 
   /**
@@ -198,9 +198,9 @@ public class Strong extends Commander
     UnitModifier defenseMod = null;
     UnitModifier moveMod = null;
 
-    MobilizeAbility(Strong strong)
+    MobilizeAbility(Strong strong, CostBasis basis)
     {
-      super(strong, MOBILIZE_NAME, MOBILIZE_COST);
+      super(strong, MOBILIZE_NAME, MOBILIZE_COST, basis);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
       // Grant the base firepower/defense bonus.
       damageMod = new UnitDamageModifier(MOBILIZE_BUFF);

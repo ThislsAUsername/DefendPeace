@@ -274,6 +274,14 @@ public class UIUtils
       return spec;
     }
 
+    @Override
+    public String toString()
+    {
+      if( paletteNames.containsKey(color) )
+        return getCanonicalFactionName(this);
+      return color.toString() + " " + faction.name;
+    }
+
     /**
      * Attempts to pull the key color for this canon faction from loaded resources.
      * <p>Falls back to Rose
@@ -327,7 +335,7 @@ public class UIUtils
 
   public enum SourceGames
   {
-    AW1(OS), AW2(BM), AW3(GE), AW4(IDS), DEFEND_PEACE(RT); // More? :v
+    AW1(OS), AW2(BM), AW3(GE), AW4(IDS), AWBW(CO), DEFEND_PEACE(RT); // More? :v
 
     public final COSpriteSpec uiColorSpec;
     SourceGames(COSpriteSpec uiColorSpec)

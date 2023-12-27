@@ -78,7 +78,7 @@ public class Meridian extends Commander
     artyAction = new TransformLifecycle.TransformFactory(tank, "~TANK");
     costShift = (getCost(tank) - getCost(arty))/2;
 
-    addCommanderAbility(new ChangeAndFlow(this));
+    addCommanderAbility(new ChangeAndFlow(this, myVehicularCharge.costBasis));
     addCommanderAbility(myVehicularCharge);
   }
 
@@ -119,9 +119,9 @@ public class Meridian extends Commander
     UnitFightStatModifier baseMod = new UnitFightStatModifier(BASIC_BUFF);
     TransformationTracker tracker;
 
-    ChangeAndFlow(Meridian meridian)
+    ChangeAndFlow(Meridian meridian, CostBasis basis)
     {
-      super(meridian, NAME, COST);
+      super(meridian, NAME, COST, basis);
 
       AIFlags = 0; // The AI doesn't know how to use this, so it shouldn't try
     }
