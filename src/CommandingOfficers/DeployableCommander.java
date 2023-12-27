@@ -126,7 +126,7 @@ public abstract class DeployableCommander extends Commander
   // Action definition happens after this point
   //////////////////////////////////////////////////////////
 
-  private static class DeployCOUFactory extends UnitActionFactory
+  public static class DeployCOUFactory extends UnitActionFactory
   {
     private static final long serialVersionUID = 1L;
     final DeployableCommander deployer;
