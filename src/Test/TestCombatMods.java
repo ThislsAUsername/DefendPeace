@@ -1,7 +1,7 @@
 package Test;
 
-import CommandingOfficers.Cinder;
 import CommandingOfficers.Commander;
+import CommandingOfficers.DefendPeace.GreySky.Cinder;
 import CommandingOfficers.DefendPeace.misc.Venge;
 import Engine.Army;
 import Engine.GameInstance;

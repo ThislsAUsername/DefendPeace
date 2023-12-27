@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import CommandingOfficers.AW4.BrennerWolves.*;
 import CommandingOfficers.DefendPeace.CyanOcean.Ave;
 import CommandingOfficers.DefendPeace.CyanOcean.Patch;
+import CommandingOfficers.DefendPeace.GreySky.Cinder;
 import CommandingOfficers.DefendPeace.RoseThorn.Strong;
 import CommandingOfficers.DefendPeace.RoseThorn.Tech;
 import CommandingOfficers.DefendPeace.misc.Bear_Bull;
