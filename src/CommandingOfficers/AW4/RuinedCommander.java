@@ -1,4 +1,4 @@
-package CommandingOfficers;
+package CommandingOfficers.AW4;
 
 import Engine.Army;
 import Engine.GameAction;
@@ -14,6 +14,9 @@ import java.awt.Color;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 
+import CommandingOfficers.CommanderAbility;
+import CommandingOfficers.CommanderInfo;
+import CommandingOfficers.DeployableCommander;
 import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;

@@ -1,5 +1,6 @@
 package CommandingOfficers;
 
+import CommandingOfficers.AW4.RuinedCommander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventQueue;

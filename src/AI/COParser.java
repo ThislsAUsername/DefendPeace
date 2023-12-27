@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.DeployableCommander;
-import CommandingOfficers.RuinedCommander;
+import CommandingOfficers.AW4.RuinedCommander;
 import Engine.Army;
 import Units.Unit;
 

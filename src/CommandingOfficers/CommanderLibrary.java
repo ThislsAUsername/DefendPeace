@@ -2,7 +2,7 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 
-import CommandingOfficers.BrennerWolves.*;
+import CommandingOfficers.AW4.BrennerWolves.*;
 import Engine.GameScenario;
 import Engine.GameScenario.GameRules;
 import UI.UIUtils;
