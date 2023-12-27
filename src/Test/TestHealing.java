@@ -1,7 +1,7 @@
 package Test;
 
 import CommandingOfficers.Commander;
-import CommandingOfficers.Patch;
+import CommandingOfficers.DefendPeace.CyanOcean.Patch;
 import Engine.Army;
 import Engine.GameScenario;
 import Engine.XYCoord;

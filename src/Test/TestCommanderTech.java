@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import CommandingOfficers.Tech;
+import CommandingOfficers.DefendPeace.CyanOcean.Patch;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
-import CommandingOfficers.Patch;
 import Engine.Army;
 import Engine.GameScenario;
 import Engine.XYCoord;
