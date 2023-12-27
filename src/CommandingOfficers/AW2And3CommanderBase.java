@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import CommandingOfficers.CommanderInfo.InfoPage;
 
 /** Base class for AW2/3 COs (AW1 is special) */
-public abstract class BuggedEnergyCostCommander extends Commander
+public abstract class AW2And3CommanderBase extends Commander
 {
   private static final long serialVersionUID = 1L;
   public static final InfoPage TRILOGY_MECHANICS_BLURB = new InfoPage(
@@ -19,7 +19,7 @@ public abstract class BuggedEnergyCostCommander extends Commander
     + "Using a power costs the energy required for the next activation of that power, rather than the advertized cost.\n"
     );
 
-  public BuggedEnergyCostCommander(CommanderInfo info, GameScenario.GameRules rules)
+  public AW2And3CommanderBase(CommanderInfo info, GameScenario.GameRules rules)
   {
     super(info, rules);
   }

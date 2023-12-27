@@ -2,13 +2,13 @@ package CommandingOfficers.AW2;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.BuggedEnergyCostCommander;
+import CommandingOfficers.AW2And3CommanderBase;
 import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.GameScenario;
 import Units.Unit;
 import Units.UnitDelta;
 
-public abstract class AW2Commander extends BuggedEnergyCostCommander
+public abstract class AW2Commander extends AW2And3CommanderBase
 {
   private static final long serialVersionUID = 1L;
   public static final InfoPage AW2_MECHANICS_BLURB = new InfoPage(
