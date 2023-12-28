@@ -61,7 +61,7 @@ public abstract class RuinedCommander extends DeployableCommander
   /** If the unit type matches any flag in this mask, it receives my zone stat boosts */
   public long boostMaskAny = Long.MAX_VALUE;
   /** Boost if all flags match; you should customize boostMaskAny if you use it */
-  public long boostMaskAll = 0;
+  public long boostMaskAll = Long.MAX_VALUE;
   public int zonePow;
   public int zoneDef;
   public final int zoneBaseRadius;
@@ -255,8 +255,8 @@ public abstract class RuinedCommander extends DeployableCommander
       if( zoneSource.isInZone(params.defender) )
       {
         params.defenseDivision += GENERIC_STAT_BUFF;
-        if( params.attacker.model.isAny(zoneSource.boostMaskAny)
-         || params.attacker.model.isAll(zoneSource.boostMaskAll)
+        if( params.defender.model.isAny(zoneSource.boostMaskAny)
+         || params.defender.model.isAll(zoneSource.boostMaskAll)
           )
           params.defenseDivision += zoneSource.zoneDef;
       }
