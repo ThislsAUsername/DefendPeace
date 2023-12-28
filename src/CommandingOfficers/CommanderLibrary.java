@@ -44,6 +44,7 @@ public class CommanderLibrary
     commanderList.add( Tech.getInfo() );
     commanderList.add( CommandingOfficers.AW4.BrennerWolves.Will.getInfo() );
     commanderList.add( BrennerDoR.getInfo() );
+    commanderList.add( CommandingOfficers.AW4.Lazuria.Gage.getInfo() );
     commanderList.add( CommandingOfficers.AW4.Lazuria.Forsythe.getInfo() );
     commanderList.add( CommandingOfficers.AW4.IDS.Caulder.getInfo() );
     commanderList.add( DocLight.getInfo() );
