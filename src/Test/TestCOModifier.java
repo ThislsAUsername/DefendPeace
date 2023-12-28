@@ -3,8 +3,8 @@ package Test;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
-import CommandingOfficers.Patch;
-import CommandingOfficers.Strong;
+import CommandingOfficers.DefendPeace.CyanOcean.Patch;
+import CommandingOfficers.DefendPeace.RoseThorn.Strong;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import CommandingOfficers.Modifiers.UnitRemodelModifier;
 import Engine.Army;

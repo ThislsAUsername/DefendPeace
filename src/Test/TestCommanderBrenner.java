@@ -4,10 +4,10 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.DeployableCommander;
-import CommandingOfficers.Patch;
-import CommandingOfficers.RuinedCommander;
-import CommandingOfficers.RuinedCommander.UseAbilityFactory;
-import CommandingOfficers.BrennerWolves.BrennerDoR;
+import CommandingOfficers.AW4.RuinedCommander;
+import CommandingOfficers.AW4.RuinedCommander.UseAbilityFactory;
+import CommandingOfficers.DefendPeace.CyanOcean.Patch;
+import CommandingOfficers.AW4.BrennerWolves.BrennerDoR;
 import Engine.Army;
 import Engine.GameActionSet;
 import Engine.GameInstance;

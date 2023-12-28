@@ -2,10 +2,10 @@ package Test;
 
 import java.util.ArrayList;
 
-import CommandingOfficers.Ave;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
-import CommandingOfficers.Patch;
+import CommandingOfficers.DefendPeace.CyanOcean.Ave;
+import CommandingOfficers.DefendPeace.CyanOcean.Patch;
 import Engine.Army;
 import Engine.GameAction;
 import Engine.GameInstance;
@@ -75,7 +75,7 @@ public class TestCommanderAve extends TestCase
     infantry.initTurn(testMap);
     performGameAction(capture, game);
 
-    testPassed &= validate(Ave.getSnowMapClone()[city.x][city.y] == CommandingOfficers.Ave.SNOW_THRESHOLD, "    Ave doesn't have 1 snow in city after capture");
+    testPassed &= validate(Ave.getSnowMapClone()[city.x][city.y] == CommandingOfficers.DefendPeace.CyanOcean.Ave.SNOW_THRESHOLD, "    Ave doesn't have 1 snow in city after capture");
 
     return testPassed;
   }

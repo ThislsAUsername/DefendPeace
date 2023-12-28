@@ -11,7 +11,7 @@ import java.util.List;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.Patch;
+import CommandingOfficers.DefendPeace.CyanOcean.Patch;
 import Engine.Army;
 import Engine.GameAction;
 import Engine.GameAction.EndTurnAction;

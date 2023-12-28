@@ -1,9 +1,9 @@
-package CommandingOfficers.BrennerWolves;
+package CommandingOfficers.AW4.BrennerWolves;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.DeployableCommander;
-import CommandingOfficers.RuinedCommander;
+import CommandingOfficers.AW4.RuinedCommander;
 import Engine.GameScenario;
 import Terrain.MapMaster;
 import UI.UIUtils;

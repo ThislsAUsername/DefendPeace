@@ -3,7 +3,7 @@ package Test;
 import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
-import CommandingOfficers.Patch;
+import CommandingOfficers.DefendPeace.CyanOcean.Patch;
 import Engine.Army;
 import Engine.GameActionSet;
 import Engine.GameInstance;
