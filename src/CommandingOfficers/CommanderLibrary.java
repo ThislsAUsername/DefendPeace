@@ -49,6 +49,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW4.Lazuria.Tasha.getInfo() );
     commanderList.add( CommandingOfficers.AW4.Lazuria.Forsythe.getInfo() );
     commanderList.add( CommandingOfficers.AW4.NRA.Waylon.getInfo() );
+    commanderList.add( CommandingOfficers.AW4.NRA.Greyfield.getInfo() );
     commanderList.add( CommandingOfficers.AW4.IDS.Caulder.getInfo() );
     commanderList.add( DocLight.getInfo() );
     commanderList.add( NotACO.getInfo() );

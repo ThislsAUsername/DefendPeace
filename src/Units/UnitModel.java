@@ -57,7 +57,8 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public static final long DIRECT          = 1l << 50; // Has only weapons for 1 range
   public static final long INDIRECT        = 1l << 51; // Has weapons for 2+ range
   // Sins against game design
-  public static final long GREYFIELD_LIKES = 1l << 63; // For Seaplanes
+  public static final long GREYFIELD_LIKES = 1l << 62; // For Seaplanes
+  // A shift of 63 produces a negative, which is Uncool
 
   public static String standardizeID(String input)
   {
