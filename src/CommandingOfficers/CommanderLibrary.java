@@ -43,6 +43,7 @@ public class CommanderLibrary
     commanderList.add( Qis.getInfo() );
     commanderList.add( Tech.getInfo() );
     commanderList.add( BrennerDoR.getInfo() );
+    commanderList.add( CommandingOfficers.AW4.IDS.Caulder.getInfo() );
     commanderList.add( DocLight.getInfo() );
     commanderList.add( NotACO.getInfo() );
     commanderList.add( CommandingOfficers.AW2.OS.Andy.getInfo() );
