@@ -24,7 +24,7 @@ public class BrennerDoR extends RuinedCommander
           "Captain of the 12th Battalion. He has an unshakable faith in humanity's goodness, and will aid any in need.\n"));
       infoPages.add(new InfoPage(
           "Base Zone: 3\n" +
-          "Zone Boost: All units +20 DD\n"));
+          "Zone Boost: All units +20 defense\n"));
       infoPages.add(new InfoPage(
           "Reinforce ("+RuinedAbility.COST+"):\n" +
           "Heal +3 HP to your units, even those in transports.\n"));
