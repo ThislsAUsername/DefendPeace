@@ -229,6 +229,8 @@ public class UIUtils
       return "Orange Star";
     if ("maroon".equalsIgnoreCase(palette) && "fire".equalsIgnoreCase(faction))
       return "Red Fire";
+    if ("new rubinelle".equalsIgnoreCase(palette) && "wolves".equalsIgnoreCase(faction))
+      return "New Rubinelle Army";
     return palette + ' ' + faction;
   }
 
