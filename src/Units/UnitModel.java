@@ -53,6 +53,12 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public static final long AIR_TO_AIR      = 1 << 22;
   public static final long TRANSPORT       = 1 << 23;
 
+  // Calculated properties so I can be lazy
+  public static final long DIRECT          = 1l << 50; // Has only weapons for 1 range
+  public static final long INDIRECT        = 1l << 51; // Has weapons for 2+ range
+  // Sins against game design
+  public static final long GREYFIELD_LIKES = 1l << 63; // For Seaplanes
+
   public static String standardizeID(String input)
   {
     return input.toLowerCase().replaceAll(" ", "_").replaceAll("-", "_");
@@ -98,6 +104,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     {
       weapons.add(wm.clone());
     }
+    setCalculatedProps();
   }
 
   public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
@@ -106,6 +113,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     this(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
     baseActions.addAll(actions);
     weapons = pWeapons;
+    setCalculatedProps();
   }
 
   private UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
@@ -129,6 +137,24 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
           (isAny(SEA)                && terrain.healsSea())  )
         healableHabs.add(terrain);
     }
+  }
+
+  private void setCalculatedProps()
+  {
+    boolean isDirect = weapons.size() > 0;
+    boolean isIndirect = false;
+    for( WeaponModel wm : weapons )
+    {
+      if( wm.rangeMax == 1 )
+        continue;
+      isDirect = false;
+      isIndirect = true;
+      break;
+    }
+    if( isDirect )
+      this.role |= DIRECT;
+    if( isIndirect )
+      this.role |= INDIRECT;
   }
 
   /**

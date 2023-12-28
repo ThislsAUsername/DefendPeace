@@ -551,7 +551,7 @@ public class DoRUnits extends UnitModelScheme
   public static class SeaplaneModel extends DoRUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = AIR_TO_SURFACE | AIR_TO_AIR | ASSAULT | JET | AIR_HIGH;
+    private static final long ROLE = AIR_TO_SURFACE | AIR_TO_AIR | ASSAULT | JET | AIR_HIGH | GREYFIELD_LIKES;
     
     private static final int UNIT_COST = 15000;
     private static final int STAR_VALUE = 14;
