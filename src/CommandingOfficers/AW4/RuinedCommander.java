@@ -31,6 +31,7 @@ import UI.GameOverlay;
 import Units.Unit;
 import Units.UnitContext;
 import Units.UnitDelta;
+import Units.UnitModel;
 
 public abstract class RuinedCommander extends DeployableCommander
 {
@@ -77,6 +78,10 @@ public abstract class RuinedCommander extends DeployableCommander
 
   @Override
   public int getCOUCount() {return 1;}
+  public boolean shouldBoost(UnitModel model)
+  {
+    return model.isAny(boostMaskAny) || model.isAll(boostMaskAll);
+  }
 
   public RuinedCommander(int radius, int atk, int def, CommanderInfo info, GameScenario.GameRules rules)
   {
@@ -249,9 +254,7 @@ public abstract class RuinedCommander extends DeployableCommander
       if( zoneSource.isInZone(params.attacker) )
       {
         params.attackPower += GENERIC_STAT_BUFF;
-        if( params.attacker.model.isAny(zoneSource.boostMaskAny)
-         || params.attacker.model.isAll(zoneSource.boostMaskAll)
-          )
+        if( zoneSource.shouldBoost(params.attacker.model) )
           params.attackPower += zoneSource.zonePow;
       }
     }
@@ -261,9 +264,7 @@ public abstract class RuinedCommander extends DeployableCommander
       if( zoneSource.isInZone(params.defender) )
       {
         params.defenseDivision += GENERIC_STAT_BUFF;
-        if( params.defender.model.isAny(zoneSource.boostMaskAny)
-         || params.defender.model.isAll(zoneSource.boostMaskAll)
-          )
+        if( zoneSource.shouldBoost(params.defender.model) )
           params.defenseDivision += zoneSource.zoneDef;
       }
     }

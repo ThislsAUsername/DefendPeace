@@ -45,9 +45,15 @@ public class Greyfield extends RuinedCommander
   public Greyfield(GameScenario.GameRules rules)
   {
     super(RADIUS, POWER, DEFENSE, coInfo, rules);
-    this.boostMaskAny = UnitModel.SEA | UnitModel.HOVER | UnitModel.GREYFIELD_LIKES;
+    this.boostMaskAny = UnitModel.SEA | UnitModel.HOVER; // Also Seaplanes, via override
 
     addCommanderAbility(new SupplyChain(this));
+  }
+
+  @Override
+  public boolean shouldBoost(UnitModel model)
+  {
+    return "seaplane".equalsIgnoreCase(model.name) || super.shouldBoost(model);
   }
 
   public static CommanderInfo getInfo()
