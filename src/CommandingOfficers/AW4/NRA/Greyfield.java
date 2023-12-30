@@ -70,7 +70,7 @@ public class Greyfield extends RuinedCommander
       super.perform(gameMap);
       for( Unit unit : myCommander.army.getUnits() )
       {
-        unit.resupply(); // the missing HP has to go somewhere...
+        unit.resupply();
         unit.materials = unit.model.maxMaterials;
       }
     }
