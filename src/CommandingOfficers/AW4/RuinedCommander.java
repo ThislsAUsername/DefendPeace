@@ -58,9 +58,15 @@ public abstract class RuinedCommander extends DeployableCommander
   public static final int CHARGERATIO_HP =  1; // Funds value of 10 HP damage dealt, for the purpose of power charge
 
   public static final int GENERIC_STAT_BUFF = 10;
-  /** If the unit type matches any flag in this mask, it receives my zone stat boosts */
+  /**
+   * Give CO-specific stat boosts to units that share any role with this mask<p>
+   * boostMaskAll can enable boosts on additional unit types, but is otherwise redundant.
+   */
   public long boostMaskAny = Long.MAX_VALUE;
-  /** Boost if all flags match; you should customize boostMaskAny if you use it */
+  /**
+   * Give CO-specific stat boosts to units that share all roles with this mask<p>
+   * This should have at least one flag that boostMaskAny does not, if you're setting it.
+   */
   public long boostMaskAll = Long.MAX_VALUE;
   public int zonePow;
   public int zoneDef;
