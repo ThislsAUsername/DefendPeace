@@ -21,6 +21,7 @@ import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.CommanderAbilityEvent;
+import Engine.GameEvents.CommanderAbilityRevertEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.StateTrackers.KillCountsTracker;
 import Engine.StateTrackers.StateTracker;
@@ -116,10 +117,20 @@ public abstract class RuinedCommander extends DeployableCommander
     return new ArrayList<CommanderAbility>();
   }
   @Override
-  public void onCOULost(Unit minion)
+  public GameEventQueue onCOULost(Unit minion)
   {
     modifyAbilityStars(-42);
     zoneIsGlobal = false;
+
+    // Stolen from Commander.revertActiveAbility(), with the caveat that we know all our subclass's powers have no revert events.
+    if( null != myActiveAbility )
+    {
+      GameEventQueue events = new GameEventQueue();
+      events.add(new CommanderAbilityRevertEvent(myActiveAbility));
+      myActiveAbility = null;
+      return events;
+    }
+    return null;
   }
   // Hook: Update current zone radius every time energy changes
   @Override
