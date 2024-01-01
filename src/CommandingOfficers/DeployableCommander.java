@@ -50,7 +50,9 @@ public abstract class DeployableCommander extends Commander
   {
     if( loc.getOwner() != actor.CO )
       return false; // No COing on neutral factories
-    return getShoppingList(loc).contains(actor.model)
+    boolean validProductionTile = getShoppingList(loc).size() > 0
+        && actor.model.healableHabs.contains(loc.getEnvironment().terrainType);
+    return validProductionTile
         || loc.getEnvironment().terrainType == TerrainType.HEADQUARTERS
         || loc.getEnvironment().terrainType == TerrainType.LAB;
   }
