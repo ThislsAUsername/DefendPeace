@@ -74,8 +74,17 @@ public class StrikeParams
   public int luckRolled = 0; // The number we plug into the RNG for luck damage
   public int luckRolledBad = 0; // The number we plug into the RNG for negative luck damage
   public final boolean isCounter;
+  /**
+   * Implies luck doesn't scale down with HP and isn't reduced by CO-based defense.<p>
+   * It's worth noting this is based on testing/observation, not reverse engineering.<p>
+   * However, it's negated if damage*CO defense == 0<p>
+   * It's implemented here by assuming all AW1 CO-based defense is multiplier-based defense.<p>
+   * Relevant link: https://forums.warsworldnews.com/viewtopic.php?p=417292&sid=a877b0305a8af6d63956bb893d11cc88#p417292
+   */
+  public final boolean aw1Luck;
 
-  public int damageMultiplier = 100;
+  public int attackerDamageMultiplier = 100;
+  public int defenderDamageMultiplier = 100;
 
   public int defenderHealth = 0;
   public final XYCoord targetCoord;
@@ -100,6 +109,9 @@ public class StrikeParams
     this.attackPower = attacker.attackPower;
     this.luckRolled = attacker.CO.luck;
     this.isCounter = isCounter;
+    aw1Luck = attacker.CO.aw1Combat;
+    if( aw1Luck && isCounter )
+      this.attackerHealth = attacker.health;
 
     this.targetCoord = target;
   }
@@ -115,6 +127,7 @@ public class StrikeParams
     this.attackPower = other.attackPower;
     this.luckRolled = other.luckRolled;
     this.isCounter = other.isCounter;
+    aw1Luck = attacker.CO.aw1Combat;
 
     this.targetCoord = other.targetCoord;
   }
@@ -122,7 +135,12 @@ public class StrikeParams
   public int calculateDamage()
   {
     int luckDamage = getLuck();
-    final int rawDamage = baseDamage * attackPower * damageMultiplier / 100 / 100;
+    if( aw1Luck && isCounter )
+      luckDamage = 0;
+    final int rawDamage = baseDamage * attackPower * attackerDamageMultiplier / 100 / 100;
+    int hpScalingDamage = rawDamage;
+    if( !aw1Luck )
+      hpScalingDamage += luckDamage;
 
     // Apply terrain defense to the correct defense number
     int finalDefenseSubtraction = defenseSubtraction;
@@ -133,7 +151,10 @@ public class StrikeParams
       finalDefenseDivision    += terrainStars * defenderHealth / 10;
     final int subtractionMultiplier = 200 - finalDefenseSubtraction;
 
-    int overallPower = (rawDamage + luckDamage) * attackerHealth / 100;
+    int overallPower = hpScalingDamage * attackerHealth / 100;
+    overallPower = overallPower * defenderDamageMultiplier / 100;
+    if( aw1Luck && overallPower > 0 )
+      overallPower += luckDamage;
     overallPower = overallPower * subtractionMultiplier /        100;
     overallPower = overallPower *          100          / finalDefenseDivision;
 
