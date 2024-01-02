@@ -6,8 +6,6 @@ import java.util.HashSet;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderAbility.CostBasis;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;

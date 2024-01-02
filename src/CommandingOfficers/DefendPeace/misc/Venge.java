@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderAbility.CostBasis;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.Army;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;

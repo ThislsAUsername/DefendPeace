@@ -14,8 +14,6 @@ import AI.AIUtils;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderAbility.CostBasis;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.GameAction.UnitSpawnAction;
 import Engine.GameScenario;
 import Engine.UnitActionFactory;
