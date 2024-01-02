@@ -62,21 +62,21 @@ public class Gage extends RuinedCommander
   protected static class Longshot extends RuinedAbility
   {
     private static final long serialVersionUID = 1L;
-    UnitTypeFilter moveMod;
+    UnitTypeFilter rangeMod;
 
     protected Longshot(RuinedCommander commander)
     {
       super(commander, "Longshot");
       if( null == commander )
         return; // This isn't a "real" ability, just a scratch struct for the info page
-      moveMod = new UnitTypeFilter(new UnitIndirectRangeModifier(2));
-      moveMod.oneOf = commander.boostMaskAny;
+      rangeMod = new UnitTypeFilter(new UnitIndirectRangeModifier(2));
+      rangeMod.oneOf = commander.boostMaskAny;
     }
 
     @Override
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      modList.add(moveMod);
+      modList.add(rangeMod);
     }
   }
 

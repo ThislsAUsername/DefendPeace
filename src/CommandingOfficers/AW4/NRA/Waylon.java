@@ -62,21 +62,21 @@ public class Waylon extends RuinedCommander
   protected static class Wingman extends RuinedAbility
   {
     private static final long serialVersionUID = 1L;
-    UnitTypeFilter moveMod;
+    UnitTypeFilter defMod;
 
     protected Wingman(RuinedCommander commander)
     {
       super(commander, "Wingman");
       if( null == commander )
         return; // This isn't a "real" ability, just a scratch struct for the info page
-      moveMod = new UnitTypeFilter(new UnitDefenseDoRModifier(270));
-      moveMod.oneOf = commander.boostMaskAny;
+      defMod = new UnitTypeFilter(new UnitDefenseDoRModifier(270));
+      defMod.oneOf = commander.boostMaskAny;
     }
 
     @Override
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      modList.add(moveMod);
+      modList.add(defMod);
     }
   }
 
