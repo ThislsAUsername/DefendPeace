@@ -128,6 +128,8 @@ public class StrikeParams
     this.luckRolled = other.luckRolled;
     this.isCounter = other.isCounter;
     aw1Luck = attacker.CO.aw1Combat;
+    this.attackerDamageMultiplier = other.attackerDamageMultiplier;
+    this.defenderDamageMultiplier = other.defenderDamageMultiplier;
 
     this.targetCoord = other.targetCoord;
   }
