@@ -68,7 +68,7 @@ public class Kanbei extends AW1Commander
   {
     if( null != getActiveAbility() )
       return;
-    params.defenderDamageMultiplier *= 120;
+    params.defenderDamageMultiplier *=  80;
     params.defenderDamageMultiplier /= 100;
   }
   @Override
