@@ -77,7 +77,7 @@ public class Kanbei extends AW1Commander
     uc.costRatio += 20;
   }
 
-  private static class MoraleBoost extends AW1BasicAbility
+  private static class MoraleBoost extends AW1Ability
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Morale Boost";
