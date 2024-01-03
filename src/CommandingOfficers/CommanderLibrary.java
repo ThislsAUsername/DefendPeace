@@ -67,6 +67,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW2.OS.Andy.getInfo() );
     commanderList.add( CommandingOfficers.AW2.BH.Sturm.getInfo() );
     commanderList.add( CommandingOfficers.AW3.OS.Andy.getInfo() );
+    commanderList.add( CommandingOfficers.AW3.OS.Rachel.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.VonBolt.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Andy.getInfo() );
   }
