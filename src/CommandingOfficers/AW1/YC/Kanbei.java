@@ -81,7 +81,7 @@ public class Kanbei extends AW1Commander
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Morale Boost";
-    private static final int COST = 8;
+    private static final int COST = 10;
     UnitModifier attMod;
     UnitModifier defMod;
 
