@@ -13,6 +13,7 @@ import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.Unit;
+import Units.UnitContext;
 
 public abstract class TerraformLifecycle
 {
@@ -111,7 +112,8 @@ public abstract class TerraformLifecycle
       unit = u;
       XYCoord unitXY = new XYCoord(u.x, u.y);
       priorTerraformAmount = (unitXY.equals(loc) ? unit.getCaptureProgress() : 0);
-      terraformProgress = unit.getHP(); // TODO: Apply CO buffs.
+      UnitContext uc = new UnitContext(unit);
+      terraformProgress = uc.calculateCapturePower();
     }
 
     @Override

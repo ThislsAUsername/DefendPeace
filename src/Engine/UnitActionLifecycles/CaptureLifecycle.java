@@ -17,6 +17,7 @@ import Terrain.TerrainType;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
+import Units.UnitContext;
 
 public abstract class CaptureLifecycle
 {
@@ -171,7 +172,8 @@ public abstract class CaptureLifecycle
     if( null != location && location.isCaptureable() && unit.CO.isEnemy(location.getOwner()) )
     {
       priorCaptureAmount = (unitXY.equals(location.getCoordinates()) ? unit.getCaptureProgress() : 0);
-      captureAmount = unit.getHP(); // TODO: Apply CO buffs.
+      UnitContext uc = new UnitContext(unit);
+      captureAmount = uc.calculateCapturePower();
     }
     else
     {

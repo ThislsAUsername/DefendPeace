@@ -90,6 +90,11 @@ public class Sami extends AW1Commander
     }
   }
   @Override
+  public void modifyCapturePower(UnitContext uc)
+  {
+    uc.capturePower += 50;
+  }
+  @Override
   public void modifyMovePower(UnitContext uc)
   {
     if( uc.model.baseCargoCapacity > 0 && uc.model.weapons.isEmpty() )
