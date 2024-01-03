@@ -16,9 +16,10 @@ public class MeteorParams
   public int radius = 2; // ditto
   public boolean selfHarm = true;
   public boolean inflictStun = false;
-  public MeteorParams(XYCoord targetPosition)
+  public MeteorParams(XYCoord targetPosition, int radius)
   {
     target = targetPosition;
+    this.radius = radius;
   }
 
   public MassDamageEvent getDamage(MapMaster map, Commander attacker)
@@ -80,7 +81,7 @@ public class MeteorParams
         }
       }
     }
-    return new MeteorParams(maxTarget);
+    return new MeteorParams(maxTarget, radius);
   }
 
   /**
@@ -110,6 +111,6 @@ public class MeteorParams
         }
       }
     }
-    return new MeteorParams(maxTarget);
+    return new MeteorParams(maxTarget, radius);
   }
 }
