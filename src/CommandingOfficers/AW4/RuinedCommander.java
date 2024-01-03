@@ -13,11 +13,13 @@ import Engine.XYCoord;
 import java.awt.Color;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.DeployableCommander;
 import CommandingOfficers.CommanderInfo.InfoPage;
+import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.CommanderAbilityEvent;
@@ -455,6 +457,12 @@ public abstract class RuinedCommander extends DeployableCommander
     public XYCoord getTargetLocation()
     {
       return destination;
+    }
+
+    @Override
+    public Collection<DamagePopup> getDamagePopups(GameMap map)
+    {
+      return abilityToUse.getDamagePopups(map);
     }
   } // ~UseAbilityAction
 
