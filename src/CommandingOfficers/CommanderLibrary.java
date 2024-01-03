@@ -55,6 +55,7 @@ public class CommanderLibrary
     commanderList.add( NotACO.getInfo() );
     commanderList.add( CommandingOfficers.AW1.OS.Andy.getInfo() );
     commanderList.add( CommandingOfficers.AW1.OS.Max.getInfo() );
+    commanderList.add( CommandingOfficers.AW1.OS.Sami.getInfo() );
     commanderList.add( CommandingOfficers.AW1.OS.Nell.getInfo() );
     commanderList.add( CommandingOfficers.AW1.BM.Grit.getInfo() );
     commanderList.add( CommandingOfficers.AW1.BM.Olaf.getInfo() );
