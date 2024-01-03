@@ -5,6 +5,7 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.AW2And3CommanderBase;
 import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.GameScenario;
+import Units.Unit;
 import Units.UnitDelta;
 
 public abstract class AW3Commander extends AW2And3CommanderBase
@@ -40,6 +41,11 @@ public abstract class AW3Commander extends AW2And3CommanderBase
     power += guiHPDealt *  enemy.model.abilityPowerValue / 2;
 
     return power;
+  }
+  @Override
+  public int calculateMassDamageCharge(Unit minion, int lostHP)
+  {
+    return 0;
   }
 
   protected abstract static class AW3Ability extends TrilogyAbility
