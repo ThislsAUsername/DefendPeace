@@ -102,7 +102,7 @@ public class Drake extends AW1Commander
         }
       }
 
-      GameEvent damage = new MassDamageEvent(myCommander, victims, 1, false);
+      GameEvent damage = new MassDamageEvent(myCommander, victims, 10, false);
 
       GameEventQueue events = new GameEventQueue();
       events.add(damage);
