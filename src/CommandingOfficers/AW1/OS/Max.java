@@ -35,7 +35,7 @@ public class Max extends AW1Commander
             "Max (AW1)\n"
           + "Dependable and brave. Over-protective of Sami and Andy.\n"
           + "Direct combat units have high firepower. Distance units are weak and have small attack ranges.\n"
-          + "(+50/0 vehicle direct combat, indirects -1 range and 0.9x/0.9x damage dealt/taken.)\n"));
+          + "(+50/0 vehicle direct combat, indirects -1 range and 0.9x/1.1x damage dealt/taken.)\n"));
       infoPages.add(new InfoPage(new MaxForce(null),
             "Increases all abilities of direct combat units.\n"
           + "(+20/0 (187/110) vehicle direct combat, +1 move to non-indirect vehicles)\n"
@@ -75,7 +75,7 @@ public class Max extends AW1Commander
   {
     if( params.defender.model.isAny(UnitModel.INDIRECT) )
     {
-      params.defenderDamageMultiplier *=  90;
+      params.defenderDamageMultiplier *= 110;
       params.defenderDamageMultiplier /= 100;
     }
   }
