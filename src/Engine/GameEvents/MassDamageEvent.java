@@ -70,7 +70,13 @@ public class MassDamageEvent implements GameEvent
       int lostHealth = -deltaHealth;
 
       if( shouldStun )
-        victim.isStunned = true;
+      {
+        // If you try to stun your own dudes, just end their turn (no impact if waited)
+        if( attacker != null && attacker.army == victim.CO.army )
+          victim.isTurnOver = true;
+        else
+          victim.isStunned = true;
+      }
 
       victims.put(victim, lostHealth);
     }
