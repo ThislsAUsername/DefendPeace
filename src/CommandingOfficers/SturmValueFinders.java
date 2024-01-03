@@ -10,14 +10,14 @@ public abstract class SturmValueFinders // Until such time as we find out AW1 wo
     public boolean countHidden = true; // Ignore cloaked units even if we can see them
     public int getValue(Commander attacker, Unit unit)
     {
-      if( !countHidden && unit.model.hidden )
-        return 0;
       int hp = unit.getHP();
       if( hp <= 1 )
         return 0;
 
       if( !unit.CO.isEnemy(attacker) )
         return -hp;
+      if( !countHidden && unit.model.hidden )
+        return 0;
       return hp;
     }
   }
@@ -28,8 +28,6 @@ public abstract class SturmValueFinders // Until such time as we find out AW1 wo
     @Override
     public int getValue(Commander attacker, Unit unit)
     {
-      if( !countHidden && unit.model.hidden )
-        return 0;
       int hp = unit.getHP();
       if( hp <= 1 )
         return 0;
@@ -40,6 +38,8 @@ public abstract class SturmValueFinders // Until such time as we find out AW1 wo
 
       if( !unit.CO.isEnemy(attacker) )
         return -value;
+      if( !countHidden && unit.model.hidden )
+        return 0;
       return value;
     }
   }
