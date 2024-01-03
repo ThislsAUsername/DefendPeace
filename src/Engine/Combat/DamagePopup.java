@@ -8,7 +8,7 @@ public class DamagePopup
 {
   public final XYCoord coords;
   public final Color color;
-  public final String quantity;
+  public String quantity;
 
   public DamagePopup(XYCoord coords, Color color, String quantity)
   {
