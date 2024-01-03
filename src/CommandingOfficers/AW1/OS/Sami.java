@@ -115,7 +115,7 @@ public class Sami extends AW1Commander
     {
       super(commander, NAME, COST);
       moveMod = new UnitTypeFilter(new UnitMovementModifier(1));
-      moveMod.noneOf = UnitModel.TROOP;
+      moveMod.oneOf = UnitModel.TROOP;
       moveTypeMod = new UnitTypeFilter(new PerfectMoveModifier());
       moveTypeMod.oneOf = UnitModel.TROOP;
 
