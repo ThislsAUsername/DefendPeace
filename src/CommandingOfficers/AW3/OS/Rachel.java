@@ -45,7 +45,7 @@ public class Rachel extends AW3Commander
             "Provides covering fire by launching three missiles from Orange Star HQ in Omega Land.\n"
           + "+10/10 stats\n"
           + "Fires missiles in order at infantry HP, funds, and HP.\n"
-          + "Shockwave ignores fog for targeting.\n"));
+          + "Missiles ignore fog for targeting.\n"));
       infoPages.add(new InfoPage(
             "Hit: Hard Work\n"
           + "Miss: Excuses"));
