@@ -15,6 +15,7 @@ public abstract class AWBWValueFinders
   public static class CostValueFinder implements IValueFinder
   {
     public int maxDamage = 3;
+    public boolean selfHarm = true;
     @Override
     public int getValue(Commander attacker, Unit unit)
     {
@@ -24,7 +25,11 @@ public abstract class AWBWValueFinders
       int value = unit.getCost() * hp / 10;
 
       if( !unit.CO.isEnemy(attacker) )
-        return -value;
+      {
+        if( selfHarm )
+          return -value;
+        return 0;
+      }
       return value;
     }
   }
