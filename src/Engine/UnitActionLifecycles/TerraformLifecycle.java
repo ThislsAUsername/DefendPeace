@@ -120,7 +120,7 @@ public abstract class TerraformLifecycle
     public void performEvent(MapMaster gameMap)
     {
       // Only attempt to do the action if it is valid to do so.
-      if( unit.capture(gameMap.getLocation(unit.x, unit.y)) )
+      if( unit.capture(gameMap) )
       {
         unit.materials -= 1;
         super.performEvent(gameMap);

@@ -71,7 +71,7 @@ public class ArmyDefeatEvent implements GameEvent
         // Release control of any buildings he owned.
         if(loc.isCaptureable() && null != owner && owner.army == defeatedArmy)
         {
-          loc.setOwner(beneficiaryCO);
+          gameMap.setOwner(beneficiaryCO, x, y);
           Unit resident = loc.getResident();
           if( null != resident )
             resident.stopCapturing();

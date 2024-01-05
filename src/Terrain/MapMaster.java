@@ -3,6 +3,7 @@ package Terrain;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import CommandingOfficers.Commander;
 import Engine.Army;
 import Engine.XYCoord;
 import Units.Unit;
@@ -71,7 +72,7 @@ public class MapMaster extends GameMap
           {
             hasLab = true;
           }
-          location.setOwner(propertyOwners[co].cos[0]);
+          setOwner(propertyOwners[co].cos[0], x, y);
         }
         else
         {
@@ -235,6 +236,29 @@ public class MapMaster extends GameMap
       }
     }
     return empty;
+  }
+
+  public void setOwner(Commander owner, XYCoord xyc)
+  {
+    setOwner(owner, xyc.x, xyc.y);
+  }
+  public void setOwner(Commander owner, int x, int y)
+  {
+    MapLocation loc = getLocation(x, y);
+    Commander prevOwner = loc.getOwner();
+    if( prevOwner == owner )
+      return;
+
+    XYCoord xyc = loc.getCoordinates();
+    if( null != prevOwner )
+    {
+      prevOwner.ownedProperties.remove(xyc);
+    }
+    loc.setOwner(owner);
+    if( null != owner )
+    {
+      owner.ownedProperties.add(xyc);
+    }
   }
 
   public void addNewUnit(Unit unit, int x, int y)

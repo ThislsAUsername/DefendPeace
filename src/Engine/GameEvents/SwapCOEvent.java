@@ -3,7 +3,6 @@ package Engine.GameEvents;
 import CommandingOfficers.Commander;
 import Engine.Army;
 import Engine.XYCoord;
-import Terrain.MapLocation;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -62,13 +61,7 @@ public class SwapCOEvent extends TurnEndEvent
   {
     for( XYCoord xyc : army.getOwnedProperties() )
     {
-      MapLocation loc = gameMap.getLocation(xyc);
-      final Commander prevOwner = loc.getOwner();
-      if( prevOwner == swapTarget )
-        continue;
-      prevOwner.ownedProperties.remove(xyc);
-      loc.setOwner(swapTarget);
-      swapTarget.ownedProperties.add(xyc);
+      gameMap.setOwner(swapTarget, xyc);
     }
   }
 

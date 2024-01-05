@@ -214,7 +214,7 @@ public abstract class CaptureLifecycle
         (location.getResident() == unit) &&
         (unit.CO.isEnemy(location.getOwner())) )
     {
-      unit.capture(gameMap.getLocation(unit.x, unit.y));
+      unit.capture(gameMap);
     }
   }
 

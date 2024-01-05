@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import Engine.XYCoord;
-import Terrain.MapLocation;
 
 public abstract class UnitState implements Serializable
 {
@@ -32,7 +31,7 @@ public abstract class UnitState implements Serializable
   public int health;
 
   protected int captureProgress;
-  protected MapLocation captureTarget;
+  protected XYCoord captureTarget;
 
 
   public UnitState(Commander co, UnitModel um)
@@ -187,11 +186,6 @@ public abstract class UnitState implements Serializable
   }
   public XYCoord getCaptureTargetCoords()
   {
-    XYCoord target = null;
-    if( null != captureTarget )
-    {
-      target = captureTarget.getCoordinates();
-    }
-    return target;
+    return captureTarget;
   }
 }
