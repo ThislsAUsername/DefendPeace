@@ -77,6 +77,13 @@ public class Sonja extends AW1Commander
       super.enqueueUnitMods(gameMap, modList);
       modList.add(sightMod);
     }
+
+    @Override
+    protected void perform(MapMaster gameMap)
+    {
+      super.perform(gameMap);
+      myCommander.army.myView.revealFog();
+    }
   }
 
 }

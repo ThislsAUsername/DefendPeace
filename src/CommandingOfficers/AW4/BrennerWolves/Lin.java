@@ -70,13 +70,20 @@ public class Lin extends RuinedCommander
       if( null == commander )
         return; // This isn't a "real" ability, just a scratch struct for the info page
       sightMod = new UnitTypeFilter(new VisionModifier(2));
-      sightMod.allOf = commander.boostMaskAll;
+      sightMod.oneOf = commander.boostMaskAny;
     }
 
     @Override
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(sightMod);
+    }
+
+    @Override
+    protected void perform(MapMaster gameMap)
+    {
+      super.perform(gameMap);
+      myCommander.army.myView.revealFog();
     }
   }
 

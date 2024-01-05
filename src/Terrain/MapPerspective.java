@@ -200,6 +200,13 @@ public class MapPerspective extends GameMap
     // then reveal what we should see
     if (null == viewer)
       return;
+    revealFog();
+  }
+  /**
+   * Hook for vision powers to nudge the view into updating.
+   */
+  public void revealFog()
+  {
     for( XYCoord xyc : flaredTiles )
       revealFog(xyc, true);
     for( Army army : master.game.armies )
