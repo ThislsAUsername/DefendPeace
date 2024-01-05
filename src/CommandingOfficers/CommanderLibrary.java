@@ -62,6 +62,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW1.BM.Olaf.getInfo() );
     commanderList.add( CommandingOfficers.AW1.GE.Drake.getInfo() );
     commanderList.add( CommandingOfficers.AW1.GE.Eagle.getInfo() );
+    commanderList.add( CommandingOfficers.AW1.YC.Sonja.getInfo() );
     commanderList.add( CommandingOfficers.AW1.YC.Kanbei.getInfo() );
     commanderList.add( CommandingOfficers.AW1.BH.Sturm.getInfo() );
     commanderList.add( CommandingOfficers.AW1.BH.SturmVS.getInfo() );
