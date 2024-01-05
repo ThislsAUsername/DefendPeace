@@ -73,6 +73,15 @@ public class GameInstance implements Serializable
     gameMap = map;
     gameMap.game = this;
     defaultWeather = weather;
+    // Pre-populate weather for day 1 turn 1
+    for( int i = 0; i < gameMap.mapWidth; i++ )
+    {
+      for( int j = 0; j < gameMap.mapHeight; j++ )
+      {
+        MapLocation loc = gameMap.getLocation(i, j);
+        loc.setForecast(defaultWeather, 0);
+      }
+    }
 
     this.armies = armies;
     activeCoNum = -1; // No army is active yet.
