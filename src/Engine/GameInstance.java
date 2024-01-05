@@ -123,7 +123,9 @@ public class GameInstance implements Serializable
   }
   public void setFog(int days)
   {
-    fogOnUntil = calcCurrentCOTurn() + (days * armies.length);
+    int thisTurn = calcCurrentCOTurn();
+    int extraTurns = days * armies.length;
+    fogOnUntil = thisTurn + extraTurns;
   }
 
   // WeakHashMap isn't serializable, so we can't use Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());

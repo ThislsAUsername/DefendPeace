@@ -1,5 +1,6 @@
 package Engine.GameEvents;
 
+import Engine.Army;
 import Engine.XYCoord;
 import Terrain.Environment.Weathers;
 import Terrain.MapLocation;
@@ -41,14 +42,24 @@ public class GlobalWeatherEvent implements GameEvent
   }
 
   @Override
-  public void performEvent(MapMaster gameMap)
+  public void performEvent(MapMaster map)
   {
-    for( int y = 0; y < gameMap.mapHeight; ++y )
+    for( int y = 0; y < map.mapHeight; ++y )
     {
-      for( int x = 0; x < gameMap.mapWidth; ++x )
+      for( int x = 0; x < map.mapWidth; ++x )
       {
-        MapLocation loc = gameMap.getLocation(x, y);
-        loc.setForecast(weather, (gameMap.game.armies.length * duration) - 1);
+        MapLocation loc = map.getLocation(x, y);
+        loc.setForecast(weather, (map.game.armies.length * duration) - 1);
+      }
+    }
+    if( weather.startsFog )
+    {
+      map.game.setFog(duration);
+      for( Army a : map.game.armies )
+      {
+        if( !a.isEnemy(map.game.activeArmy) )
+          continue; // This is probably technically laxer than it should be (allows allies to watch your turn with full vision in DoR fog), but like... it seems more fun to see things than not.
+        a.myView.resetFog();
       }
     }
   }
