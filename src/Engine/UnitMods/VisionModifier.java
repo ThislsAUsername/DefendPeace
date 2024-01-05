@@ -22,6 +22,7 @@ public class VisionModifier implements UnitModifierWithDefaults
   public void modifyVision(UnitContext uc)
   {
     uc.visionRange += sightMod;
-    uc.visionPierces = pierce;
+    if( pierce )
+      uc.visionPierces = true;
   }
 }
