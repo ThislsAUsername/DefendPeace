@@ -53,6 +53,11 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public boolean roundUpRepairs = true; // I blame AWBW
   public boolean aw1Combat = false; // See docs in StrikeParams
 
+  // These negate debuffs, not movecosts. They're fixed params on the CO since that's how weather immunity tends to go. KISS and all.
+  public boolean immuneToCold   = false; // Chill/Sleet
+  public boolean immuneToClouds = false; // Rain/Smoke vision debuffs
+  public boolean immuneToSand   = false; // Sandstorm/Sirocco
+
   public ArrayList<CommanderAbility> myAbilities = null;
   protected CommanderAbility myActiveAbility = null;
 

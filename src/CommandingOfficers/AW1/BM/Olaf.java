@@ -50,6 +50,7 @@ public class Olaf extends AW1Commander
   public Olaf(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
+    immuneToCold = true;
 
     addCommanderAbility(new Blizzard(this));
   }

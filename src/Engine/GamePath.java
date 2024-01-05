@@ -75,7 +75,7 @@ public class GamePath
   {
     int fuelBurnRate = unit.fuelBurnPerTile;
     PathNode start = waypoints.get(0);
-    if( map.getEnvironment(start.x, start.y).weatherType == Weathers.CHILL )
+    if( map.getEnvironment(start.x, start.y).weatherType == Weathers.CHILL && !co.immuneToCold )
       fuelBurnRate *= 2;
     return getMoveCost(co, unit, map) * fuelBurnRate;
   }

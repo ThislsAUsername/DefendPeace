@@ -54,7 +54,7 @@ public class StrikeParams
         ( null == attacker.weapon ) ? 0 : attacker.weapon.getDamage(defender),
         isCounter);
 
-    if( gameMap.getEnvironment(attacker.coord).weatherType == Weathers.SIROCCO )
+    if( gameMap.getEnvironment(attacker.coord).weatherType == Weathers.SIROCCO && !attacker.CO.immuneToSand )
       params.attackPower -= 30;
     for( UnitModifier mod : aMods )
       mod.modifyUnitAttack(params);
