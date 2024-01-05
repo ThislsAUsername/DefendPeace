@@ -43,6 +43,7 @@ public class CommanderLibrary
     commanderList.add( Qis.getInfo() );
     commanderList.add( Tech.getInfo() );
     commanderList.add( CommandingOfficers.AW4.BrennerWolves.Will.getInfo() );
+    commanderList.add( CommandingOfficers.AW4.BrennerWolves.Lin.getInfo() );
     commanderList.add( CommandingOfficers.AW4.BrennerWolves.Isabella.getInfo() );
     commanderList.add( BrennerDoR.getInfo() );
     commanderList.add( CommandingOfficers.AW4.Lazuria.Gage.getInfo() );
