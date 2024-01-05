@@ -4,7 +4,6 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.DeployableCommander;
 import CommandingOfficers.AW4.RuinedCommander;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventQueue;

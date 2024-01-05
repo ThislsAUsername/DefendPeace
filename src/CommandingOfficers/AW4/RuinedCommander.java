@@ -21,6 +21,7 @@ import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.CommanderAbilityEvent;
+import Engine.GameEvents.CommanderAbilityRevertEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.StateTrackers.KillCountsTracker;
 import Engine.StateTrackers.StateTracker;
@@ -31,6 +32,7 @@ import UI.GameOverlay;
 import Units.Unit;
 import Units.UnitContext;
 import Units.UnitDelta;
+import Units.UnitModel;
 
 public abstract class RuinedCommander extends DeployableCommander
 {
@@ -58,8 +60,16 @@ public abstract class RuinedCommander extends DeployableCommander
   public static final int CHARGERATIO_HP =  1; // Funds value of 10 HP damage dealt, for the purpose of power charge
 
   public static final int GENERIC_STAT_BUFF = 10;
-  /** If the unit type matches any flag in this mask, it receives my zone stat boosts */
-  public long canBoostMask = Long.MAX_VALUE;
+  /**
+   * Give CO-specific stat boosts to units that share any role with this mask<p>
+   * boostMaskAll can enable boosts on additional unit types, but is otherwise redundant.
+   */
+  public long boostMaskAny = Long.MAX_VALUE;
+  /**
+   * Give CO-specific stat boosts to units that share all roles with this mask<p>
+   * This should have at least one flag that boostMaskAny does not, if you're setting it.
+   */
+  public long boostMaskAll = Long.MAX_VALUE;
   public int zonePow;
   public int zoneDef;
   public final int zoneBaseRadius;
@@ -69,6 +79,10 @@ public abstract class RuinedCommander extends DeployableCommander
 
   @Override
   public int getCOUCount() {return 1;}
+  public boolean shouldBoost(UnitModel model)
+  {
+    return model.isAny(boostMaskAny) || model.isAll(boostMaskAll);
+  }
 
   public RuinedCommander(int radius, int atk, int def, CommanderInfo info, GameScenario.GameRules rules)
   {
@@ -103,10 +117,20 @@ public abstract class RuinedCommander extends DeployableCommander
     return new ArrayList<CommanderAbility>();
   }
   @Override
-  public void onCOULost(Unit minion)
+  public GameEventQueue onCOULost(Unit minion)
   {
     modifyAbilityStars(-42);
     zoneIsGlobal = false;
+
+    // Stolen from Commander.revertActiveAbility(), with the caveat that we know all our subclass's powers have no revert events.
+    if( null != myActiveAbility )
+    {
+      GameEventQueue events = new GameEventQueue();
+      events.add(new CommanderAbilityRevertEvent(myActiveAbility));
+      myActiveAbility = null;
+      return events;
+    }
+    return null;
   }
   // Hook: Update current zone radius every time energy changes
   @Override
@@ -241,7 +265,7 @@ public abstract class RuinedCommander extends DeployableCommander
       if( zoneSource.isInZone(params.attacker) )
       {
         params.attackPower += GENERIC_STAT_BUFF;
-        if( params.attacker.model.isAny(zoneSource.canBoostMask) )
+        if( zoneSource.shouldBoost(params.attacker.model) )
           params.attackPower += zoneSource.zonePow;
       }
     }
@@ -251,7 +275,7 @@ public abstract class RuinedCommander extends DeployableCommander
       if( zoneSource.isInZone(params.defender) )
       {
         params.defenseDivision += GENERIC_STAT_BUFF;
-        if( params.defender.model.isAny(zoneSource.canBoostMask) )
+        if( zoneSource.shouldBoost(params.defender.model) )
           params.defenseDivision += zoneSource.zoneDef;
       }
     }

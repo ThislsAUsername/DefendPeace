@@ -11,7 +11,6 @@ import java.util.Stack;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Utils;

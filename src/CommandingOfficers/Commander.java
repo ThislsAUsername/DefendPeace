@@ -53,7 +53,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public boolean roundUpRepairs = true; // I blame AWBW
 
   public ArrayList<CommanderAbility> myAbilities = null;
-  private CommanderAbility myActiveAbility = null;
+  protected CommanderAbility myActiveAbility = null;
 
   public Commander(CommanderInfo info, GameScenario.GameRules rules)
   {

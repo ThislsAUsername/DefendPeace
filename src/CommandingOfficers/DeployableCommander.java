@@ -36,7 +36,7 @@ public abstract class DeployableCommander extends Commander
   public final DeployCOUFactory deployAction; // Has to be one per CO, so units get the same instance over multiple action searches (mostly for the AI)
   /** The number of COUs you can have active at once */
   public abstract int getCOUCount();
-  public void onCOULost(Unit minion) {};
+  public GameEventQueue onCOULost(Unit minion) { return null; };
   public char getCOUMark() {return 'C';};
   public int deployCostPercent = 0;
   /** If the unit type matches any flag in this mask, it can be my COU */
@@ -104,13 +104,20 @@ public abstract class DeployableCommander extends Commander
   @Override
   public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer healthBeforeDeath)
   {
+    GameEventQueue events = super.receiveUnitDieEvent(victim, grave, healthBeforeDeath);
     // COUs die when they are killed
     if( COUs.contains(victim) )
     {
       COUsLost.add(victim);
-      onCOULost(victim);
+      GameEventQueue couLossEvents = onCOULost(victim);
+      if( null != couLossEvents )
+      {
+        if( null == events )
+          events = new GameEventQueue();
+        events.addAll(couLossEvents);
+      }
     }
-    return super.receiveUnitDieEvent(victim, grave, healthBeforeDeath);
+    return events;
   }
   @Override
   public GameEventQueue receiveUnitJoinEvent(JoinEvent join)
