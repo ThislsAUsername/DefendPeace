@@ -1,5 +1,6 @@
 package UI;
 
+import Engine.GameScenario.FogMode;
 import Engine.GameScenario.TagMode;
 
 import java.util.HashMap;
@@ -16,7 +17,7 @@ public class GameOptionSetupController implements IController
 {
   public final int GAME_OPTIONS_CONFIG_KEY = -1; // Player indices start at 0, so -1 should be safe.
 
-  private GameOption<Boolean> fowOption = new GameOptionBool("Fog of War", false);
+  private GameOption<FogMode> fowOption = new GameOption<FogMode>("Fog of War", FogMode.values(), 0);
   private GameOption<Integer> startingFundsOption = new GameOptionInt("Starting Funds", 0, 50000, 1000, 0);
   private GameOption<Integer> incomeOption = new GameOptionInt("Income", 250, 20000, 250, 1000);
   private GameOption<Weathers> weatherOption = new GameOption<Weathers>("Weather", Weathers.values(), 0);
@@ -126,7 +127,7 @@ public class GameOptionSetupController implements IController
 
         // Set the selected options and transition to the player setup screen.
         for( GameOption<?> go : gameOptions ) go.storeCurrentValue();
-        gameBuilder.isFowEnabled = fowOption.getSelectedObject();
+        gameBuilder.fogMode       = fowOption.getSelectedObject();
         gameBuilder.startingFunds = startingFundsOption.getSelectedObject();
         gameBuilder.incomePerCity = incomeOption.getSelectedObject();
         gameBuilder.defaultWeather = (Weathers)weatherOption.getSelectedObject();

@@ -7,6 +7,7 @@ import Engine.Army;
 import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.GameScenario.FogMode;
 import Engine.GamePath;
 import Engine.Utils;
 import Engine.UnitActionLifecycles.BattleLifecycle;
@@ -29,13 +30,13 @@ public class TestVisionMechanics extends TestCase
   private void setupTest()
   {
     GameScenario scn = new GameScenario();
-    scn.rules.isFogEnabled = true;
+    scn.rules.fogMode = FogMode.ON_DOR;
     strong = new Strong(scn.rules);
     patch = new Patch(scn.rules);
     Army[] cos = { new Army(scn, strong), new Army(scn, patch) };
 
     testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
-    testGame = new GameInstance(new GameScenario(), cos, testMap, Weathers.CLEAR, false);
+    testGame = new GameInstance(scn, cos, testMap, Weathers.CLEAR, false);
   }
 
   @Override

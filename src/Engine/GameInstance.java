@@ -107,7 +107,7 @@ public class GameInstance implements Serializable
 
   public boolean isFogEnabled()
   {
-    return gameScenario.rules.isFogEnabled;
+    return gameScenario.rules.fogMode.fogDefaultsOn;
   }
 
   // WeakHashMap isn't serializable, so we can't use Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());
