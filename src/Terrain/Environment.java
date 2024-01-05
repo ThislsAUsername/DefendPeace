@@ -11,7 +11,7 @@ import java.util.Map;
 public class Environment implements Serializable
 {
   private static final long serialVersionUID = 1L;
-  public static final int PROPERTY_VISION_RANGE = 2;
+  public static final int PROPERTY_VISION_RANGE = 2; // TODO: Radars?
 
   public enum Weathers
   {

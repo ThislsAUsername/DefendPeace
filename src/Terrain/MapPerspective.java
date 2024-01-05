@@ -156,11 +156,15 @@ public class MapPerspective extends GameMap
   @Override
   public boolean isLocationFogged(int x, int y)
   {
-    return isFogOn() && ((x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : isFogged[x][y]);
+    return ((x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : isFogged[x][y]);
   }
   public boolean isFogOn()
   {
     return master.game.isFogEnabled();
+  }
+  public boolean isFogDoR()
+  {
+    return master.game.rules.fogMode.dorMode;
   }
 
   /**
@@ -174,13 +178,14 @@ public class MapPerspective extends GameMap
   @Override
   public void resetFog()
   {
-    // assume everything is fogged
+    // Assume everything is fogged...
     confirmedVisibles.clear();
+    boolean defaultState = isFogOn();
     for( int y = 0; y < mapHeight; ++y )
     {
       for( int x = 0; x < mapWidth; ++x )
       {
-        isFogged[x][y] = true;
+        isFogged[x][y] = defaultState;
       }
     }
     // then reveal what we should see
@@ -198,7 +203,7 @@ public class MapPerspective extends GameMap
           {
             revealFog(coord, false);
           }
-          // We need to do a second pass with piercing vision so we can know whether to reveal the units
+          // Do a second pass for piercing vision
           for( XYCoord coord : Utils.findVisibleLocations(this, unit, true) )
           {
             revealFog(coord, true);
@@ -207,11 +212,11 @@ public class MapPerspective extends GameMap
         for( XYCoord xyc : co.ownedProperties )
         {
           revealFog(xyc, true); // Properties can see themselves and anything on them
-          MapLocation loc = master.getLocation(xyc);
-          for( XYCoord coord : Utils.findVisibleLocations(this, loc.getCoordinates(), Environment.PROPERTY_VISION_RANGE) )
-          {
-            revealFog(coord, false);
-          }
+          if( isFogDoR() )
+            for( XYCoord coord : Utils.findVisibleLocations(this, xyc, Environment.PROPERTY_VISION_RANGE) )
+            {
+              revealFog(coord, false);
+            }
         }
       }
     }
@@ -222,6 +227,11 @@ public class MapPerspective extends GameMap
   {
     if (null == viewer)
       return;
+    if( !isFogDoR() )
+    {
+      resetFog();
+      return;
+    }
     if( !viewer.isEnemy(scout.CO.army) )
     {
       for( XYCoord coord : Utils.findVisibleLocations(this, scout, false) )
@@ -241,6 +251,11 @@ public class MapPerspective extends GameMap
   {
     if (null == viewer)
       return;
+    if( !isFogDoR() )
+    {
+      resetFog();
+      return;
+    }
     if( !viewer.isEnemy(scout.CO.army) )
     {
       for( PathNode node : movepath.getWaypoints() )
@@ -257,7 +272,7 @@ public class MapPerspective extends GameMap
       }
     }
   }
-  
+
   public void revealFog(XYCoord coord, boolean piercing)
   {
     MapLocation loc = master.getLocation(coord);
