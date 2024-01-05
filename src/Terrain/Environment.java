@@ -15,7 +15,15 @@ public class Environment implements Serializable
 
   public enum Weathers
   {
-    CLEAR, SNOW, RAIN, SANDSTORM
+    //      AW2         AW2    AWDS      AWDS snow    DoR snow    AW3/4 rain  DoR sandstorm
+    CLEAR, SNOW(true), RAIN, SANDSTORM, CHILL(true), SLEET(true), SMOKE,     SIROCCO;
+
+    public final boolean isCold; // To allow filtering for "snow immunity"
+    private Weathers(boolean isCold)
+    {
+      this.isCold = isCold;
+    }
+    private Weathers() { this(false); }
   };
 
   public final TerrainType terrainType;

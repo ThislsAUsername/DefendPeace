@@ -57,15 +57,26 @@ public class TerrainSpriteSet
   private static Map<TerrainType, TerrainType> terrainBases = null;
   private static Set<TerrainType> terrainObjects = null;
 
-  private static Color backupSnowOverlayColor = new Color(240, 243, 219, 100);
-  private static Color backupRainOverlayColor = new Color(10, 35, 73, 100);
-  private static Color backupSandOverlayColor = new Color(243, 213, 85, 100);
+  private static Color backupSnowOverlayColor    = new Color(240, 243, 219, 100);
+  private static Color backupRainOverlayColor    = new Color( 10,  35,  73, 100);
+  private static Color backupSandOverlayColor    = new Color(243, 213,  85, 100);
+  private static Color backupChillOverlayColor   = new Color(240, 243, 219,  42);
+  private static Color backupSleetOverlayColor   = new Color(220, 220, 255, 100);
+  private static Color backupSmokeOverlayColor   = new Color( 30,  35,  33, 100);
+  private static Color backupSiroccoOverlayColor = new Color(243, 100,  85, 100);
   private static Map<Weathers, Color> backupOverlayColors;
   static {
     backupOverlayColors = new HashMap<Weathers, Color>();
-    backupOverlayColors.put(Weathers.SNOW, backupSnowOverlayColor);
-    backupOverlayColors.put(Weathers.RAIN, backupRainOverlayColor);
+    backupOverlayColors.put(Weathers.CLEAR    , null);
+    backupOverlayColors.put(Weathers.SNOW     , backupSnowOverlayColor);
+    backupOverlayColors.put(Weathers.RAIN     , backupRainOverlayColor);
     backupOverlayColors.put(Weathers.SANDSTORM, backupSandOverlayColor);
+    backupOverlayColors.put(Weathers.CHILL    , backupChillOverlayColor  );
+    backupOverlayColors.put(Weathers.SLEET    , backupSleetOverlayColor  );
+    backupOverlayColors.put(Weathers.SMOKE    , backupSmokeOverlayColor  );
+    backupOverlayColors.put(Weathers.SIROCCO  , backupSiroccoOverlayColor);
+    if( backupOverlayColors.size() != Weathers.values().length )
+      throw new AssertionError("Weathers and overlay colors don't match");
   }
 
   private static boolean logDetails = false;
