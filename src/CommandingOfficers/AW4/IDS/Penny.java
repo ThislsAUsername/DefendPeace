@@ -9,8 +9,10 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.GlobalWeatherEvent;
 import Terrain.MapMaster;
+import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import UI.UIUtils;
+import Units.UnitContext;
 
 public class Penny extends RuinedCommander
 {
@@ -51,6 +53,16 @@ public class Penny extends RuinedCommander
     immuneToSand   = true;
 
     addCommanderAbility(new Stormfront(this));
+  }
+
+  @Override
+  public void modifyMoveType(UnitContext uc)
+  {
+    for( TerrainType terrain : TerrainType.TerrainTypeList )
+    {
+      final int clearCost = uc.moveType.getMoveCost(Weathers.CLEAR, terrain);
+      uc.moveType.setMoveCost(terrain, clearCost);
+    }
   }
 
   public static CommanderInfo getInfo()
