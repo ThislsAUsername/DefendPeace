@@ -11,6 +11,8 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
 import UI.UIUtils;
 import Terrain.MapMaster;
+import Terrain.TerrainType;
+import Terrain.Environment.Weathers;
 import Units.Unit;
 import Units.UnitContext;
 
@@ -33,7 +35,7 @@ public class Drake extends AW1Commander
             "Drake (AW1)\n"
           + "A relaxed and carefree swashbuckler.\n"
           + "The sea is his domain. Naval units have top firepower and movement. Air units are weak.\n"
-          + "(+1 move and +2 terrain stars for naval, -20 attack for air)\n"));
+          + "(+1 move and +2 terrain stars for naval, -20 attack for air, moves normally in rain)\n"));
       infoPages.add(new InfoPage(new Tsunami(null),
             "Deals 1 damage to enemy units that aren't in a transport.\n"
           + "1.1x/0.9x damage dealt/taken.\n"));
@@ -73,6 +75,14 @@ public class Drake extends AW1Commander
   {
     if( params.defender.model.isSeaUnit() )
       params.terrainStars += 2;
+  }
+  @Override
+  public void modifyMoveType(UnitContext uc)
+  {
+    for( TerrainType terrain : TerrainType.TerrainTypeList )
+    {
+      uc.moveType.setMoveCost(Weathers.RAIN, terrain, uc.moveType.getMoveCost(Weathers.CLEAR, terrain));
+    }
   }
 
   private static class Tsunami extends AW1BasicAbility
