@@ -5,6 +5,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import Engine.GameScenario.FogMode;
+
 public class TerrainType implements Serializable
 {
   // Local class data
@@ -53,7 +55,6 @@ public class TerrainType implements Serializable
   public int getCaptureThreshold() { return mCapThreshold; }
   public Boolean isCapturable() { return 0 != (mAttributes & CAPTURABLE); }
   public Boolean isProfitable() { return 0 != (mAttributes & PROFITABLE); }
-  public Boolean isCover() { return 0 != (mAttributes & PROVIDES_COVER); }
   public Boolean isLand() { return 0 != (mAttributes & LAND); }
   public Boolean isWater() { return 0 != (mAttributes & WATER); }
   public Boolean healsLand() { return 0 != (mAttributes & HEALS_LAND); }
@@ -61,7 +62,17 @@ public class TerrainType implements Serializable
   public Boolean healsAir() { return 0 != (mAttributes & HEALS_AIR); }
   public Boolean isUnweatherable() { return 0 != (mAttributes & UNWEATHERABLE); }
   public TerrainType getBaseTerrain() { return (null == mBase)? SEA : mBase; }
-  
+
+  public boolean isCover(FogMode mode)
+  {
+    if( 0 != (mAttributes & PROVIDES_COVER) )
+      return true;
+    // All capturables are cover in DoR logic
+    if( mode.dorMode && 0 != (mAttributes & CAPTURABLE) )
+      return true;
+    return false;
+  }
+
   ////////////////////////////////////////////////////////////////////////////////////////////
   //// Publicly-accessible terrain Flyweight instances.
   private static final int SEA_FLAGS = WATER;
@@ -79,7 +90,7 @@ public class TerrainType implements Serializable
   private static final String GRASS_NAME = "GRASS";
   public static final TerrainType GRASS = new TerrainType( GRASS_FLAGS, GRASS_DEFENSE, GRASS_NAME, SHOAL );
 
-  private static final int TEMP_AIRPORT_FLAGS = LAND | CAPTURABLE | PROVIDES_COVER | HEALS_AIR;
+  private static final int TEMP_AIRPORT_FLAGS = LAND | CAPTURABLE | HEALS_AIR;
   private static final int TEMP_AIRPORT_DEFENSE = 1;
   private static final String TEMP_AIRPORT_NAME = "TEMP_AIRPORT";
   public static final TerrainType TEMP_AIRPORT = new TerrainType( TEMP_AIRPORT_FLAGS, TEMP_AIRPORT_DEFENSE, TEMP_AIRPORT_NAME, GRASS );
@@ -89,7 +100,7 @@ public class TerrainType implements Serializable
   private static final String BRIDGE_NAME = "BRIDGE";
   public static final TerrainType BRIDGE = new TerrainType( BRIDGE_FLAGS, BRIDGE_DEFENSE, BRIDGE_NAME, SEA );
 
-  private static final int CITY_FLAGS = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_LAND;
+  private static final int CITY_FLAGS = LAND | CAPTURABLE | PROFITABLE | HEALS_LAND;
   private static final int CITY_DEFENSE = 3;
   private static final String CITY_NAME = "CITY";
   public static final TerrainType CITY = new TerrainType( CITY_FLAGS, CITY_DEFENSE, CITY_NAME, GRASS );
@@ -99,7 +110,7 @@ public class TerrainType implements Serializable
   private static final String BUNKER_NAME = "BUNKER";
   public static final TerrainType BUNKER = new TerrainType( BUNKER_FLAGS, BUNKER_DEFENSE, BUNKER_NAME, GRASS );
 
-  private static final int AIRPORT_FLAGS = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_AIR;
+  private static final int AIRPORT_FLAGS = LAND | CAPTURABLE | PROFITABLE | HEALS_AIR;
   private static final int AIRPORT_DEFENSE = 3;
   private static final String AIRPORT_NAME = "AIRPORT";
   public static final TerrainType AIRPORT = new TerrainType( AIRPORT_FLAGS, AIRPORT_DEFENSE, AIRPORT_NAME, GRASS );
@@ -119,7 +130,7 @@ public class TerrainType implements Serializable
   private static final String DUNES_NAME = "DUNES";
   public static final TerrainType DUNES = new TerrainType( DUNES_FLAGS, DUNES_DEFENSE, DUNES_NAME, SHOAL );
 
-  private static final int FACTORY_FLAGS = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_LAND;
+  private static final int FACTORY_FLAGS = LAND | CAPTURABLE | PROFITABLE | HEALS_LAND;
   private static final int FACTORY_DEFENSE = 3;
   private static final String FACTORY_NAME = "FACTORY";
   public static final TerrainType FACTORY = new TerrainType( FACTORY_FLAGS, FACTORY_DEFENSE, FACTORY_NAME, GRASS );
@@ -129,12 +140,12 @@ public class TerrainType implements Serializable
   private static final String FOREST_NAME = "FOREST";
   public static final TerrainType FOREST = new TerrainType( FOREST_FLAGS, FOREST_DEFENSE, FOREST_NAME, GRASS );
 
-  private static final int HEADQUARTERS_FLAGS = LAND | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_LAND;
+  private static final int HEADQUARTERS_FLAGS = LAND | CAPTURABLE | PROFITABLE | HEALS_LAND;
   private static final int HEADQUARTERS_DEFENSE = 4;
   private static final String HEADQUARTERS_NAME = "HEADQUARTERS";
   public static final TerrainType HEADQUARTERS = new TerrainType( HEADQUARTERS_FLAGS, HEADQUARTERS_DEFENSE, HEADQUARTERS_NAME, GRASS );
 
-  private static final int LAB_FLAGS = LAND | CAPTURABLE | PROVIDES_COVER;
+  private static final int LAB_FLAGS = LAND | CAPTURABLE;
   private static final int LAB_DEFENSE = 3;
   private static final String LAB_NAME = "LAB";
   public static final TerrainType LAB = new TerrainType( LAB_FLAGS, LAB_DEFENSE, LAB_NAME, GRASS );
@@ -165,12 +176,12 @@ public class TerrainType implements Serializable
   private static final String TELETILE_NAME = "TELETILE";
   public static final TerrainType TELETILE = new TerrainType( TELETILE_FLAGS, TELETILE_DEFENSE, TELETILE_NAME, null );
 
-  private static final int SEAPORT_FLAGS = LAND | WATER | CAPTURABLE | PROFITABLE | PROVIDES_COVER | HEALS_SEA;
+  private static final int SEAPORT_FLAGS = LAND | WATER | CAPTURABLE | PROFITABLE | HEALS_SEA;
   private static final int SEAPORT_DEFENSE = 3;
   private static final String SEAPORT_NAME = "SEAPORT";
   public static final TerrainType SEAPORT = new TerrainType( SEAPORT_FLAGS, SEAPORT_DEFENSE, SEAPORT_NAME, SHOAL );
 
-  private static final int TEMP_SEAPORT_FLAGS = LAND | WATER | CAPTURABLE | PROVIDES_COVER | HEALS_SEA;
+  private static final int TEMP_SEAPORT_FLAGS = LAND | WATER | CAPTURABLE | HEALS_SEA;
   private static final int TEMP_SEAPORT_DEFENSE = 1;
   private static final String TEMP_SEAPORT_NAME = "TEMP_SEAPORT";
   public static final TerrainType TEMP_SEAPORT = new TerrainType( TEMP_SEAPORT_FLAGS, TEMP_SEAPORT_DEFENSE, TEMP_SEAPORT_NAME, SHOAL );

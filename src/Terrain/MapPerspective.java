@@ -280,14 +280,14 @@ public class MapPerspective extends GameMap
     lastOwnerSeen[coord.x][coord.y] = loc.getOwner();
     Unit resident = loc.getResident();
 
-    Environment env = loc.getEnvironment();
-    boolean shouldSee = piercing || !env.terrainType.isCover();
+    TerrainType tt = loc.getEnvironment().terrainType;
+    boolean shouldSee = piercing || !tt.isCover(master.game.rules.fogMode);
     if( null != resident )
     {
       if( piercing )
         confirmedVisibles.add(resident);
       else if( !resident.model.hidden ) // Non-invisible aircraft reveal cover that can't repair them.
-        if( resident.model.isAirUnit() && !env.terrainType.healsAir() )
+        if( resident.model.isAirUnit() && !tt.healsAir() )
           shouldSee = true;
     }
     if( shouldSee )
