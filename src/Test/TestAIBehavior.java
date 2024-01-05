@@ -114,7 +114,7 @@ public class TestAIBehavior extends TestCase
     // Add some units, and grant us a factory so we can avoid blocking it.
     Unit myTank = addUnit(testMap, testCo1, "Md Tank", tankStart.x, tankStart.y);
     addUnit(testMap, testCo2, "Recon", 10, 1);
-    testMap.getLocation(facPos).setOwner(testCo1);
+    testMap.setOwner(testCo1, facPos);
 
     // Verify that we own the factory in question.
     boolean testPassed = validate(testCo1.ownedProperties.contains(facPos), "    Failed to assign factory.");
@@ -147,14 +147,14 @@ public class TestAIBehavior extends TestCase
     setupTest(ai);
 
     // Pre-own some properties so they are out of the way.
-    testMap.getLocation(2, 5).setOwner(testCo1);
-    testMap.getLocation(4, 4).setOwner(testCo1);
-    testMap.getLocation(4, 8).setOwner(testCo1);
-    testMap.getLocation(6, 1).setOwner(testCo1);
-    testMap.getLocation(7, 1).setOwner(testCo1);
-    testMap.getLocation(8, 8).setOwner(testCo1);
-    testMap.getLocation(12, 7).setOwner(testCo1);
-    testMap.getLocation(10, 5).setOwner(testCo1);
+    testMap.setOwner(testCo1, 2, 5 );
+    testMap.setOwner(testCo1, 4, 4 );
+    testMap.setOwner(testCo1, 4, 8 );
+    testMap.setOwner(testCo1, 6, 1 );
+    testMap.setOwner(testCo1, 7, 1 );
+    testMap.setOwner(testCo1, 8, 8 );
+    testMap.setOwner(testCo1, 12, 7);
+    testMap.setOwner(testCo1, 10, 5);
 
     // Where are things?
     XYCoord facPos = new XYCoord(7, 8);
