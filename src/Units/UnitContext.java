@@ -188,6 +188,8 @@ public class UnitContext extends UnitState
     {
       rangeMin = w.rangeMin;
       rangeMax = w.rangeMax;
+      if( env != null && env.weatherType == Weathers.SANDSTORM )
+        --rangeMax;
       for( UnitModifier mod : mods )
         mod.modifyAttackRange(this);
       if( rangeMax < rangeMin )

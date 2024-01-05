@@ -17,7 +17,6 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.TurnInitEvent;
 import Engine.StateTrackers.StateTracker;
-import Engine.UnitMods.SandstormModifier;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Units.Unit;
@@ -82,9 +81,6 @@ public class GameInstance implements Serializable
     playerCursors = new HashMap<Integer, XYCoord>();
     for( int i = 0; i < armies.length; ++i )
     {
-      // This is hacky, but hey
-      armies[i].addUnitModifier(new SandstormModifier());
-
       armies[i].money = gameScenario.rules.startingFunds;
       armies[i].myView = new MapPerspective(map, armies[i]);
       armies[i].myView.game = this;
