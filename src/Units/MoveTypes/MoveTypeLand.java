@@ -15,6 +15,10 @@ public class MoveTypeLand extends MoveType
     moveCosts.get(Weathers.RAIN).setAllLandCosts(1);
     moveCosts.get(Weathers.SNOW).setAllLandCosts(1);
     moveCosts.get(Weathers.SANDSTORM).setAllLandCosts(1);
+    moveCosts.get(Weathers.CHILL  ).setAllLandCosts(1);
+    moveCosts.get(Weathers.SLEET  ).setAllLandCosts(1);
+    moveCosts.get(Weathers.SMOKE  ).setAllLandCosts(1);
+    moveCosts.get(Weathers.SIROCCO).setAllLandCosts(1);
     setMoveCost(TerrainType.TELETILE, 0);
     setMoveCost(TerrainType.PILLAR, 99);
     setMoveCost(TerrainType.METEOR, 99);
