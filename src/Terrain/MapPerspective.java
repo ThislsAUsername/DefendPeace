@@ -19,6 +19,7 @@ public class MapPerspective extends GameMap
   private boolean[][] isFogged;
   private Commander[][] lastOwnerSeen;
   private ArrayList<Unit> confirmedVisibles;
+  private ArrayList<XYCoord> flaredTiles;
 
   public MapPerspective(MapMaster pMaster, Army pViewer)
   {
@@ -26,7 +27,8 @@ public class MapPerspective extends GameMap
     master = pMaster;
     viewer = pViewer;
     isFogged = new boolean[mapWidth][mapHeight];
-    confirmedVisibles = new ArrayList<Unit>();
+    confirmedVisibles = new ArrayList<>();
+    flaredTiles = new ArrayList<>();
 
     // We start with knowledge of what properties everyone starts with.
     lastOwnerSeen = new Commander[mapWidth][mapHeight];
@@ -179,6 +181,12 @@ public class MapPerspective extends GameMap
   @Override
   public void resetFog()
   {
+    resetFog(true);
+  }
+  private void resetFog(boolean resetFlares)
+  {
+    if( resetFlares )
+      flaredTiles.clear();
     // Assume everything is fogged...
     confirmedVisibles.clear();
     boolean defaultState = isFogOn();
@@ -192,6 +200,8 @@ public class MapPerspective extends GameMap
     // then reveal what we should see
     if (null == viewer)
       return;
+    for( XYCoord xyc : flaredTiles )
+      revealFog(xyc, true);
     for( Army army : master.game.armies )
     {
       if( viewer.isEnemy(army) )
@@ -224,7 +234,7 @@ public class MapPerspective extends GameMap
       return;
     if( !isFogDoR() )
     {
-      resetFog();
+      resetFog(false);
       return;
     }
     if( !viewer.isEnemy(scout.CO.army) )
@@ -242,7 +252,7 @@ public class MapPerspective extends GameMap
       return;
     if( !isFogDoR() )
     {
-      resetFog();
+      resetFog(false);
       return;
     }
     if( !viewer.isEnemy(scout.CO.army) )
@@ -273,8 +283,16 @@ public class MapPerspective extends GameMap
         revealFog(coord, false);
       }
   }
+  public void flareTarget(XYCoord origin, int radius)
+  {
+    for( XYCoord coord : Utils.findLocationsInRange(this, origin, 0, radius) )
+    {
+      revealFog(coord, true);
+      flaredTiles.add(coord);
+    }
+  }
 
-  public void revealFog(XYCoord coord, boolean piercing)
+  protected void revealFog(XYCoord coord, boolean piercing)
   {
     MapLocation loc = master.getLocation(coord);
     lastOwnerSeen[coord.x][coord.y] = loc.getOwner();
