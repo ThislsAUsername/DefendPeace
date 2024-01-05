@@ -288,7 +288,12 @@ public class GameInstance implements Serializable
 
     // Handle any CO-specific turn events.
     events.addAll(activeArmy.initTurn(gameMap));
-    
+
+    for( Army army : armies )
+    {
+      army.myView.resetFog();
+    }
+
     // Initialize the next turn, recording any events that will occur.
     return true; // Turn init successful.
   }
