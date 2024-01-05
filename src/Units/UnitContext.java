@@ -217,6 +217,8 @@ public class UnitContext extends UnitState
   public int calculateMovePower()
   {
     this.movePower = model.baseMovePower;
+    if( env != null && env.weatherType == Weathers.SLEET )
+      --movePower;
     for( UnitModifier mod : mods )
       mod.modifyMovePower(this);
     if( movePower < 0 )
@@ -250,6 +252,13 @@ public class UnitContext extends UnitState
         visionRange += env.terrainType.getVisionBoost();
       if( env.weatherType == Weathers.RAIN )
         --visionRange;
+      if( env.weatherType == Weathers.SMOKE )
+      {
+        if( null != unit && unit.CO.gameRules.fogMode.dorMode )
+          visionRange = 1;
+        else // Default to Trilogy logic, since "has most of normal vision" will stick out more vs "vision = 1" than vice versa.
+          --visionRange;
+      }
     }
     for( UnitModifier mod : mods )
       mod.modifyVision(this);

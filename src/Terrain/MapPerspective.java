@@ -8,6 +8,7 @@ import Engine.GamePath;
 import Engine.GamePath.PathNode;
 import Engine.Utils;
 import Engine.XYCoord;
+import Terrain.Environment.Weathers;
 import Units.Unit;
 import Units.UnitContext;
 
@@ -224,11 +225,18 @@ public class MapPerspective extends GameMap
         for( XYCoord xyc : co.ownedProperties )
         {
           revealFog(xyc, true); // Properties can see themselves and anything on them
-          if( isFogDoR() ) // Trilogy fog does not enable cities to have area vision
-            for( XYCoord coord : Utils.findLocationsInRange(this, xyc, Environment.PROPERTY_VISION_RANGE) )
+          Environment env = getEnvironment(xyc);
+          if( isFogDoR() &&  // Trilogy fog does not enable cities to have area vision
+              env.weatherType != Weathers.SMOKE )
+          {
+            int propVision = Environment.PROPERTY_VISION_RANGE;
+            if( env.weatherType == Weathers.RAIN )
+              --propVision;
+            for( XYCoord coord : Utils.findLocationsInRange(this, xyc, propVision) )
             {
               revealFog(coord, false);
             }
+          }
         }
       }
     }
