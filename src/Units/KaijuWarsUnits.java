@@ -443,9 +443,7 @@ public class KaijuWarsUnits extends UnitModelScheme
     private static final long ROLE = RECON | TANK | LAND;
 
     private static final int MOVE_POWER = 2;
-    // For spotting tunneling kaiju
-    public static final int PIERCING_VISION = 2;
-    private static final int VISION_RANGE = 5;
+    public static final int VISION_RANGE = 2;
 
     private static final MoveType moveType = GROUND;
     private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
@@ -456,7 +454,8 @@ public class KaijuWarsUnits extends UnitModelScheme
       super("Radar", ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
           actions, WEAPONS, STAR_VALUE);
       kaijuCounter = 0;
-      visionRangePiercing = PIERCING_VISION;
+      // For spotting tunneling kaiju
+      visionPierces = true;
     }
   }
 

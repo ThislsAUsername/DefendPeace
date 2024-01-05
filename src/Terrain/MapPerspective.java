@@ -9,6 +9,7 @@ import Engine.GamePath.PathNode;
 import Engine.Utils;
 import Engine.XYCoord;
 import Units.Unit;
+import Units.UnitContext;
 
 public class MapPerspective extends GameMap
 {
@@ -199,21 +200,15 @@ public class MapPerspective extends GameMap
       {
         for( Unit unit : co.units )
         {
-          for( XYCoord coord : Utils.findVisibleLocations(this, unit, false) )
-          {
-            revealFog(coord, false);
-          }
-          // Do a second pass for piercing vision
-          for( XYCoord coord : Utils.findVisibleLocations(this, unit, true) )
-          {
-            revealFog(coord, true);
-          }
+          UnitContext uc = new UnitContext(this, unit);
+          uc.calculateVision();
+          revealFog(uc, uc.coord);
         }
         for( XYCoord xyc : co.ownedProperties )
         {
           revealFog(xyc, true); // Properties can see themselves and anything on them
-          if( isFogDoR() )
-            for( XYCoord coord : Utils.findVisibleLocations(this, xyc, Environment.PROPERTY_VISION_RANGE) )
+          if( isFogDoR() ) // Trilogy fog does not enable cities to have area vision
+            for( XYCoord coord : Utils.findLocationsInRange(this, xyc, Environment.PROPERTY_VISION_RANGE) )
             {
               revealFog(coord, false);
             }
@@ -234,15 +229,9 @@ public class MapPerspective extends GameMap
     }
     if( !viewer.isEnemy(scout.CO.army) )
     {
-      for( XYCoord coord : Utils.findVisibleLocations(this, scout, false) )
-      {
-        revealFog(coord, false);
-      }
-      // We need to do a second pass with piercing vision so we can know whether to reveal the units
-      for( XYCoord coord : Utils.findVisibleLocations(this, scout, true) )
-      {
-        revealFog(coord, true);
-      }
+      UnitContext uc = new UnitContext(this, scout);
+      uc.calculateVision();
+      revealFog(uc, uc.coord);
     }
   }
 
@@ -258,27 +247,50 @@ public class MapPerspective extends GameMap
     }
     if( !viewer.isEnemy(scout.CO.army) )
     {
+      UnitContext uc = new UnitContext(this, scout);
       for( PathNode node : movepath.getWaypoints() )
       {
-        for( XYCoord coord : Utils.findVisibleLocations(this, scout, node.x, node.y, false) )
-        {
-          revealFog(coord, false);
-        }
-        // We need to do a second pass with piercing vision so we can know whether to reveal the units
-        for( XYCoord coord : Utils.findVisibleLocations(this, scout, node.x, node.y, true) )
-        {
-          revealFog(coord, true);
-        }
+        uc.setCoord(node.GetCoordinates());
+        uc.calculateVision();
+        revealFog(uc, uc.coord);
       }
     }
+  }
+
+  /**
+   * Assumes the scout context has pre-calculated its vision.
+   */
+  protected void revealFog(UnitContext scout, XYCoord seeFrom)
+  {
+    int piercingRange = scout.visionPierces ? scout.visionRange : 1;
+    for( XYCoord coord : Utils.findLocationsInRange(this, seeFrom, 0, piercingRange) )
+    {
+      revealFog(coord, true);
+    }
+    if( !scout.visionPierces )
+      for( XYCoord coord : Utils.findLocationsInRange(this, seeFrom, piercingRange, scout.visionRange) )
+      {
+        revealFog(coord, false);
+      }
   }
 
   public void revealFog(XYCoord coord, boolean piercing)
   {
     MapLocation loc = master.getLocation(coord);
-    isFogged[coord.x][coord.y] = false;
     lastOwnerSeen[coord.x][coord.y] = loc.getOwner();
-    if (piercing && loc.getResident() != null)
-      confirmedVisibles.add(loc.getResident());
+    Unit resident = loc.getResident();
+
+    Environment env = loc.getEnvironment();
+    boolean shouldSee = piercing || !env.terrainType.isCover();
+    if( null != resident )
+    {
+      if( piercing )
+        confirmedVisibles.add(resident);
+      else if( !resident.model.hidden ) // Non-invisible aircraft reveal cover that can't repair them.
+        if( resident.model.isAirUnit() && !env.terrainType.healsAir() )
+          shouldSee = true;
+    }
+    if( shouldSee )
+      isFogged[coord.x][coord.y] = false;
   }
 }

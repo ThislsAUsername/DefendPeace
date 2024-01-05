@@ -71,6 +71,12 @@ public abstract class UnitModFilter implements UnitModifier
       effect.modifyAttackRange(uc);
   }
 
+  public void modifyVision(UnitContext uc)
+  {
+    if( shouldApplyTo(uc) )
+      effect.modifyVision(uc);
+  }
+
   @Override
   public void modifyCapturePower(UnitContext uc)
   {

@@ -339,60 +339,6 @@ public class Utils
     TravelDistanceComparator tdc = new TravelDistanceComparator(unit, end, map, reverseTravel);
     Collections.sort(mapLocations, tdc);
   }
-  
-
-  /** Returns a list of all locations visible to the unit at its current location. */
-  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, boolean piercing)
-  {
-    return findVisibleLocations(map, viewer, viewer.x, viewer.y, piercing);
-  }
-  /** Returns a list of all locations that would be visible to the unit if it were at (x, y). */
-  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, Unit viewer, int x, int y, boolean piercing)
-  {
-    ArrayList<XYCoord> viewables = new ArrayList<XYCoord>();
-
-    if( map.isLocationValid(x, y) )
-    {
-      int range = (piercing)? viewer.model.visionRangePiercing : viewer.model.visionRange;
-      // if it's a surface unit, give it the boost the terrain would provide, so long as it's not adjacent-only vision
-      if( (!piercing || range > 1) && viewer.model.isSurfaceUnit() )
-        range += map.getEnvironment(x, y).terrainType.getVisionBoost();
-      viewables.addAll(findVisibleLocations(map, new XYCoord(x, y), range, piercing));
-    }
-    
-    return viewables;
-  }
-  /** Returns a list of all locations visible to a unit at origin that could see range tiles. */
-  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range)
-  {
-    return findVisibleLocations(map, origin, range, false);
-  }
-  /** Returns a list of all visible locations within range of origin, ignoring cover effects. */
-  public static ArrayList<XYCoord> findVisibleLocations(GameMap map, XYCoord origin, int range, boolean piercing)
-  {
-    ArrayList<XYCoord> locations = new ArrayList<XYCoord>();
-
-    // Loop through all the valid x and y offsets, as dictated by the max range, and add valid spaces to our collection.
-    for( int yOff = -range; yOff <= range; ++yOff )
-    {
-      for( int xOff = -range; xOff <= range; ++xOff )
-      {
-        int currentRange = Math.abs(xOff) + Math.abs(yOff);
-        XYCoord coord = new XYCoord(origin.x + xOff, origin.y + yOff);
-        if( currentRange <= range && map.isLocationValid(coord) )
-        {
-          // If we're adjacent, or we can see through cover, or it's *not* cover, we can see into it.
-          if( piercing || !map.getEnvironment(coord).terrainType.isCover() )
-          {
-            // Add this location to the set.
-            locations.add(coord);
-          }
-        }
-      }
-    }
-
-    return locations;
-  }
 
   public static boolean pathCollides(GameMap map, Unit unit, GamePath path, boolean includeOccupiedSpaces)
   {

@@ -9,6 +9,7 @@ import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.UnitMods.UnitModifier;
 import Terrain.Environment;
+import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 import Units.MoveTypes.MoveType;
 
@@ -30,11 +31,13 @@ public class UnitContext extends UnitState
 
   public int attackPower;
   public int defensePower;
-  public int movePower;
   public int capturePower; // in percent
   public int cargoCapacity;
 
   public MoveType moveType;
+  public int movePower;
+  public int visionRange;
+  public boolean visionPierces;
 
   public int costBase;
   public int costRatio;
@@ -110,16 +113,31 @@ public class UnitContext extends UnitState
   {
     super(other);
     unit = other.unit;
+    map  = other.map;
     path = other.path;
     coord = other.coord;
+
     attackPower = other.attackPower;
     defensePower = other.defensePower;
     capturePower = other.capturePower;
+    cargoCapacity = other.cargoCapacity;
+
+    moveType = other.moveType;
+    movePower = other.movePower;
+    visionRange = other.visionRange;
+    visionPierces = other.visionPierces;
+
+    costBase  = other.costBase;
+    costRatio = other.costRatio;
+    costShift = other.costShift;
+
     env = other.env;
     terrainStars = other.terrainStars;
+
     weapon = other.weapon;
     rangeMin = other.rangeMin;
     rangeMax = other.rangeMax;
+    actionTypes.addAll(other.actionTypes);
     mods.addAll(other.mods);
   }
   public void initModel()
@@ -127,13 +145,24 @@ public class UnitContext extends UnitState
     attackPower = UnitModel.DEFAULT_STAT_RATIO;
     defensePower = UnitModel.DEFAULT_STAT_RATIO;
     capturePower = UnitModel.DEFAULT_STAT_RATIO;
-    movePower = model.baseMovePower;
     cargoCapacity = model.baseCargoCapacity;
+
     moveType = model.baseMoveType; // This should be safe to not deep-copy until we know we want to change it
+    movePower = model.baseMovePower;
+    visionRange = model.visionRange;
+    visionPierces = model.visionPierces;
+
     costBase = model.costBase;
     costRatio = UnitModel.DEFAULT_STAT_RATIO;
     costShift = 0;
     actionTypes.addAll(model.baseActions);
+  }
+
+  public void setCoord(XYCoord coord)
+  {
+    this.coord = coord;
+    if( null != map && null != coord )
+      setEnvironment(map.getEnvironment(coord));
   }
 
   public void setPath(GamePath pPath)
@@ -206,6 +235,25 @@ public class UnitContext extends UnitState
     if( captureProgress < 0 )
       captureProgress = 0;
     return captureProgress;
+  }
+
+  public int calculateVision()
+  {
+    visionRange = model.visionRange;
+    visionPierces = model.visionPierces;
+    if( null != env )
+    {
+      // if it's a surface unit, give it the boost the terrain would provide, so long as it's not adjacent-only vision
+      if( model.isSurfaceUnit() )
+        visionRange += env.terrainType.getVisionBoost();
+      if( env.weatherType == Weathers.RAIN )
+        --visionRange;
+    }
+    for( UnitModifier mod : mods )
+      mod.modifyVision(this);
+    if( visionRange < 1 )
+      visionRange = 1;
+    return visionRange;
   }
 
   /**

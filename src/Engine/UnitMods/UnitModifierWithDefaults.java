@@ -55,6 +55,10 @@ public interface UnitModifierWithDefaults extends UnitModifier
   {
   }
 
+  default void modifyVision(UnitContext uc)
+  {
+  }
+
   @Override
   default void modifyCapturePower(UnitContext uc)
   {

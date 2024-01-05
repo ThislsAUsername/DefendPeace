@@ -82,7 +82,7 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public int maxMaterials = 0;
   public boolean needsMaterials = true;
   public int visionRange;
-  public int visionRangePiercing = 1;
+  public boolean visionPierces = false;
   public boolean hidden = false;
   public Set<TerrainType> healableHabs = new HashSet<TerrainType>();
   public ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();

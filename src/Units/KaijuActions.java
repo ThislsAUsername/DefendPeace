@@ -956,7 +956,7 @@ public class KaijuActions
         else
         {
           ArrayList<GameAction> radarHits = new ArrayList<>();
-          for( XYCoord xyc : Utils.findLocationsInRange(map, actCoord, Radar.PIERCING_VISION) )
+          for( XYCoord xyc : Utils.findLocationsInRange(map, actCoord, Radar.VISION_RANGE) )
           {
             Unit resident = map.getResident(xyc);
             if( null != resident && resident.CO.isEnemy(actor.CO)
