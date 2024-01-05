@@ -69,12 +69,12 @@ public class Caulder extends RuinedCommander
     // Bounding box to limit wasted iterations
     final int minX = Math.max(cou.x - zoneRadius, 0);
     final int minY = Math.max(cou.y - zoneRadius, 0);
-    final int maxX = Math.min(cou.x + zoneRadius, map.mapWidth);
-    final int maxY = Math.min(cou.y + zoneRadius, map.mapHeight);
+    final int maxX = Math.min(cou.x + zoneRadius, map.mapWidth  - 1);
+    final int maxY = Math.min(cou.y + zoneRadius, map.mapHeight - 1);
 
-    for( int x = minX; x < maxX; x++ )
+    for( int y = minY; y <= maxY; y++ ) // Top to bottom, left to right
     {
-      for( int y = minY; y < maxY; y++ )
+      for( int x = minX; x <= maxX; x++ )
       {
         if( center.getDistance(x, y) > zoneRadius )
           continue;
