@@ -128,6 +128,7 @@ public class Sami extends AW1Commander
     @Override
     protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
+      super.enqueueUnitMods(gameMap, modList);
       modList.add(moveMod);
       modList.add(moveTypeMod);
       modList.add(footAtkMod);
