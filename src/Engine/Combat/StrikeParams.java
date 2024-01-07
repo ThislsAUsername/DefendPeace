@@ -110,7 +110,7 @@ public class StrikeParams
     this.luckRolled = attacker.CO.luck;
     this.isCounter = isCounter;
     aw1Luck = attacker.CO.aw1Combat;
-    if( aw1Luck && isCounter )
+    if( aw1Luck && isCounter ) // Intended special case; AW1 counters don't round HP and don't get luck damage.
       this.attackerHealth = attacker.health;
 
     this.targetCoord = target;
