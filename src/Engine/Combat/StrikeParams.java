@@ -217,13 +217,13 @@ public class StrikeParams
     private int getLuckOptimistic()
     {
       int luckDamage = luckBase;
-      luckDamage += luckRolled-1;
+      luckDamage += Math.max(0, luckRolled-1);
       return luckDamage;
     }
     private int getLuckPessimistic()
     {
       int luckDamage = luckBase;
-      luckDamage -= luckRolledBad-1;
+      luckDamage -= Math.max(0, luckRolledBad-1);
       return luckDamage;
     }
     private int getLuckReal()
