@@ -137,11 +137,11 @@ public class StrikeParams
   public int calculateDamage()
   {
     int luckDamage = getLuck();
-    if( aw1Luck && isCounter )
+    if( aw1Luck && isCounter ) // AW1 cannot counterattack with luck.
       luckDamage = 0;
     final int rawDamage = baseDamage * attackPower * attackerDamageMultiplier / 100 / 100;
     int hpScalingDamage = rawDamage;
-    if( !aw1Luck )
+    if( !aw1Luck ) // AW1 luck isn't scaled with HP.
       hpScalingDamage += luckDamage;
 
     // Apply terrain defense to the correct defense number
@@ -155,7 +155,7 @@ public class StrikeParams
 
     int overallPower = hpScalingDamage * attackerHealth / 100;
     overallPower = overallPower * defenderDamageMultiplier / 100;
-    if( aw1Luck && overallPower > 0 )
+    if( aw1Luck && overallPower > 0 ) // AW1 luck can be negated but not reduced by CO-based defense.
       overallPower += luckDamage;
     overallPower = overallPower * subtractionMultiplier /        100;
     overallPower = overallPower *          100          / finalDefenseDivision;
