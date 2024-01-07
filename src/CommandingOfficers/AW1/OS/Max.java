@@ -104,9 +104,8 @@ public class Max extends AW1Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      super.enqueueUnitMods(gameMap, modList);
       modList.add(moveMod);
       modList.add(atkMod);
     }

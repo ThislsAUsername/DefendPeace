@@ -61,10 +61,14 @@ public abstract class AWBWCommander extends Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected final void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(genericAttack);
       modList.add(genericDefense);
+      enqueueMods(gameMap, modList);
     }
+    // Extra function to allow for stat mods so the above can be final.
+    protected void enqueueMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    {}
   }
 }

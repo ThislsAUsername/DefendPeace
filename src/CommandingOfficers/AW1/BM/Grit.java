@@ -85,9 +85,8 @@ public class Grit extends AW1Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      super.enqueueUnitMods(gameMap, modList);
       modList.add(rangeMod);
       modList.add(atkMod);
     }
