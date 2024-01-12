@@ -58,7 +58,7 @@ public class Sonja extends AW1Commander
     uc.visionRange += 1;
   }
 
-  private static class EnhancedVision extends AW1Ability
+  private static class EnhancedVision extends AW1BasicAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Enhanced Vision";
@@ -72,9 +72,8 @@ public class Sonja extends AW1Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      super.enqueueUnitMods(gameMap, modList);
       modList.add(sightMod);
     }
 
