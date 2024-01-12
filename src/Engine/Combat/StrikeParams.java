@@ -68,7 +68,7 @@ public class StrikeParams
 
   public int baseDamage;
   public int attackerHealth;
-  public int attackPower;
+  public int attackPower; // Only add/subtract from this quantity.
 // These three variables are needed to simulate different games' luck implementations - 1 RN vs 2 RNs
   public int luckBase = 0; // Luck value if you roll 0
   public int luckRolled = 0; // The number we plug into the RNG for luck damage
@@ -83,13 +83,15 @@ public class StrikeParams
    */
   public final boolean aw1Luck;
 
+  // Multiplier that scales your attack bonus as well; only multiply/divide this quantity.
   public int attackerDamageMultiplier = 100;
+  // Multiplier that scales the *enemy's* attack; only multiply/divide this quantity.
   public int defenderDamageMultiplier = 100;
 
   public int defenderHealth = 0;
   public final XYCoord targetCoord;
-  public int defenseSubtraction = 100;
-  public int defenseDivision    = 100;
+  public int defenseSubtraction = 100; // Only add/subtract from this quantity.
+  public int defenseDivision    = 100; // Only add/subtract from this quantity.
   public int terrainStars = 0;
   public boolean terrainGivesSubtraction = true;
 
