@@ -53,6 +53,14 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW4.IDS.Caulder.getInfo() );
     commanderList.add( DocLight.getInfo() );
     commanderList.add( NotACO.getInfo() );
+    commanderList.add( CommandingOfficers.AW1.OS.Andy.getInfo() );
+    commanderList.add( CommandingOfficers.AW1.OS.Max.getInfo() );
+    commanderList.add( CommandingOfficers.AW1.OS.Nell.getInfo() );
+    commanderList.add( CommandingOfficers.AW1.BM.Grit.getInfo() );
+    commanderList.add( CommandingOfficers.AW1.BM.Olaf.getInfo() );
+    commanderList.add( CommandingOfficers.AW1.GE.Drake.getInfo() );
+    commanderList.add( CommandingOfficers.AW1.GE.Eagle.getInfo() );
+    commanderList.add( CommandingOfficers.AW1.YC.Kanbei.getInfo() );
     commanderList.add( CommandingOfficers.AW2.OS.Andy.getInfo() );
     commanderList.add( CommandingOfficers.AW3.OS.Andy.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Andy.getInfo() );

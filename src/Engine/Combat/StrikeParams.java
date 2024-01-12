@@ -68,19 +68,30 @@ public class StrikeParams
 
   public int baseDamage;
   public int attackerHealth;
-  public int attackPower;
+  public int attackPower; // Only add/subtract from this quantity.
 // These three variables are needed to simulate different games' luck implementations - 1 RN vs 2 RNs
   public int luckBase = 0; // Luck value if you roll 0
   public int luckRolled = 0; // The number we plug into the RNG for luck damage
   public int luckRolledBad = 0; // The number we plug into the RNG for negative luck damage
   public final boolean isCounter;
+  /**
+   * Implies luck doesn't scale down with HP and isn't reduced by CO-based defense.<p>
+   * It's worth noting this is based on testing/observation, not reverse engineering.<p>
+   * However, it's negated if damage*CO defense == 0<p>
+   * It's implemented here by assuming all AW1 CO-based defense is multiplier-based defense.<p>
+   * Relevant link: https://forums.warsworldnews.com/viewtopic.php?p=417292&sid=a877b0305a8af6d63956bb893d11cc88#p417292
+   */
+  public final boolean aw1Luck;
 
-  public int damageMultiplier = 100;
+  // Multiplier that scales your attack bonus as well; only multiply/divide this quantity.
+  public int attackerDamageMultiplier = 100;
+  // Multiplier that scales the *enemy's* attack; only multiply/divide this quantity.
+  public int defenderDamageMultiplier = 100;
 
   public int defenderHealth = 0;
   public final XYCoord targetCoord;
-  public int defenseSubtraction = 100;
-  public int defenseDivision    = 100;
+  public int defenseSubtraction = 100; // Only add/subtract from this quantity.
+  public int defenseDivision    = 100; // Only add/subtract from this quantity.
   public int terrainStars = 0;
   public boolean terrainGivesSubtraction = true;
 
@@ -100,6 +111,9 @@ public class StrikeParams
     this.attackPower = attacker.attackPower;
     this.luckRolled = attacker.CO.luck;
     this.isCounter = isCounter;
+    aw1Luck = attacker.CO.aw1Combat;
+    if( aw1Luck && isCounter ) // Intended special case; AW1 counters don't round HP and don't get luck damage.
+      this.attackerHealth = attacker.health;
 
     this.targetCoord = target;
   }
@@ -115,6 +129,9 @@ public class StrikeParams
     this.attackPower = other.attackPower;
     this.luckRolled = other.luckRolled;
     this.isCounter = other.isCounter;
+    aw1Luck = attacker.CO.aw1Combat;
+    this.attackerDamageMultiplier = other.attackerDamageMultiplier;
+    this.defenderDamageMultiplier = other.defenderDamageMultiplier;
 
     this.targetCoord = other.targetCoord;
   }
@@ -122,7 +139,12 @@ public class StrikeParams
   public int calculateDamage()
   {
     int luckDamage = getLuck();
-    final int rawDamage = baseDamage * attackPower * damageMultiplier / 100 / 100;
+    if( aw1Luck && isCounter ) // AW1 cannot counterattack with luck.
+      luckDamage = 0;
+    final int rawDamage = baseDamage * attackPower * attackerDamageMultiplier / 100 / 100;
+    int hpScalingDamage = rawDamage;
+    if( !aw1Luck ) // AW1 luck isn't scaled with HP.
+      hpScalingDamage += luckDamage;
 
     // Apply terrain defense to the correct defense number
     int finalDefenseSubtraction = defenseSubtraction;
@@ -133,7 +155,10 @@ public class StrikeParams
       finalDefenseDivision    += terrainStars * defenderHealth / 10;
     final int subtractionMultiplier = 200 - finalDefenseSubtraction;
 
-    int overallPower = (rawDamage + luckDamage) * attackerHealth / 100;
+    int overallPower = hpScalingDamage * attackerHealth / 100;
+    overallPower = overallPower * defenderDamageMultiplier / 100;
+    if( aw1Luck && overallPower > 0 ) // AW1 luck can be negated but not reduced by CO-based defense.
+      overallPower += luckDamage;
     overallPower = overallPower * subtractionMultiplier /        100;
     overallPower = overallPower *          100          / finalDefenseDivision;
 
@@ -194,13 +219,13 @@ public class StrikeParams
     private int getLuckOptimistic()
     {
       int luckDamage = luckBase;
-      luckDamage += luckRolled;
+      luckDamage += Math.max(0, luckRolled-1);
       return luckDamage;
     }
     private int getLuckPessimistic()
     {
       int luckDamage = luckBase;
-      luckDamage -= luckRolledBad;
+      luckDamage -= Math.max(0, luckRolledBad-1);
       return luckDamage;
     }
     private int getLuckReal()

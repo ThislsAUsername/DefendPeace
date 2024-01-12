@@ -51,6 +51,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public int incomeAdjustment = 0; // Commander subclasses can increase/decrease income if needed.
   private int myAbilityPower = 0;
   public boolean roundUpRepairs = true; // I blame AWBW
+  public boolean aw1Combat = false; // See docs in StrikeParams
 
   public ArrayList<CommanderAbility> myAbilities = null;
   protected CommanderAbility myActiveAbility = null;
