@@ -83,9 +83,8 @@ public class Rachel extends AWBWCommander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      super.enqueueUnitMods(gameMap, modList);
       modList.add(luckMod);
     }
   }

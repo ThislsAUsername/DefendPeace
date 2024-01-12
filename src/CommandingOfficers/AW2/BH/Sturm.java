@@ -105,9 +105,8 @@ public class Sturm extends AW2Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    protected void enqueueMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      super.enqueueUnitMods(gameMap, modList);
       modList.add(fightMod);
     }
 
