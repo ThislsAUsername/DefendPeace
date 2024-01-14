@@ -72,6 +72,13 @@ public abstract class UnitModFilter implements UnitModifier
   }
 
   @Override
+  public void modifyCapturePower(UnitContext uc)
+  {
+    if( shouldApplyTo(uc) )
+      effect.modifyCapturePower(uc);
+  }
+
+  @Override
   public void modifyCost(UnitContext uc)
   {
     if( shouldApplyTo(uc) )

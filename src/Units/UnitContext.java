@@ -31,6 +31,7 @@ public class UnitContext extends UnitState
   public int attackPower;
   public int defensePower;
   public int movePower;
+  public int capturePower; // in percent
   public int cargoCapacity;
 
   public MoveType moveType;
@@ -113,6 +114,7 @@ public class UnitContext extends UnitState
     coord = other.coord;
     attackPower = other.attackPower;
     defensePower = other.defensePower;
+    capturePower = other.capturePower;
     env = other.env;
     terrainStars = other.terrainStars;
     weapon = other.weapon;
@@ -124,6 +126,7 @@ public class UnitContext extends UnitState
   {
     attackPower = UnitModel.DEFAULT_STAT_RATIO;
     defensePower = UnitModel.DEFAULT_STAT_RATIO;
+    capturePower = UnitModel.DEFAULT_STAT_RATIO;
     movePower = model.baseMovePower;
     cargoCapacity = model.baseCargoCapacity;
     moveType = model.baseMoveType; // This should be safe to not deep-copy until we know we want to change it
@@ -188,6 +191,21 @@ public class UnitContext extends UnitState
     if( movePower < 0 )
       movePower = 0;
     return movePower;
+  }
+
+  /**
+   * @return The new capture progress I would make
+   */
+  public int calculateCapturePower()
+  {
+    this.capturePower = UnitModel.DEFAULT_STAT_RATIO;
+    for( UnitModifier mod : mods )
+      mod.modifyCapturePower(this);
+
+    int captureProgress = getHP() * capturePower / UnitModel.DEFAULT_STAT_RATIO;
+    if( captureProgress < 0 )
+      captureProgress = 0;
+    return captureProgress;
   }
 
   /**

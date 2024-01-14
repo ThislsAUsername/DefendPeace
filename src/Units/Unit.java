@@ -86,6 +86,28 @@ public class Unit extends UnitState implements UnitModList
     return new UnitContext(map, this, weapon);
   }
 
+  public boolean capture(MapLocation target)
+  {
+    boolean success = false;
+
+    if( target != captureTarget )
+    {
+      captureTarget = target;
+      captureProgress = 0;
+    }
+    UnitContext uc = new UnitContext(this);
+    captureProgress += uc.calculateCapturePower();
+    if( captureProgress >= target.getEnvironment().terrainType.getCaptureThreshold() )
+    {
+      target.setOwner(CO);
+      captureProgress = 0;
+      target = null;
+      success = true;
+    }
+
+    return success;
+  }
+
   /**
    * @return whether or not this unit can attack the given unit type at the
    * specified range, accounting for the possibility of moving first.

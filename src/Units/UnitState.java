@@ -175,27 +175,6 @@ public abstract class UnitState implements Serializable
   }
 
 
-  public boolean capture(MapLocation target)
-  {
-    boolean success = false;
-
-    if( target != captureTarget )
-    {
-      captureTarget = target;
-      captureProgress = 0;
-    }
-    captureProgress += getHP();
-    if( captureProgress >= target.getEnvironment().terrainType.getCaptureThreshold() )
-    {
-      target.setOwner(CO);
-      captureProgress = 0;
-      target = null;
-      success = true;
-    }
-
-    return success;
-  }
-
   public void stopCapturing()
   {
     captureTarget = null;
