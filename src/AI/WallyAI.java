@@ -823,14 +823,14 @@ public class WallyAI extends ModularAI
             {
               double damageValue = AICombatUtils.scoreAttackAction(unit, attack, gameMap,
                   (results) -> {
-                    double loss   = Math.min(unit                 .getHealth(), (int)results.attacker.getPreciseHealthDamage());
-                    double damage = Math.min(results.defender.unit.getHealth(), (int)results.defender.getPreciseHealthDamage());
+                    int loss   = Math.min(unit                 .getHealth(), (int)results.attacker.getPreciseHealthDamage());
+                    int damage = Math.min(results.defender.unit.getHealth(), (int)results.defender.getPreciseHealthDamage());
 
                     if( damage > loss ) // only shoot that which you hurt more than it hurts you
                       return damage * results.defender.unit.getCost();
 
-                    return 0.;
-                  }, (terrain, params) -> 0.01); // Attack terrain, but don't prioritize it over units
+                    return 0;
+                  }, (terrain, params) -> 1); // Attack terrain, but don't prioritize it over units
 
               if( damageValue > bestDamage )
               {

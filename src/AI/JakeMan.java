@@ -52,6 +52,7 @@ public class JakeMan extends ModularAI
   private static final double FIRSTSTRIKE_ON_THREAT_WEIGHT = 2.0;
   private static final int    STAY_UNHURT_BIAS = 1000;
   private static final int    STAY_ALIVE_BIAS = 2000;
+  private static final int    BIG_THREAT_THRESHOLD = 80; // Enemy health at which I double the expected value of dealing damage
   // Fraction of the unit to remove from the counter-threat power of my unit type if I'm not attacking
   private static final double PEACEFUL_SELF_THREAT_RATIO = 1;
   private static final int    UNIT_HEAL_THRESHOLD = 60; // Health at which units heal
@@ -667,16 +668,19 @@ public class JakeMan extends ModularAI
             if( loss >= unit.getHealth() )
               extraLoss += STAY_ALIVE_BIAS;
             loss *= unit.getCost();
+            loss /= UnitModel.MAXIMUM_HEALTH;
             loss += extraLoss;
+
             damage *= defender.getCost();
+            damage /= UnitModel.MAXIMUM_HEALTH;
             if( isThreatenedBy(unit.model, defender.model) )
               damage *= FIRSTSTRIKE_ON_THREAT_WEIGHT;
             // Value damage to hurt units less
-            damage *= defender.getHP();
-            damage /= 10;
+            if( defender.getHealth() >= BIG_THREAT_THRESHOLD )
+              damage *= 2;
 
-            return (double)(damage - loss);
-          }, (terrain, params) -> 0.00); // Don't attack terrain
+            return damage - loss;
+          }, (terrain, params) -> 0); // Don't attack terrain
 
       if( damageValue > bestDamage )
       {
