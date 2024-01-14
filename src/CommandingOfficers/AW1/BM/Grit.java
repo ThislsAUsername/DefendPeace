@@ -66,7 +66,7 @@ public class Grit extends AW1Commander
   public void modifyAttackRange(UnitContext uc)
   {
     if( uc.weapon != null && uc.weapon.rangeMax > 1 )
-      uc.weapon.rangeMax += 1;
+      uc.rangeMax += 1;
   }
 
   private static class SnipeAttack extends AW1BasicAbility
