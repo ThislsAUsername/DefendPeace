@@ -87,6 +87,8 @@ public class WallyAI extends ModularAI
   private static final double AGGRO_EFFECT_THRESHOLD = 0.55; // % of a kill required to want to attack something
   private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
   private static final double AGGRO_CHEAPER_WEIGHT = 0.01; // Multiplier on the score penalty for using expensive units to blow up stragglers
+  private static final int    KILL_FUNDS_BIAS = 1000; // Bias towards kills
+  private static final int    CHIP_FUNDS_BIAS = 500; // Bias towards hitting full HP units
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
   private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges
@@ -2113,10 +2115,16 @@ public class WallyAI extends ModularAI
         captureValue = actor.CO.gameRules.incomePerCity;
 
       BattleSummary results = CombatEngine.simulateBattleResults(actor, target, gameMap, CALC);
+      int hpDiffValue = 0;
+      if( results.defender.after.getHealth() <= 0 )
+        hpDiffValue += KILL_FUNDS_BIAS;
+      if( target.getHealth() == UnitModel.MAXIMUM_HEALTH )
+        hpDiffValue += CHIP_FUNDS_BIAS;
+
       hploss   = actor .getHP() - Math.max(0, results.attacker.after.getHP());
       hpdamage = target.getHP() - Math.max(0, results.defender.after.getHP());
       loss     = (hploss   * actorCost  ) / 10;
-      damage   = (hpdamage * targetValue) / 10 + captureValue;
+      damage   = (hpdamage * targetValue) / 10 + captureValue + hpDiffValue;
 
       int wallValue = 0;
       if( !ignoreWallValue )
