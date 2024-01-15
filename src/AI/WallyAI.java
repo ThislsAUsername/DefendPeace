@@ -12,6 +12,7 @@ import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.CombatContext.CalcType;
+import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.BattleLifecycle.BattleAction;
 import Engine.UnitActionLifecycles.CaptureLifecycle.CaptureAction;
 import Terrain.*;
@@ -560,10 +561,16 @@ public class WallyAI extends ModularAI
     @Override
     public GameAction getUnitAction(Unit unit, GameMap map)
     {
-      final GameAction capAction = super.getUnitAction(unit, map);
+      GameAction capAction = super.getUnitAction(unit, map);
       int capProgress = unit.getCaptureProgress();
       if( null == capAction )
-        return null;
+      {
+        if( capProgress == 0 )
+          return null;
+        XYCoord xyc = new XYCoord(unit);
+        ai.futureCapTargets.remove(xyc);
+        capAction = new CaptureLifecycle.CaptureAction(map, unit, GamePath.stayPut(xyc));
+      }
 
       XYCoord mc = capAction.getMoveLocation();
       int finalCapAmt = capProgress + unit.getHP(); // TODO: This probably wants a generic util
@@ -2182,18 +2189,20 @@ public class WallyAI extends ModularAI
   public int valueCapture(CaptureAction ga, GameMap gameMap)
   {
     Unit unit = ga.getActor();
-    XYCoord moveCoord = ga.getMoveLocation();
-    int capValue = unit.getHP(); // TODO: update for capture boosts
-    if( 0 == moveCoord.getDistance(unit) )
-      capValue += unit.getCaptureProgress();
-    boolean success = (capValue) >= gameMap.getEnvironment(moveCoord).terrainType.getCaptureThreshold();
+    XYCoord capCoord = ga.getMoveLocation();
+    int capProgress = 0;
+    if( 0 == capCoord.getDistance(unit) )
+      capProgress += unit.getCaptureProgress();
+    int capValue = new UnitContext(unit).calculateCapturePower();
+    int capThreshold = gameMap.getEnvironment(capCoord).terrainType.getCaptureThreshold();
+    int capTurns = (capThreshold - capProgress + capValue-1) / capValue;
 
-    if( success )
+    if( capTurns == 1 )
       return Integer.MAX_VALUE/42; // I can't think of very many good reasons to skip finishing a capture
 
-    int yeetFactor = valueTerrain(unit.CO, gameMap.getEnvironment(moveCoord).terrainType);
-    // Since we can't be certain of a capture, ballpark a day's income per full HP inf's worth of capping
-    return (int) (capValue * yeetFactor) / 10;
+    int yeetFactor = valueTerrain(unit.CO, gameMap.getEnvironment(capCoord).terrainType);
+    // Since we can't be certain of a capture, ballpark the terrain value scaled by the capture time.
+    return yeetFactor / capTurns;
   }
 
   private static int valueAction(WallyAI ai, GameMap gameMap, ActionPlan ap)
