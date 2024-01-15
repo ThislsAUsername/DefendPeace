@@ -936,7 +936,7 @@ public class WallyAI extends ModularAI
         Unit resident = ai.predMap.getResident(moveCoord);
         ActionPlan  ap = ai.mapPlan[moveCoord.x][moveCoord.y].toAchieve;
         boolean spaceFree = null == resident;
-        if( !spaceFree && (!canEvict || null == ap ) )
+        if( !spaceFree && (!canEvict || null == ap || ai.predMap.helpsClearTile(ap) ) )
           continue; // Bail if we can't clear the space
 
         // Figure out what I can do here.
@@ -1414,11 +1414,11 @@ public class WallyAI extends ModularAI
 
       // If whatever's in our landing pad has no plans yet, poke and see if some can be made
       Unit currentResident = gameMap.getResident(xyc);
-      if( null != currentResident )
+      if( null != currentResident && currentResident.CO.army == myArmy )
       {
         if( plannedUnits.contains(currentResident) || evictionStack.contains(currentResident) )
           continue;
-        boolean residentIsEvictable = !currentResident.isTurnOver && currentResident.CO.army == myArmy;
+        boolean residentIsEvictable = !currentResident.isTurnOver;
 
         if( !canEvictSiege && currentResident.model.hasImmobileWeapon() )
           continue;
@@ -1527,11 +1527,11 @@ public class WallyAI extends ModularAI
 
       // If whatever's in our landing pad has no plans yet, poke and see if some can be made
       Unit currentResident = gameMap.getResident(xyc);
-      if( null != currentResident )
+      if( null != currentResident && currentResident.CO.army == myArmy )
       {
         if( plannedUnits.contains(currentResident) || evictionStack.contains(currentResident) )
           continue;
-        boolean residentIsEvictable = !currentResident.isTurnOver && currentResident.CO.army == myArmy;
+        boolean residentIsEvictable = !currentResident.isTurnOver;
 
         if( !residentIsEvictable || recurseDepth <= 0 )
           continue;
@@ -2249,6 +2249,15 @@ public class WallyAI extends ModularAI
     {
       Unit resident = getResident(x, y);
       return null == resident || resident == unit;
+    }
+    public boolean helpsClearTile(ActionPlan plan)
+    {
+      if( plan.action.getType() != UnitActionFactory.ATTACK )
+        return false;
+      XYCoord tt = plan.action.getTargetLocation();
+      Unit resident = getResident(tt);
+      // If it's empty or we've already planned to fill it with our own dude, we planned to kill with this action.
+      return null == resident || !viewer.isEnemy(resident.CO);
     }
   }
 }
