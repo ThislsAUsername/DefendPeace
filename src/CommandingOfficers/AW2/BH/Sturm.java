@@ -118,9 +118,6 @@ public class Sturm extends AW2Commander
       MeteorParams meteor = targets[rand];
       GameEventQueue events = super.getEvents(map);
 
-      if( null == meteor.target )
-        return events;
-
       meteor.power = POWER;
       GameEvent event = meteor.getDamage(map, myCommander);
       events.add(event);
