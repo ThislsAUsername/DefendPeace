@@ -7,7 +7,7 @@ public abstract class SturmValueFinders // Until such time as we find out AW1 wo
 {
   public static class HPValueFinder implements IValueFinder
   {
-    public boolean countHidden = true; // Ignore cloaked units even if we can see them
+    public boolean countHidden = true; // Flag to enable AW2 Sturm to not count damage on cloaked units even if he can see them
     public int getValue(Commander attacker, Unit unit)
     {
       int hp = unit.getHP();
@@ -23,7 +23,7 @@ public abstract class SturmValueFinders // Until such time as we find out AW1 wo
   }
   public static class CostValueFinder implements IValueFinder
   {
-    public boolean countHidden = true; // Ignore cloaked units even if we can see them
+    public boolean countHidden = true; // Ditto above
     public int indirectMultiplier = 1;
     @Override
     public int getValue(Commander attacker, Unit unit)
