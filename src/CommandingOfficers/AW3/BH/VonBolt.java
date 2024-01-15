@@ -101,8 +101,8 @@ public class VonBolt extends AW3Commander
     private MeteorParams[] findTargets(GameMap map)
     {
       MeteorParams[] targets = new MeteorParams[2];
-      targets[0] = MeteorParams.findValue(map, myCommander, 2, new AW3ValueFinders.HealthValueFinder());
-      targets[1] = MeteorParams.findValue(map, myCommander, 2, new AW3ValueFinders.CostValueFinder());
+      targets[0] = MeteorParams.planMeteor(map, myCommander, 2, new AW3ValueFinders.HealthValueFinder());
+      targets[1] = MeteorParams.planMeteor(map, myCommander, 2, new AW3ValueFinders.CostValueFinder());
       return targets;
     }
     @Override

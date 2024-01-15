@@ -124,9 +124,9 @@ public class Rachel extends AW3Commander
     {
       // Should targeting account for the previous hits' damage?
       MeteorParams[] targets = new MeteorParams[3];
-      targets[0] = MeteorParams.findValue(map, myCommander, 2, new AW3ValueFinders.CaptureValueFinder());
-      targets[1] = MeteorParams.findValue(map, myCommander, 2, new AW3ValueFinders.CostValueFinder());
-      targets[2] = MeteorParams.findValue(map, myCommander, 2, new AW3ValueFinders.HealthValueFinder());
+      targets[0] = MeteorParams.planMeteor(map, myCommander, 2, new AW3ValueFinders.CaptureValueFinder());
+      targets[1] = MeteorParams.planMeteor(map, myCommander, 2, new AW3ValueFinders.CostValueFinder());
+      targets[2] = MeteorParams.planMeteor(map, myCommander, 2, new AW3ValueFinders.HealthValueFinder());
       return targets;
     }
     @Override

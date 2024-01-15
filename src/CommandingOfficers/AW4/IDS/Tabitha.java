@@ -108,7 +108,7 @@ public class Tabitha extends RuinedCommander
     }
     private MeteorParams findTarget(GameMap map)
     {
-      return MeteorParams.findValue(map, myCommander, 2, new FirestormValueFinder());
+      return MeteorParams.planMeteor(map, myCommander, 2, new FirestormValueFinder());
     }
     @Override
     public Collection<DamagePopup> getDamagePopups(GameMap map)

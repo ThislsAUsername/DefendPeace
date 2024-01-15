@@ -119,9 +119,9 @@ public class Rachel extends AWBWCommander
     {
       // Targeting does not account for previous hits' damage
       MeteorParams[] targets = new MeteorParams[3];
-      targets[0] = MeteorParams.findValue(map, myCommander, 2, new AWBWValueFinders.CaptureValueFinder());
-      targets[1] = MeteorParams.findValue(map, myCommander, 2, new AWBWValueFinders.CostValueFinder());
-      targets[2] = MeteorParams.findValue(map, myCommander, 2, new AWBWValueFinders.HealthValueFinder());
+      targets[0] = MeteorParams.planMeteor(map, myCommander, 2, new AWBWValueFinders.CaptureValueFinder());
+      targets[1] = MeteorParams.planMeteor(map, myCommander, 2, new AWBWValueFinders.CostValueFinder());
+      targets[2] = MeteorParams.planMeteor(map, myCommander, 2, new AWBWValueFinders.HealthValueFinder());
       return targets;
     }
     @Override

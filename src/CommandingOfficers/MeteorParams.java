@@ -41,10 +41,7 @@ public class MeteorParams
     return new MassDamageEvent(attacker, victimList, power*10, false, inflictStun);
   }
 
-  /**
-   * @return The aggregate score for the tile based on all known victims.
-   */
-  private static int getScore(GameMap map, Commander attacker, XYCoord target, int radius, IValueFinder evaluator)
+  private static int aggregateTargetScore(GameMap map, Commander attacker, XYCoord target, int radius, IValueFinder evaluator)
   {
     int currentValue = 0;
 
@@ -62,9 +59,9 @@ public class MeteorParams
   }
 
   /**
-   * @return A MassStrikeParams with the best target, or no target if there are no values above 0.
+   * @return A MeteorParams with the best target, or no target if there are no values above 0.
    */
-  public static MeteorParams findValue(GameMap map, Commander attacker, int radius, IValueFinder evaluator)
+  public static MeteorParams planMeteor(GameMap map, Commander attacker, int radius, IValueFinder evaluator)
   {
     XYCoord maxTarget = null;
     int maxValue = 0;
@@ -73,7 +70,7 @@ public class MeteorParams
       for( int j = 0; j < map.mapHeight; j++ )
       {
         XYCoord currentTarget = new XYCoord(i, j);
-        int currentValue = getScore(map, attacker, currentTarget, radius, evaluator);
+        int currentValue = aggregateTargetScore(map, attacker, currentTarget, radius, evaluator);
         if( currentValue > maxValue )
         {
           maxValue = currentValue;
@@ -90,7 +87,7 @@ public class MeteorParams
    * @param scoringMap The map to use to score valid strike locations.
    * @return A MassStrikeParams with the best target, or no target if there are no values above 0.
    */
-  public static MeteorParams findValueOnEnemy(GameMap targetingMap, GameMap scoringMap, Commander attacker, int radius, IValueFinder evaluator)
+  public static MeteorParams planMeteorOnEnemy(GameMap targetingMap, GameMap scoringMap, Commander attacker, int radius, IValueFinder evaluator)
   {
     XYCoord maxTarget = null;
     int maxValue = 0;
@@ -103,7 +100,7 @@ public class MeteorParams
           continue;
 
         XYCoord currentTarget = new XYCoord(i, j);
-        int currentValue = getScore(scoringMap, attacker, currentTarget, radius, evaluator);
+        int currentValue = aggregateTargetScore(scoringMap, attacker, currentTarget, radius, evaluator);
         if( currentValue > maxValue )
         {
           maxValue = currentValue;

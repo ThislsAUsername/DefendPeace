@@ -98,7 +98,7 @@ public class VonBolt extends AWBWCommander
       AWBWValueFinders.CostValueFinder finder = new AWBWValueFinders.CostValueFinder();
       finder.maxDamage = POWER;
       finder.selfHarm  = false;
-      return MeteorParams.findValue(map, myCommander, 2, finder);
+      return MeteorParams.planMeteor(map, myCommander, 2, finder);
     }
     @Override
     public Collection<DamagePopup> getDamagePopups(GameMap map)

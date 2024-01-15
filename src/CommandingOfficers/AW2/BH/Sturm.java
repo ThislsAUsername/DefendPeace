@@ -138,9 +138,9 @@ public class Sturm extends AW2Commander
       artyFinder.countHidden = false;
       artyFinder.indirectMultiplier = 2;
       MapPerspective scoringMap = myCommander.army.myView;
-      targets[0] = MeteorParams.findValueOnEnemy(map, scoringMap, myCommander, 2, hpFinder);
-      targets[1] = MeteorParams.findValueOnEnemy(map, scoringMap, myCommander, 2, costFinder);
-      targets[2] = MeteorParams.findValueOnEnemy(map, scoringMap, myCommander, 2, artyFinder);
+      targets[0] = MeteorParams.planMeteorOnEnemy(map, scoringMap, myCommander, 2, hpFinder);
+      targets[1] = MeteorParams.planMeteorOnEnemy(map, scoringMap, myCommander, 2, costFinder);
+      targets[2] = MeteorParams.planMeteorOnEnemy(map, scoringMap, myCommander, 2, artyFinder);
       return targets;
     }
     @Override

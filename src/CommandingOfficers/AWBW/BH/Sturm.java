@@ -127,7 +127,7 @@ public class Sturm extends AWBWCommander
     {
       AWBWValueFinders.CostValueFinder finder = new AWBWValueFinders.CostValueFinder();
       finder.maxDamage = power;
-      return MeteorParams.findValueOnEnemy(map, map, myCommander, 2, finder);
+      return MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, finder);
     }
     @Override
     public Collection<DamagePopup> getDamagePopups(GameMap map)

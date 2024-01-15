@@ -137,11 +137,11 @@ public class Sturm extends AW1Commander
     private MeteorParams[] findTargets(GameMap map)
     {
       MeteorParams[] targets = new MeteorParams[3];
-      targets[0] = MeteorParams.findValueOnEnemy(map, map, myCommander, 2, new SturmValueFinders.HPValueFinder());
-      targets[1] = MeteorParams.findValueOnEnemy(map, map, myCommander, 2, new SturmValueFinders.CostValueFinder());
+      targets[0] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, new SturmValueFinders.HPValueFinder());
+      targets[1] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, new SturmValueFinders.CostValueFinder());
       SturmValueFinders.CostValueFinder artyFinder = new SturmValueFinders.CostValueFinder();
       artyFinder.indirectMultiplier = 2;
-      targets[2] = MeteorParams.findValueOnEnemy(map, map, myCommander, 2, artyFinder);
+      targets[2] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, artyFinder);
       return targets;
     }
     @Override
