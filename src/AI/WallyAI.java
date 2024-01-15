@@ -1992,19 +1992,19 @@ public class WallyAI extends ModularAI
 
     // Build infantry from any remaining facilities.
     log("Building infantry to fill out my production");
-    XYCoord infCoord = getLocationToBuild(gameMap, CPI, infModel);
-    while (infCoord != null)
+    MapLocation infLoc = CPI.getLocationToBuild(infModel);
+    while (infLoc != null)
     {
-      MapLocation infLoc = gameMap.getLocation(infCoord);
+      XYCoord infCoord = infLoc.getCoordinates();
       Commander infBuyer = infLoc.getOwner();
       int cost = infBuyer.getBuyCost(infModel, infCoord);
       if (cost > budget)
         break;
       builds.put(infCoord, infModel);
       budget -= cost;
-      CPI.removeBuildLocation(gameMap.getLocation(infCoord));
+      CPI.removeBuildLocation(infLoc);
       log(String.format("  At %s (%s remaining)", infCoord, budget));
-      infCoord = getLocationToBuild(gameMap, CPI, infModel);
+      infLoc = CPI.getLocationToBuild(infModel);
     }
 
     return builds;
