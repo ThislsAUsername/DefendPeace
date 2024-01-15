@@ -90,6 +90,7 @@ public class WallyAI extends ModularAI
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
   private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges
+  private static final double MIN_COUNTER_EFFECTIVENESS = 0.7; // Minimum matchup strength for a counter unit
 
   private static final double TERRAIN_FUNDS_WEIGHT = 2.5; // Multiplier for per-city income for adding value to units threatening to cap
   private static final double TERRAIN_INDUSTRY_WEIGHT = 20000; // Funds amount added to units threatening to cap an industry
@@ -1891,6 +1892,7 @@ public class WallyAI extends ModularAI
       // Find the first (most funds-invested) enemy UnitModel, and remove it. Even if we can't find an adequate counter,
       // there is not reason to consider it again on the next iteration.
       ModelForCO enemyToCounter = enemyModels.poll().getKey();
+      int enemyCostPer = enemyToCounter.co.getCost(enemyToCounter.um);
       double enemyNumber = enemyUnitHP.get(enemyToCounter);
       log(String.format("Need a counter for %s worth %s", enemyToCounter, enemyNumber));
       log(String.format("Remaining budget: %s", budget));
@@ -1928,9 +1930,14 @@ public class WallyAI extends ModularAI
             costBuffer = 0; // No granting ourselves extra moolah.
           if(totalCost <= (budget - costBuffer))
           {
-            // Go place orders.
-            log(String.format("    I can build %s for a cost of %s (%s remaining, witholding %s)",
-                                    idealCounter, totalCost, budget, costBuffer));
+            double effectiveness = findEffectiveness(idealCounter, enemyToCounter);
+            // Go place orders, if this is our most efficient option so far.
+            log(String.format("    I can build %s for %s with effectiveness %s%% (%s remaining, witholding %s)",
+                                    idealCounter, totalCost, (int)(100*effectiveness), budget, costBuffer));
+            double costRatio = ((double) enemyCostPer) / idealCost;
+            if( effectiveness*costRatio < MIN_COUNTER_EFFECTIVENESS )
+              continue;
+
             builds.put(coord, idealCounter.um);
             budget -= idealCost;
             CPI.removeBuildLocation(gameMap.getLocation(coord));
@@ -1940,7 +1947,9 @@ public class WallyAI extends ModularAI
           }
           else
           {
-            log(String.format("    %s cost %s, I have %s (witholding %s).", idealCounter, idealCost, budget, costBuffer));
+            double effectiveness = findEffectiveness(idealCounter, enemyToCounter);
+            log(String.format("    %s cost %s, I have %s (witholding %s, effectiveness %s%%).",
+                         idealCounter, idealCost, budget,   costBuffer, (int)(100*effectiveness)));
           }
         }
       } // ~while( !availableUnitModels.isEmpty() )
@@ -2011,7 +2020,7 @@ public class WallyAI extends ModularAI
     UnitContext tc = new UnitContext(target.co, target.um);
     // These can technically come from different weapons, but we're going for a conservative estimate.
     double enemyRange = 0;
-    int enemyDamage = 0;
+    int enemyDamage = 1; // avoid zero division
     for( WeaponModel wm : target.um.weapons )
     {
       tc.setWeapon(wm);
@@ -2021,13 +2030,13 @@ public class WallyAI extends ModularAI
       else
         range -= (Math.pow(wm.rangeMin, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
       enemyRange = Math.max(enemyRange, range);
-      enemyDamage = Math.max(enemyDamage, CombatEngine.calculateOneStrikeDamage(tc, tc.rangeMax, mc, predMap));
+      enemyDamage = Math.max(enemyDamage, CombatEngine.calculateOneStrikeDamage(tc, tc.rangeMax, mc, predMap, CalcType.OPTIMISTIC));
     }
     double bestScore = 0;
     for( WeaponModel wm : model.um.weapons )
     {
       mc.setWeapon(wm);
-      double damage = CombatEngine.calculateOneStrikeDamage(mc, mc.rangeMax, tc, predMap);
+      double damage = CombatEngine.calculateOneStrikeDamage(mc, mc.rangeMax, tc, predMap, CalcType.OPTIMISTIC);
 
       double myRange = mc.rangeMax;
       if( wm.canFireAfterMoving )
@@ -2038,7 +2047,7 @@ public class WallyAI extends ModularAI
       double rangeMod = Math.pow(myRange / enemyRange, RANGE_WEIGHT);
       double damageMod = ((double) damage) / UnitModel.MAXIMUM_HEALTH;
       if( mc.rangeMax == 1 ) // Scale our effective damage by our direct combat (dis)advantage, if we're a direct.
-        damageMod *= ((double) damage) / enemyDamage;
+        damageMod *= Math.min(10, ((double) damage) / enemyDamage);
 
       double effectiveness = damageMod * rangeMod;
       bestScore = Math.max(bestScore, effectiveness);
