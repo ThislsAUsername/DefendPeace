@@ -2118,7 +2118,9 @@ public class WallyAI extends ModularAI
       loss     = (hploss   * actorCost  ) / 10;
       damage   = (hpdamage * targetValue) / 10 + captureValue;
 
-      int wallValue = ai.wallFundsValue(gameMap, ai.threatMap, actor.unit, actor.coord, target.unit);
+      int wallValue = 0;
+      if( !ignoreWallValue )
+        wallValue = ai.wallFundsValue(gameMap, ai.threatMap, actor.unit, actor.coord, target.unit);
       //                                 funds "gained"              funds lost     term to favor using cheaper units
       fundsDelta = (int) (damage*AGGRO_FUNDS_WEIGHT + wallValue)    -   loss    - (int) (actorCost*AGGRO_CHEAPER_WEIGHT);
       // This double-values counterdamage on units that aren't safe, but that seems pretty harmless?
