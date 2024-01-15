@@ -2006,9 +2006,12 @@ public class WallyAI extends ModularAI
   /** Returns effective power in terms of whole kills per unit, based on respective threat areas and how much damage I deal */
   public double findEffectiveness(ModelForCO model, ModelForCO target)
   {
+    // TODO: account for average terrain defense?
     UnitContext mc = new UnitContext(model.co, model.um);
     UnitContext tc = new UnitContext(target.co, target.um);
+    // These can technically come from different weapons, but we're going for a conservative estimate.
     double enemyRange = 0;
+    int enemyDamage = 0;
     for( WeaponModel wm : target.um.weapons )
     {
       tc.setWeapon(wm);
@@ -2018,13 +2021,14 @@ public class WallyAI extends ModularAI
       else
         range -= (Math.pow(wm.rangeMin, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
       enemyRange = Math.max(enemyRange, range);
+      enemyDamage = Math.max(enemyDamage, CombatEngine.calculateOneStrikeDamage(tc, tc.rangeMax, mc, predMap));
     }
-    double counterPower = 0;
+    double bestScore = 0;
     for( WeaponModel wm : model.um.weapons )
     {
       mc.setWeapon(wm);
-      double damage = wm.getDamage(target.um);
-      // Using the WeaponModel values directly for now
+      double damage = CombatEngine.calculateOneStrikeDamage(mc, mc.rangeMax, tc, predMap);
+
       double myRange = mc.rangeMax;
       if( wm.canFireAfterMoving )
         myRange += getEffectiveMove(model);
@@ -2032,12 +2036,14 @@ public class WallyAI extends ModularAI
         myRange -= (Math.pow(wm.rangeMin, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
 
       double rangeMod = Math.pow(myRange / enemyRange, RANGE_WEIGHT);
+      double damageMod = ((double) damage) / UnitModel.MAXIMUM_HEALTH;
+      if( mc.rangeMax == 1 ) // Scale our effective damage by our direct combat (dis)advantage, if we're a direct.
+        damageMod *= ((double) damage) / enemyDamage;
 
-      // TODO: account for average terrain defense?
-      double effectiveness = damage * rangeMod / 100;
-      counterPower = Math.max(counterPower, effectiveness);
+      double effectiveness = damageMod * rangeMod;
+      bestScore = Math.max(bestScore, effectiveness);
     }
-    return counterPower;
+    return bestScore;
   }
   public double getEffectiveMove(ModelForCO model)
   {
