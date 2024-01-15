@@ -1492,6 +1492,32 @@ public class WallyAI extends ModularAI
           }
         }
 
+        if( actionType == UnitActionFactory.CAPTURE )
+        {
+          for( GameAction capture : actionSet.getGameActions() )
+          {
+            final int fundsDelta = valueCapture((CaptureAction) capture, gameMap);
+            XYCoord capLoc = capture.getMoveLocation();
+
+            int opportunityCost = 0;
+            if( !spaceFree )
+            {
+              opportunityCost = valueAction(this, gameMap, ap);
+            }
+            final int thisDelta = fundsDelta - opportunityCost; // Ignore threats, capping is delicious.
+            if( thisDelta > minFundsDelta )
+            {
+              log(String.format("      I can start a cap on %s", capLoc));
+              ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), capture);
+              plan.path = movePath;
+              plan.purpose = TravelPurpose.CONQUER;
+              plan.isAttack = false;
+              plan.fromEviction = mustMove;
+              rankedTravelPlans.add(new AbstractMap.SimpleEntry<>(plan, thisDelta));
+            }
+          }
+        }
+
         if( actionType == UnitActionFactory.WAIT )
         {
           for( GameAction move : actionSet.getGameActions() )
@@ -2237,7 +2263,7 @@ public class WallyAI extends ModularAI
         resident.x = x;
         resident.y = y;
       }
-      // If the actual unit is gone and is an enemy, treat it as dead
+      // If the actual unit is gone (i.e. off the map, because it's dead) and is an enemy, treat it as dead
       if( viewer.isEnemy(resident.CO) && 0 < new XYCoord(resident).getDistance(x, y) )
         return returnLoc;
 
