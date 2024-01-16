@@ -85,7 +85,7 @@ public class MeteorParams
    * Restricts targeting to always center on enemy units.
    * @param targetingMap The map to use to find units to center on.
    * @param scoringMap The map to use to score valid strike locations.
-   * @return A MassStrikeParams with the best target, or no target if there are no values above 0.
+   * @return A MeteorParams with the best target, or no target if there are no values above 0.
    */
   public static MeteorParams planMeteorOnEnemy(GameMap targetingMap, GameMap scoringMap, Commander attacker, int radius, IValueFinder evaluator)
   {

@@ -17,6 +17,8 @@ public abstract class AW3ValueFinders
       // Ignore Oozium, if we ever add those
       int health = unit.getHealth();
       if( health < 10 )
+        // Datamined value/threshold: https://forums.warsworldnews.com/viewtopic.php?t=13385
+        // "Units with a HP of less than 1.0 are assigned a value of 2G, with no multipliers"
         return 2;
       health = Math.min(health, maxDamage * 10);
 
