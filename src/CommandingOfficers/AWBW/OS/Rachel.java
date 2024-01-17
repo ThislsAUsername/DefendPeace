@@ -122,6 +122,10 @@ public class Rachel extends AWBWCommander
       targets[0] = MeteorParams.planMeteor(map, myCommander, 2, new AWBWValueFinders.CaptureValueFinder());
       targets[1] = MeteorParams.planMeteor(map, myCommander, 2, new AWBWValueFinders.CostValueFinder());
       targets[2] = MeteorParams.planMeteor(map, myCommander, 2, new AWBWValueFinders.HealthValueFinder());
+      for( MeteorParams silo : targets )
+        if( silo.target == null )
+          silo.target = new XYCoord(0, 0);
+
       return targets;
     }
     @Override
