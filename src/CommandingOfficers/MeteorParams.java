@@ -59,6 +59,7 @@ public class MeteorParams
   }
 
   /**
+   * Like planMeteorOnEnemy(), but may center on any map tile.
    * @return A MeteorParams with the best target, or no target if there are no values above 0.
    */
   public static MeteorParams planMeteor(GameMap map, Commander attacker, int radius, IValueFinder evaluator)
@@ -82,7 +83,7 @@ public class MeteorParams
   }
 
   /**
-   * Restricts targeting to always center on enemy units.
+   * Like planMeteor(), but restricts targeting to always center on enemy units.
    * @param targetingMap The map to use to find units to center on.
    * @param scoringMap The map to use to score valid strike locations.
    * @return A MeteorParams with the best target, or no target if there are no values above 0.
