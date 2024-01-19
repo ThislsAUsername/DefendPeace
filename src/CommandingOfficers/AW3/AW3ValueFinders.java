@@ -15,7 +15,7 @@ public abstract class AW3ValueFinders
     public int getValue(Commander attacker, Unit unit)
     {
       // Ignore Oozium, if we ever add those
-      int health = unit.getHealth();
+      int health = unit.health;
       if( health < 10 )
         // Datamined value/threshold: https://forums.warsworldnews.com/viewtopic.php?t=13385
         // "Units with a HP of less than 1.0 are assigned a value of 2G, with no multipliers"
@@ -35,7 +35,7 @@ public abstract class AW3ValueFinders
     public int getValue(Commander attacker, Unit unit)
     {
       // Ignore Oozium, if we ever add those
-      int health = unit.getHealth();
+      int health = unit.health;
       if( health < 10 )
         return 1;
       health = Math.min(health, maxDamage * 10);
@@ -51,7 +51,7 @@ public abstract class AW3ValueFinders
     public int getValue(Commander attacker, Unit unit)
     {
       // Ignore Oozium, if we ever add those
-      int health = unit.getHealth();
+      int health = unit.health;
       if( health < 10 )
         return 1;
       health = Math.min(health, maxDamage * 10);
