@@ -598,6 +598,9 @@ public class WallyAI extends ModularAI
     {
       if( ai.plannedUnits.contains(unit) )
         return null;
+      boolean isSiege = unit.model.hasImmobileWeapon();
+      if( !isSiege )
+        return null;
 
       // Find the possible destination.
       XYCoord coord = new XYCoord(unit.x, unit.y);
@@ -1283,6 +1286,10 @@ public class WallyAI extends ModularAI
     // Categorize all enemies by type, and all types by how well we match up vs them
     for( Unit target : allThreats )
     {
+      XYCoord targetCoord = new XYCoord(target.x, target.y);
+      if( !gameMap.isLocationValid(targetCoord) )
+        continue; // We don't care about shooting dead people
+
       UnitModel model = target.model;
       final ModelForCO modelKey = new ModelForCO(target);
       int range = 1;
@@ -1295,7 +1302,6 @@ public class WallyAI extends ModularAI
       if( null == uc.weapon )
         continue; // No point in calculating further if we can't hit the target
 
-      XYCoord targetCoord = new XYCoord(target.x, target.y);
       double effectiveness = findEffectiveness(um, modelKey);
       GamePath path = new PathCalcParams(uc, predMap).setTheoretical().findShortestPath(targetCoord);
       if (null != path &&
