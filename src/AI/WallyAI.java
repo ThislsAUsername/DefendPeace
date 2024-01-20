@@ -104,7 +104,7 @@ public class WallyAI extends ModularAI
   private static enum TravelPurpose
   {
     // BUSINESS, PLEASURE,
-    WANDER(0), SUPPLIES(7), KILL(13), CONQUER(42), NA(99);
+    WANDER(0), SUPPLIES(7), KILL(13), CONQUER(42), BESIEGE(64), NA(99);
     public final int priority;
     TravelPurpose(int p)
     {
@@ -1043,7 +1043,8 @@ public class WallyAI extends ModularAI
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
                                           this, gameMap, ai.threatMap,
                                           unit, avoidProduction, shouldWander,
-                                          canEvictSiege, evictionValue, EVICTION_DEPTH);
+                                          canEvictSiege, evictionValue, EVICTION_DEPTH,
+                                          null);
 
       if( null == travelPlans )
         return null;
@@ -1085,7 +1086,8 @@ public class WallyAI extends ModularAI
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
                                           this, gameMap, ai.threatMap,
                                           unit, avoidProduction, shouldWander,
-                                          canEvictSiege, evictionValue, EVICTION_DEPTH);
+                                          canEvictSiege, evictionValue, EVICTION_DEPTH,
+                                          null);
 
       if( null == travelPlans )
         return null;
@@ -1131,7 +1133,8 @@ public class WallyAI extends ModularAI
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
                                           this, gameMap, ai.threatMap,
                                           unit, avoidProduction, shouldWander,
-                                          canEvictSiege, evictionValue, EVICTION_DEPTH);
+                                          canEvictSiege, evictionValue, EVICTION_DEPTH,
+                                          null);
 
       if( null == travelPlans )
         return null;
@@ -1247,7 +1250,10 @@ public class WallyAI extends ModularAI
     {
       goals.addAll(findCombatUnitDestinations(gameMap, allThreats, unit));
       if( !goals.isEmpty() )
-        travelPurpose = TravelPurpose.KILL;
+        if( unit.model.hasImmobileWeapon() )
+          travelPurpose = TravelPurpose.BESIEGE; // Siege units have the highest travel priority since they're most likely to have to waste turns.
+        else
+          travelPurpose = TravelPurpose.KILL;
     }
 
     if( goals.isEmpty() ) // If there's really nothing to do, go to MY HQ
@@ -1334,7 +1340,8 @@ public class WallyAI extends ModularAI
                         AIModule whodunit, GameMap gameMap,
                         ArrayList<TileThreat>[][] threatMap, Unit unit,
                         boolean avoidProduction, boolean shouldWander,
-                        boolean canEvictSiege, int evictionValue, int recurseDepth)
+                        boolean canEvictSiege, int evictionValue, int recurseDepth,
+                        ArrayList<XYCoord> bannedTiles)
   {
     if( evictionStack.contains(unit) )
       return null;
@@ -1357,10 +1364,15 @@ public class WallyAI extends ModularAI
     if( !mustMove && !shouldWander && travelPurpose == TravelPurpose.WANDER )
       return null; // Don't clutter the queue with pointless movements
 
+    if( null != bannedTiles )
+    {
+      destinations.removeAll(bannedTiles);
+      validTargets.removeAll(bannedTiles);
+    }
     if( mustMove ) // If we *must* travel, make sure we do actually move.
     {
-      destinations.remove(new XYCoord(unit.x, unit.y));
-      validTargets.remove(new XYCoord(unit.x, unit.y));
+      destinations.remove(new XYCoord(unit));
+      validTargets.remove(new XYCoord(unit));
     }
     boolean attackEviction = mustMove && null != mapPlan[unit.x][unit.y].toAchieve && mapPlan[unit.x][unit.y].toAchieve.action.getType() == UnitActionFactory.ATTACK;
     if( attackEviction ) // Don't assume we can hop into our evicter's target's space, since that won't work
@@ -1413,7 +1425,7 @@ public class WallyAI extends ModularAI
       // Figure out how to get here.
       boolean spaceFree = null == plannedResident;
       if( !spaceFree &&
-          ( null == ap || ap.fromEviction || ap.purpose.priority > travelPurpose.priority) )
+          ( null == ap || ap.purpose.priority > travelPurpose.priority) )
         continue; // Bail if:
       // There's no other action to evaluate against ours
       // The other action is from an eviction
@@ -1552,7 +1564,7 @@ public class WallyAI extends ModularAI
     } // ~for destinations
 
     ArrayList<ActionPlan> bestPlans = null;
-    // Now that we have an ordered list of our travel locations, figure out the best one we can accomplish (potentially requiring eviction)
+    // Now that we have an ordered list of our travel locations, figure out the best one we can accomplish (potentially requiring eviction of both current and planned residents)
     while (!rankedTravelPlans.isEmpty())
     {
       final Entry<ActionPlan, Integer> entry = rankedTravelPlans.poll();
@@ -1560,34 +1572,48 @@ public class WallyAI extends ModularAI
       XYCoord xyc = plan.action.getMoveLocation();
       ArrayList<ActionPlan> prereqPlans = new ArrayList<>();
 
+      ArrayList<Unit> evictees = new ArrayList<>();
+      ArrayList<XYCoord> evicteeBannedTiles = new ArrayList<>();
+      evicteeBannedTiles.add(xyc);
+      evicteeBannedTiles.add(new XYCoord(unit));
+
+      ActionPlan  ap       = mapPlan[xyc.x][xyc.y].toAchieve;
       Unit currentResident = gameMap.getResident(xyc);
       boolean currentResidentHasPlans = plannedUnits.contains(currentResident);
-      if( !currentResidentHasPlans )
-        // If whatever's in our landing pad has no plans yet, poke and see if some can be made
-        if( null != currentResident && currentResident.CO.army == myArmy )
-        {
-          if( evictionStack.contains(currentResident) )
-            continue;
-          boolean residentIsEvictable = !currentResident.isTurnOver;
+      if( !currentResidentHasPlans && null != currentResident )
+        evictees.add(currentResident);
+      if( null != ap )
+      {
+        evictees.add(ap.actor.unit);
+        if( ap.fromEviction )
+          evicteeBannedTiles.add(new XYCoord(ap.actor.unit));
+      }
 
-          if( !residentIsEvictable || recurseDepth <= 0 )
-            continue;
-          // If nobody's there, no need to evict.
-          // If the resident is evictable, try to evict and bail if we can't.
-          // If the resident isn't evictable, we think it will be dead soon, so just keep going.
+      for( Unit ev : evictees )
+      {
+        if( evictionStack.contains(ev) )
+          continue;
+        boolean residentIsEvictable = !ev.isTurnOver;
 
-          int planEvictionValue = evictionValue + entry.getValue();
-          // Prevent reflexive eviction
-          evictionStack.add(unit);
-          ArrayList<ActionPlan> evictionPlans = planTravelActions(
-                                                whodunit, gameMap, threatMap,
-                                                currentResident, avoidProduction, true, // Always enable wandering
-                                                canEvictSiege, planEvictionValue, recurseDepth - 1);
-          evictionStack.remove(unit);
-          if( null == evictionPlans )
-            continue;
-          prereqPlans.addAll(evictionPlans);
-        } // ~if resident
+        if( !residentIsEvictable || recurseDepth <= 0 )
+          continue;
+        // If nobody's there, no need to evict.
+        // If the resident is evictable, try to evict and bail if we can't.
+        // If the resident isn't evictable, we think it will be dead soon, so just keep going.
+
+        int planEvictionValue = evictionValue + entry.getValue();
+        // Prevent reflexive eviction
+        evictionStack.add(unit);
+        ArrayList<ActionPlan> evictionPlans = planTravelActions(
+                                              whodunit, gameMap, threatMap,
+                                              ev, avoidProduction, true, // Always enable wandering
+                                              canEvictSiege, planEvictionValue, recurseDepth - 1,
+                                              evicteeBannedTiles);
+        evictionStack.remove(unit);
+        if( null == evictionPlans )
+          continue;
+        prereqPlans.addAll(evictionPlans);
+      } // ~for evictees
 
       bestPlans = new ArrayList<>();
       bestPlans.addAll(prereqPlans);
