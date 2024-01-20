@@ -2264,6 +2264,7 @@ public class WallyAI extends ModularAI
       return Integer.MAX_VALUE/42; // I can't think of very many good reasons to skip finishing a capture
 
     int yeetFactor = valueTerrain(unit.CO, gameMap.getEnvironment(capCoord).terrainType);
+    yeetFactor *= 2; // To restore the previous value scale for full-HP caps
     // Since we can't be certain of a capture, ballpark the terrain value scaled by the capture time.
     return yeetFactor / capTurns;
   }
