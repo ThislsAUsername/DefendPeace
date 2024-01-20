@@ -1125,7 +1125,7 @@ public class WallyAI extends ModularAI
       int evictionValue = 0;
       if( null != evicter && unit != evicter.unit && null != evicterPlan )
         evictionValue = valueAction(ai, gameMap, evicterPlan);
-      boolean avoidProduction = false;
+      boolean avoidProduction = true;
       boolean shouldWander = false;
       boolean canEvictSiege = true;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
@@ -1386,7 +1386,7 @@ public class WallyAI extends ModularAI
     // This will allow us to navigate around large obstacles that require us to move away
     // from our intended long-term goal.
     int unitMove = unit.getMovePower(predMap);
-    path.snip(unitMove + 1); // Trim the path approximately down to size.
+    path.snip(unitMove + 2); // Trim the path approximately down to size.
     XYCoord pathPoint = path.getEndCoord(); // Set the last location as our goal.
 
     // Sort my currently-reachable move locations by distance from the goal,
@@ -1419,19 +1419,21 @@ public class WallyAI extends ModularAI
       // The other action is from an eviction
       // The other action is travel for an equal or greater purpose than ours
 
-      // If whatever's in our landing pad has no plans yet, poke and see if some can be made
       Unit currentResident = gameMap.getResident(xyc);
-      if( null != currentResident && currentResident.CO.army == myArmy )
-      {
-        if( plannedUnits.contains(currentResident) || evictionStack.contains(currentResident) )
-          continue;
-        boolean residentIsEvictable = !currentResident.isTurnOver;
+      boolean currentResidentHasPlans = plannedUnits.contains(currentResident);
+      if( !currentResidentHasPlans )
+        // If whatever's in our landing pad has no plans yet, poke and see if some can be made
+        if( null != currentResident && currentResident.CO.army == myArmy )
+        {
+          if( evictionStack.contains(currentResident) )
+            continue;
+          boolean residentIsEvictable = !currentResident.isTurnOver;
 
-        if( !canEvictSiege && currentResident.model.hasImmobileWeapon() )
-          continue;
-        if( !residentIsEvictable || recurseDepth <= 0 )
-          continue;
-      } // ~if resident
+          if( !canEvictSiege && currentResident.model.hasImmobileWeapon() )
+            continue;
+          if( !residentIsEvictable || recurseDepth <= 0 )
+            continue;
+        } // ~if resident
 
       GamePath movePath = xyc.getMyPath();
       if( movePath.getPathLength() < xyc.getDistance(unit) )
@@ -1558,32 +1560,34 @@ public class WallyAI extends ModularAI
       XYCoord xyc = plan.action.getMoveLocation();
       ArrayList<ActionPlan> prereqPlans = new ArrayList<>();
 
-      // If whatever's in our landing pad has no plans yet, poke and see if some can be made
       Unit currentResident = gameMap.getResident(xyc);
-      if( null != currentResident && currentResident.CO.army == myArmy )
-      {
-        if( plannedUnits.contains(currentResident) || evictionStack.contains(currentResident) )
-          continue;
-        boolean residentIsEvictable = !currentResident.isTurnOver;
+      boolean currentResidentHasPlans = plannedUnits.contains(currentResident);
+      if( !currentResidentHasPlans )
+        // If whatever's in our landing pad has no plans yet, poke and see if some can be made
+        if( null != currentResident && currentResident.CO.army == myArmy )
+        {
+          if( evictionStack.contains(currentResident) )
+            continue;
+          boolean residentIsEvictable = !currentResident.isTurnOver;
 
-        if( !residentIsEvictable || recurseDepth <= 0 )
-          continue;
-        // If nobody's there, no need to evict.
-        // If the resident is evictable, try to evict and bail if we can't.
-        // If the resident isn't evictable, we think it will be dead soon, so just keep going.
+          if( !residentIsEvictable || recurseDepth <= 0 )
+            continue;
+          // If nobody's there, no need to evict.
+          // If the resident is evictable, try to evict and bail if we can't.
+          // If the resident isn't evictable, we think it will be dead soon, so just keep going.
 
-        int planEvictionValue = evictionValue + entry.getValue();
-        // Prevent reflexive eviction
-        evictionStack.add(unit);
-        ArrayList<ActionPlan> evictionPlans = planTravelActions(
-                                              whodunit, gameMap, threatMap,
-                                              currentResident, avoidProduction, true, // Always enable wandering
-                                              canEvictSiege, planEvictionValue, recurseDepth - 1);
-        evictionStack.remove(unit);
-        if( null == evictionPlans )
-          continue;
-        prereqPlans.addAll(evictionPlans);
-      } // ~if resident
+          int planEvictionValue = evictionValue + entry.getValue();
+          // Prevent reflexive eviction
+          evictionStack.add(unit);
+          ArrayList<ActionPlan> evictionPlans = planTravelActions(
+                                                whodunit, gameMap, threatMap,
+                                                currentResident, avoidProduction, true, // Always enable wandering
+                                                canEvictSiege, planEvictionValue, recurseDepth - 1);
+          evictionStack.remove(unit);
+          if( null == evictionPlans )
+            continue;
+          prereqPlans.addAll(evictionPlans);
+        } // ~if resident
 
       bestPlans = new ArrayList<>();
       bestPlans.addAll(prereqPlans);
