@@ -1457,7 +1457,7 @@ public class WallyAI extends ModularAI
     Queue<Entry<ActionPlan, Integer>> rankedTravelPlans =
         new PriorityQueue<>(13, new EntryValueComparator<>());
 
-    int minFundsDelta = -1 * evictionValue;
+    int minFundsDelta = Math.min(0, -1 * evictionValue);
     boolean ignoreWallValue = !avoidProduction;
     for( Utils.SearchNode xyc : destinations )
     {
