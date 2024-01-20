@@ -1616,8 +1616,8 @@ public class WallyAI extends ModularAI
       } // ~for evictees
 
       bestPlans = new ArrayList<>();
+      bestPlans.add(plan); // Since this cancels ap implicitly, ap's replacement needs to be cached after this one is
       bestPlans.addAll(prereqPlans);
-      bestPlans.add(plan);
       break; // We found a workable one. Ship it
     }
 
