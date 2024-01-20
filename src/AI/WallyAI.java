@@ -509,8 +509,9 @@ public class WallyAI extends ModularAI
         }
       }
 
-      if( actor.unit != plan.action.getActor())
-        ai.log(String.format("Warning: plan/action mismatch with %s:\n\t%s\n\t!=\n\t%s", plan, actor.unit, plan.action.getActor()));
+      Unit gaActor = plan.action.getActor();
+      if( gaActor != null && actor.unit != gaActor )
+        ai.log(String.format("Warning: plan/action mismatch with %s:\n\t%s\n\t!=\n\t%s", plan, actor.unit, gaActor));
       if( null != plan.startPos )
         vacatedTiles.add(plan.startPos);
 
@@ -1054,8 +1055,7 @@ public class WallyAI extends ModularAI
                                           canEvictSiege, evictionValue, EVICTION_DEPTH,
                                           null);
 
-      if( null != evicter && unit != evicter.unit && null != evicterPlan )
-        // evictionID can be null here due to unit build actions
+      if( null != evictionID )
         ai.evictionStack.remove(evictionID);
       if( null == travelPlans )
         return null;
@@ -1105,8 +1105,7 @@ public class WallyAI extends ModularAI
                                           canEvictSiege, evictionValue, EVICTION_DEPTH,
                                           null);
 
-      if( null != evicter && unit != evicter.unit && null != evicterPlan )
-        // evictionID can be null here due to unit build actions
+      if( null != evictionID )
         ai.evictionStack.remove(evictionID);
       if( null == travelPlans )
         return null;
@@ -1160,8 +1159,7 @@ public class WallyAI extends ModularAI
                                           canEvictSiege, evictionValue, EVICTION_DEPTH,
                                           null);
 
-      if( null != evicter && unit != evicter.unit && null != evicterPlan )
-        // evictionID can be null here due to unit build actions
+      if( null != evictionID )
         ai.evictionStack.remove(evictionID);
       if( null == travelPlans )
         return null;
@@ -1206,7 +1204,11 @@ public class WallyAI extends ModularAI
         {
           builds.remove(coord);
           GameAction buyAction = new GameAction.UnitProductionAction(buyer, toBuy, coord);
-          ai.updatePlan(this, new UnitContext(buyer, toBuy), null, buyAction);
+          Unit fakeUnit = new Unit(buyer, toBuy);
+          fakeUnit.x = coord.x;
+          fakeUnit.y = coord.y;
+          fakeUnit.isTurnOver = false; // To pull a sneaky on FillActionQueue
+          ai.updatePlan(this, new UnitContext(fakeUnit), null, buyAction);
         }
         else
         {
@@ -1722,8 +1724,6 @@ public class WallyAI extends ModularAI
 
       // Scratch struct so we can mess with it
       final UnitContext threatContext = new UnitContext(tt.identity);
-      if( target == threatContext.unit )
-        continue; // We aren't scared of that which we're about to shoot
 
       // Collect planned damage so far
       int damagePercent = 0;
