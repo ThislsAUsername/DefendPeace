@@ -1077,10 +1077,15 @@ public class WallyAI extends ModularAI
 
       ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
       final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
+      Unit evictionID = null;
       final ActionPlan evicterPlan = ai.mapPlan[unit.x][unit.y].toAchieve;
       int evictionValue = 0;
       if( null != evicter && unit != evicter.unit && null != evicterPlan )
+      {
+        evictionID = evicter.unit;
+        ai.evictionStack.add(evictionID);
         evictionValue = valueAction(ai, gameMap, evicterPlan);
+      }
       boolean avoidProduction = false;
       boolean shouldWander = false;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
@@ -1089,6 +1094,8 @@ public class WallyAI extends ModularAI
                                           canEvictSiege, evictionValue, EVICTION_DEPTH,
                                           null);
 
+      if( null != evictionID )
+        ai.evictionStack.remove(evictionID);
       if( null == travelPlans )
         return null;
       for( ActionPlan plan : travelPlans )
@@ -1446,6 +1453,8 @@ public class WallyAI extends ModularAI
       // The other action is travel for an equal or greater purpose than ours
 
       Unit currentResident = gameMap.getResident(xyc);
+      if( evictionStack.contains(currentResident) )
+        continue;
       boolean currentResidentHasPlans = plannedUnits.contains(currentResident);
       if( !currentResidentHasPlans )
         // If whatever's in our landing pad has no plans yet, poke and see if some can be made
