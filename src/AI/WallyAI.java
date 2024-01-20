@@ -1037,9 +1037,14 @@ public class WallyAI extends ModularAI
 
       ai.log(String.format("Evaluating eviction for %s.", unit.toStringWithLocation()));
       final ActionPlan evicterPlan = ai.mapPlan[unit.x][unit.y].toAchieve;
+      Unit evictionID = null;
       int evictionValue = 0;
       if( null != evicter && unit != evicter.unit && null != evicterPlan )
+      {
+        evictionID = evicter.unit;
+        ai.evictionStack.add(evictionID);
         evictionValue = valueAction(ai, gameMap, evicterPlan);
+      }
       boolean avoidProduction = false;
       boolean shouldWander = false;
       boolean canEvictSiege = true;
@@ -1049,6 +1054,9 @@ public class WallyAI extends ModularAI
                                           canEvictSiege, evictionValue, EVICTION_DEPTH,
                                           null);
 
+      if( null != evicter && unit != evicter.unit && null != evicterPlan )
+        // evictionID can be null here due to unit build actions
+        ai.evictionStack.remove(evictionID);
       if( null == travelPlans )
         return null;
       for( ActionPlan plan : travelPlans )
@@ -1097,7 +1105,8 @@ public class WallyAI extends ModularAI
                                           canEvictSiege, evictionValue, EVICTION_DEPTH,
                                           null);
 
-      if( null != evictionID )
+      if( null != evicter && unit != evicter.unit && null != evicterPlan )
+        // evictionID can be null here due to unit build actions
         ai.evictionStack.remove(evictionID);
       if( null == travelPlans )
         return null;
@@ -1133,10 +1142,15 @@ public class WallyAI extends ModularAI
 
       ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
       final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
+      Unit evictionID = null;
       final ActionPlan evicterPlan = ai.mapPlan[unit.x][unit.y].toAchieve;
       int evictionValue = 0;
       if( null != evicter && unit != evicter.unit && null != evicterPlan )
+      {
+        evictionID = evicter.unit;
+        ai.evictionStack.add(evictionID);
         evictionValue = valueAction(ai, gameMap, evicterPlan);
+      }
       boolean avoidProduction = true;
       boolean shouldWander = false;
       boolean canEvictSiege = true;
@@ -1146,6 +1160,9 @@ public class WallyAI extends ModularAI
                                           canEvictSiege, evictionValue, EVICTION_DEPTH,
                                           null);
 
+      if( null != evicter && unit != evicter.unit && null != evicterPlan )
+        // evictionID can be null here due to unit build actions
+        ai.evictionStack.remove(evictionID);
       if( null == travelPlans )
         return null;
       for( ActionPlan plan : travelPlans )
