@@ -96,6 +96,7 @@ public class WallyAI extends ModularAI
   private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges
 
   private static final double BANK_EFFICIENCY_FACTOR = 1.7; // Minimum effectiveness multiplier to consider banking for a better counter
+  private static final double MAX_BANK_FUNDS_FACTOR = 2.5; // Maximum to bank compared to a counter you can actually buy
 
   private static final double TERRAIN_FUNDS_WEIGHT = 2.5; // Multiplier for per-city income for adding value to units threatening to cap
   private static final double TERRAIN_INDUSTRY_WEIGHT = 20000; // Funds amount added to units threatening to cap an industry
@@ -123,9 +124,10 @@ public class WallyAI extends ModularAI
     boolean isAttack = false;
     boolean fromEviction = false;
     int percentDamage = -1; // The damage we expect to deal with our attack
+    int score;
     XYCoord clearTile; // The tile we expect to have emptied with our attack, if any; populated when queueing our final action order
     TravelPurpose purpose = TravelPurpose.NA;
-    ActionPlan(Object whodunit, UnitContext uc, GameAction action)
+    ActionPlan(Object whodunit, UnitContext uc, GameAction action, int pScore)
     {
       this.whodunit = whodunit;
       this.action = action;
@@ -134,6 +136,7 @@ public class WallyAI extends ModularAI
         startPos = new XYCoord(action.getActor());
       else
         startPos = action.getTargetLocation();
+      score = pScore;
     }
     @Override
     public String toString()
@@ -215,23 +218,23 @@ public class WallyAI extends ModularAI
     log(String.format("[======== Wally ending turn %s for %s =========]", turnNum, myArmy));
   }
 
-  private void updatePlan(Object whodunit, Unit unit, GamePath path, GameAction action)
+  private void updatePlan(Object whodunit, int score, Unit unit, GamePath path, GameAction action)
   {
-    updatePlan(whodunit, unit, path, action, false, 42);
+    updatePlan(whodunit, score, unit, path, action, false, 42);
   }
-  private void updatePlan(Object whodunit, UnitContext uc, GamePath path, GameAction action)
+  private void updatePlan(Object whodunit, int score, UnitContext uc, GamePath path, GameAction action)
   {
-    updatePlan(whodunit, uc, path, action, false, 42);
+    updatePlan(whodunit, score, uc, path, action, false, 42);
   }
-  private void updatePlan(Object whodunit, Unit unit, GamePath path, GameAction action, boolean isAttack, int percentDamage)
+  private void updatePlan(Object whodunit, int score, Unit unit, GamePath path, GameAction action, boolean isAttack, int percentDamage)
   {
-    updatePlan(whodunit, new UnitContext(unit), path, action, isAttack, percentDamage);
+    updatePlan(whodunit, score, new UnitContext(unit), path, action, isAttack, percentDamage);
   }
-  private void updatePlan(Object whodunit, UnitContext uc, GamePath path, GameAction action, boolean isAttack, int percentDamage)
+  private void updatePlan(Object whodunit, int score, UnitContext uc, GamePath path, GameAction action, boolean isAttack, int percentDamage)
   {
     if( null == action )
       return;
-    final ActionPlan plan = new ActionPlan(whodunit, uc, action);
+    final ActionPlan plan = new ActionPlan(whodunit, uc, action, score);
     plan.path = path;
     plan.isAttack = isAttack;
     plan.percentDamage = percentDamage;
@@ -582,8 +585,10 @@ public class WallyAI extends ModularAI
       if( !willCapture && 0 < ai.threatMap[mc.x][mc.y].size() )
         return null;
 
-      // If there's path weirdness this early in the game, it's fine to freak out
-      ai.updatePlan(this, unit, null, capAction);
+      int capScore = 500;
+      if( capAction instanceof CaptureLifecycle.CaptureAction )
+        capScore = ai.valueCapture((CaptureLifecycle.CaptureAction) capAction, map);
+      ai.updatePlan(this, capScore, unit, null, capAction);
       return null;
     }
   }
@@ -633,7 +638,7 @@ public class WallyAI extends ModularAI
             Unit target = loc.getResident();
             if( null == target ) continue; // Ignore terrain
             final BattleSummary results = CombatEngine.simulateBattleResults(unit, target, gameMap, movePath, CALC);
-            int damage = valueUnit(target, loc, false) * Math.min(target.getHealth(), results.defender.getPreciseHealthDamage()) / 10;
+            int damage = valueUnit(target, loc, false) * Math.min(target.getHealth(), results.defender.getPreciseHealthDamage()) / UnitModel.MAXIMUM_HEALTH;
             if( damage > bestDamage )
             {
               bestDamage = damage;
@@ -650,7 +655,7 @@ public class WallyAI extends ModularAI
       }
 
       boolean isAttack = true;
-      ai.updatePlan(this, unit, movePath, bestAttack, isAttack, percentDamage);
+      ai.updatePlan(this, bestDamage, unit, movePath, bestAttack, isAttack, percentDamage);
 
       return null;
     }
@@ -714,6 +719,8 @@ public class WallyAI extends ModularAI
         if( null == neededAttacks )
           continue;
 
+        // All hits get the same score since they're all needed for a kill.
+        int score = valueUnit(targetID, gameMap.getLocation(targetLoc), true);
         for( XYCoord xyc : neededAttacks.keySet() )
         {
           Unit unit = neededAttacks.get(xyc);
@@ -738,7 +745,7 @@ public class WallyAI extends ModularAI
           boolean isAttack = true;
           final BattleAction attack = new BattleAction(ai.predMap, unit, movePath, targetLoc.x, targetLoc.y);
 
-          ai.updatePlan(this, unit, movePath, attack, isAttack, percentDamage);
+          ai.updatePlan(this, score, unit, movePath, attack, isAttack, percentDamage);
           attackerOptions.remove(unit);
           if( damageTotal >= target.getHealth() )
             break;
@@ -1015,7 +1022,7 @@ public class WallyAI extends ModularAI
         } // ~for action types
       } // ~for destinations
 
-      ai.updatePlan(whodunit, unit, bestPath, bestAction, isAttack, percentDamage);
+      ai.updatePlan(whodunit, bestFundsDelta, unit, bestPath, bestAction, isAttack, percentDamage);
     } // ~planValueAction
   } // ~FreeRealEstate
 
@@ -1202,7 +1209,8 @@ public class WallyAI extends ModularAI
         Commander buyer = loc.getOwner();
         ArrayList<UnitModel> list = buyer.getShoppingList(loc);
         UnitModel toBuy = builds.get(coord);
-        if( buyer.getBuyCost(toBuy, coord) <= myArmy.money && list.contains(toBuy) )
+        int buyCost = buyer.getBuyCost(toBuy, coord);
+        if( buyCost <= myArmy.money && list.contains(toBuy) )
         {
           builds.remove(coord);
           GameAction buyAction = new GameAction.UnitProductionAction(buyer, toBuy, coord);
@@ -1210,7 +1218,7 @@ public class WallyAI extends ModularAI
           fakeUnit.x = coord.x;
           fakeUnit.y = coord.y;
           fakeUnit.isTurnOver = false; // To pull a sneaky on FillActionQueue
-          ai.updatePlan(this, new UnitContext(fakeUnit), null, buyAction);
+          ai.updatePlan(this, 2500 + buyCost / 2, new UnitContext(fakeUnit), null, buyAction);
         }
         else
         {
@@ -1235,6 +1243,15 @@ public class WallyAI extends ModularAI
     TravelPurpose travelPurpose = TravelPurpose.WANDER;
 
     ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
+    // Clean out any stations we already have plans for.
+    for( int i = 0; i < stations.size(); )
+    {
+      XYCoord xyc = stations.get(i);
+      if( null != predMap.getResident(xyc) )
+        stations.remove(xyc);
+      else
+        ++i;
+    }
     Utils.sortLocationsByTravelTime(unit, stations, predMap);
 
     boolean shouldResupply = false;
@@ -1526,8 +1543,12 @@ public class WallyAI extends ModularAI
       }
 
       int bonusPoints = 0;
-      if( xyc.equals(goal))
-        bonusPoints += 9001;
+      if( xyc.equals(goal) )
+      {
+        bonusPoints += 9;
+        if( travelPurpose == TravelPurpose.SUPPLIES )
+          bonusPoints = unit.CO.getCost(unit.model);
+      }
       UnitContext actor = new UnitContext(gameMap, unit);
       actor.setPath(movePath);
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(predMap, movePath, ignoreResident);
@@ -1553,7 +1574,7 @@ public class WallyAI extends ModularAI
             if( thisDelta > minFundsDelta )
             {
               log(String.format("      Best en passant attack deals %s", fundsDelta));
-              ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), attack);
+              ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), attack, thisDelta);
               plan.path = movePath;
               plan.purpose = travelPurpose;
               plan.isAttack = true;
@@ -1585,7 +1606,7 @@ public class WallyAI extends ModularAI
             if( thisDelta > minFundsDelta )
             {
               log(String.format("      I can start a cap on %s", capLoc));
-              ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), capture);
+              ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), capture, thisDelta);
               plan.path = movePath;
               plan.purpose = TravelPurpose.CONQUER;
               plan.isAttack = false;
@@ -1608,7 +1629,7 @@ public class WallyAI extends ModularAI
             int waitScore = movePath.getPathLength() + wallPoints + walkGain + bonusPoints;
             if( minFundsDelta < waitScore && movePath.getPathLength() > 1 ) // Just wait if we can't do anything cool
             {
-              ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), move);
+              ActionPlan plan = new ActionPlan(whodunit, new UnitContext(unit), move, waitScore);
               plan.path = movePath;
               plan.purpose = travelPurpose;
               plan.fromEviction = mustMove;
@@ -2068,6 +2089,8 @@ public class WallyAI extends ModularAI
         for( ModelForCO otherCounter : availableUnitModels )
         {
           final int otherCost = buyer.getBuyCost(otherCounter.um, coord);
+          if( MAX_BANK_FUNDS_FACTOR * buyCost < otherCost )
+            continue;
           double otherEffectiveness = findEffectiveness(otherCounter, enemyToCounter);
           double otherEfficiency = otherEffectiveness / otherCost;
           if( otherEfficiency >= scaledEfficiency )
@@ -2254,25 +2277,6 @@ public class WallyAI extends ModularAI
       fundsDelta = (int) (damage*AGGRO_FUNDS_WEIGHT + wallValue)    -   loss    - (int) (actorCost*AGGRO_CHEAPER_WEIGHT);
       // This double-values counterdamage on units that aren't safe, but that seems pretty harmless?
     }
-    public static AttackValue forPlannedAttack(WallyAI ai, GameAction ga, GameMap gameMap, boolean ignoreWallValue)
-    {
-      XYCoord moveCoord = ga.getMoveLocation();
-      XYCoord targetXYC = ga.getTargetLocation();
-      UnitContext actor  = ai.mapPlan[moveCoord.x][moveCoord.y].identity;
-      UnitContext target = ai.mapPlan[targetXYC.x][targetXYC.y].identity;
-
-      if( null == target )
-      {
-        // TODO: Consider evaluating this as a oneshot
-        Unit tu = gameMap.getResident(targetXYC);
-        if( null != tu )
-          target = new UnitContext(gameMap, tu);
-        else
-          return new AttackValue(ai, actor, targetXYC, gameMap, ignoreWallValue);
-      }
-
-      return new AttackValue(ai, actor, target, gameMap, ignoreWallValue);
-    }
   }
   public int valueCapture(CaptureAction ga, GameMap gameMap)
   {
@@ -2302,21 +2306,7 @@ public class WallyAI extends ModularAI
       return Integer.MAX_VALUE / 42;
     }
 
-    int opportunityCost = 0;
-    final UnitActionFactory apType = ap.action.getType();
-    if( apType == UnitActionFactory.ATTACK )
-      opportunityCost = AttackValue.forPlannedAttack(ai, ap.action, gameMap, false).fundsDelta;
-    if( apType == UnitActionFactory.CAPTURE )
-      opportunityCost = ai.valueCapture((CaptureAction) ap.action, gameMap);
-    if( apType == UnitActionFactory.WAIT )
-      opportunityCost = 0;
-    if( ap.action instanceof GameAction.UnitProductionAction )
-    {
-      XYCoord xyc = ap.action.getTargetLocation();
-      UnitContext toBuild = ai.mapPlan[xyc.x][xyc.y].identity;
-      opportunityCost = toBuild.CO.getCost(toBuild.model) * 3;
-    }
-    return opportunityCost;
+    return ap.score;
   }
 
   /**
