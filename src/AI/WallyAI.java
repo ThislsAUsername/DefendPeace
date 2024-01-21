@@ -1440,6 +1440,12 @@ public class WallyAI extends ModularAI
         break;
       }
     }
+    // If we have to move and have no destinations, make the start tile the goal
+    if( mustMove && null == goal )
+    {
+      goal = new XYCoord(unit);
+      path = GamePath.stayPut(unit);
+    }
 
     if( null == goal ) return null;
 
