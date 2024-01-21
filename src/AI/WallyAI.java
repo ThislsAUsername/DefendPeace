@@ -2123,7 +2123,7 @@ public class WallyAI extends ModularAI
     UnitContext tc = new UnitContext(target.co, target.um);
     // These can technically come from different weapons, but we're going for a conservative estimate.
     double enemyRange = 0;
-    int enemyDamage = 1; // avoid zero division
+    int enemyDamage = 0;
     for( WeaponModel wm : target.um.weapons )
     {
       tc.setWeapon(wm);
@@ -2148,8 +2148,10 @@ public class WallyAI extends ModularAI
         myRange -= (Math.pow(wm.rangeMin, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
 
       double rangeMod = Math.pow(myRange / enemyRange, RANGE_WEIGHT);
+      if( !Double.isFinite(rangeMod) )
+        rangeMod = 1;
       double damageMod = ((double) damage) / UnitModel.MAXIMUM_HEALTH;
-      if( mc.rangeMax == 1 ) // Scale our effective damage by our direct combat (dis)advantage, if we're a direct.
+      if( mc.rangeMax == 1 && enemyDamage > 0 ) // Scale our effective damage by our direct combat (dis)advantage, if we're a direct.
         damageMod *= Math.min(10, ((double) damage) / enemyDamage);
 
       double effectiveness = damageMod * rangeMod;
