@@ -95,8 +95,7 @@ public class WallyAI extends ModularAI
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
   private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges
 
-  private static final double BANK_COUNTER_FACTOR = 1.7; // Minimum effectiveness multiplier to consider banking for a better counter
-  private static final double MAX_BANK_COUNTER_FUNDS_FACTOR = 2.5; // Maximum to bank compared to a counter you can actually buy
+  private static final double BANK_EFFICIENCY_FACTOR = 1.7; // Minimum effectiveness multiplier to consider banking for a better counter
 
   private static final double TERRAIN_FUNDS_WEIGHT = 2.5; // Multiplier for per-city income for adding value to units threatening to cap
   private static final double TERRAIN_INDUSTRY_WEIGHT = 20000; // Funds amount added to units threatening to cap an industry
@@ -2030,6 +2029,10 @@ public class WallyAI extends ModularAI
       ArrayList<ModelForCO> availableUnitModels = new ArrayList<>();
       for( ModelForCO coModel : CPI.availableUnitModels )
         availableUnitModels.add(coModel);
+      double idealEffect = 0;
+      UnitModel idealCounter = null;
+      XYCoord idealCoord = null;
+      int idealCost = 9001;
       for( ModelForCO currentCounter : availableUnitModels )
       {
         // I only want combat units, since I don't understand transports
@@ -2041,45 +2044,57 @@ public class WallyAI extends ModularAI
           continue;
         MapLocation loc = gameMap.getLocation(coord);
         Commander buyer = loc.getOwner();
-        final int buyCost = buyer.getBuyCost(currentCounter.um, coord);
         double effectiveness = findEffectiveness(currentCounter, enemyToCounter);
+        if( !(effectiveness > 0) )
+          continue;
+
+        final int buyCost = buyer.getBuyCost(currentCounter.um, coord);
+        double scaledEfficiency = BANK_EFFICIENCY_FACTOR * effectiveness / buyCost;
 
         // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
         int costBuffer = (CPI.getNumFacilitiesFor(infModel)) * infCost;
-        if(buyer.getShoppingList(gameMap.getLocation(coord)).contains(infModel))
+        if( buyer.getShoppingList(gameMap.getLocation(coord)).contains(infModel) )
           costBuffer -= infCost;
 
         if( 0 > costBuffer )
           costBuffer = 0; // No granting ourselves extra moolah.
-        if( buyCost <= (budget - costBuffer) )
+        if( buyCost > (budget - costBuffer) )
+          continue;
+
+        log(String.format("    buy %s for %s with effectiveness %s%%? (%s remaining, witholding %s)",
+                              currentCounter, buyCost, (int)(100*effectiveness), budget, costBuffer));
+
+        boolean bankInstead = false;
+        for( ModelForCO otherCounter : availableUnitModels )
         {
-          // Go place orders, if this is our most efficient option so far.
-          log(String.format("    buy %s for %s with effectiveness %s%%? (%s remaining, witholding %s)",
-                                currentCounter, buyCost, (int)(100*effectiveness), budget, costBuffer));
-
-          boolean bankInstead = false;
-          for( ModelForCO otherCounter : availableUnitModels )
+          final int otherCost = buyer.getBuyCost(otherCounter.um, coord);
+          double otherEffectiveness = findEffectiveness(otherCounter, enemyToCounter);
+          double otherEfficiency = otherEffectiveness / otherCost;
+          if( otherEfficiency >= scaledEfficiency )
           {
-            final int otherCost = buyer.getBuyCost(otherCounter.um, coord);
-            double otherEffectiveness = findEffectiveness(otherCounter, enemyToCounter);
-            if( otherEffectiveness >= effectiveness * BANK_COUNTER_FACTOR
-                && otherCost <= buyCost * MAX_BANK_COUNTER_FUNDS_FACTOR )
-            {
-              bankInstead = true;
-              break; // If we can reasonably save for a much better unit, do so.
-            }
+            bankInstead = true;
+            break; // If we can reasonably save for a much better unit, do so.
           }
-          if( bankInstead )
-            continue;
+        }
+        if( bankInstead )
+          continue;
 
-          builds.put(coord, currentCounter.um);
-          budget -= buyCost;
-          CPI.removeBuildLocation(gameMap.getLocation(coord));
-          // We found a counter for this enemy UnitModel; break and go to the next type.
-          // This break means we will build at most one type of unit per turn to counter each enemy type.
-          break;
+        if(effectiveness >= idealEffect)
+        {
+          idealEffect = effectiveness;
+          idealCoord = coord;
+          idealCounter = currentCounter.um;
+          idealCost = buyCost;
         }
       } // ~for( availableUnitModels )
+
+      if( null != idealCounter )
+      {
+        log(String.format("      buying %s at %s", idealCounter, idealCoord));
+        builds.put(idealCoord, idealCounter);
+        budget -= idealCost;
+        CPI.removeBuildLocation(gameMap.getLocation(idealCoord));
+      }
     } // ~while( !enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
 
     // Build infantry from any remaining facilities.
