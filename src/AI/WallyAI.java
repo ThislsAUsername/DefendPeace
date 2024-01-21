@@ -88,6 +88,7 @@ public class WallyAI extends ModularAI
   private static final double AGGRO_EFFECT_THRESHOLD = 0.55; // % of a kill required to want to attack something
   private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
   private static final double AGGRO_CHEAPER_WEIGHT = 0.01; // Multiplier on the score penalty for using expensive units to blow up stragglers
+  private static final int    YEET_FUNDS_BIAS = 1000; // Bias against yeets
   private static final int    KILL_FUNDS_BIAS = 1000; // Bias towards kills
   private static final int    CHIP_FUNDS_BIAS = 500; // Bias towards hitting full HP units
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
@@ -985,7 +986,7 @@ public class WallyAI extends ModularAI
               bestPath = movePath;
               bestAction = ga;
               isAttack = true;
-              percentDamage = results.hpdamage*10;
+              percentDamage = results.hpDamage*10;
             }
           }
 
@@ -2211,7 +2212,7 @@ public class WallyAI extends ModularAI
 
   private static class AttackValue
   {
-    final int hploss, hpdamage, loss, damage;
+    final int hpLoss, hpDamage, loss, damage;
     final int fundsDelta;
 
     // Terrain-attack constructor
@@ -2219,8 +2220,8 @@ public class WallyAI extends ModularAI
     {
       MapLocation targetLoc = map.getLocation(target);
       StrikeParams params = CombatEngine.calculateTerrainDamage(actor.unit, actor.path, targetLoc, map);
-      hploss     = 0;
-      hpdamage   = (int) params.calculateDamage();
+      hpLoss     = 0;
+      hpDamage   = (int) params.calculateDamage();
       loss       = 0;
       damage     = 0;
       fundsDelta = 1;
@@ -2234,16 +2235,19 @@ public class WallyAI extends ModularAI
         captureValue = actor.CO.gameRules.incomePerCity;
 
       BattleSummary results = CombatEngine.simulateBattleResults(actor, target, gameMap, CALC);
+      hpLoss   = actor .getHP() - Math.max(0, results.attacker.after.getHP());
+      hpDamage = target.getHP() - Math.max(0, results.defender.after.getHP());
+
       int hpDiffValue = 0;
+      if( results.attacker.after.getHealth() <= 0 )
+        hpDiffValue -= YEET_FUNDS_BIAS;
       if( results.defender.after.getHealth() <= 0 )
         hpDiffValue += KILL_FUNDS_BIAS;
-      if( target.getHealth() == UnitModel.MAXIMUM_HEALTH )
+      if( hpDamage > 0 && target.getHealth() == UnitModel.MAXIMUM_HEALTH )
         hpDiffValue += CHIP_FUNDS_BIAS;
 
-      hploss   = actor .getHP() - Math.max(0, results.attacker.after.getHP());
-      hpdamage = target.getHP() - Math.max(0, results.defender.after.getHP());
-      loss     = (hploss   * actorCost  ) / 10;
-      damage   = (hpdamage * targetValue) / 10 + captureValue + hpDiffValue;
+      loss     = (hpLoss   * actorCost  ) / 10;
+      damage   = (hpDamage * targetValue) / 10 + captureValue + hpDiffValue;
 
       int wallValue = 0;
       if( !ignoreWallValue )
