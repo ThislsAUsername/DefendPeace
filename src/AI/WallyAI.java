@@ -89,12 +89,14 @@ public class WallyAI extends ModularAI
   private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
   private static final double AGGRO_CHEAPER_WEIGHT = 0.01; // Multiplier on the score penalty for using expensive units to blow up stragglers
   private static final int    YEET_FUNDS_BIAS = 1000; // Bias against yeets
-  private static final int    KILL_FUNDS_BIAS = 1000; // Bias towards kills
+  private static final int    KILL_FUNDS_BIAS = 500; // Bias towards kills
   private static final int    CHIP_FUNDS_BIAS = 500; // Bias towards hitting full HP units
   private static final double RANGE_WEIGHT = 1; // Exponent for how powerful range is considered to be
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
   private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges
-  private static final double MIN_COUNTER_EFFECTIVENESS = 0.7; // Minimum matchup strength for a counter unit
+
+  private static final double BANK_COUNTER_FACTOR = 1.7; // Minimum effectiveness multiplier to consider banking for a better counter
+  private static final double MAX_BANK_COUNTER_FUNDS_FACTOR = 2.5; // Maximum to bank compared to a counter you can actually buy
 
   private static final double TERRAIN_FUNDS_WEIGHT = 2.5; // Multiplier for per-city income for adding value to units threatening to cap
   private static final double TERRAIN_INDUSTRY_WEIGHT = 20000; // Funds amount added to units threatening to cap an industry
@@ -2014,7 +2016,6 @@ public class WallyAI extends ModularAI
       // Find the first (most funds-invested) enemy UnitModel, and remove it. Even if we can't find an adequate counter,
       // there is not reason to consider it again on the next iteration.
       ModelForCO enemyToCounter = enemyModels.poll().getKey();
-      int enemyCostPer = enemyToCounter.co.getCost(enemyToCounter.um);
       double enemyNumber = enemyUnitHP.get(enemyToCounter);
       log(String.format("Need a counter for %s worth %s", enemyToCounter, enemyNumber));
       log(String.format("Remaining budget: %s", budget));
@@ -2023,58 +2024,56 @@ public class WallyAI extends ModularAI
       ArrayList<ModelForCO> availableUnitModels = new ArrayList<>();
       for( ModelForCO coModel : CPI.availableUnitModels )
         availableUnitModels.add(coModel);
-      while (!availableUnitModels.isEmpty())
+      for( ModelForCO currentCounter : availableUnitModels )
       {
-        // Sort my available models by their power against this enemy type.
-        Collections.sort(availableUnitModels, new UnitPowerComparator(enemyToCounter, this));
-
-        // Grab the best counter.
-        ModelForCO idealCounter = availableUnitModels.get(0);
-        availableUnitModels.remove(idealCounter); // Make sure we don't try to build two rounds of the same thing in one turn.
         // I only want combat units, since I don't understand transports
-        if( !idealCounter.um.weapons.isEmpty() )
+        if( currentCounter.um.weapons.isEmpty() )
+          continue;
+
+        XYCoord coord = getLocationToBuild(gameMap, CPI, currentCounter.um);
+        if( null == coord )
+          continue;
+        MapLocation loc = gameMap.getLocation(coord);
+        Commander buyer = loc.getOwner();
+        final int buyCost = buyer.getBuyCost(currentCounter.um, coord);
+        double effectiveness = findEffectiveness(currentCounter, enemyToCounter);
+
+        // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
+        int costBuffer = (CPI.getNumFacilitiesFor(infModel)) * infCost;
+        if(buyer.getShoppingList(gameMap.getLocation(coord)).contains(infModel))
+          costBuffer -= infCost;
+
+        if( 0 > costBuffer )
+          costBuffer = 0; // No granting ourselves extra moolah.
+        if( buyCost <= (budget - costBuffer) )
         {
-          log(String.format("  buy %s?", idealCounter));
-          XYCoord coord = getLocationToBuild(gameMap, CPI, idealCounter.um);
-          if (null == coord)
+          // Go place orders, if this is our most efficient option so far.
+          log(String.format("    buy %s for %s with effectiveness %s%%? (%s remaining, witholding %s)",
+                                currentCounter, buyCost, (int)(100*effectiveness), budget, costBuffer));
+
+          boolean bankInstead = false;
+          for( ModelForCO otherCounter : availableUnitModels )
+          {
+            final int otherCost = buyer.getBuyCost(otherCounter.um, coord);
+            double otherEffectiveness = findEffectiveness(otherCounter, enemyToCounter);
+            if( otherEffectiveness >= effectiveness * BANK_COUNTER_FACTOR
+                && otherCost <= buyCost * MAX_BANK_COUNTER_FUNDS_FACTOR )
+            {
+              bankInstead = true;
+              break; // If we can reasonably save for a much better unit, do so.
+            }
+          }
+          if( bankInstead )
             continue;
-          MapLocation loc = gameMap.getLocation(coord);
-          Commander buyer = loc.getOwner();
-          final int idealCost = buyer.getBuyCost(idealCounter.um, coord);
-          int totalCost = idealCost;
 
-          // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
-          int costBuffer = (CPI.getNumFacilitiesFor(infModel)) * infCost;
-          if(buyer.getShoppingList(gameMap.getLocation(coord)).contains(infModel))
-            costBuffer -= infCost;
-
-          if( 0 > costBuffer )
-            costBuffer = 0; // No granting ourselves extra moolah.
-          if(totalCost <= (budget - costBuffer))
-          {
-            double effectiveness = findEffectiveness(idealCounter, enemyToCounter);
-            // Go place orders, if this is our most efficient option so far.
-            log(String.format("    I can build %s for %s with effectiveness %s%% (%s remaining, witholding %s)",
-                                    idealCounter, totalCost, (int)(100*effectiveness), budget, costBuffer));
-            double costRatio = ((double) enemyCostPer) / idealCost;
-            if( effectiveness*costRatio < MIN_COUNTER_EFFECTIVENESS )
-              continue;
-
-            builds.put(coord, idealCounter.um);
-            budget -= idealCost;
-            CPI.removeBuildLocation(gameMap.getLocation(coord));
-            // We found a counter for this enemy UnitModel; break and go to the next type.
-            // This break means we will build at most one type of unit per turn to counter each enemy type.
-            break;
-          }
-          else
-          {
-            double effectiveness = findEffectiveness(idealCounter, enemyToCounter);
-            log(String.format("    %s cost %s, I have %s (witholding %s, effectiveness %s%%).",
-                         idealCounter, idealCost, budget,   costBuffer, (int)(100*effectiveness)));
-          }
+          builds.put(coord, currentCounter.um);
+          budget -= buyCost;
+          CPI.removeBuildLocation(gameMap.getLocation(coord));
+          // We found a counter for this enemy UnitModel; break and go to the next type.
+          // This break means we will build at most one type of unit per turn to counter each enemy type.
+          break;
         }
-      } // ~while( !availableUnitModels.isEmpty() )
+      } // ~for( availableUnitModels )
     } // ~while( !enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
 
     // Build infantry from any remaining facilities.
@@ -2107,30 +2106,6 @@ public class WallyAI extends ModularAI
     {
       int diff = entry2.getValue() - entry1.getValue();
       return diff;
-    }
-  }
-
-  /**
-   * Arrange UnitModels according to their effective damage/range against a configured UnitModel.
-   */
-  private static class UnitPowerComparator implements Comparator<ModelForCO>
-  {
-    ModelForCO targetModel;
-    private WallyAI wally;
-
-    public UnitPowerComparator(ModelForCO targetType, WallyAI pWally)
-    {
-      targetModel = targetType;
-      wally = pWally;
-    }
-
-    @Override
-    public int compare(ModelForCO model1, ModelForCO model2)
-    {
-      double eff1 = wally.findEffectiveness(model1, targetModel);
-      double eff2 = wally.findEffectiveness(model2, targetModel);
-
-      return (eff1 < eff2) ? 1 : ((eff1 > eff2) ? -1 : 0);
     }
   }
 
