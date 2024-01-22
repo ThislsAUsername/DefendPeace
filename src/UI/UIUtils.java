@@ -97,7 +97,7 @@ public class UIUtils
       // We want to be able to use the normal units, as well as any others
       factions.add(new Faction(DEFAULT_FACTION_NAME,DEFAULT_FACTION_NAME));
 
-      final File folder = new File("res/unit/faction");
+      final File folder = new File(Engine.Driver.JAR_DIR + "res/unit/faction");
 
       if (folder.canRead())
       {

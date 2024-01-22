@@ -157,7 +157,7 @@ public class SpriteLibrary
   {
     TerrainType terrainType = spriteKey.terrainKey;
 
-    String tileSpritesheetLocations = "res/tileset";
+    String tileSpritesheetLocations = Engine.Driver.JAR_DIR + "res/tileset";
     String formatString = tileSpritesheetLocations + "/%s_%s.png";
 
     // Transition format Strings are e.g. "res/tileset/grass_bridge_clear.png", for
@@ -224,7 +224,7 @@ public class SpriteLibrary
   {
     if( moveCursorLineSprite == null )
     {
-      moveCursorLineSprite = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/tileset/moveCursorLine.png"), baseSpriteSize, baseSpriteSize);
+      moveCursorLineSprite = new Sprite(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/tileset/moveCursorLine.png"), baseSpriteSize, baseSpriteSize);
     }
 
     return moveCursorLineSprite;
@@ -234,7 +234,7 @@ public class SpriteLibrary
   {
     if( moveCursorArrowSprite == null )
     {
-      moveCursorArrowSprite = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/tileset/moveCursorArrow.png"), baseSpriteSize, baseSpriteSize);
+      moveCursorArrowSprite = new Sprite(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/tileset/moveCursorArrow.png"), baseSpriteSize, baseSpriteSize);
     }
 
     return moveCursorArrowSprite;
@@ -346,7 +346,7 @@ public class SpriteLibrary
   {
     if( null == mapUnitNumberSprites )
     {
-      mapUnitNumberSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/unit/icon/numbers.png"), 8, 8);
+      mapUnitNumberSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/unit/icon/numbers.png"), 8, 8);
     }
     return mapUnitNumberSprites;
   }
@@ -355,7 +355,7 @@ public class SpriteLibrary
   {
     if( null == mapUnitLetterSprites )
     {
-      mapUnitLetterSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/unit/icon/alphabet.png"), 8, 8);
+      mapUnitLetterSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/unit/icon/alphabet.png"), 8, 8);
     }
     return mapUnitLetterSprites;
   }
@@ -364,7 +364,7 @@ public class SpriteLibrary
   {
     if( null == mapUnitSymbolSprites )
     {
-      mapUnitSymbolSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/unit/icon/symbols.png"), 8, 8);
+      mapUnitSymbolSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/unit/icon/symbols.png"), 8, 8);
     }
     return mapUnitSymbolSprites;
   }
@@ -414,7 +414,7 @@ public class SpriteLibrary
     {
       if( null == myIcon )
       {
-        myIcon = SpriteLibrary.loadSpriteSheetFile("res/unit/icon/"+this.toString().toLowerCase()+".png");
+        myIcon = SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/unit/icon/"+this.toString().toLowerCase()+".png");
       }
       return myIcon;
     }
@@ -437,17 +437,17 @@ public class SpriteLibrary
 
   public static BufferedImage getCargoIcon(Color color)
   {
-    return getColoredSprite( mapUnitCargoIcons, "res/unit/icon/cargo.png", color);
+    return getColoredSprite( mapUnitCargoIcons, Engine.Driver.JAR_DIR + "res/unit/icon/cargo.png", color);
   }
 
   public static BufferedImage getCaptureIcon(Color color)
   {
-    return getColoredSprite( mapUnitCaptureIcons, "res/unit/icon/capture.png", color);
+    return getColoredSprite( mapUnitCaptureIcons, Engine.Driver.JAR_DIR + "res/unit/icon/capture.png", color);
   }
 
   public static BufferedImage getHideIcon(Color color)
   {
-    return getColoredSprite( mapUnitHideIcons, "res/unit/icon/hide.png", color);
+    return getColoredSprite( mapUnitHideIcons, Engine.Driver.JAR_DIR + "res/unit/icon/hide.png", color);
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -460,7 +460,7 @@ public class SpriteLibrary
     {
       try
       {
-        final File folder = new File("res/");
+        final File folder = new File(Engine.Driver.JAR_DIR + "res/");
         if( folder.canRead() )
         {
           for( final File fileEntry : folder.listFiles() )
@@ -512,7 +512,7 @@ public class SpriteLibrary
   {
     if( null == letterSpritesSmallCaps )
     {
-      letterSpritesSmallCaps = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/letters.png"), 5, 6);
+      letterSpritesSmallCaps = new Sprite(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/letters.png"), 5, 6);
     }
     return letterSpritesSmallCaps;
   }
@@ -528,7 +528,7 @@ public class SpriteLibrary
   {
     if( null == numberSpritesSmallCaps )
     {
-      numberSpritesSmallCaps = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/numbers.png"), 5, 6);
+      numberSpritesSmallCaps = new Sprite(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/numbers.png"), 5, 6);
     }
     return numberSpritesSmallCaps;
   }
@@ -543,7 +543,7 @@ public class SpriteLibrary
   {
     if( null == symbolSpritesSmallCaps )
     {
-      symbolSpritesSmallCaps = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/symbols.png"), 5, 6);
+      symbolSpritesSmallCaps = new Sprite(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/symbols.png"), 5, 6);
     }
     return symbolSpritesSmallCaps;
   }
@@ -567,7 +567,7 @@ public class SpriteLibrary
   {
     if( null == cursorSprites )
     {
-      cursorSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/cursor.png"), 6, 6);
+      cursorSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/cursor.png"), 6, 6);
     }
     return cursorSprites;
   }
@@ -576,7 +576,7 @@ public class SpriteLibrary
   {
     if( null == arrowheadSprites )
     {
-      arrowheadSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/arrowheads.png"), 10, 10);
+      arrowheadSprites = new Sprite(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/arrowheads.png"), 10, 10);
     }
     return arrowheadSprites;
   }
@@ -585,14 +585,14 @@ public class SpriteLibrary
   {
     if( null == previewArrow )
     {
-      previewArrow = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/preview_arrow.png"), baseSpriteSize, baseSpriteSize);
+      previewArrow = new Sprite(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/preview_arrow.png"), baseSpriteSize, baseSpriteSize);
     }
     Sprite newArrow = new Sprite(previewArrow);
     newArrow.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(key).paletteColors);
     return newArrow.getFrame(0);
   }
 
-  public static final String OVERLAY_FILE_PATH = "res/ui/co_overlay.png";
+  public static final String OVERLAY_FILE_PATH = Engine.Driver.JAR_DIR + "res/ui/co_overlay.png";
   /**
    * Returns the overlay image for the HUD, which serves as a backdrop for the army
    * name and the currently-available funds.
@@ -656,7 +656,7 @@ public class SpriteLibrary
     {
       // Image should be: empty bar, full bar, empty point, 1/3 point, 2/3 point, full point, large point.
       // Image should be: empty point, 1/3 point, 2/3 point, full point, large point.
-      Sprite overlay = new Sprite(SpriteLibrary.loadSpriteSheetFile("res/ui/powerbar_pieces.png"), POWERBAR_FRAME_WIDTH, POWERBAR_FRAME_HEIGHT);
+      Sprite overlay = new Sprite(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/powerbar_pieces.png"), POWERBAR_FRAME_WIDTH, POWERBAR_FRAME_HEIGHT);
       overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 
       coPowerBarPieces.put(co, overlay);
@@ -711,7 +711,7 @@ public class SpriteLibrary
   {
     if( null == actionCursor )
     {
-      actionCursor = SpriteLibrary.loadSpriteSheetFile("res/tileset/cursor_action.png");
+      actionCursor = SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/tileset/cursor_action.png");
       if( null == actionCursor )
       {
         actionCursor = createDefaultBlankSprite(baseSpriteSize, baseSpriteSize);
@@ -729,10 +729,10 @@ public class SpriteLibrary
   {
     if( null == menuOptionsSprite )
     {
-      menuOptionsSprite = new Sprite(createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile("res/ui/main/newgame.png")));
-      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile("res/ui/main/continue.png")));
-      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile("res/ui/main/options.png")));
-      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile("res/ui/main/quit.png")));
+      menuOptionsSprite = new Sprite(createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/main/newgame.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/main/continue.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/main/options.png")));
+      menuOptionsSprite.addFrame(createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/main/quit.png")));
     }
     return menuOptionsSprite;
   }
@@ -741,7 +741,7 @@ public class SpriteLibrary
   {
     if(null == gameOverDefeatText)
     {
-      gameOverDefeatText = SpriteLibrary.loadSpriteSheetFile("res/ui/defeat.png");
+      gameOverDefeatText = SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/defeat.png");
     }
     return gameOverDefeatText;
   }
@@ -750,7 +750,7 @@ public class SpriteLibrary
   {
     if(null == gameOverVictoryText)
     {
-      gameOverVictoryText = SpriteLibrary.loadSpriteSheetFile("res/ui/victory.png");
+      gameOverVictoryText = SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/ui/victory.png");
     }
     return gameOverVictoryText;
   }
@@ -767,8 +767,8 @@ public class SpriteLibrary
     if(!coSpriteSets.containsKey(whichCo))
     {
       // We don't have it, so we need to load it.
-      String baseFileName = "res/co/" + whichCo;
-      String basePlaceholder = "res/co/placeholder";
+      String baseFileName = Engine.Driver.JAR_DIR + "res/co/" + whichCo;
+      String basePlaceholder = Engine.Driver.JAR_DIR + "res/co/placeholder";
 
       // Find out if the images exist. If they don't, use placeholders.
       String bodyString = ((new File(baseFileName + ".png").isFile())? baseFileName : basePlaceholder) + ".png";

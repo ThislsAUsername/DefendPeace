@@ -13,7 +13,7 @@ import Engine.Pair;
 
 public class InputHandler implements IController
 {
-  private static final String KEYS_FILENAME = "res/keys.txt";
+  private static final String KEYS_FILENAME = Engine.Driver.JAR_DIR + "res/keys.txt";
 
   public static OptionSelector actionCommandSelector = new OptionSelector( InputHandler.InputAction.values().length );
   public static OptionSelector actionKeySelector = new OptionSelector(1); // We will just use the absolute, and normalize per action.

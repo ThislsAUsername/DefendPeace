@@ -46,8 +46,8 @@ public class SerializationUtils
 
   public static String writeSave(GameInstance game, boolean endCurrentTurn)
   {
-    String filename = "save/" + game.saveFile;
-    new File("save/").mkdirs(); // make sure we don't freak out if the directory's not there
+    String filename = Engine.Driver.JAR_DIR + "save/" + game.saveFile;
+    new File(Engine.Driver.JAR_DIR + "save/").mkdirs(); // make sure we don't freak out if the directory's not there
 
     System.out.println(String.format("Now saving to %s", filename));
     try (FileOutputStream file = new FileOutputStream(filename); ObjectOutputStream out = new ObjectOutputStream(file);)

@@ -20,6 +20,7 @@ import UI.Art.SpriteArtist.SpriteEngine;
 
 public class Driver implements ActionListener, KeyListener
 {
+  public static final String JAR_DIR = ClassLoader.getSystemClassLoader().getResource(".").getPath().replaceAll("bin/$", "");
   private static Driver gameDriver;
   private Stack<ControlState> gameStatus = new Stack<ControlState>();
   private GameViewProxy gameView;

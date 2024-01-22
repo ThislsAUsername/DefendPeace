@@ -133,7 +133,7 @@ public class UnitSpriteSet
    */
   private String getMapUnitSpriteFilenameTemplate(String unitType, Faction faction)
   {
-    final String format = "res/unit/faction/%s/%s_map%s.png";
+    final String format = Engine.Driver.JAR_DIR + "res/unit/faction/%s/%s_map%s.png";
 
     // Try the faction's proper name, the one it's based off of, then default to "Thorn" if all else fails.
     String[] namesToTry = {faction.name, faction.basis};
