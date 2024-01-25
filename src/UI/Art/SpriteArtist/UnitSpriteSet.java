@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.*;
 
 import Engine.GameInstance;
+import Terrain.MapPerspective;
 import UI.UIUtils;
 import UI.UIUtils.Faction;
 import Units.Unit;
@@ -238,7 +239,7 @@ public class UnitSpriteSet
    * Lower Right: Activity icons, e.g. transporting units or capturing property.
    * Lower Left: HP when not at full health (this can extend to the lower right if the unit has >10 HP).
    */
-  public void drawUnitIcons(Graphics g, GameInstance game, Unit u, int animIndex, int drawX, int drawY)
+  public void drawUnitIcons(Graphics g, GameInstance game, MapPerspective map, Unit u, int animIndex, int drawX, int drawY)
   {
     ArrayList<BufferedImage> unitIcons = new ArrayList<BufferedImage>();
 
@@ -284,7 +285,9 @@ public class UnitSpriteSet
     }
 
     // Transport icon.
-    if( u.heldUnits != null && !u.heldUnits.isEmpty() )
+    boolean fogOn = map.game.isFogEnabled();
+    boolean hideCargo = fogOn && u.CO.isEnemy(map.viewer);
+    if( !hideCargo && !u.heldUnits.isEmpty() )
       unitIcons.add(SpriteLibrary.getCargoIcon(u.CO.myColor));
 
     // Capture icon.
