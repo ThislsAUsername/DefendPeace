@@ -11,6 +11,7 @@ import Engine.UnitMods.UnitModifier;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
+import Terrain.MapLocation;
 import Units.MoveTypes.MoveType;
 
 /**
@@ -244,15 +245,16 @@ public class UnitContext extends UnitState
     return captureProgress;
   }
 
-  public int calculateFuelBurnIdle(Environment env)
+  public int calculateFuelBurnIdle(MapLocation loc)
   {
-    this.env = env;
+    this.env = loc.getEnvironment();
     fuelBurnIdle = model.fuelBurnIdle;
     for( UnitModifier mod : mods )
       mod.modifyIdleFuelBurn(this);
 
     // Don't burn fuel while in port
-    if( model.healableHabs.contains(env.terrainType) )
+    if( model.healableHabs.contains(env.terrainType)
+        && !CO.isEnemy(loc.getOwner()) )
       fuelBurnIdle = Math.min(0, fuelBurnIdle);
     return fuelBurnIdle;
   }
