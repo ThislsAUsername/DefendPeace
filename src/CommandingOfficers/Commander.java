@@ -132,6 +132,8 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     {
       events.add(new CommanderAbilityRevertEvent(myActiveAbility));
       events.addAll(myActiveAbility.getRevertEvents(map));
+      // Deactivate now because we need to get rid of vision buffs before fog is reset
+      myActiveAbility.deactivate(map);
       myActiveAbility = null;
     }
 

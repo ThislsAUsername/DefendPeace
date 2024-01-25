@@ -29,9 +29,7 @@ public class CommanderAbilityRevertEvent implements GameEvent
 
   @Override
   public void performEvent(MapMaster gameMap)
-  {
-    myAbility.deactivate(gameMap);
-  }
+  {}
 
   @Override
   public XYCoord getStartPoint()

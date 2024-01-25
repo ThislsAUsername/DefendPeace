@@ -89,6 +89,7 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
     {
       events.addAll(co.initTurn(map));
     }
+    myView.resetFog();
 
     if( null != aiController )
     {
