@@ -26,6 +26,7 @@ public class MapPerspective extends GameMap
   {
     super(pMaster.mapWidth, pMaster.mapHeight);
     master = pMaster;
+    game   = master.game;
     viewer = pViewer;
     isFogged = new boolean[mapWidth][mapHeight];
     confirmedVisibles = new ArrayList<>();

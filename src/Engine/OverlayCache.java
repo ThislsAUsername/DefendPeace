@@ -59,6 +59,9 @@ public class OverlayCache implements CacheInvalidationListener
       ArrayList<Unit> threats = new ArrayList<>();
 
       final Army viewer = drawableMap.viewer;
+      if( null == viewer )
+        return new ArrayList<>();
+
       for( Army army : game.armies )
       {
         cacheLine.addAll(army.getMyOverlays(drawableMap, army == viewer));
