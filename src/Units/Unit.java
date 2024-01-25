@@ -100,7 +100,11 @@ public class Unit extends UnitState implements UnitModList
     int captureThreshold = map.getEnvironment(x, y).terrainType.getCaptureThreshold();
     if( captureProgress >= captureThreshold )
     {
-      map.setOwner(CO, x, y);
+      Commander newOwner = CO;
+      // Capture territory for your primary CO in persistent tags
+      if( CO.gameRules.tagMode.supportsMultiCmdrSelect )
+        newOwner = CO.army.cos[0];
+      map.setOwner(newOwner, x, y);
       captureProgress = 0;
       captureTarget = null;
       success = true;
