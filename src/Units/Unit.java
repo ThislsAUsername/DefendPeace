@@ -61,7 +61,9 @@ public class Unit extends UnitState implements UnitModList
 
     if( null != locus )
     {
-      fuel = Math.max(0, fuel - model.fuelBurnIdle);
+      UnitContext uc = new UnitContext(this);
+      int burn = uc.calculateFuelBurnIdle(locus.getEnvironment());
+      fuel = Math.max(0, fuel - burn);
 
       // Collect any turn-initialization events for this unit.
       events.addAll(model.getTurnInitEvents(this, map));

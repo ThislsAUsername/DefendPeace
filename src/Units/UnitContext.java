@@ -35,6 +35,7 @@ public class UnitContext extends UnitState
   public int cargoCapacity;
 
   public MoveType moveType;
+  public int fuelBurnIdle;
   public int movePower;
   public int visionRange;
   public boolean visionPierces;
@@ -123,6 +124,7 @@ public class UnitContext extends UnitState
     cargoCapacity = other.cargoCapacity;
 
     moveType = other.moveType;
+    fuelBurnIdle = other.fuelBurnIdle;
     movePower = other.movePower;
     visionRange = other.visionRange;
     visionPierces = other.visionPierces;
@@ -148,6 +150,7 @@ public class UnitContext extends UnitState
     cargoCapacity = model.baseCargoCapacity;
 
     moveType = model.baseMoveType; // This should be safe to not deep-copy until we know we want to change it
+    fuelBurnIdle = model.fuelBurnIdle;
     movePower = model.baseMovePower;
     visionRange = model.visionRange;
     visionPierces = model.visionPierces;
@@ -239,6 +242,19 @@ public class UnitContext extends UnitState
     if( captureProgress < 0 )
       captureProgress = 0;
     return captureProgress;
+  }
+
+  public int calculateFuelBurnIdle(Environment env)
+  {
+    this.env = env;
+    fuelBurnIdle = model.fuelBurnIdle;
+    for( UnitModifier mod : mods )
+      mod.modifyIdleFuelBurn(this);
+
+    // Don't burn fuel while in port
+    if( model.healableHabs.contains(env.terrainType) )
+      fuelBurnIdle = Math.min(0, fuelBurnIdle);
+    return fuelBurnIdle;
   }
 
   public int calculateVision()
