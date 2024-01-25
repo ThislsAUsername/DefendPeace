@@ -9,8 +9,8 @@ import java.util.Map;
 import Engine.GameEvents.GameEventListener.CacheInvalidationListener;
 import Engine.GameInstance;
 import Engine.XYCoord;
-import Terrain.GameMap;
 import Terrain.MapLocation;
+import Terrain.MapPerspective;
 import Terrain.TerrainType;
 import UI.UnitMarker;
 import UI.Art.SpriteArtist.MarkArtist.MarkingCache;
@@ -36,7 +36,7 @@ public class MapTileDetailsArtist
     currentTile = new XYCoord(-1, -1);
   }
 
-  public static void drawTileDetails(Graphics g, GameMap map, XYCoord tileToDetail, boolean overlayIsLeft)
+  public static void drawTileDetails(Graphics g, MapPerspective map, XYCoord tileToDetail, boolean overlayIsLeft)
   {
     // Rebuild the overlay image if needed.
     generateOverlay(map, tileToDetail);
@@ -58,7 +58,7 @@ public class MapTileDetailsArtist
     }
   }
 
-  private static void generateOverlay(GameMap map, XYCoord coord)
+  private static void generateOverlay(MapPerspective map, XYCoord coord)
   {
     if( currentTile.equals(coord) )
       return; // Did this already; just use the cached image.
@@ -132,7 +132,7 @@ public class MapTileDetailsArtist
 
   private static void addDetailInfoFor(ArrayList<BufferedImage> unitImageCache,
                                        ArrayList<ArrayList<AttributeArtist>> unitAttrCache,
-                                       GameMap map, XYCoord coord, Unit unit)
+                                       MapPerspective map, XYCoord coord, Unit unit)
   {
     UnitSpriteSet uss = SpriteLibrary.getMapUnitSpriteSet(unit);
     unitImageCache.add(uss.getUnitImage());
@@ -158,6 +158,10 @@ public class MapTileDetailsArtist
       BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(stat.markColor).get(stat.mark);
       unitAttrs.add(new AttributeArtist(symbol, stat.textColor, stat.text));
     }
+    boolean fogOn = map.game.isFogEnabled();
+    boolean hideCargo = fogOn && unit.CO.isEnemy(map.viewer);
+    if( hideCargo )
+      return;
     // Also display cargo via DFS
     for( Unit cargo : unit.heldUnits)
       addDetailInfoFor(unitImageCache, unitAttrCache,
