@@ -648,7 +648,7 @@ public class SpriteMapView extends MapView
         g.drawImage(coOverlays, mapViewWidth - coOverlays.getWidth(), headerOffset, null);
     }
     else
-      CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeArmy, headerOffset, overlayIsLeft);
+      CommanderOverlayArtist.drawCommanderOverlay(g, false, myGame.activeArmy, headerOffset, overlayIsLeft);
 
     // Draw terrain defense and unit status.
     if( includeTileDetails )

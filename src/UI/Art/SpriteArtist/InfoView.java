@@ -92,7 +92,12 @@ public class InfoView extends MapView // Extend MapView for getDrawableMap(). We
       return; // Continue no further if we don't have room to actually draw
 
     if (null != thisArmy)
-      CommanderOverlayArtist.drawCommanderOverlay(myG, thisArmy, false);
+    {
+      MapPerspective drawableMap = getDrawableMap(myControl.getGame());
+      boolean fogOn = myControl.getGame().isFogEnabled();
+      boolean hideFunds = fogOn && thisArmy.isEnemy(drawableMap.viewer);
+      CommanderOverlayArtist.drawCommanderOverlay(myG, hideFunds, thisArmy, false);
+    }
     
     // add the actual info
     myG.setColor(SpriteUIUtils.MENUFRAMECOLOR); // outer buffer
