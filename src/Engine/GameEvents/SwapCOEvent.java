@@ -51,6 +51,9 @@ public class SwapCOEvent extends TurnEndEvent
         }
         shiftPropsTo(gameMap, army, swapTarget);
         break;
+      case Persistent:
+        shiftPropsTo(gameMap, army, swapTarget);
+        break;
       case OFF:
       case Team_Merge:
         break;

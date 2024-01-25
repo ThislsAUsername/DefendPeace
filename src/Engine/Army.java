@@ -17,7 +17,6 @@ import AI.AILibrary;
 import AI.AIMaker;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
-import Engine.GameScenario.TagMode;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -253,9 +252,9 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
     return Color.RED;
   }
 
-  protected boolean awbwDeniesCharge()
+  protected boolean taggingDeniesCharge()
   {
-    return TagMode.AWBW == gameRules.tagMode
+    return gameRules.tagMode.supportsMultiCmdrSelect
         && getAbilityText().length() > 0;
   }
 
@@ -265,7 +264,7 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   @Override
   public GameEventQueue receiveBattleEvent(final BattleSummary summary)
   {
-    if( awbwDeniesCharge() )
+    if( taggingDeniesCharge() )
       return null;
 
     // We only care who the units belong to, not who picked the fight.
@@ -301,6 +300,24 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
           }
         }
           break;
+        case Persistent:
+        {
+          // As persistent tags is meant to be mostly a sidegrade, give half charge to the primary, and split the rest among the rest.
+          final int primaryCharge = cos[0].calculateCombatCharge(minion, enemy, isCounter);
+          if( cos.length == 1 )
+            cos[0].modifyAbilityPower(primaryCharge);
+          else
+          {
+            cos[0].modifyAbilityPower(primaryCharge / 2);
+            final double tagMultiplier = 0.5 / (cos.length - 1);
+            for( int i = 1; i < cos.length; ++i )
+            {
+              final int tagCharge = cos[i].calculateCombatCharge(minion, enemy, isCounter);
+              cos[i].modifyAbilityPower((int) (tagCharge * tagMultiplier));
+            }
+          }
+        }
+          break;
         case Team_Merge:
         case OFF:
         {
@@ -321,7 +338,7 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   {
     if( attacker != null && this == attacker.army )
       return null; // Punching yourself shouldn't make you angry
-    if( awbwDeniesCharge() )
+    if( taggingDeniesCharge() )
       return null;
 
     for( Entry<Unit, Integer> damageEntry : lostHealth.entrySet() )
@@ -340,6 +357,24 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
             final int tagCharge = cos[i].calculateMassDamageCharge(minion, damageEntry.getValue());
             final int tagDivisor = 2;
             cos[i].modifyAbilityPower(tagCharge / tagDivisor);
+          }
+        }
+          break;
+        case Persistent:
+        {
+          // As persistent tags is meant to be mostly a sidegrade, give half charge to the primary, and split the rest among the rest.
+          final int primaryCharge = cos[0].calculateMassDamageCharge(minion, damageEntry.getValue());
+          if( cos.length == 1 )
+            cos[0].modifyAbilityPower(primaryCharge);
+          else
+          {
+            cos[0].modifyAbilityPower(primaryCharge / 2);
+            final double tagMultiplier = 0.5 / (cos.length - 1);
+            for( int i = 1; i < cos.length; ++i )
+            {
+              final int tagCharge = cos[i].calculateMassDamageCharge(minion, damageEntry.getValue());
+              cos[i].modifyAbilityPower((int) (tagCharge / tagMultiplier));
+            }
           }
         }
           break;
