@@ -194,7 +194,7 @@ public class MapPerspective extends GameMap
     {
       for( int x = 0; x < mapWidth; ++x )
       {
-        isFogged[x][y] = defaultState;
+        isFogged[x][y] = defaultState && !getEnvironment(x, y).terrainType.isUnweatherable();
       }
     }
     // then reveal what we should see
