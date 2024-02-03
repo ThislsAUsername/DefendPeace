@@ -17,6 +17,7 @@ import Engine.GameAction;
 import Engine.GameAction.EndTurnAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.GameScenario.FogMode;
 import Engine.GameScenario.TagMode;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
@@ -153,7 +154,7 @@ public class FightClub
       for( int gameIndex = 0; gameIndex < params.numGames; ++gameIndex )
       {
         GameScenario scenario = new GameScenario(mi.getValidUnitModelSchemes()[0],
-            GameScenario.DEFAULT_INCOME, GameScenario.DEFAULT_STARTING_FUNDS, false, TagMode.OFF);
+            GameScenario.DEFAULT_INCOME, GameScenario.DEFAULT_STARTING_FUNDS, FogMode.OFF_DOR, TagMode.OFF);
 
         int numCos = mi.getNumCos();
 

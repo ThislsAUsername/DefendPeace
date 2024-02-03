@@ -338,7 +338,7 @@ public abstract class RuinedCommander extends DeployableCommander
       costBasis.maxStarRatio = costBasis.baseStarRatio;
       costBasis.starRatioPerCast = 0;
     }
-    
+
     @Override
     protected void perform(MapMaster gameMap)
     {

@@ -72,7 +72,4 @@ public abstract class GameMap implements Serializable, IEnvironsProvider
   public void revealFog(Unit scout, GamePath movepath)
   {}
 
-  /** Reveals a single tile of fog */
-  public void revealFog(XYCoord coord, boolean piercing)
-  {}
 }

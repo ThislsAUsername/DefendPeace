@@ -427,7 +427,7 @@ public class TestGameEvent extends TestCase
 
     // Verify the map looks as we expect.
     testPassed &= validate(city.getEnvironment().terrainType == TerrainType.CITY, "    No city at (10, 1).");
-    city.setOwner(testCo2);
+    testMap.setOwner(testCo2, city.getCoordinates());
     testPassed &= validate(city.getOwner() == testCo2, "    City should belong to CO 2.");
     testPassed &= validate(hq.getEnvironment().terrainType == TerrainType.HEADQUARTERS, "    No HQ where expected.");
     testPassed &= validate(hq.getOwner() == testCo2, "    HQ should belong to CO 2.");

@@ -22,11 +22,11 @@ public class GameScenario implements Serializable
   }
   public GameScenario(int income, int startFunds)
   {
-    rules = new GameRules(new AWBWUnits(), income, startFunds, false, TagMode.OFF);
+    rules = new GameRules(new AWBWUnits(), income, startFunds, FogMode.OFF_DOR, TagMode.OFF);
   }
-  public GameScenario(UnitModelScheme scheme, int income, int startFunds, boolean isFogEnabled, TagMode tags)
+  public GameScenario(UnitModelScheme scheme, int income, int startFunds, FogMode fog, TagMode tags)
   {
-    rules = new GameRules(scheme, income, startFunds, isFogEnabled, tags);
+    rules = new GameRules(scheme, income, startFunds, fog, tags);
   }
 
   public GameEventQueue initTurn(GameMap map)
@@ -46,6 +46,19 @@ public class GameScenario implements Serializable
     }
   };
 
+  public enum FogMode
+  {
+    OFF_TRILOGY(false, false), ON_TRILOGY(true, false), OFF_DOR(false, true), ON_DOR(true, true);
+
+    public final boolean fogDefaultsOn;
+    public final boolean dorMode;
+    private FogMode(boolean isOn, boolean DoR)
+    {
+      this.fogDefaultsOn = isOn;
+      this.dorMode = DoR;
+    }
+  };
+
   /** Object to hold the rules of engagement for a given match. */
   public static class GameRules implements Serializable
   {
@@ -54,15 +67,15 @@ public class GameScenario implements Serializable
     public final int startingFunds;
     public final UnitModelScheme unitModelScheme;
     public final TagMode tagMode;
-    public boolean isFogEnabled;
+    public FogMode fogMode;
 
-    public GameRules(UnitModelScheme ums, int income, int startFunds, boolean fogOn, TagMode tags)
+    public GameRules(UnitModelScheme ums, int income, int startFunds, FogMode fog, TagMode tags)
     {
       incomePerCity = income;
       startingFunds = startFunds;
       unitModelScheme = ums;
       tagMode = tags;
-      isFogEnabled = fogOn;
+      fogMode = fog;
     }
   }
 }

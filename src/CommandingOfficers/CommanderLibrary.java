@@ -43,6 +43,7 @@ public class CommanderLibrary
     commanderList.add( Qis.getInfo() );
     commanderList.add( Tech.getInfo() );
     commanderList.add( CommandingOfficers.AW4.BrennerWolves.Will.getInfo() );
+    commanderList.add( CommandingOfficers.AW4.BrennerWolves.Lin.getInfo() );
     commanderList.add( CommandingOfficers.AW4.BrennerWolves.Isabella.getInfo() );
     commanderList.add( BrennerDoR.getInfo() );
     commanderList.add( CommandingOfficers.AW4.Lazuria.Gage.getInfo() );
@@ -62,6 +63,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW1.BM.Olaf.getInfo() );
     commanderList.add( CommandingOfficers.AW1.GE.Drake.getInfo() );
     commanderList.add( CommandingOfficers.AW1.GE.Eagle.getInfo() );
+    commanderList.add( CommandingOfficers.AW1.YC.Sonja.getInfo() );
     commanderList.add( CommandingOfficers.AW1.YC.Kanbei.getInfo() );
     commanderList.add( CommandingOfficers.AW1.BH.Sturm.getInfo() );
     commanderList.add( CommandingOfficers.AW1.BH.SturmVS.getInfo() );

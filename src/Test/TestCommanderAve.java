@@ -94,12 +94,12 @@ public class TestCommanderAve extends TestCase
     }
 
     // Add a new property.
-    XYCoord snowCity = new XYCoord(12,5);
+    XYCoord snowCity = new XYCoord(12,4);
     XYCoord inRange = new XYCoord(7,5);
     XYCoord outOfRange = new XYCoord(6,5);
 
     // Grant a new city and make sure the snow spreads from there, but not too far.
-    testMap.getLocation(snowCity).setOwner(Ave);
+    testMap.setOwner(Ave, snowCity);
     int maxIters = 15;
     for( int i = 1; i < maxIters; ++i )
     {
@@ -123,11 +123,11 @@ public class TestCommanderAve extends TestCase
     }
     //System.out.println("Snow map:\n" + Ave.getSnowMapAsString());
     Unit infantry = addUnit(testMap, Ave, UnitModel.TROOP, snowCity.x, snowCity.y);
-    GamePath path = Utils.findShortestPath(infantry, new XYCoord(10, 5), testMap);
+    GamePath path = Utils.findShortestPath(infantry, snowCity.down().down(), testMap);
     testPassed &= validate( 2 == path.getFuelCost(Ave, infantry.model, testMap), "    Ave's units burn too much fuel moving through snow." );
 
     // Take the city away, and make sure the snow recedes.
-    testMap.getLocation(snowCity).setOwner(null);
+    testMap.setOwner(null, snowCity);
     for( int i = 1; i < maxIters; ++i )
     {
       GameEventQueue turnEvents = new GameEventQueue();
@@ -136,7 +136,7 @@ public class TestCommanderAve extends TestCase
       Environment cityEnv = testMap.getEnvironment(snowCity); 
       if( cityEnv.weatherType != Weathers.SNOW )
       {
-        System.out.println("Snow melted after " + i + " turns");
+//        System.out.println("Snow melted after " + i + " turns");
         break;
       }
     }

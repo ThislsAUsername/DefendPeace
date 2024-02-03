@@ -522,7 +522,7 @@ public class SpriteMapView extends MapView
    * NOTE: Does not draw the unit icon for the currently-active unit, if
    * one is selected; this must be done separately.
    */
-  public void drawStatusIcons(Graphics g, GameMap gameMap, Army viewer, int animIndex)
+  public void drawStatusIcons(Graphics g, MapPerspective gameMap, Army viewer, int animIndex)
   {
     ArrayList<Unit> actors = null;
     if( null != currentAnimation )
@@ -537,7 +537,7 @@ public class SpriteMapView extends MapView
           // If an action is being considered, draw the active unit later, not now.
           if( null == actors || !actors.contains(resident) )
           {
-            unitArtist.drawUnitIcons(g, resident, resident.x, resident.y, animIndex);
+            unitArtist.drawUnitIcons(g, gameMap, resident, resident.x, resident.y, animIndex);
             MarkArtist.drawMark(g, myGame, viewer, resident, animIndex);
           }
         }
@@ -648,7 +648,7 @@ public class SpriteMapView extends MapView
         g.drawImage(coOverlays, mapViewWidth - coOverlays.getWidth(), headerOffset, null);
     }
     else
-      CommanderOverlayArtist.drawCommanderOverlay(g, myGame.activeArmy, headerOffset, overlayIsLeft);
+      CommanderOverlayArtist.drawCommanderOverlay(g, false, myGame.activeArmy, headerOffset, overlayIsLeft);
 
     // Draw terrain defense and unit status.
     if( includeTileDetails )

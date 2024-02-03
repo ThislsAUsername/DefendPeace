@@ -9,6 +9,7 @@ import Engine.GamePath.PathNode;
 import Engine.Utils;
 import Engine.XYCoord;
 import Units.Unit;
+import Units.UnitContext;
 
 public class MapPerspective extends GameMap
 {
@@ -18,6 +19,7 @@ public class MapPerspective extends GameMap
   private boolean[][] isFogged;
   private Commander[][] lastOwnerSeen;
   private ArrayList<Unit> confirmedVisibles;
+  private ArrayList<XYCoord> flaredTiles;
 
   public MapPerspective(MapMaster pMaster, Army pViewer)
   {
@@ -25,7 +27,8 @@ public class MapPerspective extends GameMap
     master = pMaster;
     viewer = pViewer;
     isFogged = new boolean[mapWidth][mapHeight];
-    confirmedVisibles = new ArrayList<Unit>();
+    confirmedVisibles = new ArrayList<>();
+    flaredTiles = new ArrayList<>();
 
     // We start with knowledge of what properties everyone starts with.
     lastOwnerSeen = new Commander[mapWidth][mapHeight];
@@ -156,11 +159,15 @@ public class MapPerspective extends GameMap
   @Override
   public boolean isLocationFogged(int x, int y)
   {
-    return isFogOn() && ((x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : isFogged[x][y]);
+    return ((x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) ? true : isFogged[x][y]);
   }
   public boolean isFogOn()
   {
-    return (null == viewer) || viewer.gameRules.isFogEnabled;
+    return master.game.isFogEnabled();
+  }
+  public boolean isFogDoR()
+  {
+    return master.game.rules.fogMode.dorMode;
   }
 
   /**
@@ -174,18 +181,34 @@ public class MapPerspective extends GameMap
   @Override
   public void resetFog()
   {
-    // assume everything is fogged
+    resetFog(true);
+  }
+  private void resetFog(boolean resetFlares)
+  {
+    if( resetFlares )
+      flaredTiles.clear();
+    // Assume everything is fogged...
     confirmedVisibles.clear();
+    boolean defaultState = isFogOn();
     for( int y = 0; y < mapHeight; ++y )
     {
       for( int x = 0; x < mapWidth; ++x )
       {
-        isFogged[x][y] = true;
+        isFogged[x][y] = defaultState && !getEnvironment(x, y).terrainType.isUnweatherable();
       }
     }
     // then reveal what we should see
     if (null == viewer)
       return;
+    revealFog();
+  }
+  /**
+   * Hook for vision powers to nudge the view into updating.
+   */
+  public void revealFog()
+  {
+    for( XYCoord xyc : flaredTiles )
+      revealFog(xyc, true);
     for( Army army : master.game.armies )
     {
       if( viewer.isEnemy(army) )
@@ -194,24 +217,18 @@ public class MapPerspective extends GameMap
       {
         for( Unit unit : co.units )
         {
-          for( XYCoord coord : Utils.findVisibleLocations(this, unit, false) )
-          {
-            revealFog(coord, false);
-          }
-          // We need to do a second pass with piercing vision so we can know whether to reveal the units
-          for( XYCoord coord : Utils.findVisibleLocations(this, unit, true) )
-          {
-            revealFog(coord, true);
-          }
+          UnitContext uc = new UnitContext(this, unit);
+          uc.calculateVision();
+          revealFog(uc, uc.coord);
         }
         for( XYCoord xyc : co.ownedProperties )
         {
           revealFog(xyc, true); // Properties can see themselves and anything on them
-          MapLocation loc = master.getLocation(xyc);
-          for( XYCoord coord : Utils.findVisibleLocations(this, loc.getCoordinates(), Environment.PROPERTY_VISION_RANGE) )
-          {
-            revealFog(coord, false);
-          }
+          if( isFogDoR() ) // Trilogy fog does not enable cities to have area vision
+            for( XYCoord coord : Utils.findLocationsInRange(this, xyc, Environment.PROPERTY_VISION_RANGE) )
+            {
+              revealFog(coord, false);
+            }
         }
       }
     }
@@ -222,17 +239,16 @@ public class MapPerspective extends GameMap
   {
     if (null == viewer)
       return;
+    if( !isFogDoR() )
+    {
+      resetFog(false);
+      return;
+    }
     if( !viewer.isEnemy(scout.CO.army) )
     {
-      for( XYCoord coord : Utils.findVisibleLocations(this, scout, false) )
-      {
-        revealFog(coord, false);
-      }
-      // We need to do a second pass with piercing vision so we can know whether to reveal the units
-      for( XYCoord coord : Utils.findVisibleLocations(this, scout, true) )
-      {
-        revealFog(coord, true);
-      }
+      UnitContext uc = new UnitContext(this, scout);
+      uc.calculateVision();
+      revealFog(uc, uc.coord);
     }
   }
 
@@ -241,29 +257,65 @@ public class MapPerspective extends GameMap
   {
     if (null == viewer)
       return;
+    if( !isFogDoR() )
+    {
+      resetFog(false);
+      return;
+    }
     if( !viewer.isEnemy(scout.CO.army) )
     {
+      UnitContext uc = new UnitContext(this, scout);
       for( PathNode node : movepath.getWaypoints() )
       {
-        for( XYCoord coord : Utils.findVisibleLocations(this, scout, node.x, node.y, false) )
-        {
-          revealFog(coord, false);
-        }
-        // We need to do a second pass with piercing vision so we can know whether to reveal the units
-        for( XYCoord coord : Utils.findVisibleLocations(this, scout, node.x, node.y, true) )
-        {
-          revealFog(coord, true);
-        }
+        uc.setCoord(node.GetCoordinates());
+        uc.calculateVision();
+        revealFog(uc, uc.coord);
       }
     }
   }
-  
-  public void revealFog(XYCoord coord, boolean piercing)
+
+  /**
+   * Assumes the scout context has pre-calculated its vision.
+   */
+  protected void revealFog(UnitContext scout, XYCoord seeFrom)
+  {
+    int piercingRange = scout.visionPierces ? scout.visionRange : 1;
+    for( XYCoord coord : Utils.findLocationsInRange(this, seeFrom, 0, piercingRange) )
+    {
+      revealFog(coord, true);
+    }
+    if( !scout.visionPierces )
+      for( XYCoord coord : Utils.findLocationsInRange(this, seeFrom, piercingRange, scout.visionRange) )
+      {
+        revealFog(coord, false);
+      }
+  }
+  public void flareTarget(XYCoord origin, int radius)
+  {
+    for( XYCoord coord : Utils.findLocationsInRange(this, origin, 0, radius) )
+    {
+      revealFog(coord, true);
+      flaredTiles.add(coord);
+    }
+  }
+
+  protected void revealFog(XYCoord coord, boolean piercing)
   {
     MapLocation loc = master.getLocation(coord);
-    isFogged[coord.x][coord.y] = false;
     lastOwnerSeen[coord.x][coord.y] = loc.getOwner();
-    if (piercing && loc.getResident() != null)
-      confirmedVisibles.add(loc.getResident());
+    Unit resident = loc.getResident();
+
+    TerrainType tt = loc.getEnvironment().terrainType;
+    boolean shouldSee = piercing || !tt.isCover(master.game.rules.fogMode);
+    if( null != resident )
+    {
+      if( piercing )
+        confirmedVisibles.add(resident);
+      else if( !resident.model.hidden ) // Non-invisible aircraft reveal cover that can't repair them.
+        if( resident.model.isAirUnit() && !tt.healsAir() )
+          shouldSee = true;
+    }
+    if( shouldSee )
+      isFogged[coord.x][coord.y] = false;
   }
 }

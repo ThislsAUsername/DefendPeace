@@ -518,7 +518,7 @@ public class KaijuWarsKaiju
   public static boolean isEnemyRadarScanning(GameMap map, XYCoord target, Commander affiliation)
   {
     boolean isAnyRadar = false;
-    for( XYCoord xyc : Utils.findLocationsInRange(map, target, Radar.PIERCING_VISION) )
+    for( XYCoord xyc : Utils.findLocationsInRange(map, target, Radar.VISION_RANGE) )
     {
       Unit resident = map.getResident(xyc);
       if( null != resident && resident.CO.isEnemy(affiliation)
@@ -555,7 +555,7 @@ public class KaijuWarsKaiju
       // Check for any hostile kaiju in range to study
       for( Unit kaiju : kaijuAbilityTier.keySet() )
       {
-        if( kaiju.CO.isEnemy(unit.CO) && Radar.PIERCING_VISION >= end.getDistance(kaiju) )
+        if( kaiju.CO.isEnemy(unit.CO) && Radar.VISION_RANGE >= end.getDistance(kaiju) )
         {
           chargeToGive += 2;
         }

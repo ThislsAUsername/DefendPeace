@@ -141,7 +141,7 @@ public class TestCapture extends TestCase
     
     // Set up for the test.
     Unit infA = addUnit(testMap, testCo1, UnitModel.TROOP, 2, 2); // On the city.
-    prop.setOwner(testCo2);
+    testMap.setOwner(testCo2, prop.getCoordinates());
 
     // Start capturing the city.
     infA.initTurn(testMap);
@@ -162,7 +162,7 @@ public class TestCapture extends TestCase
     testMap.removeUnit(infA);
     testCo1.army.team = -1;
     testCo2.army.team = -1;
-    prop.setOwner(null);
+    testMap.setOwner(null, prop.getCoordinates());
 
     return testPassed;
   }

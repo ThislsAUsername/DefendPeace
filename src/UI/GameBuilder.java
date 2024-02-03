@@ -8,6 +8,7 @@ import CommandingOfficers.CommanderInfo;
 import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.GameScenario.FogMode;
 import Engine.GameScenario.TagMode;
 import Terrain.Environment.Weathers;
 import Terrain.MapInfo;
@@ -20,7 +21,7 @@ import Units.UnitModelScheme;
 public class GameBuilder
 {
   public MapInfo mapInfo;
-  public boolean isFowEnabled = false;
+  public FogMode fogMode = FogMode.OFF_TRILOGY;
   public int startingFunds = 0;
   public int incomePerCity = 1000;
   public Weathers defaultWeather = Weathers.CLEAR;
@@ -35,7 +36,7 @@ public class GameBuilder
 
   public GameInstance createGame(PlayerSetupInfo[] playerInfos)
   {
-    GameScenario scenario = new GameScenario(unitModelScheme, incomePerCity, startingFunds, isFowEnabled, tagMode);
+    GameScenario scenario = new GameScenario(unitModelScheme, incomePerCity, startingFunds, fogMode, tagMode);
 
     // Add any CO-specific units into our set of UnitModels
     for( PlayerSetupInfo player : playerInfos )

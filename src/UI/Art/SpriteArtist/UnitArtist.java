@@ -3,6 +3,7 @@ package UI.Art.SpriteArtist;
 import java.awt.Graphics;
 
 import Engine.GameInstance;
+import Terrain.MapPerspective;
 import UI.Art.SpriteArtist.UnitSpriteSet.AnimState;
 import Units.Unit;
 
@@ -21,13 +22,13 @@ public class UnitArtist
    * "Real" means that the specified x and y are that of the game's
    * underlying data model, not of the draw-space.
    */
-  public void drawUnitIcons(Graphics g, Unit unit, int x, int y, int animIndex)
+  public void drawUnitIcons(Graphics g, MapPerspective map, Unit unit, int x, int y, int animIndex)
   {
     // Convert "real" location into a draw-space location, then draw icons.
     int drawX = (int) (tileSize * x);
     int drawY = (int) (tileSize * y);
 
-    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnitIcons(g, myGame, unit, animIndex, drawX, drawY);
+    SpriteLibrary.getMapUnitSpriteSet(unit).drawUnitIcons(g, myGame, map, unit, animIndex, drawX, drawY);
   }
 
   /**

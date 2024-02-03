@@ -49,7 +49,7 @@ public class Unit extends UnitState implements UnitModList
     }
     else
       isTurnOver = false;
-    if( captureTarget != null && captureTarget.getResident() != this )
+    if( captureTarget != null && !captureTarget.equals(x, y) )
     {
       captureTarget = null;
       captureProgress = 0;
@@ -86,22 +86,23 @@ public class Unit extends UnitState implements UnitModList
     return new UnitContext(map, this, weapon);
   }
 
-  public boolean capture(MapLocation target)
+  public boolean capture(MapMaster map)
   {
     boolean success = false;
 
-    if( target != captureTarget )
+    if( captureTarget == null || !captureTarget.equals(x, y) )
     {
-      captureTarget = target;
+      captureTarget = new XYCoord(x, y);
       captureProgress = 0;
     }
     UnitContext uc = new UnitContext(this);
     captureProgress += uc.calculateCapturePower();
-    if( captureProgress >= target.getEnvironment().terrainType.getCaptureThreshold() )
+    int captureThreshold = map.getEnvironment(x, y).terrainType.getCaptureThreshold();
+    if( captureProgress >= captureThreshold )
     {
-      target.setOwner(CO);
+      map.setOwner(CO, x, y);
       captureProgress = 0;
-      target = null;
+      captureTarget = null;
       success = true;
     }
 

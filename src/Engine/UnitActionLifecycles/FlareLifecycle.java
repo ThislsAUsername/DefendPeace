@@ -179,9 +179,7 @@ public abstract class FlareLifecycle
     public void performEvent(MapMaster gameMap)
     {
       launcher.ammo -= 1;
-      ArrayList<XYCoord> tiles = Utils.findLocationsInRange(gameMap, target, 0, radius);
-      for( XYCoord xyc : tiles )
-        launcher.CO.army.myView.revealFog(xyc, true);
+      launcher.CO.army.myView.flareTarget(target, radius);
     }
 
     @Override

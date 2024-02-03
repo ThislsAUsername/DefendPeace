@@ -40,19 +40,13 @@ public class MapLocation implements Serializable, ITargetable
     return owner;
   }
 
+  /**
+   * If the actual map state is changing, make sure to update the ownedProperties lists.<p>
+   * MapMaster.setOwner() is a convenient way to do so.
+   */
   public void setOwner(Commander owner)
   {
-    // remove ourselves from the previous owner's list, if one exists
-    if( null != this.owner )
-    {
-      this.owner.ownedProperties.remove(coords);
-    }
     this.owner = owner;
-    // add ourselves to the new owner's list, if it exists
-    if( null != this.owner )
-    {
-      this.owner.ownedProperties.add(coords);
-    }
   }
 
   public Unit getResident()
