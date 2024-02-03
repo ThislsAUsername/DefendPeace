@@ -62,7 +62,7 @@ public class TerrainSpriteSet
   private static Color backupSandOverlayColor    = new Color(243, 213,  85, 100);
   private static Color backupChillOverlayColor   = new Color(240, 243, 219,  42);
   private static Color backupSleetOverlayColor   = new Color(220, 220, 255,  72);
-  private static Color backupSmokeOverlayColor   = new Color( 30,  35,  33,  42);
+  private static Color backupSmokeOverlayColor   = new Color( 30, 142,  33,  72);
   private static Color backupSiroccoOverlayColor = new Color(243, 100,  85,  72);
   private static Map<Weathers, Color> backupOverlayColors;
   static {
