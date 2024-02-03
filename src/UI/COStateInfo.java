@@ -42,7 +42,7 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
         if( null != resident && resident.CO.army == thisArmy )
         {
           unitCount++;
-          if( resident.model.isTroop() )
+          if( !resident.model.isTroop() )
             vehCount++;
           unitFunds += resident.getCost() * resident.getHP() / 10;
         }
