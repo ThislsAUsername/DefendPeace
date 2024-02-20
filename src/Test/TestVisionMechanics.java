@@ -10,6 +10,7 @@ import Engine.GameScenario;
 import Engine.GameScenario.FogMode;
 import Engine.GamePath;
 import Engine.Utils;
+import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitActionLifecycles.ResupplyLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
@@ -64,7 +65,7 @@ public class TestVisionMechanics extends TestCase
     meaty.model.hidden = true; // Does anyone else think this is a bad idea? No? Okay, must be fair and balanced.
     
     // It's Strong's turn. Set up his fog goggles.
-    strong.army.initTurn(testMap);
+    testGame.turn(new GameEventQueue());
     boolean testPassed = true;
 
     // Make sure we can't see what we're not supposed to.

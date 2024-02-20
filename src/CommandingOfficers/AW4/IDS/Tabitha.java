@@ -47,7 +47,6 @@ public class Tabitha extends RuinedCommander
       return new Tabitha(rules);
     }
   }
-  public static final int D2DREPAIRS = 5;
   public static final int RADIUS  = 0;
   public static final int POWER   = 50;
   public static final int DEFENSE = 50;

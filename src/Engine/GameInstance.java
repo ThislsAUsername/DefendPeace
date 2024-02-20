@@ -17,7 +17,6 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.TurnInitEvent;
 import Engine.StateTrackers.StateTracker;
-import Engine.UnitMods.SandstormModifier;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Units.Unit;
@@ -49,7 +48,9 @@ public class GameInstance implements Serializable
   public final long rngSeed;
   private long rngNumbersGenerated = 0; // This isn't big enough to hold the period of our RNG, but one can hope games won't have enough combat to overflow this
 
-  private int currentTurn;
+  /** Measured in CO-turns, not days. */
+  private int fogOnUntil;
+  private int currentDay;
   private boolean currentTurnEnded = true; // Set to false when saving a game mid-turn.
 
   public GameInstance(Army[] armies, MapMaster map)
@@ -69,11 +70,21 @@ public class GameInstance implements Serializable
     rngSeed = new SplittableRandom().nextLong();
     rng = new SplittableRandom(rngSeed);
 
-    currentTurn = 1;
+    fogOnUntil = 0;
+    currentDay = 1;
 
     gameMap = map;
     gameMap.game = this;
     defaultWeather = weather;
+    // Pre-populate weather for day 1 turn 1
+    for( int i = 0; i < gameMap.mapWidth; i++ )
+    {
+      for( int j = 0; j < gameMap.mapHeight; j++ )
+      {
+        MapLocation loc = gameMap.getLocation(i, j);
+        loc.setForecast(defaultWeather, 0);
+      }
+    }
 
     this.armies = armies;
     activeCoNum = -1; // No army is active yet.
@@ -82,9 +93,6 @@ public class GameInstance implements Serializable
     playerCursors = new HashMap<Integer, XYCoord>();
     for( int i = 0; i < armies.length; ++i )
     {
-      // This is hacky, but hey
-      armies[i].addUnitModifier(new SandstormModifier());
-
       armies[i].money = gameScenario.rules.startingFunds;
       armies[i].myView = new MapPerspective(map, armies[i]);
       armies[i].myView.game = this;
@@ -105,9 +113,19 @@ public class GameInstance implements Serializable
     saveFile = getSaveName();
   }
 
+  public int calcCurrentCOTurn()
+  {
+    return (currentDay * armies.length) + activeCoNum;
+  }
   public boolean isFogEnabled()
   {
-    return rules.fogMode.fogDefaultsOn;
+    return fogOnUntil > calcCurrentCOTurn() || rules.fogMode.fogDefaultsOn;
+  }
+  public void setFog(int days)
+  {
+    int thisTurn = calcCurrentCOTurn();
+    int extraTurns = days * armies.length;
+    fogOnUntil = thisTurn + extraTurns;
   }
 
   // WeakHashMap isn't serializable, so we can't use Collections.newSetFromMap(new WeakHashMap<GameEventListener, Boolean>());
@@ -212,7 +230,7 @@ public class GameInstance implements Serializable
       activeCoNum++;
       if( activeCoNum > armies.length - 1 )
       {
-        currentTurn++;
+        currentDay++;
         activeCoNum = 0;
       }
       activeArmy = armies[activeCoNum];
@@ -224,7 +242,7 @@ public class GameInstance implements Serializable
     {
       // Display "It's not your turn" message.
       boolean hideMap = true;
-      events.add(new TurnInitEvent(activeArmy, currentTurn, hideMap, "It's not your turn"));
+      events.add(new TurnInitEvent(activeArmy, currentDay, hideMap, "It's not your turn"));
       return false; // auth failed.
     }
 
@@ -255,7 +273,7 @@ public class GameInstance implements Serializable
       }
     }
 
-    events.add(new TurnInitEvent(activeArmy, currentTurn, isFogEnabled() || isSecurityEnabled));
+    events.add(new TurnInitEvent(activeArmy, currentDay, isFogEnabled() || isSecurityEnabled));
 
     if( !weatherChanges.isEmpty() )
     {
@@ -270,7 +288,12 @@ public class GameInstance implements Serializable
 
     // Handle any CO-specific turn events.
     events.addAll(activeArmy.initTurn(gameMap));
-    
+
+    for( Army army : armies )
+    {
+      army.myView.resetFog();
+    }
+
     // Initialize the next turn, recording any events that will occur.
     return true; // Turn init successful.
   }
@@ -278,7 +301,7 @@ public class GameInstance implements Serializable
   /** Return the current turn number. */
   public int getCurrentTurn()
   {
-    return currentTurn;
+    return currentDay;
   }
 
   /**
@@ -398,10 +421,10 @@ public class GameInstance implements Serializable
 
   public boolean isSecurityEnforced()
   {
-    // Little reason to secure at turn 0; folks often have one player build
+    // Little reason to secure on Day 1; folks often have one player build
     // infantry for everyone for the first round, so we'll create passwords
     // after the second turn and enforce them thereafter.
-    return currentTurn > 1 && isSecurityEnabled && !activeArmy.isAI();
+    return currentDay > 1 && isSecurityEnabled && !activeArmy.isAI();
   }
 
   public boolean requireInitOnLoad()

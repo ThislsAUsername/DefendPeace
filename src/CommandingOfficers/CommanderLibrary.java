@@ -51,6 +51,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW4.Lazuria.Forsythe.getInfo() );
     commanderList.add( CommandingOfficers.AW4.NRA.Waylon.getInfo() );
     commanderList.add( CommandingOfficers.AW4.NRA.Greyfield.getInfo() );
+    commanderList.add( CommandingOfficers.AW4.IDS.Penny.getInfo() );
     commanderList.add( CommandingOfficers.AW4.IDS.Tabitha.getInfo() );
     commanderList.add( CommandingOfficers.AW4.IDS.Caulder.getInfo() );
     commanderList.add( DocLight.getInfo() );
@@ -68,9 +69,13 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW1.BH.Sturm.getInfo() );
     commanderList.add( CommandingOfficers.AW1.BH.SturmVS.getInfo() );
     commanderList.add( CommandingOfficers.AW2.OS.Andy.getInfo() );
+    commanderList.add( CommandingOfficers.AW2.BM.Olaf.getInfo() );
+    commanderList.add( CommandingOfficers.AW2.GE.Drake.getInfo() );
     commanderList.add( CommandingOfficers.AW2.BH.Sturm.getInfo() );
     commanderList.add( CommandingOfficers.AW3.OS.Andy.getInfo() );
     commanderList.add( CommandingOfficers.AW3.OS.Rachel.getInfo() );
+    commanderList.add( CommandingOfficers.AW3.BM.Olaf.getInfo() );
+    commanderList.add( CommandingOfficers.AW3.GE.Drake.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.VonBolt.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Andy.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Rachel.getInfo() );

@@ -188,6 +188,8 @@ public class UnitContext extends UnitState
     {
       rangeMin = w.rangeMin;
       rangeMax = w.rangeMax;
+      if( env != null && env.weatherType == Weathers.SANDSTORM && !CO.immuneToSand )
+        --rangeMax;
       for( UnitModifier mod : mods )
         mod.modifyAttackRange(this);
       if( rangeMax < rangeMin )
@@ -215,6 +217,8 @@ public class UnitContext extends UnitState
   public int calculateMovePower()
   {
     this.movePower = model.baseMovePower;
+    if( env != null && env.weatherType == Weathers.SLEET && !CO.immuneToCold )
+      --movePower;
     for( UnitModifier mod : mods )
       mod.modifyMovePower(this);
     if( movePower < 0 )
@@ -246,8 +250,16 @@ public class UnitContext extends UnitState
       // if it's a surface unit, give it the boost the terrain would provide, so long as it's not adjacent-only vision
       if( model.isSurfaceUnit() )
         visionRange += env.terrainType.getVisionBoost();
-      if( env.weatherType == Weathers.RAIN )
+      if( env.weatherType == Weathers.RAIN && !CO.immuneToClouds )
         --visionRange;
+      if( env.weatherType == Weathers.SMOKE && !CO.immuneToClouds )
+      {
+        // SMOKE sets vision to 1 (before buffs but after mountains) in DoR, but Drake's version in DS only subtracts 1 from vision.
+        if( null != unit && unit.CO.gameRules.fogMode.dorMode )
+          visionRange = 1;
+        else // Default to Trilogy logic, since "has most of normal vision" will stick out more vs "vision = 1" than vice versa.
+          --visionRange;
+      }
     }
     for( UnitModifier mod : mods )
       mod.modifyVision(this);
