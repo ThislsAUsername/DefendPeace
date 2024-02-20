@@ -275,7 +275,7 @@ public class UnitContext extends UnitState
         // SMOKE sets vision to 1 (before buffs but after mountains) in DoR, but Drake's version in DS only subtracts 1 from vision.
         if( null != unit && unit.CO.gameRules.fogMode.dorMode )
           visionRange = 1;
-        else // Default to Trilogy logic, since "has most of normal vision" will stick out more vs "vision = 1" than vice versa.
+        else // Default to Trilogy logic, since a rogue "has most of normal vision" sticks out more in "vision = 1" than the reverse.
           --visionRange;
       }
     }
