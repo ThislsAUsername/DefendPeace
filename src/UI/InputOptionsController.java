@@ -8,7 +8,7 @@ import UI.InputHandler.InputAction;
 
 public class InputOptionsController implements IController
 {
-  private static final String OTHER_INPUT_FILENAME = "res/other_input.txt";
+  private static final String OTHER_INPUT_FILENAME = Engine.Driver.JAR_DIR + "res/other_input.txt";
 
   public enum HideAbilityPreviews
   {

@@ -149,7 +149,7 @@ public class SpriteOptions
   //////////////////////////////////////////////////////////////////////
   //  File utility functions.
   //////////////////////////////////////////////////////////////////////
-  private static final String KEYS_FILENAME = "res/graphics_options.txt";
+  private static final String KEYS_FILENAME = Engine.Driver.JAR_DIR + "res/graphics_options.txt";
 
   private static void saveSettingsToDisk()
   {

@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class PasswordManager
 {
-  private static final String PASSFILE_NAME = "res/passfile";
+  private static final String PASSFILE_NAME = Engine.Driver.JAR_DIR + "res/passfile";
 
   /**
    * Create a new passfile if there isn't one yet, and then associate the passfile with `cmdr`.

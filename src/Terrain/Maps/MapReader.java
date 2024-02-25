@@ -26,7 +26,7 @@ public class MapReader extends IMapBuilder
     // If it fails, we don't need to do anything in the catch{} since we just won't have anything in our list.
     try
     {
-      final File folder = new File("res/map");
+      final File folder = new File(Engine.Driver.JAR_DIR + "res/map");
 
       for( final File fileEntry : folder.listFiles() )
       {

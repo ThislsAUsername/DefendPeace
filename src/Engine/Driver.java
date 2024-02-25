@@ -8,6 +8,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
 import java.util.Stack;
 
 import javax.swing.JFrame;
@@ -20,6 +21,7 @@ import UI.Art.SpriteArtist.SpriteEngine;
 
 public class Driver implements ActionListener, KeyListener
 {
+  public static final String JAR_DIR = ClassLoader.getSystemClassLoader().getResource(".").getPath().replaceAll("bin/$", "");
   private static Driver gameDriver;
   private Stack<ControlState> gameStatus = new Stack<ControlState>();
   private GameViewProxy gameView;
@@ -103,8 +105,9 @@ public class Driver implements ActionListener, KeyListener
 
   public static void main(String args[])
   {
+    boolean inDevDirectory = new File("src/").exists();
     // Run the test cases. If those all pass, launch the primary driver.
-    if( !new TestMain().runTest() )
+    if( inDevDirectory && !new TestMain().runTest() )
     {
       System.out.println("One or more tests failed!");
       System.exit(0);

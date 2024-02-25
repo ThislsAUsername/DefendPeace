@@ -124,7 +124,7 @@ public class MainUIController implements IController
           break;
           case CONTINUE:
             ArrayList<SaveInfo> saves = new ArrayList<SaveInfo>();
-            final File folder = new File("save/");
+            final File folder = new File(Engine.Driver.JAR_DIR + "save/");
             if( folder.canRead() )
             {
               for( final File fileEntry : folder.listFiles() )

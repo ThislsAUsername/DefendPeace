@@ -210,7 +210,7 @@ public class PlayerSetupController implements IController
 
   public static String buildSettingsFileName(GameBuilder gameBuilder)
   {
-    return "res/map_options/" + gameBuilder.mapInfo.mapName + "_army_selections.txt";
+    return Engine.Driver.JAR_DIR + "res/map_options/" + gameBuilder.mapInfo.mapName + "_army_selections.txt";
   }
 
   public boolean writeConfigStrings()
