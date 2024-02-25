@@ -444,7 +444,7 @@ public class Muriel implements AIController
     // Look for advantageous attack actions.
     ArrayList<GameAction> attackActions = unitActionsByType.get(UnitActionFactory.ATTACK);
     GameAction maxCarnageAction = null;
-    double maxDamageValue = 0;
+    int maxDamageValue = 0;
     if( null != attackActions && !attackActions.isEmpty() )
     {
       for( GameAction action : attackActions )
@@ -457,15 +457,15 @@ public class Muriel implements AIController
         Unit unitInTheWay = gameMap.getResident(action.getMoveLocation()); // Could be us, could be nobody.
 
         // Sift through all attack actions we can perform.
-        double damageValue = AICombatUtils.scoreAttackAction(unit, action, gameMap,
+        int damageValue = AICombatUtils.scoreAttackAction(unit, action, gameMap,
             (results) -> {
-              double healthDamage = Math.min(results.defender.getPreciseHealthDamage(), results.defender.unit.health);
+              int healthDamage = Math.min(results.defender.getPreciseHealthDamage(), results.defender.unit.health);
 
               if( shouldAttack(unit, results.defender.unit, gameMap) )
-                return (results.defender.unit.getCost() / 10) * healthDamage;
+                return (results.defender.unit.getCost() / UnitModel.MAXIMUM_HEALTH) * healthDamage;
 
-              return 0.;
-            }, (terrain, params) -> 0.); // Don't mess with terrain
+              return 0;
+            }, (terrain, params) -> 0); // Don't mess with terrain
 
         // Find the attack that causes the most monetary damage, provided it's at least a halfway decent idea.
         if( (damageValue > maxDamageValue) )

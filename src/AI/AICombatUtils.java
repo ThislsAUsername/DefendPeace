@@ -41,11 +41,11 @@ public class AICombatUtils
    * @param demolishScorer Evaluates targeting terrain
    * @return
    */
-  public static double scoreAttackAction(Unit unit, GameAction action, GameMap map,
-                                         Function<BattleSummary, Double> combatScorer,
-                                         BiFunction<TerrainType, StrikeParams, Double> demolishScorer)
+  public static int scoreAttackAction(Unit unit, GameAction action, GameMap map,
+                                         Function<BattleSummary, Integer> combatScorer,
+                                         BiFunction<TerrainType, StrikeParams, Integer> demolishScorer)
   {
-    double score = 0;
+    int score = 0;
     MapLocation targetLoc = map.getLocation(action.getTargetLocation());
     Unit targetUnit = targetLoc.getResident();
     if( null != targetUnit )
