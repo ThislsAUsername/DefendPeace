@@ -37,12 +37,18 @@ public class GameScenario implements Serializable
 
   public enum TagMode
   {
-    OFF(false), AWBW(true), Persistent(true), Team_Merge(false); // Cartridge
+    OFF       (false, "Dunno what you expected"),
+    AWBW      (true , "Multi-CO; only one active at a time"),
+    Persistent(true , "Multi-CO; only one builds or COPs at a time"),
+    Team_Merge(false, "All teams become a single player");
+    // Cartridge
 
     public final boolean supportsMultiCmdrSelect;
-    private TagMode(boolean multiCO)
+    public final String description;
+    private TagMode(boolean multiCO, String desc)
     {
       this.supportsMultiCmdrSelect = multiCO;
+      description = desc;
     }
   };
 
