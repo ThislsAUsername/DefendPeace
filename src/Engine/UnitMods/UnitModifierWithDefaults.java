@@ -51,6 +51,11 @@ public interface UnitModifierWithDefaults extends UnitModifier
   }
 
   @Override
+  default void modifyIdleFuelBurn(UnitContext uc)
+  {
+  }
+
+  @Override
   default void modifyAttackRange(UnitContext uc)
   {
   }

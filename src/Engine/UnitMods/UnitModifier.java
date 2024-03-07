@@ -50,6 +50,7 @@ public interface UnitModifier extends Serializable
 
   void modifyMovePower(UnitContext uc);
   void modifyMoveType(UnitContext uc);
+  void modifyIdleFuelBurn(UnitContext uc);
   void modifyAttackRange(UnitContext uc);
 
   void modifyVision(UnitContext uc);

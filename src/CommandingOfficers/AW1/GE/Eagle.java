@@ -12,6 +12,7 @@ import Engine.UnitMods.UnitModifier;
 import UI.UIUtils;
 import Terrain.MapMaster;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 public class Eagle extends AW1Commander
@@ -33,7 +34,7 @@ public class Eagle extends AW1Commander
             "Eagle (AW1)\n"
           + "An ace pilot who’s as tough as nails.\n"
           + "Strongest firepower in the skies. But flounders at sea.\n"
-          + "(1.15x/0.9x damage dealt/taken for air, -20 attack for naval)\n"));
+          + "(1.15x/0.9x damage dealt/taken and -2 fuel burn/turn for air, -20 attack for naval)\n"));
       infoPages.add(new InfoPage(new LightningStrike(null),
             "Non-infantry units ordered to wait can now move again that turn. However, their ratings are lower than normal.\n"
           + "(0.8x/1.3x damage dealt/taken, including footsoldiers)\n"));
@@ -75,6 +76,12 @@ public class Eagle extends AW1Commander
       params.defenderDamageMultiplier *= 90;
       params.defenderDamageMultiplier /= 100;
     }
+  }
+  @Override
+  public void modifyIdleFuelBurn(UnitContext uc)
+  {
+    if( uc.model.isAirUnit() )
+      uc.fuelBurnIdle -= 2;
   }
 
   private static class LightningStrike extends AW1Ability

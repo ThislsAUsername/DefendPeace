@@ -65,6 +65,13 @@ public abstract class UnitModFilter implements UnitModifier
   }
 
   @Override
+  public void modifyIdleFuelBurn(UnitContext uc)
+  {
+    if( shouldApplyTo(uc) )
+      effect.modifyIdleFuelBurn(uc);
+  }
+
+  @Override
   public void modifyAttackRange(UnitContext uc)
   {
     if( shouldApplyTo(uc) )

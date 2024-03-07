@@ -11,6 +11,7 @@ import Engine.UnitMods.UnitModifier;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
 import Terrain.GameMap;
+import Terrain.MapLocation;
 import Units.MoveTypes.MoveType;
 
 /**
@@ -35,6 +36,7 @@ public class UnitContext extends UnitState
   public int cargoCapacity;
 
   public MoveType moveType;
+  public int fuelBurnIdle;
   public int movePower;
   public int visionRange;
   public boolean visionPierces;
@@ -123,6 +125,7 @@ public class UnitContext extends UnitState
     cargoCapacity = other.cargoCapacity;
 
     moveType = other.moveType;
+    fuelBurnIdle = other.fuelBurnIdle;
     movePower = other.movePower;
     visionRange = other.visionRange;
     visionPierces = other.visionPierces;
@@ -148,6 +151,7 @@ public class UnitContext extends UnitState
     cargoCapacity = model.baseCargoCapacity;
 
     moveType = model.baseMoveType; // This should be safe to not deep-copy until we know we want to change it
+    fuelBurnIdle = model.fuelBurnIdle;
     movePower = model.baseMovePower;
     visionRange = model.visionRange;
     visionPierces = model.visionPierces;
@@ -241,6 +245,20 @@ public class UnitContext extends UnitState
     return captureProgress;
   }
 
+  public int calculateFuelBurnIdle(MapLocation loc)
+  {
+    this.env = loc.getEnvironment();
+    // Don't burn fuel while in port
+    if( model.healableHabs.contains(env.terrainType)
+        && !CO.isEnemy(loc.getOwner()) )
+      return 0;
+
+    fuelBurnIdle = model.fuelBurnIdle;
+    for( UnitModifier mod : mods )
+      mod.modifyIdleFuelBurn(this);
+    return fuelBurnIdle;
+  }
+
   public int calculateVision()
   {
     visionRange = model.visionRange;
@@ -257,7 +275,7 @@ public class UnitContext extends UnitState
         // SMOKE sets vision to 1 (before buffs but after mountains) in DoR, but Drake's version in DS only subtracts 1 from vision.
         if( null != unit && unit.CO.gameRules.fogMode.dorMode )
           visionRange = 1;
-        else // Default to Trilogy logic, since "has most of normal vision" will stick out more vs "vision = 1" than vice versa.
+        else // Default to Trilogy logic, since a rogue "has most of normal vision" sticks out more in "vision = 1" than the reverse.
           --visionRange;
       }
     }
