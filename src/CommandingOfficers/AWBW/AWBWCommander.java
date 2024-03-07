@@ -36,10 +36,18 @@ public abstract class AWBWCommander extends Commander
   @Override
   public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy, boolean isCounter)
   {
-    if( null != getActiveAbility() )
+    if( minion == null || enemy == null )
       return 0;
-    // TODO: Copy/paste super's code and delete the HP-based bit once the parent PR settles down.
-    return super.calculateCombatCharge(minion, enemy, isCounter);
+
+    int guiHPLoss  = minion.getHPDamage();
+    int guiHPDealt =  enemy.getHPDamage();
+
+    int power = 0; // value in funds of the charge we're getting
+
+    power += guiHPLoss * minion.unit.getCost() / 10;
+    power += guiHPDealt * enemy.unit.getCost() / 10 / 2;
+
+    return power;
   }
   @Override
   public int calculateMassDamageCharge(Unit minion, int lostHP)

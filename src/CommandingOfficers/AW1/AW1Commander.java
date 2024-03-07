@@ -33,8 +33,6 @@ public abstract class AW1Commander extends Commander
   @Override
   public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy, boolean isCounter)
   {
-    if( null != getActiveAbility() )
-      return 0;
     if( minion == null || enemy == null )
       return 0;
 
@@ -43,7 +41,6 @@ public abstract class AW1Commander extends Commander
 
     int power = 0; // value in funds of the charge we're getting
 
-    // Add up the funds value of the damage done to both participants.
     power += guiHPLoss * minion.unit.getCost() / 10;
     power += guiHPDealt * enemy.unit.getCost() / 10 / 4;
 
