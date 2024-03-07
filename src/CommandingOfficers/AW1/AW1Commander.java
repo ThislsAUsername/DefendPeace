@@ -38,8 +38,8 @@ public abstract class AW1Commander extends Commander
     if( minion == null || enemy == null )
       return 0;
 
-    int guiHPLoss  = minion.getHealthDamage() / 10;
-    int guiHPDealt =  enemy.getHealthDamage() / 10;
+    int guiHPLoss  = minion.getHPDamage();
+    int guiHPDealt =  enemy.getHPDamage();
 
     int power = 0; // value in funds of the charge we're getting
 
