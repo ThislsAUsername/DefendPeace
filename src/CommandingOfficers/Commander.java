@@ -139,6 +139,14 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   }
 
   /**
+   * @return whether this CO can currently charge
+   */
+  public boolean canAcceptCharge()
+  {
+    return (null == myActiveAbility);
+  }
+
+  /**
    * @return whether these COs would like to kill each other
    */
   public boolean isEnemy(Commander other)

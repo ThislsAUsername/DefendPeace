@@ -253,14 +253,10 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
     return Color.RED;
   }
 
-  protected boolean taggingDeniesCharge()
-  {
-    return gameRules.tagMode.supportsMultiCmdrSelect
-        && getAbilityText().length() > 0;
-  }
-
   public void awbwTagsCharge(Function<Commander, Integer> chargeEvaluator)
   {
+    if( !cos[0].canAcceptCharge() )
+      return;
     final int primaryCharge = chargeEvaluator.apply(cos[0]);
     cos[0].modifyAbilityPower(primaryCharge);
     final int tagDivisor = 2;
@@ -272,6 +268,8 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   }
   public void persistentTagsCharge(Function<Commander, Integer> chargeEvaluator)
   {
+    if( !cos[0].canAcceptCharge() )
+      return;
     // As persistent tags is meant to be mostly a sidegrade, give half charge to the primary, and split the rest among the rest.
     final int primaryCharge = chargeEvaluator.apply(cos[0]);
     if( cos.length == 1 )
@@ -294,8 +292,6 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   @Override
   public GameEventQueue receiveBattleEvent(final BattleSummary summary)
   {
-    if( taggingDeniesCharge() )
-      return null;
     // The lambdas demand the args be effectively final, so we're duplicating checks today
     boolean amAttacking = this == summary.attacker.CO.army;
     if( !amAttacking && this != summary.defender.CO.army )
@@ -327,10 +323,11 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
         break;
       case Team_Merge:
       case OFF:
-      {
-        final int ownerCharge = chargeEvaluator.apply(minion.CO);
-        minion.CO.modifyAbilityPower(ownerCharge);
-      }
+        if( minion.CO.canAcceptCharge() )
+        {
+          final int ownerCharge = chargeEvaluator.apply(minion.CO);
+          minion.CO.modifyAbilityPower(ownerCharge);
+        }
         break;
     }
     return null;
@@ -344,8 +341,6 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   {
     if( attacker != null && this == attacker.army )
       return null; // Punching yourself shouldn't make you angry
-    if( taggingDeniesCharge() )
-      return null;
 
     for( Entry<Unit, Integer> damageEntry : lostHealth.entrySet() )
     {
@@ -363,10 +358,11 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
           break;
         case Team_Merge:
         case OFF:
-        {
-          final int ownerCharge = chargeEvaluator.apply(minion.CO);
-          minion.CO.modifyAbilityPower(ownerCharge);
-        }
+          if( minion.CO.canAcceptCharge() )
+          {
+            final int ownerCharge = chargeEvaluator.apply(minion.CO);
+            minion.CO.modifyAbilityPower(ownerCharge);
+          }
           break;
       }
     }
