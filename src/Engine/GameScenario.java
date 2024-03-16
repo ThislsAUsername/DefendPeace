@@ -38,10 +38,10 @@ public class GameScenario implements Serializable
   public enum TagMode
   {
     OFF       (false, "Dunno what you expected"),
-    AWBW      (true , "Multi-CO; only one active at a time"),
-    Persistent(true , "Multi-CO; only one builds or COPs at a time"),
+    AWBW      (true , "Multi-CO; the current CO owns everything; other COs get half charge free"),
+    Persistent(true , "Multi-CO; the current CO builds and COPs; other COs keep units and steal half charge"),
     Team_Merge(false, "All teams become a single player");
-    // Cartridge
+    // Cartridge (true, "AWBW, but with affinity bonuses and tag powers"),
 
     public final boolean supportsMultiCmdrSelect;
     public final String description;
