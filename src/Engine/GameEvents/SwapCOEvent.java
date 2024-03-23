@@ -15,9 +15,9 @@ public class SwapCOEvent extends TurnEndEvent
 {
   Commander swapTarget;
 
-  public SwapCOEvent(Army army, int turnNum, Commander swapTarget)
+  public SwapCOEvent(MapMaster map, Army army, int turnNum, Commander swapTarget)
   {
-    super(army, turnNum);
+    super(map, army, turnNum);
     this.swapTarget = swapTarget;
   }
 

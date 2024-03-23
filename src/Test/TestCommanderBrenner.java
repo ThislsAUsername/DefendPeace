@@ -70,7 +70,7 @@ public class TestCommanderBrenner extends TestCase
     Unit infOnGrass      = addUnit(testMap, Brenner, UnitModel.LAND,           2, 8);
     Unit infOnUnowned    = addUnit(testMap, Brenner, UnitModel.LAND,           7, 8);
 
-    Brenner.initTurn(testMap);
+    turn(game);
     Brenner.army.money = 9001;
     boolean testPassed = true;
     DeployableCommander.DeployCOUFactory couer = Brenner.deployAction;
@@ -108,7 +108,7 @@ public class TestCommanderBrenner extends TestCase
     // And our victim
     Unit inf = addUnit(testMap, Patch, UnitModel.TROOP, 1, 2);
 
-    Brenner.initTurn(testMap);
+    turn(game);
     Brenner.army.money = 9001;
     boolean testPassed = true;
 
@@ -142,7 +142,7 @@ public class TestCommanderBrenner extends TestCase
     COU .damageHealth(20);
     UseAbilityFactory abilityer = new RuinedCommander.UseAbilityFactory(Brenner.myAbilities.get(0));
 
-    Brenner.initTurn(testMap);
+    turn(game);
     performGameAction(new LoadLifecycle.LoadAction(testMap, mech, Utils.findShortestPath(mech, new XYCoord(COU), testMap)), game);
 
     ArrayList<GameActionSet> unchargedActions = COU.getPossibleActions(testMap, GamePath.stayPut(COU));

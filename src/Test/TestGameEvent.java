@@ -11,7 +11,6 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.CreateUnitEvent;
-import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MoveEvent;
 import Engine.GameEvents.UnitDieEvent;
@@ -81,6 +80,8 @@ public class TestGameEvent extends TestCase
     // Clean up
     testMap.removeUnit(infA);
     testMap.removeUnit(infB);
+    testCo1.units.remove(infA);
+    testCo1.units.remove(infB);
 
     return testPassed;
   }
@@ -140,6 +141,7 @@ public class TestGameEvent extends TestCase
 
     // Clean up
     testMap.removeUnit(infA);
+    testCo1.units.remove(infA);
 
     return testPassed;
   }
@@ -162,6 +164,7 @@ public class TestGameEvent extends TestCase
 
     // Clean up.
     testMap.removeUnit(resident);
+    testCo1.units.remove(resident);
 
     return testPassed;
   }
@@ -212,6 +215,9 @@ public class TestGameEvent extends TestCase
     testMap.removeUnit(inf);
     testMap.removeUnit(mech);
     testMap.removeUnit(apc);
+    testCo1.units.remove(inf);
+    testCo1.units.remove(mech);
+    testCo1.units.remove(apc);
 
     return testPassed;
   }
@@ -260,6 +266,9 @@ public class TestGameEvent extends TestCase
     testMap.removeUnit(inf);
     testMap.removeUnit(mech);
     testMap.removeUnit(apc);
+    testCo1.units.remove(inf);
+    testCo1.units.remove(mech);
+    testCo1.units.remove(apc);
 
     return testPassed;
   }
@@ -296,9 +305,12 @@ public class TestGameEvent extends TestCase
     // Sink the boat. All units it holds should also be accounted for.
     GameEventQueue geq = new GameEventQueue();
     Utils.enqueueDeathEvent(boat, geq);
-    testPassed &= validate(geq.size() == 3, "    Utils.enqueueDeathEvent built the wrong number of events!");
+    // One event for each of the 3 units, and also one for losing
+    testPassed &= validate(geq.size() == 4, "    Utils.enqueueDeathEvent built the wrong number of events!");
 
-    // No cleanup required.
+    new UnitDieEvent(man).performEvent(testMap);
+    new UnitDieEvent(car).performEvent(testMap);
+    new UnitDieEvent(boat).performEvent(testMap);
 
     return testPassed;
   }
@@ -331,15 +343,7 @@ public class TestGameEvent extends TestCase
         "    Mech2 weapon still has " + mech2.ammo + " ammo, but should be empty.");
 
     // Simulate a new turn for the APC/Recon; the apc should re-supply the mech, and the recon should re-supply from the HQ.
-    GameEventQueue events = new GameEventQueue();
-    events.addAll(apc.initTurn(testMap));
-    events.addAll(recon.initTurn(testMap));
-    events.addAll(mech.initTurn(testMap));
-    events.addAll(mech2.initTurn(testMap));
-    for( GameEvent event : events )
-    {
-      event.performEvent(testMap);
-    }
+    turn(testGame);
 
     // Give the APC a new GameAction to go resupply mech2.
     GameAction resupplyAction = new ResupplyLifecycle.ResupplyAction(apc, Utils.findShortestPath(apc, 2, 3, testMap));
@@ -358,6 +362,10 @@ public class TestGameEvent extends TestCase
     testMap.removeUnit(mech);
     testMap.removeUnit(mech2);
     testMap.removeUnit(recon);
+    testCo1.units.remove(apc);
+    testCo1.units.remove(mech);
+    testCo1.units.remove(mech2);
+    testCo1.units.remove(recon);
 
     return testPassed;
   }
@@ -406,6 +414,8 @@ public class TestGameEvent extends TestCase
     // Clean up.
     testMap.removeUnit(recipient);
     testMap.removeUnit(donor);
+    testCo1.units.remove(recipient);
+    testCo1.units.remove(donor);
 
     return testPassed;
   }

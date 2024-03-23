@@ -86,7 +86,7 @@ public class TestAIBehavior extends TestCase
     testCo1.army.money = 80000;
 
     // Run through the turn's actions.
-    testCo1.army.initTurn(testMap);
+    turn(testGame);
     boolean testPassed = true;
     GameAction act = testCo1.army.getNextAIAction(testMap);
     testPassed &= validate(null != act, "    Failed to produce an action!");
@@ -120,7 +120,7 @@ public class TestAIBehavior extends TestCase
     boolean testPassed = validate(testCo1.ownedProperties.contains(facPos), "    Failed to assign factory.");
 
     // Run through the turn's actions.
-    testCo1.army.initTurn(testMap);
+    turn(testGame);
     GameAction act = null;
     do
     {
@@ -167,7 +167,7 @@ public class TestAIBehavior extends TestCase
     Unit iRight = addUnit(testMap, testCo1, "Infantry", facPos.right());
 
     // The infs all want to cap the fac, but can't because it is occupied. Gotta let the AA through.
-    testCo1.army.initTurn(testMap);
+    turn(testGame);
     testCo1.army.money = 0; // No production needed for this test.
 
     // Run through the turn's actions.
@@ -210,7 +210,7 @@ public class TestAIBehavior extends TestCase
 
     // The infs will want to cap the enemy HQ. Make sure the first one can
     // displace the second one so they both make best speed.
-    testCo1.army.initTurn(testMap);
+    turn(testGame);
     GameAction act = null;
     boolean testPassed = true;
     do
@@ -248,13 +248,14 @@ public class TestAIBehavior extends TestCase
     Unit inf = addUnit(testMap, testCo1, "Infantry", new XYCoord(2, 0));
     for( int xx = 3; xx < 10; ++xx)
       addUnit(testMap, testCo1, "Md Tank", new XYCoord(xx, 0));
+    turn(testGame);
 
     // The inf will want to cap the enemy HQ. Make sure the tanks get out of the way.
     boolean testPassed = true;
     int turnLimit = 4; // This should be enough time to cap the enemy HQ.
     for( int tt = 0; tt < turnLimit; ++tt )
     {
-      testCo1.army.initTurn(testMap);
+      turn(testGame, 2);
       GameAction act = null;
       do
       {
@@ -293,13 +294,14 @@ public class TestAIBehavior extends TestCase
       addUnit(testMap, testCo1, "Infantry", new XYCoord(xx, 0));
     Unit nmeArty = addUnit(testMap, testCo2, "Artillery", new XYCoord(9, 0)); // Target artillery
     Unit inf = addUnit(testMap, testCo1, "Md Tank", new XYCoord(1, 0)); // Create tank last just to make the AI compensate.
+    turn(testGame);
 
     // The inf will want to cap the enemy HQ. Make sure the tanks get out of the way.
     boolean testPassed = true;
     int turnLimit = 4; // This should be enough time to cap the enemy HQ.
     for( int tt = 0; tt < turnLimit; ++tt )
     {
-      testCo1.army.initTurn(testMap);
+      turn(testGame, 2);
       GameAction act = null;
       do
       {
@@ -326,7 +328,7 @@ public class TestAIBehavior extends TestCase
     // Give resources.
     testCo1.army.money = 80000;
 
-    testCo1.army.initTurn(testMap);
+    turn(testGame);
     GameAction act = null;
     boolean testPassed = true;
     do

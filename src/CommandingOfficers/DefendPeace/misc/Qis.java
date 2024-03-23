@@ -124,13 +124,10 @@ public class Qis extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(MapMaster gameMap)
+  protected void onTurnInit(MapMaster map, GameEventQueue events)
   {
     snowTrailTurns = 1;
     snowTrailShouldScale = false;
-
-    GameEventQueue returnEvents = super.initTurn(gameMap);
-    return returnEvents;
   }
 
   @Override

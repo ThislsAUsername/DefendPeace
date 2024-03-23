@@ -76,35 +76,32 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
       co.deInitForGame(game);
   }
 
-  /**
-   * Collect income and handle any COModifiers.
-   * @param map
-   */
-  public GameEventQueue initTurn(MapMaster map)
+  public GameEventQueue getAbilityRevertEvents(MapMaster map)
   {
     GameEventQueue events = new GameEventQueue();
 
-    money += getIncomePerTurn();
     for( Commander co : cos )
     {
-      events.addAll(co.initTurn(map));
-    }
-
-    if( null != aiController )
-    {
-      aiController.initTurn(myView);
+      events.addAll(co.getAbilityRevertEvents(map));
     }
 
     return events;
   }
 
   @Override
+  public GameEventQueue receiveTurnInitEvent(MapMaster map, Army army, int turn)
+  {
+    if( null != aiController )
+      aiController.initTurn(myView);
+
+    return null;
+  }
+
+  @Override
   public GameEventQueue receiveTurnEndEvent(Army army, int turn)
   {
-    if( aiController != null ) aiController.endTurn();
-    myView.resetFog();
-    for( Commander co : cos )
-      co.endTurn();
+    if( aiController != null )
+      aiController.endTurn();
 
     return null;
   }

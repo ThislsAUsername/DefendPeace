@@ -101,7 +101,8 @@ public abstract class TestCase
     for( GameEvent event : sequence )
     {
       event.performEvent( game.gameMap );
-      GameEventListener.publishEvent(event, game);
+      GameEventQueue rippleSequence = GameEventListener.publishEvent(event, game);
+      performEvents(game, rippleSequence);
     }
   }
 

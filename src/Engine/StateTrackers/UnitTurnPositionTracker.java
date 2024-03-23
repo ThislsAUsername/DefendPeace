@@ -5,6 +5,7 @@ import java.util.HashMap;
 import Engine.Army;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
+import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitContext;
 
@@ -18,7 +19,7 @@ public class UnitTurnPositionTracker extends StateTracker
   public HashMap<Unit, XYCoord> prevCoordMap = new HashMap<>();
 
   @Override
-  public GameEventQueue receiveTurnInitEvent(Army army, int turn)
+  public GameEventQueue receiveTurnInitEvent(MapMaster map, Army army, int turn)
   {
     ArrayList<Unit> units = army.getUnits();
     for( Unit u : units )

@@ -1,18 +1,21 @@
 package Engine.GameEvents;
 
-import CommandingOfficers.CommanderAbility;
+import Engine.Army;
 import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 
-public class CommanderAbilityRevertEvent implements GameEvent
+/**
+ * Resets everyone's vision.
+ */
+public class ResetVisionEvent implements GameEvent
 {
-  private final CommanderAbility myAbility;
+  final MapMaster map;
 
-  public CommanderAbilityRevertEvent(CommanderAbility ability)
+  public ResetVisionEvent(MapMaster map)
   {
-    myAbility = ability;
+    this.map = map;
   }
 
   @Override
@@ -24,14 +27,16 @@ public class CommanderAbilityRevertEvent implements GameEvent
   @Override
   public GameEventQueue sendToListener(GameEventListener listener)
   {
-    return listener.receiveCommanderAbilityRevertEvent(myAbility);
+    return null;
   }
 
   @Override
-  public void performEvent(MapMaster gameMap)
+  public void performEvent(MapMaster map)
   {
-    myAbility.deactivate(gameMap);
-    myAbility.myCommander.myActiveAbility = null;
+    for( Army army : map.game.armies )
+    {
+      army.myView.resetFog();
+    }
   }
 
   @Override

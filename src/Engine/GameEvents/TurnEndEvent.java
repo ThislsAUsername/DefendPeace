@@ -1,6 +1,7 @@
 package Engine.GameEvents;
 
 import Engine.Army;
+import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 
@@ -9,9 +10,9 @@ import UI.Art.Animation.GameAnimation;
  */
 public class TurnEndEvent extends TurnInitEvent
 {
-  public TurnEndEvent(Army army, int turnNum)
+  public TurnEndEvent(MapMaster map, Army army, int turnNum)
   {
-    super(army, turnNum, false, "Turn "+turnNum);
+    super(map, army, turnNum, false, "Turn "+turnNum);
   }
 
   @Override
