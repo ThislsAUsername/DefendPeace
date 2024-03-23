@@ -153,13 +153,13 @@ public abstract class RuinedCommander extends DeployableCommander
         ++zoneRadius;
     }
   }
+
+  // Charge based on HP damage dealt in zone
   @Override
   public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy, boolean isCounter)
   {
     if( zoneIsGlobal )
       return 0; // No charging while the zone is global, that's a little OP
-    if( minion == null || enemy == null )
-      return 0;
 
     // isCounter tells us who the attacker is, so we can figure out which one we care about being in the zone
     UnitContext chargeSource = minion.after;
@@ -168,7 +168,7 @@ public abstract class RuinedCommander extends DeployableCommander
     if( !isInZone(chargeSource) )
       return 0;
 
-    int guiHPDealt = enemy.getHealthDamage() / 10;
+    int guiHPDealt =  enemy.getHPDamage();
 
     int power = 0; // value in funds of the charge we're getting
 

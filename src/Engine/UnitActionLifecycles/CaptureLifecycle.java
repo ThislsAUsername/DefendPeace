@@ -1,5 +1,6 @@
 package Engine.UnitActionLifecycles;
 
+import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
@@ -116,8 +117,12 @@ public abstract class CaptureLifecycle
             {
               // Someone is losing their big, comfy chair.
               ArmyDefeatEvent defeat = new ArmyDefeatEvent(captureLocation.getOwner().army);
+              Commander newOwner = actor.CO;
+              // Capture territory for your primary CO in persistent tags
+              if( newOwner.gameRules.tagMode.supportsMultiCmdrSelect )
+                newOwner = newOwner.army.cos[0];
               if( (propertyType == TerrainType.HEADQUARTERS) )
-                defeat.setPropertyBeneficiary(actor.CO);
+                defeat.setPropertyBeneficiary(newOwner);
               captureEvents.add(defeat);
             }
           }

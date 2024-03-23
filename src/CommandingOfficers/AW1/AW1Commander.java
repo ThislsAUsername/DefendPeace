@@ -30,20 +30,15 @@ public abstract class AW1Commander extends Commander
     aw1Combat = true;
   }
 
+  // Charge based on funds damage taken + 1/4 dealt
   @Override
   public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy, boolean isCounter)
   {
-    if( null != getActiveAbility() )
-      return 0;
-    if( minion == null || enemy == null )
-      return 0;
-
-    int guiHPLoss  = minion.getHealthDamage() / 10;
-    int guiHPDealt =  enemy.getHealthDamage() / 10;
+    int guiHPLoss  = minion.getHPDamage();
+    int guiHPDealt =  enemy.getHPDamage();
 
     int power = 0; // value in funds of the charge we're getting
 
-    // Add up the funds value of the damage done to both participants.
     power += guiHPLoss * minion.unit.getCost() / 10;
     power += guiHPDealt * enemy.unit.getCost() / 10 / 4;
 

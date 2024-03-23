@@ -32,9 +32,9 @@ public class UnitDelta implements Serializable
     CO = after.CO;
   }
 
-  public int getHealthDamage()
+  public int getHPDamage()
   {
-    return deltaHealth * -1;
+    return deltaHealth * -1 / 10;
   }
   public int getPreciseHealthDamage()
   {

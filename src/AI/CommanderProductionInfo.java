@@ -62,6 +62,9 @@ public class CommanderProductionInfo
         }
         else
         {
+          // Put every valid prop type in every propsForCO so we don't have surprises later
+          for( Commander co : army.cos )
+            propertyCounts.get(co).putIfAbsent(terrain, 0);
           propsForCO.put(terrain, 1);
         }
 

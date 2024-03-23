@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.function.Function;
 
 import AI.AIController;
 import AI.AILibrary;
 import AI.AIMaker;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
-import Engine.GameScenario.TagMode;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -253,10 +253,37 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
     return Color.RED;
   }
 
-  protected boolean awbwDeniesCharge()
+  public void awbwTagsCharge(Function<Commander, Integer> chargeEvaluator)
   {
-    return TagMode.AWBW == gameRules.tagMode
-        && getAbilityText().length() > 0;
+    if( !cos[0].canAcceptCharge() )
+      return;
+    final int primaryCharge = chargeEvaluator.apply(cos[0]);
+    cos[0].modifyAbilityPower(primaryCharge);
+    final int tagDivisor = 2;
+    for( int i = 1; i < cos.length; ++i )
+    {
+      final int tagCharge = chargeEvaluator.apply(cos[i]);
+      cos[i].modifyAbilityPower(tagCharge / tagDivisor);
+    }
+  }
+  public void persistentTagsCharge(Function<Commander, Integer> chargeEvaluator)
+  {
+    if( !cos[0].canAcceptCharge() )
+      return;
+    // As persistent tags is meant to be mostly a sidegrade, give half charge to the primary, and split the rest among the rest.
+    final int primaryCharge = chargeEvaluator.apply(cos[0]);
+    if( cos.length == 1 )
+      cos[0].modifyAbilityPower(primaryCharge);
+    else
+    {
+      cos[0].modifyAbilityPower(primaryCharge / 2);
+      final double tagMultiplier = 0.5 / (cos.length - 1);
+      for( int i = 1; i < cos.length; ++i )
+      {
+        final int tagCharge = chargeEvaluator.apply(cos[i]);
+        cos[i].modifyAbilityPower((int) (tagCharge * tagMultiplier));
+      }
+    }
   }
 
   /**
@@ -265,50 +292,43 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   @Override
   public GameEventQueue receiveBattleEvent(final BattleSummary summary)
   {
-    if( awbwDeniesCharge() )
-      return null;
+    // The lambdas demand the args be effectively final, so we're duplicating checks today
+    boolean amAttacking = this == summary.attacker.CO.army;
+    if( !amAttacking && this != summary.defender.CO.army )
+      return null; // not attacking and not the defender -> not involved
 
     // We only care who the units belong to, not who picked the fight.
-    UnitDelta minion = null;
-    UnitDelta enemy = null;
-    boolean isCounter = false;
-    if( this == summary.attacker.CO.army )
+    final UnitDelta minion;
+    final UnitDelta enemy;
+    final boolean isCounter = !amAttacking;
+    if( amAttacking )
     {
       minion = summary.attacker;
       enemy = summary.defender;
-      isCounter = false;
     }
-    if( this == summary.defender.CO.army )
+    else
     {
       minion = summary.defender;
       enemy = summary.attacker;
-      isCounter = true;
     }
 
-    if( minion != null && enemy != null )
+    Function<Commander, Integer> chargeEvaluator = (co) -> co.calculateCombatCharge(minion, enemy, isCounter);
+    switch (gameRules.tagMode)
     {
-      switch (gameRules.tagMode)
-      {
-        case AWBW:
+      case AWBW:
+        awbwTagsCharge(chargeEvaluator);
+        break;
+      case Persistent:
+        persistentTagsCharge(chargeEvaluator);
+        break;
+      case Team_Merge:
+      case OFF:
+        if( minion.CO.canAcceptCharge() )
         {
-          final int primaryCharge = cos[0].calculateCombatCharge(minion, enemy, isCounter);
-          cos[0].modifyAbilityPower(primaryCharge);
-          for( int i = 1; i < cos.length; ++i )
-          {
-            final int tagCharge = cos[i].calculateCombatCharge(minion, enemy, isCounter);
-            final int tagDivisor = 2;
-            cos[i].modifyAbilityPower(tagCharge / tagDivisor);
-          }
-        }
-          break;
-        case Team_Merge:
-        case OFF:
-        {
-          final int ownerCharge = minion.CO.calculateCombatCharge(minion, enemy, isCounter);
+          final int ownerCharge = chargeEvaluator.apply(minion.CO);
           minion.CO.modifyAbilityPower(ownerCharge);
         }
-          break;
-      }
+        break;
     }
     return null;
   }
@@ -321,34 +341,28 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   {
     if( attacker != null && this == attacker.army )
       return null; // Punching yourself shouldn't make you angry
-    if( awbwDeniesCharge() )
-      return null;
 
     for( Entry<Unit, Integer> damageEntry : lostHealth.entrySet() )
     {
       Unit minion = damageEntry.getKey();
       if( this != minion.CO.army )
         break;
+      Function<Commander, Integer> chargeEvaluator = (co) -> co.calculateMassDamageCharge(minion, damageEntry.getValue());
       switch (gameRules.tagMode)
       {
         case AWBW:
-        {
-          final int primaryCharge = cos[0].calculateMassDamageCharge(minion, damageEntry.getValue());
-          cos[0].modifyAbilityPower(primaryCharge);
-          for( int i = 1; i < cos.length; ++i )
-          {
-            final int tagCharge = cos[i].calculateMassDamageCharge(minion, damageEntry.getValue());
-            final int tagDivisor = 2;
-            cos[i].modifyAbilityPower(tagCharge / tagDivisor);
-          }
-        }
+          awbwTagsCharge(chargeEvaluator);
+          break;
+        case Persistent:
+          persistentTagsCharge(chargeEvaluator);
           break;
         case Team_Merge:
         case OFF:
-        {
-          final int ownerCharge = minion.CO.calculateMassDamageCharge(minion, damageEntry.getValue());
-          minion.CO.modifyAbilityPower(ownerCharge);
-        }
+          if( minion.CO.canAcceptCharge() )
+          {
+            final int ownerCharge = chargeEvaluator.apply(minion.CO);
+            minion.CO.modifyAbilityPower(ownerCharge);
+          }
           break;
       }
     }

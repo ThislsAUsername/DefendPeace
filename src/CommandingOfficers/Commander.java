@@ -139,6 +139,14 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   }
 
   /**
+   * @return whether this CO can currently charge
+   */
+  public boolean canAcceptCharge()
+  {
+    return (null == myActiveAbility);
+  }
+
+  /**
    * @return whether these COs would like to kill each other
    */
   public boolean isEnemy(Commander other)
@@ -316,11 +324,8 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   // Note: Cart charge only uses whole HP, so that's what we're doing, too.
   public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy, boolean isCounter)
   {
-    if( minion == null || enemy == null )
-      return 0;
-
-    int guiHPLoss  = minion.getHealthDamage() / 10;
-    int guiHPDealt =  enemy.getHealthDamage() / 10;
+    int guiHPLoss  = minion.getHPDamage();
+    int guiHPDealt =  enemy.getHPDamage();
 
     int power = 0; // value in funds of the charge we're getting
 
