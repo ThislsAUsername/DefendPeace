@@ -2,11 +2,8 @@ package Units;
 
 import java.util.ArrayList;
 import Engine.UnitActionFactory;
-import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.ResupplyEvent;
 import Engine.UnitActionLifecycles.ExplodeLifecycle;
 import Engine.UnitActionLifecycles.TransformLifecycle;
-import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.MoveTypes.Flight;
 import Units.MoveTypes.FloatHeavy;
@@ -764,17 +761,9 @@ public class AWBWUnits extends UnitModelScheme
           moveType, actions, weapons, STAR_VALUE);
       baseCargoCapacity = 2;
       carryableMask = AIR_LOW | AIR_HIGH;
-    }
 
-    /** Carriers supply their cargo at the beginning of every turn. Make it so. */
-    @Override
-    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
-    {
-      GameEventQueue events = super.getTurnInitEvents(self, map);
-      for( Unit cargo : self.heldUnits )
-        if( !cargo.isFullySupplied() )
-          events.add(new ResupplyEvent(self, cargo));
-      return events;
+      /** Carriers supply their cargo at the beginning of every turn. Make it so. */
+      supplyCargo = true;
     }
   }
 
@@ -801,17 +790,9 @@ public class AWBWUnits extends UnitModelScheme
           moveType, actions, weapons, STAR_VALUE);
       baseCargoCapacity = 2;
       carryableMask = AIR_LOW;
-    }
 
-    /** Cruisers supply their cargo at the beginning of every turn. Make it so. */
-    @Override
-    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
-    {
-      GameEventQueue events = super.getTurnInitEvents(self, map);
-      for( Unit cargo : self.heldUnits )
-        if( !cargo.isFullySupplied() )
-          events.add(new ResupplyEvent(self, cargo));
-      return events;
+      /** Cruisers supply their cargo at the beginning of every turn. Make it so. */
+      supplyCargo = true;
     }
   }
 

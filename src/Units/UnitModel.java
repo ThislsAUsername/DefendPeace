@@ -90,6 +90,9 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public long carryableExclusionMask;
   public Set<TerrainType> unloadExclusionTerrain = new HashSet<TerrainType>();
 
+  public boolean supplyCargo = false;
+  public boolean repairCargo = false;
+
   public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
       MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] pWeapons, int powerValue)
   {
@@ -230,6 +233,18 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
         }
       }
     }
+
+    if( supplyCargo )
+      for( Unit cargo : self.heldUnits )
+      {
+        if( !cargo.isFullySupplied() )
+          queue.add(new ResupplyEvent(self, cargo));
+      }
+    if( repairCargo )
+      for( Unit cargo : self.heldUnits )
+      {
+        queue.add(new HealUnitEvent(cargo, self.CO.getRepairPower(), self.CO.army)); // Event handles cost logic
+      }
 
     if( !resupplying && (0 == self.fuel) & (isAirUnit() || isSeaUnit()) )
     {

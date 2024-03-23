@@ -4,15 +4,11 @@ import java.util.ArrayList;
 
 import Engine.GameInstance;
 import Engine.UnitActionFactory;
-import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.HealUnitEvent;
-import Engine.GameEvents.ResupplyEvent;
 import Engine.StateTrackers.StateTracker;
 import Engine.StateTrackers.SuicideAttackTracker;
 import Engine.StateTrackers.UnitResurrectionTracker;
 import Engine.StateTrackers.UnitTurnPositionTracker;
 import Engine.UnitActionLifecycles.UnitProduceLifecycle;
-import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import Units.KaijuWarsWeapons.CombatStunApplier;
@@ -628,20 +624,10 @@ public class KaijuWarsUnits extends UnitModelScheme
 
       kaijuCounter = 5;
       boostsAllies = true;
-    }
 
-    /** Repair cargo to (badly) simulate repairing lots of dudes in the source game */
-    @Override
-    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
-    {
-      GameEventQueue events = super.getTurnInitEvents(self, map);
-      for( Unit cargo : self.heldUnits )
-      {
-        events.add(new HealUnitEvent(cargo, self.CO.getRepairPower(), self.CO.army)); // Event handles cost logic
-        if( !cargo.isFullySupplied() )
-          events.add(new ResupplyEvent(self, cargo));
-      }
-      return events;
+      /** Repair cargo to (badly) simulate repairing lots of dudes in the source game */
+      repairCargo = true;
+      supplyCargo = true;
     }
   }
 
