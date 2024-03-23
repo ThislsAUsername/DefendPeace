@@ -62,6 +62,8 @@ public class Max extends AW1Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
+    if( params.attacker.model.isAny(UnitModel.TROOP) )
+      return;
     if( params.battleRange < 2 )
       params.attackPower += 50;
     if( params.attacker.model.isAny(UnitModel.INDIRECT) )
@@ -73,6 +75,8 @@ public class Max extends AW1Commander
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
+    if( params.attacker.model.isAny(UnitModel.TROOP) )
+      return;
     if( params.defender.model.isAny(UnitModel.INDIRECT) )
     {
       params.defenderDamageMultiplier *= 110;
