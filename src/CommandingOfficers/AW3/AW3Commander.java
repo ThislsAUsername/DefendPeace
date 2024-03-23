@@ -23,12 +23,10 @@ public abstract class AW3Commander extends AW2And3CommanderBase
     super(info, rules);
   }
 
+  // Charge based on abilityPowerValue-scaled damage taken + 1/2 dealt
   @Override
   public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy, boolean isCounter)
   {
-    if( minion == null || enemy == null )
-      return 0;
-
     int guiHPLoss  = minion.getHPDamage();
     int guiHPDealt =  enemy.getHPDamage();
 
