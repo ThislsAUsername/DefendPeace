@@ -1,6 +1,7 @@
 package Engine.GameEvents;
 
 import Engine.Army;
+import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
@@ -8,11 +9,16 @@ import UI.Art.Animation.GameAnimation;
 /**
  * Does nothing except signal the end of an Army's turn.
  */
-public class TurnEndEvent extends TurnInitEvent
+public class TurnEndEvent implements GameEvent
 {
+  final MapMaster map;
+  Army army;
+  int turn;
   public TurnEndEvent(MapMaster map, Army army, int turnNum)
   {
-    super(map, army, turnNum, false, "Turn "+turnNum);
+    this.map = map;
+    this.army = army;
+    turn = turnNum;
   }
 
   @Override
@@ -30,6 +36,18 @@ public class TurnEndEvent extends TurnInitEvent
   @Override
   public void performEvent(MapMaster map)
   {
+  }
+
+  @Override
+  public XYCoord getStartPoint()
+  {
+    return null;
+  }
+
+  @Override
+  public XYCoord getEndPoint()
+  {
+    return null;
   }
 
   @Override
