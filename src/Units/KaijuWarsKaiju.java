@@ -1,5 +1,7 @@
 package Units;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,7 +35,11 @@ import Units.KaijuActions.BirdResurrectFactory;
 import Units.KaijuActions.BirdSwoopFactory;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
 import Units.KaijuWarsUnits.Radar;
+import Units.KaijuWarsUnits.KaijuWarsUnitModel.KaijuWarsUnitModelBuilder;
 import Units.MoveTypes.MoveType;
+import lombok.Builder;
+import lombok.var;
+import lombok.experimental.SuperBuilder;
 
 public class KaijuWarsKaiju
 {
@@ -81,57 +87,38 @@ public class KaijuWarsKaiju
    *  + EMP Pulse (Kill a Radar within range 2. Otherwise, kill all adjacent units)
    */
 
-  private static final int KAIJU_COST = 0;
-  private static final int MOVE_POWER = 2; // Dummy value
-  private static final int STAR_VALUE = 50;
-  private static final int MAX_FUEL = 99;
-  private static final int IDLE_FUEL_BURN = 0;
-  private static final int MAX_AMMO = -1;
-  private static final int VISION_RANGE = 2;
+
+  private static void setKaijuVars(KaijuWarsUnitModelBuilder<?, ?> b)
+  {
+    b.costBase(0);
+    b.baseMovePower(2); // Dummy value
+    b.abilityPowerValue(50);
+    b.maxFuel(99);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(-1);
+    b.visionRange(2);
+    b.baseMoveType(KAIJU_MOVE);
+    b.baseActions(new ArrayList<>(Arrays.asList(KAIJU_ACTIONS)));
+    b.fuelBurnPerTile(0);
+    b.needsMaterials(false);
+  }
 
   private static final UnitActionFactory[] KAIJU_ACTIONS = { new KaijuActions.KaijuCrushFactory(), UnitActionFactory.DELETE };
 
   private static final MoveType KAIJU_MOVE         = new FootKaiju(true);
   private static final MoveType KAIJU_MOVE_RAMPAGE = new FootKaiju(false);
 
+  @SuperBuilder(toBuilder = true)
   public static class KaijuUnitModel extends KaijuWarsUnitModel
   {
     private static final long serialVersionUID = 1L;
     public final int[] healthChunks, healthBases;
-    public boolean regenOnBuildingKill  = false;
-    public boolean chargeOnBuildingKill = false;
-    public boolean hasRamSkill          = false;
-    public boolean hasDeepTunnelSkill   = false;
+    @Builder.Default public final boolean regenOnBuildingKill  = false;
+    @Builder.Default public final boolean chargeOnBuildingKill = false;
+    @Builder.Default public final boolean hasRamSkill          = false;
+    @Builder.Default public final boolean hasDeepTunnelSkill   = false;
     // Used by Big Donk and Duggemundr to get a new type on spawn
-    public UnitModel promotesToAtAllSkills = null;
-
-    public KaijuUnitModel(String pName, long pRole, int[] pHealthChunks, int[] pHealthBases)
-    {
-      super(pName, pRole, KAIJU_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, KAIJU_MOVE, KAIJU_ACTIONS, new WeaponModel[0], STAR_VALUE);
-
-      resistsKaiju = true;
-      isKaiju      = true;
-      healthChunks = pHealthChunks;
-      healthBases  = pHealthBases;
-    }
-
-    @Override
-    public UnitModel clone()
-    {
-      // Create a new model with the given attributes.
-      KaijuUnitModel newModel = new KaijuUnitModel(name, role, healthChunks, healthBases);
-
-      newModel.copyValues(this);
-      return newModel;
-    }
-    public void copyValues(KaijuUnitModel other)
-    {
-      super.copyValues(other);
-      regenOnBuildingKill   = other.regenOnBuildingKill;
-      chargeOnBuildingKill  = other.chargeOnBuildingKill;
-      hasRamSkill           = other.hasRamSkill;
-      promotesToAtAllSkills = other.promotesToAtAllSkills;
-    }
+    @Builder.Default public final UnitModel promotesToAtAllSkills = null;
   }
 
   public static final int BIRD_LAND_HEALTH = 100; // Should match the first chunk below
@@ -159,15 +146,11 @@ public class KaijuWarsKaiju
   public static final int[] SNEK_HPBASES  = { 50,  50,  50 };
   public static final int[] UFO_HPBASES   = { 50,  50,   0 };
 
+  @SuperBuilder(toBuilder = true)
   public static class Alphazaurus extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final long ROLE = TROOP | LAND | SEA;
-    public Alphazaurus()
-    {
-      super("Alphazaurus", ROLE, ALPHA_CHUNKS, ALPHA_HPBASES);
-      addUnitModifier(new AlphazaurusMod());
-    }
 
     /** Heal self by 3 on a cooldown */
     @Override
@@ -184,6 +167,19 @@ public class KaijuWarsKaiju
       }
       return events;
     }
+  }
+  public static KaijuUnitModel Alphazaurus()
+  {
+    var b = Alphazaurus.builder();
+    b.name("Alphazaurus");
+    b.role(Alphazaurus.ROLE);
+    setKaijuVars(b);
+    b.healthChunks(ALPHA_CHUNKS);
+    b.healthBases(ALPHA_HPBASES);
+
+    KaijuUnitModel output = b.build();
+    output.addUnitModifier(new AlphazaurusMod());
+    return output;
   }
   public static class AlphazaurusMod extends KaijuMoveMod
   {
@@ -216,30 +212,34 @@ public class KaijuWarsKaiju
     }
   } //~AlphazaurusMod
 
+  @SuperBuilder(toBuilder = true)
   public static class HellTurkey extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final long ROLE = HOVER | AIR_LOW;
     public HellTurkeyLand turkeyLand;
     public HellTurkeyEgg turkeyEgg;
-    public HellTurkey()
-    {
-      super("Hell Turkey", ROLE, BIRD_CHUNKS, BIRD_HPBASES);
-      addUnitModifier(new HellTurkeyMod());
-    }
     // Transitions to the land turkey are handled by KaijuStateTracker and the Kaiju crush action
   }
+  public static HellTurkey HellTurkey()
+  {
+    var b = HellTurkey.builder();
+    b.name("Hell Turkey");
+    b.role(HellTurkey.ROLE);
+    setKaijuVars(b);
+    b.healthChunks(BIRD_CHUNKS);
+    b.healthBases (BIRD_HPBASES);
+
+    HellTurkey output = b.build();
+    output.addUnitModifier(new HellTurkeyMod());
+    return output;
+  }
+  @SuperBuilder(toBuilder = true)
   public static class HellTurkeyLand extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final long ROLE = HOVER | LAND;
     public final HellTurkey airTurkey;
-    public HellTurkeyLand(HellTurkey turkey)
-    {
-      super("Hell Turkey Land", ROLE, BIRD_CHUNKS, BIRD_HPBASES);
-      airTurkey = turkey;
-      addUnitModifier(new HellTurkeyMod());
-    }
 
     /** Heal self by 1 with Swoop, if able */
     @Override
@@ -264,22 +264,45 @@ public class KaijuWarsKaiju
       return events;
     }
   }
+  public static HellTurkeyLand HellTurkeyLand(HellTurkey turkey)
+  {
+    var b = HellTurkeyLand.builder();
+    b.name("Hell Turkey Land");
+    b.role(HellTurkeyLand.ROLE);
+    b.airTurkey(turkey);
+    setKaijuVars(b);
+    b.healthChunks(BIRD_CHUNKS);
+    b.healthBases (BIRD_HPBASES);
+
+    HellTurkeyLand output = b.build();
+    output.addUnitModifier(new HellTurkeyMod());
+    return output;
+  }
+  @SuperBuilder(toBuilder = true)
   public static class HellTurkeyEgg extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final long ROLE = LAND;
     public final HellTurkeyLand landTurkey;
-    public HellTurkeyEgg(HellTurkeyLand turkey)
-    {
-      super("Hell Turkey Egg", ROLE, BIRD_CHUNKS, BIRD_HPBASES);
-      landTurkey = turkey;
-      this.baseMovePower = 0;
-      // The egg may resurrect, and naught else
-      this.baseActions.clear();
-      this.baseActions.add(new KaijuActions.BirdResurrectFactory(landTurkey));
-      // The egg is invincible
-      this.addUnitModifier(new UnitDefenseModifier(300));
-    }
+  }
+  public static HellTurkeyEgg HellTurkeyEgg(HellTurkeyLand turkey)
+  {
+    var b = HellTurkeyEgg.builder();
+    b.name("Hell Turkey Egg");
+    b.role(HellTurkeyEgg.ROLE);
+    b.baseMovePower(0);
+    b.landTurkey(turkey);
+    setKaijuVars(b);
+    b.healthChunks(BIRD_CHUNKS);
+    b.healthBases (BIRD_HPBASES);
+
+    HellTurkeyEgg output = b.build();
+    // The egg may resurrect, and naught else
+    output.baseActions.clear();
+    output.baseActions.add(new KaijuActions.BirdResurrectFactory(turkey));
+    // The egg is invincible
+    output.addUnitModifier(new UnitDefenseModifier(300));
+    return output;
   }
   public static class HellTurkeyMod extends KaijuMoveMod
   {
@@ -312,30 +335,35 @@ public class KaijuWarsKaiju
     }
   } //~HellTurkeyMod
 
+  @SuperBuilder(toBuilder = true)
   public static class BigDonk extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final long ROLE = TROOP | LAND;
-    public BigDonk(BigDonkRampage rampager)
-    {
-      super("Big Donk", ROLE, DONK_CHUNKS, DONK_HPBASES);
-      regenOnBuildingKill = true;
-      promotesToAtAllSkills = rampager;
-      addUnitModifier(new BigDonkMod());
-    }
   }
-  // Variant determined on spawn by KaijuStateTracker
-  public static class BigDonkRampage extends KaijuUnitModel
+  public static BigDonk BigDonk(BigDonk rampager)
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = TROOP | LAND;
-    public BigDonkRampage()
-    {
-      super("Big Donk", ROLE, DONK_CHUNKS, DONK_HPBASES);
-      regenOnBuildingKill = true;
-      baseMoveType = KAIJU_MOVE_RAMPAGE;
-      addUnitModifier(new BigDonkMod());
-    }
+    var b = BigDonk.builder();
+    b.name("Big Donk");
+    b.role(BigDonk.ROLE);
+    b.regenOnBuildingKill(true);
+    b.promotesToAtAllSkills(rampager);
+    setKaijuVars(b);
+    b.healthChunks(DONK_CHUNKS);
+    b.healthBases (DONK_HPBASES);
+
+    BigDonk output = b.build();
+    output.addUnitModifier(new BigDonkMod());
+    return output;
+  }
+  public static BigDonk BigDonkRampage()
+  {
+    var b = BigDonk(null).toBuilder();
+    b.baseMoveType(KAIJU_MOVE_RAMPAGE);
+
+    BigDonk output = b.build();
+    output.addUnitModifier(new BigDonkMod());
+    return output;
   }
   public static class BigDonkMod extends KaijuMoveMod
   {
@@ -378,27 +406,36 @@ public class KaijuWarsKaiju
     }
   } //~BigDonkMod
 
+  @SuperBuilder(toBuilder = true)
   public static class Snek extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final long ROLE = TANK | LAND | SUBSURFACE;
-    public Snek(SnekTunneler tunneler)
-    {
-      super("Duggemundr", ROLE, SNEK_CHUNKS, SNEK_HPBASES);
-      promotesToAtAllSkills = tunneler;
-      hasRamSkill = true;
-      addUnitModifier(new SnekMod());
-    }
   }
-  public static class SnekTunneler extends Snek
+  public static Snek Snek(Snek tunneler)
   {
-    private static final long serialVersionUID = 1L;
-    public SnekTunneler()
-    {
-      super(null);
-      hidden = true;
-      hasDeepTunnelSkill = true;
-    }
+    var b = Snek.builder();
+    b.name("Duggemundr");
+    b.role(Snek.ROLE);
+    b.promotesToAtAllSkills(tunneler);
+    b.hasRamSkill(true);
+    setKaijuVars(b);
+    b.healthChunks(SNEK_CHUNKS);
+    b.healthBases (SNEK_HPBASES);
+
+    Snek output = b.build();
+    output.addUnitModifier(new SnekMod());
+    return output;
+  }
+  public static Snek SnekTunneler()
+  {
+    var b = Snek(null).toBuilder();
+    b.hidden(true);
+    b.hasDeepTunnelSkill(true);
+
+    Snek output = b.build();
+    output.addUnitModifier(new SnekMod());
+    return output;
   }
   public static class SnekMod extends KaijuMoveMod
   {
@@ -434,16 +471,11 @@ public class KaijuWarsKaiju
     }
   } // ~SnekMod
 
+  @SuperBuilder(toBuilder = true)
   public static class UFO extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
     private static final long ROLE = JET | AIR_HIGH;
-    public UFO(UFOAbducts abductor)
-    {
-      super("Flying Hubcap", ROLE, UFO_CHUNKS, UFO_HPBASES);
-      promotesToAtAllSkills = abductor;
-      addUnitModifier(new UFOMod());
-    }
 
     /** Disable my move boost and EMP AoE if I have them and there's a Radar in range */
     @Override
@@ -464,14 +496,28 @@ public class KaijuWarsKaiju
       return events;
     }
   }
-  public static class UFOAbducts extends UFO
+  public static UFO UFO(UFO abductor)
   {
-    private static final long serialVersionUID = 1L;
-    public UFOAbducts()
-    {
-      super(null);
-      chargeOnBuildingKill = true;
-    }
+    var b = UFO.builder();
+    b.name("Flying Hubcap");
+    b.role(UFO.ROLE);
+    b.promotesToAtAllSkills(abductor);
+    setKaijuVars(b);
+    b.healthChunks(UFO_CHUNKS);
+    b.healthBases (UFO_HPBASES);
+
+    UFO output = b.build();
+    output.addUnitModifier(new UFOMod());
+    return output;
+  }
+  public static UFO UFOAbducts()
+  {
+    var b = UFO(null).toBuilder();
+    b.chargeOnBuildingKill(true);
+
+    UFO output = b.build();
+    output.addUnitModifier(new UFOMod());
+    return output;
   }
   public static class UFOMod extends KaijuMoveMod
   {
@@ -795,7 +841,7 @@ public class KaijuWarsKaiju
       if( !map.isLocationValid(to) )
         return MoveType.IMPASSABLE;
 
-      int cost = super.getTransitionCost(map, from, to, team, canTravelThroughEnemies);
+      int cost = super.getTransitionCost(map, from, to, team, true);
 
       // Cannot path through: Kaiju, buildings
       final MapLocation fromLocation = map.getLocation(from);
