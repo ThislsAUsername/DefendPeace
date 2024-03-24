@@ -30,7 +30,6 @@ import Engine.GameEvents.CreateUnitEvent;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
-import Terrain.TerrainType;
 import UI.UIUtils;
 import Units.Unit;
 import Units.UnitContext;
@@ -38,6 +37,7 @@ import Units.UnitModel;
 import Units.UnitModelScheme;
 import Units.WeaponModel;
 import Units.MoveTypes.FootMech;
+import lombok.var;
 import Units.UnitModelScheme.GameReadyModels;
 
 public class Tech extends Commander
@@ -570,23 +570,27 @@ public class Tech extends Commander
     UnitModel mdTank = grms.unitModels.getAllModels(UnitModel.LAND | UnitModel.ASSAULT, matchOnAny).get(1);
     UnitModel antiAir = grms.unitModels.getUnitModel(UnitModel.LAND | UnitModel.SURFACE_TO_AIR, matchOnAny);
 
-    UnitModel BattleMech = mdTank.clone();
-    BattleMech.name = BATTLEMECH_NAME;
-    BattleMech.role = BattleMech.role | UnitModel.SURFACE_TO_AIR;
-    BattleMech.costBase = mdTank.costBase*2 + (antiAir.costBase/2);
-    BattleMech.abilityPowerValue = 20;
-    BattleMech.maxFuel = 30;
-    BattleMech.maxAmmo = 10;
-    BattleMech.visionRange = 2;
-    BattleMech.baseMovePower = 4;
-    BattleMech.baseMoveType = new FootMech();
-    BattleMech.healableHabs = new HashSet<TerrainType>(); // BattleMechs have specialized parts, not easy to repair.
+    var BattleMech = mdTank.toBuilder();
+    BattleMech.name(BATTLEMECH_NAME);
+    BattleMech.costBase(mdTank.costBase*2 + (antiAir.costBase/2));
+    BattleMech.abilityPowerValue(20);
+    BattleMech.maxFuel(30);
+    BattleMech.maxAmmo(10);
+    BattleMech.visionRange(2);
+    BattleMech.baseMovePower(4);
+    BattleMech.baseMoveType(new FootMech());
 
-    WeaponModel ratatat = antiAir.weapons.get(0).clone();
     ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
-    weapons.add(BattleMech.weapons.get(0));
+    weapons.add(mdTank.weapons.get(0));
+    WeaponModel ratatat = antiAir.weapons.get(0).clone();
     weapons.add(ratatat);
-    BattleMech.weapons = weapons;
-    return BattleMech;
+    BattleMech.weapons(weapons);
+
+    UnitModel builtBM = BattleMech.build();
+    builtBM.role |= UnitModel.SURFACE_TO_AIR;
+    builtBM.setCalculatedProps();
+
+    builtBM.healableHabs.clear(); // BattleMechs have specialized parts, not easy to repair.
+    return builtBM;
   }
 } // class Tech
