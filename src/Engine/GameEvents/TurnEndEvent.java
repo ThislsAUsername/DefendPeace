@@ -28,6 +28,11 @@ public class TurnEndEvent extends TurnInitEvent
   }
 
   @Override
+  public void performEvent(MapMaster map)
+  {
+  }
+
+  @Override
   public boolean shouldEndTurn()
   {
     return true;
