@@ -86,8 +86,8 @@ public class Max extends AW1Commander
   @Override
   public void modifyAttackRange(UnitContext uc)
   {
-    if( uc.weapon != null && uc.weapon.rangeMax > 1 )
-      uc.weapon.rangeMax -= 1;
+    if( uc.weapon != null && uc.weapon.rangeMax() > 1 )
+      uc.rangeMax -= 1;
   }
 
   private static class MaxForce extends AW1BasicAbility

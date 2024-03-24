@@ -65,7 +65,7 @@ public class Grit extends AW1Commander
   @Override
   public void modifyAttackRange(UnitContext uc)
   {
-    if( uc.weapon != null && uc.weapon.rangeMax > 1 )
+    if( uc.weapon != null && uc.weapon.rangeMax() > 1 )
       uc.rangeMax += 1;
   }
 
