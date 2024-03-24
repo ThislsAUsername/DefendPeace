@@ -51,7 +51,7 @@ public abstract class BattleLifecycle
           {
             // Evaluate this weapon for targets if it has ammo, and if either the weapon
             // is mobile or we don't care if it's mobile (because we aren't moving).
-            if( wpn.loaded(actor) && (!moved || wpn.canFireAfterMoving) )
+            if( wpn.loaded(actor) && (!moved || wpn.canFireAfterMoving()) )
             {
               UnitContext uc = new UnitContext(map, actor, wpn, movePath, moveLocation);
               ArrayList<XYCoord> locations = Utils.findTargetsInRange(map, uc);

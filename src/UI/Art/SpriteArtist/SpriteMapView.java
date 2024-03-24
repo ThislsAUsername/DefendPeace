@@ -267,7 +267,7 @@ public class SpriteMapView extends MapView
         // ...and this turn's targets on top
         if( threatMode == SelectedUnitThreatAreaMode.All
             || threatMode == SelectedUnitThreatAreaMode.Current )
-          if( w.canFireAfterMoving || currentPath.getPathLength() == 1 )
+          if( w.canFireAfterMoving() || currentPath.getPathLength() == 1 )
           {
             UnitContext uc = new UnitContext(gameMap, currentActor, w, currentPath, cursorCoord);
             overlays.add(new GameOverlay(null,
