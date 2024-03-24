@@ -103,7 +103,7 @@ public class TestCommanderAve extends TestCase
     for( int i = 1; i < maxIters; ++i )
     {
       // Add more snow.
-      turn(game, 2);
+      day(game);
       if( testMap.getEnvironment(inRange).weatherType == Weathers.SNOW )
       {
         System.out.println("Snow after " + i + " turns");

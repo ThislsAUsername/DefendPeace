@@ -255,7 +255,7 @@ public class TestAIBehavior extends TestCase
     int turnLimit = 4; // This should be enough time to cap the enemy HQ.
     for( int tt = 0; tt < turnLimit; ++tt )
     {
-      turn(testGame, 2);
+      day(testGame);
       GameAction act = null;
       do
       {
@@ -301,7 +301,7 @@ public class TestAIBehavior extends TestCase
     int turnLimit = 4; // This should be enough time to cap the enemy HQ.
     for( int tt = 0; tt < turnLimit; ++tt )
     {
-      turn(testGame, 2);
+      day(testGame);
       GameAction act = null;
       do
       {

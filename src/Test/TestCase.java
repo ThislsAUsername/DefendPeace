@@ -106,6 +106,10 @@ public abstract class TestCase
     }
   }
 
+  protected static void day(GameInstance game)
+  {
+    turn(game, game.armies.length);
+  }
   protected static void turn(GameInstance game)
   {
     turn(game, 1);
