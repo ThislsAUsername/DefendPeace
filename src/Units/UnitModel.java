@@ -18,11 +18,14 @@ import Engine.UnitMods.UnitModifier;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.MoveTypes.MoveType;
+import lombok.Builder;
+import lombok.experimental.SuperBuilder;
 
 /**
  * Defines the invariant characteristics of a unit. One UnitModel can be shared across many instances of that Unit type.
  */
-public abstract class UnitModel implements Serializable, ITargetable, UnitModList
+@SuperBuilder(toBuilder = true)
+public class UnitModel implements Serializable, ITargetable, UnitModList
 {
   private static final long serialVersionUID = 1L;
 
@@ -63,82 +66,38 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
     return input.toLowerCase().replaceAll(" ", "_").replaceAll("-", "_");
   }
 
-  public int costBase;
-  public int baseMovePower;
-  public MoveType baseMoveType;
-  public ArrayList<UnitActionFactory> baseActions = new ArrayList<UnitActionFactory>();
-  public int baseCargoCapacity = 0;
+  public final int costBase;
+  public final int baseMovePower;
+  public final MoveType baseMoveType;
+  public final ArrayList<UnitActionFactory> baseActions;
+  @Builder.Default public final int baseCargoCapacity = 0;
   public static final int DEFAULT_STAT_RATIO = 100; // Accounts for firepower, defense, and cost
 
   // Dynamic modifications to any property below this line will require new additions to UnitContext and UnitModifier
   public static final int MAXIMUM_HEALTH = 100;
-  public String name;
-  public long role;
-  public int abilityPowerValue; // In percent of a star's value per GUI HP
-  public int maxAmmo;
-  public int maxFuel;
-  public int fuelBurnIdle;
-  public int fuelBurnPerTile = 1;
-  public int maxMaterials = 0;
-  public boolean needsMaterials = true;
-  public int visionRange;
-  public boolean visionPierces = false;
-  public boolean hidden = false;
-  public Set<TerrainType> healableHabs = new HashSet<TerrainType>();
-  public ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
-  public long carryableMask;
-  public long carryableExclusionMask;
-  public Set<TerrainType> unloadExclusionTerrain = new HashSet<TerrainType>();
+  public final String name;
+  public long role; // Can't easily be final due to setCalculatedProps()
+  public final int abilityPowerValue; // In percent of a star's value per GUI HP
+  public final int maxAmmo;
+  public final int maxFuel;
+  public final int fuelBurnIdle;
+  @Builder.Default public final int fuelBurnPerTile = 1;
+  @Builder.Default public final int maxMaterials = 0;
+  @Builder.Default public final boolean needsMaterials = true;
+  public final int visionRange;
+  @Builder.Default public final boolean visionPierces = false;
+  @Builder.Default public final boolean hidden = false;
+  public final Set<TerrainType> healableHabs = new HashSet<TerrainType>();
+  @Builder.Default public final ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
+  public final long carryableMask;
+  public final long carryableExclusionMask;
+  @Builder.Default public final Set<TerrainType> unloadExclusionTerrain = new HashSet<TerrainType>();
 
-  public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] pWeapons, int powerValue)
-  {
-    this(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
+  @Builder.Default public final boolean supplyCargo = false;
+  @Builder.Default public final boolean repairCargo = false;
 
-    for( UnitActionFactory action : actions )
-    {
-      baseActions.add(action);
-    }
-    for( WeaponModel wm : pWeapons )
-    {
-      weapons.add(wm.clone());
-    }
-    setCalculatedProps();
-  }
 
-  public UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> pWeapons, int powerValue)
-  {
-    this(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, powerValue);
-    baseActions.addAll(actions);
-    weapons = pWeapons;
-    setCalculatedProps();
-  }
-
-  private UnitModel(String pName, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision, int pMovePower,
-      MoveType pPropulsion, int powerValue)
-  {
-    name = pName;
-    role = pRole;
-    costBase = cost;
-    maxAmmo = pAmmoMax;
-    abilityPowerValue = powerValue;
-    maxFuel = pFuelMax;
-    fuelBurnIdle = pIdleFuelBurn;
-    visionRange = pVision;
-    baseMovePower = pMovePower;
-    baseMoveType = pPropulsion.clone();
-
-    for( TerrainType terrain : TerrainType.TerrainTypeList )
-    {
-      if( (isAny(AIR_LOW | AIR_HIGH) && terrain.healsAir())  ||
-          (isAny(LAND)               && terrain.healsLand()) ||
-          (isAny(SEA)                && terrain.healsSea())  )
-        healableHabs.add(terrain);
-    }
-  }
-
-  private void setCalculatedProps()
+  public void setCalculatedProps()
   {
     boolean isDirect = weapons.size() > 0;
     boolean isIndirect = false;
@@ -154,31 +113,14 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
       this.role |= DIRECT;
     if( isIndirect )
       this.role |= INDIRECT;
-  }
 
-  /**
-   * Copy-constructor. Does a deep-copy to allow easy creation of
-   * unit types that are similar to existing types.
-   * @param other The UnitModel to clone.
-   * @return The UnitModel clone.
-   */
-  @Override
-  public abstract UnitModel clone();
-
-  /** Copies stuff that isn't directly handled by the constructor. */
-  protected void copyValues(UnitModel other)
-  {
-    // Duplicate the other model's transporting abilities.
-    baseCargoCapacity = other.baseCargoCapacity;
-    carryableMask = other.carryableMask;
-    carryableExclusionMask = other.carryableExclusionMask;
-
-    // Duplicate other assorted values
-    maxMaterials = other.maxMaterials;
-    needsMaterials = other.needsMaterials;
-    fuelBurnPerTile = other.fuelBurnPerTile;
-    for( UnitModifier mod : other.unitMods )
-      unitMods.add(mod);
+    for( TerrainType terrain : TerrainType.TerrainTypeList )
+    {
+      if( (isAny(AIR_LOW | AIR_HIGH) && terrain.healsAir())  ||
+          (isAny(LAND)               && terrain.healsLand()) ||
+          (isAny(SEA)                && terrain.healsSea())  )
+        healableHabs.add(terrain);
+    }
   }
 
   public boolean canRepairOn(MapLocation locus)
@@ -230,6 +172,18 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
         }
       }
     }
+
+    if( supplyCargo )
+      for( Unit cargo : self.heldUnits )
+      {
+        if( !cargo.isFullySupplied() )
+          queue.add(new ResupplyEvent(self, cargo));
+      }
+    if( repairCargo )
+      for( Unit cargo : self.heldUnits )
+      {
+        queue.add(new HealUnitEvent(cargo, self.CO.getRepairPower(), self.CO.army)); // Event handles cost logic
+      }
 
     if( !resupplying && (0 == self.fuel) & (isAirUnit() || isSeaUnit()) )
     {
@@ -360,5 +314,11 @@ public abstract class UnitModel implements Serializable, ITargetable, UnitModLis
   public void removeUnitModifier(UnitModifier unitModifier)
   {
     unitMods.remove(unitModifier);
+  }
+
+  @Override
+  public int getDamageRedirect(WeaponModel wm)
+  {
+    throw new UnsupportedOperationException("Called base UnitModel.getDamageRedirect()");
   }
 }

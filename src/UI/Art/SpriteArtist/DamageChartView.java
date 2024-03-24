@@ -136,7 +136,7 @@ public class DamageChartView implements IView
         int maxDamage = 0;
         for( WeaponModel weapon : shooter.weapons )
         {
-          if( control.outOfAmmo && !weapon.hasInfiniteAmmo )
+          if( control.outOfAmmo && !weapon.hasInfiniteAmmo() )
             continue; // Can't shoot with no bullets.
 
           int currentDamage = (int) weapon.getDamage(target);

@@ -29,6 +29,7 @@ import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
+import lombok.Data;
 
 /**
  * Muriel will Make Units Reactively, Informed by the Enemy Loadout.
@@ -1096,6 +1097,7 @@ public class Muriel implements AIController
     }
   }
 
+  @Data
   private static class UnitModelPair
   {
     public final ModelForCO first;
@@ -1104,33 +1106,6 @@ public class Muriel implements AIController
     {
       this.first = first;
       this.second = second;
-    }
-
-    @Override
-    public int hashCode()
-    {
-      final int prime = 160091;
-      int result = 1;
-      result = prime * result + first.hashCode();
-      result = prime * result + second.hashCode();
-      return result;
-    }
-
-    @Override
-    public boolean equals(Object obj)
-    {
-      if( this == obj )
-        return true;
-      if( obj == null )
-        return false;
-      if( getClass() != obj.getClass() )
-        return false;
-      UnitModelPair other = (UnitModelPair) obj;
-      if( first != other.first )
-        return false;
-      if( second != other.second )
-        return false;
-      return true;
     }
   }
 
