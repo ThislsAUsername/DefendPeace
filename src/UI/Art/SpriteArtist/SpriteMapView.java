@@ -162,8 +162,8 @@ public class SpriteMapView extends MapView
 
     XYCoord animStart = toAnimate.getStartPoint();
     XYCoord animEnd = toAnimate.getEndPoint();
-    boolean isEventHidden = (null == animStart || gameMap.isLocationFogged(animStart))
-                         && (null == animEnd   || gameMap.isLocationFogged(animEnd));
+    boolean isEventHidden = (null != animStart && gameMap.isLocationFogged(animStart))
+                         && (null != animEnd   && gameMap.isLocationFogged(animEnd));
 
     if( isEventHidden )
       return false;

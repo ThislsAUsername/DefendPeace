@@ -16,6 +16,7 @@ import Engine.UnitActionLifecycles.LoadLifecycle;
 import Engine.UnitActionLifecycles.UnloadLifecycle;
 import Terrain.Environment.Weathers;
 import Terrain.MapLocation;
+import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -80,7 +81,7 @@ public interface GameEventListener extends Serializable
   default public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){ return null; };
   default public GameEventQueue receiveMoveEvent(Unit unit, GamePath unitPath){ return null; };
   default public GameEventQueue receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){ return null; };
-  default public GameEventQueue receiveTurnInitEvent(Army co, int turn){ return null; };
+  default public GameEventQueue receiveTurnInitEvent(MapMaster map, Army co, int turn){ return null; };
   default public GameEventQueue receiveTurnEndEvent(Army co, int turn){ return null; };
   default public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){ return null; };
   default public GameEventQueue receiveResupplyEvent(ResupplyEvent event){ return null; };
@@ -111,7 +112,7 @@ public interface GameEventListener extends Serializable
     default public GameEventQueue receiveCommanderDefeatEvent(ArmyDefeatEvent event){InvalidateCache(); return null; };
     default public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){InvalidateCache(); return null; };
     default public GameEventQueue receiveMoveEvent(Unit unit, GamePath unitPath){InvalidateCache(); return null; };
-    default public GameEventQueue receiveTurnInitEvent(Army co, int turn){ InvalidateCache(); return null; };
+    default public GameEventQueue receiveTurnInitEvent(MapMaster map, Army co, int turn){ InvalidateCache(); return null; };
     default public GameEventQueue receiveTurnEndEvent(Army co, int turn){ InvalidateCache(); return null; };
     default public GameEventQueue receiveTeleportEvent(Unit teleporter, XYCoord from, XYCoord to){InvalidateCache(); return null; };
     default public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event){InvalidateCache(); return null; };

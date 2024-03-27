@@ -74,7 +74,7 @@ public abstract class DeployableCommander extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(MapMaster map)
+  protected void onTurnInit(MapMaster map, GameEventQueue events)
   {
     if( resetCOUsEveryTurn )
     {
@@ -85,13 +85,6 @@ public abstract class DeployableCommander extends Commander
       this.COUs.removeAll(COUsLost);
       this.COUsLost.clear();
     }
-    return super.initTurn(map);
-  }
-
-  @Override
-  public void endTurn()
-  {
-    super.endTurn();
   }
 
   @Override

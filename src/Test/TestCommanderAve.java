@@ -83,8 +83,7 @@ public class TestCommanderAve extends TestCase
   boolean testSnowSpread()
   {
     boolean testPassed = true;
-    GameEventQueue events = Ave.initTurn(testMap);
-    for(GameEvent event: events) event.performEvent(testMap);
+    turn(game);
     
     // Verify that after initializing the first time, Ave's properties are all snow-bound.
     for( XYCoord prop : Ave.ownedProperties )
@@ -104,8 +103,7 @@ public class TestCommanderAve extends TestCase
     for( int i = 1; i < maxIters; ++i )
     {
       // Add more snow.
-      GameEventQueue turnEvents = Ave.initTurn(testMap);
-      for(GameEvent event: turnEvents) event.performEvent(testMap);
+      day(game);
       if( testMap.getEnvironment(inRange).weatherType == Weathers.SNOW )
       {
         System.out.println("Snow after " + i + " turns");
@@ -164,8 +162,8 @@ public class TestCommanderAve extends TestCase
     ArrayList<CommanderAbility> abilities = Ave.getReadyAbilities();
     for( CommanderAbility ca : abilities )
     {
+      performEvents(game, Ave.getAbilityRevertEvents(testMap));
       Ave.modifyAbilityStars(20);
-      Ave.initTurn(testMap);
       performGameAction(new GameAction.AbilityAction(ca), game);
     }
 

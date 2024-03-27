@@ -59,7 +59,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public boolean immuneToSand   = false; // Sandstorm/Sirocco
 
   public ArrayList<CommanderAbility> myAbilities = null;
-  protected CommanderAbility myActiveAbility = null;
+  public CommanderAbility myActiveAbility = null;
 
   public Commander(CommanderInfo info, GameScenario.GameRules rules)
   {
@@ -103,28 +103,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     return ca;
   }
 
-  public void endTurn()
-  {
-  }
-
-  /**
-   * Deactivate any active ability, and init all units
-   */
-  public GameEventQueue initTurn(MapMaster map)
-  {
-    GameEventQueue events = new GameEventQueue();
-
-    events.addAll(revertActiveAbility(map));
-
-    for( Unit u : units )
-    {
-      events.addAll(u.initTurn(map));
-    }
-
-    return events;
-  }
-
-  public GameEventQueue revertActiveAbility(MapMaster map)
+  public final GameEventQueue getAbilityRevertEvents(MapMaster map)
   {
     GameEventQueue events = new GameEventQueue();
 
@@ -132,11 +111,26 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     {
       events.add(new CommanderAbilityRevertEvent(myActiveAbility));
       events.addAll(myActiveAbility.getRevertEvents(map));
-      myActiveAbility = null;
     }
 
     return events;
   }
+
+  @Override
+  public final GameEventQueue receiveTurnInitEvent(MapMaster map, Army army, int turn)
+  {
+    if( army != this.army)
+      return null;
+
+    GameEventQueue events = new GameEventQueue();
+
+    onTurnInit(map, events);
+    for( Unit u : units )
+      events.addAll(u.model.getTurnInitEvents(u, map));
+
+    return events;
+  }
+  protected void onTurnInit(MapMaster map, GameEventQueue events) {}
 
   /**
    * @return whether this CO can currently charge

@@ -67,7 +67,7 @@ public abstract class GameAction
     {
       GameEventQueue buildEvents = new GameEventQueue();
 
-      buildEvents.add(new TurnEndEvent(who, turn));
+      buildEvents.add(new TurnEndEvent(gameMap, who, turn));
 
       return buildEvents;
     }
@@ -107,9 +107,9 @@ public abstract class GameAction
     {
       GameEventQueue buildEvents = new GameEventQueue();
 
-      buildEvents.addAll(who.cos[0].revertActiveAbility(gameMap));
-      buildEvents.add(new SwapCOEvent(who, turn, swapTarget));
-      buildEvents.add(new TurnEndEvent(who, turn));
+      buildEvents.addAll(who.getAbilityRevertEvents(gameMap));
+      buildEvents.add(new SwapCOEvent(gameMap, who, turn, swapTarget));
+      buildEvents.add(new TurnEndEvent(gameMap, who, turn));
 
       return buildEvents;
     }

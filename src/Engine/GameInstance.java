@@ -15,6 +15,8 @@ import CommandingOfficers.Commander;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MapChangeEvent;
+import Engine.GameEvents.ModifyFundsEvent;
+import Engine.GameEvents.ResetVisionEvent;
 import Engine.GameEvents.TurnInitEvent;
 import Engine.StateTrackers.StateTracker;
 import Terrain.Environment;
@@ -242,7 +244,7 @@ public class GameInstance implements Serializable
     {
       // Display "It's not your turn" message.
       boolean hideMap = true;
-      events.add(new TurnInitEvent(activeArmy, currentDay, hideMap, "It's not your turn"));
+      events.add(new TurnInitEvent(gameMap, activeArmy, currentDay, hideMap, "It's not your turn"));
       return false; // auth failed.
     }
 
@@ -273,26 +275,22 @@ public class GameInstance implements Serializable
       }
     }
 
-    events.add(new TurnInitEvent(activeArmy, currentDay, isFogEnabled() || isSecurityEnabled));
-
+    // Income first, since it should have no dependencies (and stuff depends on it)
+    events.add(new ModifyFundsEvent(activeArmy, activeArmy.getIncomePerTurn()));
+    events.addAll(activeArmy.getAbilityRevertEvents(gameMap));
+    events.add(new ResetVisionEvent(gameMap));
     if( !weatherChanges.isEmpty() )
     {
       events.add(new MapChangeEvent(weatherChanges));
     }
+    // Set up CO/unit state for the new day.
+    events.add(new TurnInitEvent(gameMap, activeArmy, currentDay, isFogEnabled() || isSecurityEnabled));
 
     // Set the cursor to the new CO's last known cursor position.
     setCursorLocation(playerCursors.get(activeCoNum).x, playerCursors.get(activeCoNum).y);
 
-    // Handle income and any other scenario-specific events.
+    // Handle any other scenario-specific events.
     events.addAll(gameScenario.initTurn(gameMap));
-
-    // Handle any CO-specific turn events.
-    events.addAll(activeArmy.initTurn(gameMap));
-
-    for( Army army : armies )
-    {
-      army.myView.resetFog();
-    }
 
     // Initialize the next turn, recording any events that will occur.
     return true; // Turn init successful.

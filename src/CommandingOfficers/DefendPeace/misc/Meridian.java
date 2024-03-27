@@ -12,7 +12,6 @@ import Engine.GameScenario;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
-import Engine.GameEvents.GameEventQueue;
 import Engine.StateTrackers.TransformationTracker;
 import Engine.UnitActionLifecycles.TransformLifecycle;
 import Engine.UnitMods.UnitFightStatModifier;
@@ -83,12 +82,6 @@ public class Meridian extends Commander
 
     addCommanderAbility(new ChangeAndFlow(this, myVehicularCharge.costBasis));
     addCommanderAbility(myVehicularCharge);
-  }
-
-  @Override
-  public GameEventQueue initTurn(MapMaster map)
-  {
-    return super.initTurn(map);
   }
 
   @Override

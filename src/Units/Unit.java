@@ -8,7 +8,6 @@ import Engine.GameActionSet;
 import Engine.GamePath;
 import Engine.UnitActionFactory;
 import Engine.XYCoord;
-import Engine.GameEvents.GameEventQueue;
 import Engine.UnitMods.UnitModList;
 import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
@@ -28,18 +27,10 @@ public class Unit extends UnitState implements UnitModList
   }
 
   /**
-   * Ready this unit for the next turn. Any actions it performs as part of
-   * initialization will be returned in a GameEventQueue.
-   * @param map
-   * @param events
+   * Ready this unit for the next turn.
    */
-  public GameEventQueue initTurn(MapMaster map)
+  public void initTurn(MapMaster map)
   {
-    // Make a queue to return any init events.
-    GameEventQueue events = new GameEventQueue();
-
-    MapLocation locus = map.getLocation(x, y);
-
     // Only perform turn initialization for the unit if it is on the map.
     //   Units that are e.g. in a transport don't burn fuel, etc.
     if( isStunned )
@@ -55,21 +46,13 @@ public class Unit extends UnitState implements UnitModList
       captureProgress = 0;
     }
 
-    if( null != heldUnits )
-      for( Unit cargo : heldUnits )
-        events.addAll(cargo.initTurn(map));
-
-    if( null != locus )
+    MapLocation locus = map.getLocation(x, y);
+    if( null != locus ) // Units can be off-map
     {
       UnitContext uc = new UnitContext(this);
       int burn = uc.calculateFuelBurnIdle(locus);
       fuel = Math.max(0, fuel - burn);
-
-      // Collect any turn-initialization events for this unit.
-      events.addAll(model.getTurnInitEvents(this, map));
     } // ~If location is valid.
-
-    return events;
   }
 
   public MoveType getMoveFunctor()

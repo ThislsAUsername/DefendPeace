@@ -101,10 +101,15 @@ public abstract class TestCase
     for( GameEvent event : sequence )
     {
       event.performEvent( game.gameMap );
-      GameEventListener.publishEvent(event, game);
+      GameEventQueue rippleSequence = GameEventListener.publishEvent(event, game);
+      performEvents(game, rippleSequence);
     }
   }
 
+  protected static void day(GameInstance game)
+  {
+    turn(game, game.armies.length);
+  }
   protected static void turn(GameInstance game)
   {
     turn(game, 1);

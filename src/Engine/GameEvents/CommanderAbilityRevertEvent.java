@@ -31,6 +31,7 @@ public class CommanderAbilityRevertEvent implements GameEvent
   public void performEvent(MapMaster gameMap)
   {
     myAbility.deactivate(gameMap);
+    myAbility.myCommander.myActiveAbility = null;
   }
 
   @Override

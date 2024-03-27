@@ -88,16 +88,10 @@ public class Venge extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(MapMaster map)
+  public GameEventQueue receiveTurnEndEvent(Army army, int turn)
   {
-    GameEventQueue events = super.initTurn(map);
-    return events;
-  }
-  @Override
-  public void endTurn()
-  {
-    super.endTurn();
     aggressors.clear();
+    return null;
   }
 
   @Override

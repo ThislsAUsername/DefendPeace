@@ -118,7 +118,7 @@ public class TestCombatMods extends TestCase
     // Clean up
     testMap.removeUnit(infA);
     testMap.removeUnit(infB);
-    performEvents(testGame, venge.army.initTurn(testMap));
+    day(testGame);
 
     return testPassed;
   }
@@ -162,7 +162,7 @@ public class TestCombatMods extends TestCase
     // Clean up
     testMap.removeUnit(infA);
     testMap.removeUnit(infB);
-    performEvents(testGame, venge.army.initTurn(testMap));
+    day(testGame);
 
     return testPassed;
   }

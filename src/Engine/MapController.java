@@ -641,7 +641,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
       saveMsg.add(saveName);
 
       boolean hideMap = true;
-      TurnInitEvent outro = new TurnInitEvent(myGame.activeArmy, myGame.getCurrentTurn(), hideMap, saveMsg);
+      TurnInitEvent outro = new TurnInitEvent(myGame.gameMap, myGame.activeArmy, myGame.getCurrentTurn(), hideMap, saveMsg);
       activeEventQueue.add(outro);
       myView.animate(outro);
 

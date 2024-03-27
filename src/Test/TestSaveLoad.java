@@ -60,7 +60,7 @@ public class TestSaveLoad extends TestCase
     Unit meaty = addUnit(testMap, patch, UnitModel.ASSAULT, 7, 5);
     
     // It's Strong's turn. Set up his fog goggles.
-    strong.army.initTurn(testMap);
+    turn(game);
     boolean testPassed = true;
 
     // Since running actual combat would be complicated, just grab some RNs

@@ -55,12 +55,10 @@ public class Caulder extends RuinedCommander
   }
 
   @Override
-  public GameEventQueue initTurn(MapMaster map)
+  protected void onTurnInit(MapMaster map, GameEventQueue events)
   {
-    GameEventQueue events = super.initTurn(map);
-
     if( COUs.isEmpty() )
-      return events;
+      return;
 
     Unit cou = COUs.get(0);
     XYCoord center = new XYCoord(cou);
@@ -85,8 +83,6 @@ public class Caulder extends RuinedCommander
         }
       }
     }
-
-    return events;
   }
 
 }

@@ -157,10 +157,8 @@ public class Ave extends Commander
   }
 
   @Override
-  public GameEventQueue initTurn(MapMaster gameMap)
+  protected void onTurnInit(MapMaster gameMap, GameEventQueue returnEvents)
   {
-    GameEventQueue returnEvents = super.initTurn(gameMap);
-
     // Initialize our snow tracker if needed.
     if( null == snowMap )
     {
@@ -174,7 +172,6 @@ public class Ave extends Commander
     relevelSnow(gameMap, returnEvents); // Enough to spread a bit each way.
 
     if(snowLoggingEnabled) log("[Commander Ave.initTurn] Snow Map: \n" + getSnowMapAsString());
-    return returnEvents;
   }
 
   /** Ave's units take less cover from forests. */

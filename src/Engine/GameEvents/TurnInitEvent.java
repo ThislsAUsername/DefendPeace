@@ -8,30 +8,33 @@ import Engine.XYCoord;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
+import Units.Unit;
 
 /**
- * Does nothing except signal the start of an Army's turn.
+ * Sets up the input army's units for the next turn.
  */
 public class TurnInitEvent implements GameEvent
 {
+  final MapMaster map;
   Army army;
   int turn;
   boolean opaque;
   Collection<String> msg;
 
-  public TurnInitEvent(Army army, int turnNum, boolean hideMap)
+  public TurnInitEvent(MapMaster map, Army army, int turnNum, boolean hideMap)
   {
-    this(army, turnNum, hideMap, "Turn "+turnNum);
+    this(map, army, turnNum, hideMap, "Turn "+turnNum);
   }
 
-  public TurnInitEvent(Army army, int turnNum, boolean hideMap, String message)
+  public TurnInitEvent(MapMaster map, Army army, int turnNum, boolean hideMap, String message)
   {
-    this(army, turnNum, hideMap, new ArrayList<String>());
+    this(map, army, turnNum, hideMap, new ArrayList<String>());
     msg.add(message);
   }
 
-  public TurnInitEvent(Army army, int turnNum, boolean hideMap, Collection<String> message)
+  public TurnInitEvent(MapMaster map, Army army, int turnNum, boolean hideMap, Collection<String> message)
   {
+    this.map = map;
     this.army = army;
     turn = turnNum;
     opaque = hideMap;
@@ -47,12 +50,14 @@ public class TurnInitEvent implements GameEvent
   @Override
   public GameEventQueue sendToListener(GameEventListener listener)
   {
-    return listener.receiveTurnInitEvent(army, turn);
+    return listener.receiveTurnInitEvent(map, army, turn);
   }
 
   @Override
-  public void performEvent(MapMaster gameMap)
+  public void performEvent(MapMaster map)
   {
+    for( Unit u : army.getUnits() )
+      u.initTurn(map);
   }
 
   @Override

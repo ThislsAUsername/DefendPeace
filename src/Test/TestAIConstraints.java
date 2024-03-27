@@ -60,7 +60,7 @@ public class TestAIConstraints extends TestCase
     armyOne.team = 9;
     testGame.armies[1].team = armyOne.team;
     // Run through a round of init-turns so that our allies are ready-to-act
-    turn(testGame, 3);
+    day(testGame);
 
     GameAction act = null;
     boolean testPassed = true;
