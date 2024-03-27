@@ -46,6 +46,7 @@ public class Driver implements ActionListener, KeyListener
     gameWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     gameWindow.addKeyListener(this);
     gameWindow.pack();
+    gameWindow.setLocationRelativeTo(null);
     gameWindow.setVisible(true);
 
     // Draw the screen at (ideally) 60fps.
