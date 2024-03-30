@@ -421,6 +421,8 @@ public class TerrainSpriteSet
       terrainObjects = new HashSet<TerrainType>();
       terrainObjects.add(TerrainType.BUNKER);
       terrainObjects.add(TerrainType.CITY);
+      terrainObjects.add(TerrainType.DS_TOWER);
+      terrainObjects.add(TerrainType.DOR_TOWER);
       terrainObjects.add(TerrainType.FACTORY);
       terrainObjects.add(TerrainType.FOREST);
       terrainObjects.add(TerrainType.AIRPORT);
@@ -495,6 +497,8 @@ public class TerrainSpriteSet
     {
       terrainBases = new HashMap<TerrainType, TerrainType>();
       terrainBases.put(TerrainType.CITY, TerrainType.ROAD);
+      terrainBases.put(TerrainType.DS_TOWER, TerrainType.ROAD);
+      terrainBases.put(TerrainType.DOR_TOWER, TerrainType.ROAD);
       terrainBases.put(TerrainType.DUNES, TerrainType.GRASS);
       terrainBases.put(TerrainType.FACTORY, TerrainType.ROAD);
       terrainBases.put(TerrainType.AIRPORT, TerrainType.GRASS);
