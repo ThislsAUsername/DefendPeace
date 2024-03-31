@@ -95,24 +95,22 @@ public class Javier extends AW3Commander
   private static class JavierAbility extends AW3Ability
   {
     private static final long serialVersionUID = 1L;
-    private final UnitModifier boostDef;
-    private final UnitModifier boostTower;
+    private final int boostDef;
+    private final int boostTower;
 
-    JavierAbility(Commander commander, CostBasis cb, String name, int cost, int defense, int towerMult)
+    JavierAbility(Commander commander, CostBasis cb, String name, int cost, int towerMult, int defense)
     {
       super(commander, name, cost, cb);
       AIFlags = PHASE_TURN_START;
-      boostDef = new IndirectDefenseModifier(defense);
-      if( null == commander )
-        boostTower = null;
-      else
-        boostTower = new TowerCountMultiplier(towerMult, commander.army);
+      boostDef = defense;
+      boostTower = towerMult;
     }
 
     protected void enqueueMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      modList.add(boostDef);
-      modList.add(boostTower);
+      // Generate mods at activation time since Javier doesn't have an army at construction time.
+      modList.add(new IndirectDefenseModifier(boostDef));
+      modList.add(new TowerCountMultiplier(boostTower, myCommander.army));
     }
   }
 }
