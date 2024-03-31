@@ -73,8 +73,8 @@ public class ArmyDefeatEvent implements GameEvent
         {
           gameMap.setOwner(beneficiaryCO, x, y);
           Unit resident = loc.getResident();
-          if( null != resident )
-            resident.stopCapturing();
+          if( null != resident && !resident.CO.isEnemy(beneficiaryCO) )
+            resident.stopCapturing(); // IFF the new owner is a friend
         }
       } // ~width loop
     } // ~height loop
