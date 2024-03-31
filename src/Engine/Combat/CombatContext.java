@@ -94,7 +94,7 @@ public class CombatContext
   /**
    * Call during combat calculations
    */
-  public void applyModifiers()
+  public CombatContext applyModifiers()
   {
     // Make local shallow copies to avoid funny business
     List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
@@ -104,6 +104,7 @@ public class CombatContext
       mod.changeCombatContext(this);
     for( UnitModifier mod : dMods )
       mod.changeCombatContext(this);
+    return this;
   }
 
   /**

@@ -52,7 +52,7 @@ public class UnitContext extends UnitState
 
   public final List<UnitActionFactory> actionTypes = new ArrayList<UnitActionFactory>();
 
-  public final List<UnitModifier> mods = new ArrayList<>();
+  public final ArrayList<UnitModifier> mods = new ArrayList<>();
 
   /**
    * Builds a UnitContext grounded to a specific Unit on its current tile, with map awareness.
