@@ -30,8 +30,7 @@ public class UnitContext extends UnitState
   public GamePath path;
   public XYCoord coord;
 
-  public int attackPower;
-  public int defensePower;
+  public int towerCountDoR = -99, towerCountDS = -99; // Calculated by CombatContext
   public int capturePower; // in percent
   public int cargoCapacity;
 
@@ -119,8 +118,8 @@ public class UnitContext extends UnitState
     path = other.path;
     coord = other.coord;
 
-    attackPower = other.attackPower;
-    defensePower = other.defensePower;
+    towerCountDS = other.towerCountDS;
+    towerCountDoR = other.towerCountDoR;
     capturePower = other.capturePower;
     cargoCapacity = other.cargoCapacity;
 
@@ -145,8 +144,6 @@ public class UnitContext extends UnitState
   }
   public void initModel()
   {
-    attackPower = UnitModel.DEFAULT_STAT_RATIO;
-    defensePower = UnitModel.DEFAULT_STAT_RATIO;
     capturePower = UnitModel.DEFAULT_STAT_RATIO;
     cargoCapacity = model.baseCargoCapacity;
 

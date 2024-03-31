@@ -9,6 +9,7 @@ import Terrain.GameMap;
 import Terrain.Environment.Weathers;
 import Units.ITargetable;
 import Units.UnitContext;
+import Units.UnitModel;
 
 /**
  * Utility struct used to facilitate calculating battle results.
@@ -71,7 +72,7 @@ public class StrikeParams
 
   public int baseDamage;
   public int attackerHealth;
-  public int attackPower; // Only add/subtract from this quantity.
+  public int attackPower = UnitModel.DEFAULT_STAT_RATIO; // Only add/subtract from this quantity.
 // These three variables are needed to simulate different games' luck implementations - 1 RN vs 2 RNs
   public int luckBase = 0; // Luck value if you roll 0
   public int luckRolled = 0; // The number we plug into the RNG for luck damage
@@ -93,8 +94,8 @@ public class StrikeParams
 
   public int defenderHealth = 0;
   public final XYCoord targetCoord;
-  public int defenseSubtraction = 100; // Only add/subtract from this quantity.
-  public int defenseDivision    = 100; // Only add/subtract from this quantity.
+  public int defenseSubtraction = UnitModel.DEFAULT_STAT_RATIO; // Only add/subtract from this quantity.
+  public int defenseDivision    = UnitModel.DEFAULT_STAT_RATIO; // Only add/subtract from this quantity.
   public int terrainStars = 0;
   public boolean terrainGivesSubtraction = true;
 
@@ -111,7 +112,6 @@ public class StrikeParams
 
     this.baseDamage = baseDamage;
     this.attackerHealth = attacker.getHealth();
-    this.attackPower = attacker.attackPower;
     this.luckRolled = attacker.CO.luck;
     this.isCounter = isCounter;
     aw1Luck = attacker.CO.aw1Combat;
@@ -119,6 +119,8 @@ public class StrikeParams
       this.attackerHealth = attacker.health;
 
     this.targetCoord = target;
+
+    attacker.CO.applyTowerAttack(this);
   }
   protected StrikeParams(StrikeParams other)
   {
@@ -188,8 +190,9 @@ public class StrikeParams
       this.defender = defender;
 
       defenderHealth = defender.getHealth();
-      this.defenseSubtraction = defender.defensePower;
       this.terrainStars = defender.terrainStars;
+
+      defender.CO.applyTowerDefense(this);
     }
 
     @Override
