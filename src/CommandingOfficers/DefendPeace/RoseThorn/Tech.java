@@ -165,7 +165,7 @@ public class Tech extends Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageBuff);
       modList.add(defenseBuff);
@@ -242,7 +242,7 @@ public class Tech extends Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageBuff);
       modList.add(defenseBuff);

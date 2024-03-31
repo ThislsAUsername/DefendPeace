@@ -143,7 +143,7 @@ public class Patch extends Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageBuff);
     }

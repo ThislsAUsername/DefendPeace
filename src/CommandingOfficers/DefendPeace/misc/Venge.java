@@ -193,7 +193,7 @@ public class Venge extends Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       UnitInstanceFilter uif = new UnitInstanceFilter(new IronWillMod(IRONWILL_BOOST));
       for( Unit unit : myCommander.army.getUnits() )
@@ -249,7 +249,7 @@ public class Venge extends Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageMod);
       modList.add(defenseMod);

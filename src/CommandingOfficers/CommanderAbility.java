@@ -149,7 +149,7 @@ public abstract class CommanderAbility implements Serializable
   }
 
   /** Allows the subclass to specify any modifiers that it would like to be active while the ability is */
-  protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList) {}
+  public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList) {}
 
   public Collection<DamagePopup> getDamagePopups(GameMap map)
   {

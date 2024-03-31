@@ -39,7 +39,7 @@ public abstract class AW2And3CommanderBase extends Commander
     }
 
     @Override
-    protected final void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    public final void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(genericAttack);
       modList.add(genericDefense);

@@ -74,7 +74,7 @@ public class Lin extends RuinedCommander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(sightMod);
     }
