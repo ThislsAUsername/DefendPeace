@@ -76,6 +76,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW3.OS.Rachel.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BM.Olaf.getInfo() );
     commanderList.add( CommandingOfficers.AW3.GE.Drake.getInfo() );
+    commanderList.add( CommandingOfficers.AW3.GE.Javier.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.VonBolt.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Andy.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Rachel.getInfo() );

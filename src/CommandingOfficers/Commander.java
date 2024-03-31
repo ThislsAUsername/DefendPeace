@@ -346,13 +346,13 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     return power;
   }
 
-  public final void applyTowerAttack(StrikeParams params)
+  public void applyTowerAttack(StrikeParams params)
   {
     UnitContext minion = params.attacker;
     params.attackPower += minion.towerCountDS * 10;
     params.attackPower += minion.towerCountDoR * 5;
   }
-  public final void applyTowerDefense(BattleParams params)
+  public void applyTowerDefense(BattleParams params)
   {
     UnitContext minion = params.defender;
     params.defenseDivision += minion.towerCountDoR * 5;
