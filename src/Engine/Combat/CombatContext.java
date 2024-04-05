@@ -38,6 +38,12 @@ public class CombatContext
                         UnitContext pAttacker, UnitContext pDefender,
                         CalcType pCalcType)
   {
+    this(gi, map, pAttacker, pDefender, calcBattleRange(pAttacker, pDefender), pCalcType);
+  }
+  public CombatContext(GameInstance gi, GameMap map,
+                        UnitContext pAttacker, UnitContext pDefender, int battleRange,
+                        CalcType pCalcType)
+  {
     attacker = pAttacker;
     defender = pDefender;
 
@@ -47,12 +53,7 @@ public class CombatContext
     if (null == gameInstance && !calcType.isSim())
       throw new IllegalArgumentException("Caller requires true game results but did not provide a GameInstance.");
 
-    int attackerX = attacker.coord.x;
-    int attackerY = attacker.coord.y;
-    int defenderX = defender.coord.x;
-    int defenderY = defender.coord.y;
-
-    battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
+    this.battleRange = battleRange;
     setTowerCounts(map, attacker);
     setTowerCounts(map, defender);
 
@@ -89,6 +90,17 @@ public class CombatContext
     canCounter = other.canCounter;
     battleRange = other.battleRange;
     calcType = other.calcType;
+  }
+  private static int calcBattleRange(UnitContext attacker, UnitContext defender)
+  {
+    int battleRange;
+    int attackerX = attacker.coord.x;
+    int attackerY = attacker.coord.y;
+    int defenderX = defender.coord.x;
+    int defenderY = defender.coord.y;
+
+    battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
+    return battleRange;
   }
 
   /**
