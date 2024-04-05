@@ -1347,7 +1347,7 @@ public class WallyAI extends ModularAI
       {
         int distance = path.getMoveCost(um.co, um.um, gameMap);
         int distanceTurns = distance / uc.calculateMovePower() + 1; // I sure do love division by 0
-        int targetFunds = target.getCost()*target.getHP()/10;
+        int targetFunds = WallyAI.valueUnit(gameMap, target, true);
         valueMap.put( targetCoord, (int)(effectiveness*targetFunds)/distanceTurns );
       }
     }
@@ -1856,6 +1856,10 @@ public class WallyAI extends ModularAI
     return wallGain - wallLoss;
   }
 
+  private static int valueUnit(GameMap map, Unit unit, boolean includeCurrentHealth)
+  {
+    return valueUnit(unit, map.getLocation(unit.x, unit.y), includeCurrentHealth);
+  }
   private static int valueUnit(Unit unit, MapLocation locale, boolean includeCurrentHealth)
   {
     int value = unit.getCost();
@@ -2249,8 +2253,8 @@ public class WallyAI extends ModularAI
     }
     public AttackValue(WallyAI ai, UnitContext actor, UnitContext target, GameMap gameMap, boolean ignoreWallValue)
     {
-      final int actorCost = actor.CO.getCost(actor.model);
-      int targetValue = target.unit.getCost();
+      final int actorCost = WallyAI.valueUnit(gameMap, actor.unit, false);
+      int targetValue = WallyAI.valueUnit(gameMap, target.unit, false);
       int captureValue = 0;
       if( target.unit.getCaptureProgress() > 0 ) // Assume we deny a turn of income
         captureValue = actor.CO.gameRules.incomePerCity;
