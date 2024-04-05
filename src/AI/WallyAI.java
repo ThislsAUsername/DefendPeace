@@ -34,13 +34,11 @@ public class WallyAI extends ModularAI
             new NHitKO(army, this),
             new SiegeAttacks(army, this),
             new PowerActivator(army, CommanderAbility.PHASE_BUY),
-            new FreeRealEstate(army, this, false, false), // prioritize non-eviction
-            new FreeRealEstate(army, this, true,  false), // evict if necessary
             new BuildStuff(army, this),
+            new FreeRealEstate(army, this),
             new Travel(army, this, false),
             new SiegeTravel(army, this),
             new Travel(army, this, true),
-            new FreeRealEstate(army, this, true,  true), // step on industries we're not using
             new Eviction(army, this, false), // Getting dudes out of the way
 
             new FillActionQueue(army, this),
@@ -901,12 +899,9 @@ public class WallyAI extends ModularAI
   public static class FreeRealEstate extends UnitActionFinder<WallyAI>
   {
     private static final long serialVersionUID = 1L;
-    private final boolean canEvict, canStepOnProduction;
-    public FreeRealEstate(Army co, WallyAI ai, boolean canEvict, boolean canStepOnProduction)
+    public FreeRealEstate(Army co, WallyAI ai)
     {
       super(co, ai);
-      this.canEvict = canEvict;
-      this.canStepOnProduction = canStepOnProduction;
     }
 
     @Override
@@ -915,15 +910,13 @@ public class WallyAI extends ModularAI
       if( ai.plannedUnits.contains(unit) )
         return null;
 
-      planValueAction(this, unit.CO, ai, unit, gameMap, !canStepOnProduction, canEvict);
+      planValueAction(this, unit.CO, ai, unit, gameMap);
 
       return null;
     }
 
     public static void planValueAction( AIModule whodunit, Commander co, WallyAI ai,
-                                              Unit unit, GameMap gameMap,
-                                              boolean avoidProduction,
-                                              boolean canEvict )
+                                              Unit unit, GameMap gameMap )
     {
       XYCoord position = new XYCoord(unit.x, unit.y);
 
@@ -937,7 +930,7 @@ public class WallyAI extends ModularAI
         XYCoord target = ai.mapPlan[unit.x][unit.y].toAchieve.action.getTargetLocation();
         destinations.remove(target);
       }
-      destinations.removeAll(AIUtils.findAlliedIndustries(ai.predMap, co.army, destinations, !avoidProduction));
+      destinations.removeAll(AIUtils.findAlliedIndustries(ai.predMap, co.army, destinations, true));
       // sort by furthest away, good for capturing
       Utils.sortLocationsByDistance(position, destinations);
       Collections.reverse(destinations);
@@ -956,7 +949,7 @@ public class WallyAI extends ModularAI
         Unit resident = ai.predMap.getResident(moveCoord);
         ActionPlan  ap = ai.mapPlan[moveCoord.x][moveCoord.y].toAchieve;
         boolean spaceFree = null == resident;
-        if( !spaceFree && (!canEvict || null == ap || ai.predMap.helpsClearTile(ap) ) )
+        if( !spaceFree && ( null == ap || ai.predMap.helpsClearTile(ap) ) )
           continue; // Bail if we can't clear the space
 
         // Figure out what I can do here.
