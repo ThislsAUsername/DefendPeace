@@ -595,13 +595,19 @@ public class JakeMan extends ModularAI
         break;
       }
     }
+    // If we have to move and have no destinations, make the start tile the goal
+    if( mustMove && null == goal )
+    {
+      goal = new XYCoord(unit);
+      path = GamePath.stayPut(unit);
+    }
 
     if( null == goal ) return null;
 
     // Choose the point on the path just out of our range as our 'goal', and try to move there.
     // This will allow us to navigate around large obstacles that require us to move away
     // from our intended long-term goal.
-    path.snip(unit.getMovePower(gameMap) + 1); // Trim the path approximately down to size.
+    path.snip(unit.getMovePower(gameMap) + 2); // Trim the path approximately down to size.
     XYCoord pathPoint = path.getEndCoord(); // Set the last location as our goal.
 
     // Sort my currently-reachable move locations by distance from the goal,
