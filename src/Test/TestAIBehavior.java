@@ -5,6 +5,7 @@ import AI.AIMaker;
 import AI.Muriel;
 import AI.WallyAI;
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.DefendPeace.CyanOcean.Patch;
 import CommandingOfficers.DefendPeace.RoseThorn.Strong;
 import Engine.Army;
@@ -36,9 +37,13 @@ public class TestAIBehavior extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest(MapInfo mapInfo, AIMaker ai)
   {
+    setupTest(mapInfo, ai, Strong.getInfo(), Patch.getInfo());
+  }
+  private void setupTest(MapInfo mapInfo, AIMaker ai, CommanderInfo co1, CommanderInfo co2)
+  {
     GameScenario scn = new GameScenario();
-    testCo1 = new Strong(scn.rules);
-    testCo2 = new Patch(scn.rules);
+    testCo1 = co1.create(scn.rules);
+    testCo2 = co2.create(scn.rules);
     Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
     AIController testAI = ai.create(cos[0]);
@@ -72,6 +77,7 @@ public class TestAIBehavior extends TestCase
       testPassed &= validate(testTankWadeThroughInfs(ai), "  "+ai.getName()+" failed Tank move priority test.");
     }
     testPassed &= validate(testProductionClearing(WallyAI.info), "  Free up industry test failed.");
+    testPassed &= validate(testUnCapture(WallyAI.info), "  Inf distraction test failed.");
 
     return testPassed;
   }
@@ -348,6 +354,37 @@ public class TestAIBehavior extends TestCase
         break;
     }
     testPassed &= validate(foundMega, "    "+ai.getName()+" didn't build the right thing!");
+
+    // Clean up
+    cleanupTest();
+
+    return testPassed;
+  }
+
+  /** Test that I will interrupt a city capture to interrupt a neutral factory capture */
+  private boolean testUnCapture(AIMaker ai)
+  {
+    setupTest(MapReader.readSingleMap("src/Test/TestInfOptimization.map"), ai,
+              CommandingOfficers.AW1.YC.Kanbei.getInfo(),
+              CommandingOfficers.AW4.BrennerWolves.Will.getInfo());
+
+    Unit interrupter = testMap.getResident(2, 1);
+    Unit target      = testMap.getResident(5, 1);
+    interrupter.capture(testMap);
+    target     .capture(testMap);
+    turn(testGame);
+
+    GameAction act = null;
+    boolean testPassed = true;
+    do
+    {
+      act = testCo1.army.getNextAIAction(testMap);
+      if( null != act )
+        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
+    } while( null != act && testPassed );
+
+    testPassed &= validate(interrupter.getCaptureProgress() == 0, "    "+ai.getName()+" didn't stop capturing");
+    testPassed &= validate(target     .getHP() < 10, "    "+ai.getName()+" didn't hit the target");
 
     // Clean up
     cleanupTest();

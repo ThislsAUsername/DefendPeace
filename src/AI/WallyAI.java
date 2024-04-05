@@ -96,6 +96,7 @@ public class WallyAI extends ModularAI
   private static final double BANK_EFFICIENCY_FACTOR = 1.7; // Minimum effectiveness multiplier to consider banking for a better counter
   private static final double MAX_BANK_FUNDS_FACTOR = 2.5; // Maximum to bank compared to a counter you can actually buy
 
+  private static final double COMPLETE_CAPTURE_WEIGHT = 4; // Roughly corresponds to the number of turns of prop value we expect to lose by not finishing a capture.
   private static final double TERRAIN_FUNDS_WEIGHT = 2.5; // Multiplier for per-city income for adding value to units threatening to cap
   private static final double TERRAIN_INDUSTRY_WEIGHT = 20000; // Funds amount added to units threatening to cap an industry
   private static final double TERRAIN_HQ_WEIGHT = 42000; //                  "                                      HQ
@@ -154,7 +155,7 @@ public class WallyAI extends ModularAI
   }
   private UnitPrediction[][] mapPlan; // TODO: Invalidate if any unit gets trapped/ends up not where we expect - cache unit+destination on offer action
   public PredictionMap predMap; // Owns a reference to the above, to expose its contents to Utils
-  private HashSet<Unit> plannedUnits;
+  private HashMap<Unit, ActionPlan> plansByUnit;
   private static class TileThreat
   {
     UnitContext identity;
@@ -177,7 +178,7 @@ public class WallyAI extends ModularAI
     capPhase = new CapPhaseAnalyzer(map, myArmy);
     mapPlan = new UnitPrediction[map.mapWidth][map.mapHeight];
     predMap = new PredictionMap(myArmy, mapPlan);
-    plannedUnits = new HashSet<>();
+    plansByUnit = new HashMap<>();
     for( int x = 0; x < map.mapWidth; ++x )
       for( int y = 0; y < map.mapHeight; ++y )
       {
@@ -242,23 +243,10 @@ public class WallyAI extends ModularAI
   {
     XYCoord dest = plan.action.getMoveLocation();
     final UnitPrediction destPredictTile = mapPlan[dest.x][dest.y];
-    ActionPlan canceled = destPredictTile.toAchieve;
-    if( null != canceled )
-    {
-      if( null != canceled.action.getActor() )
-        plannedUnits.remove(canceled.action.getActor());
-      // Assume only one attack vs any given target - this is not always true, but I don't care
-      if( canceled.action.getType() == UnitActionFactory.ATTACK )
-      {
-        final XYCoord ctt = canceled.action.getTargetLocation();
-        mapPlan[ctt.x][ctt.y].damageInstances.remove(canceled);
-      }
-      // Don't mess with canceling attacks that clear tiles, at least for now
-//      final XYCoord cct = canceled.clearTile;
-//      if( null != cct )
-//        mapPlan[cct.x][cct.y].identity =
-      // Don't chain cancellations - if Wally is dumb enough to cause that, he can recalculate :P
-    }
+    ActionPlan evicted = destPredictTile.toAchieve;
+    ActionPlan actorPrevPlan = plansByUnit.get(plan.actor.unit);
+    cancelPlan(evicted);
+    cancelPlan(actorPrevPlan);
 
     // Assuming our path has been planned well re:terrain, running into enemies is the only obstacle
     GamePath path = plan.path;
@@ -276,13 +264,39 @@ public class WallyAI extends ModularAI
     destPredictTile.identity = plan.actor;
     plan.actor.coord = dest;
     if( null != actorIdentity )
-      plannedUnits.add(actorIdentity);
+      plansByUnit.put(actorIdentity, plan);
 
     if( plan.isAttack )
     {
       final XYCoord target = plan.action.getTargetLocation();
       mapPlan[target.x][target.y].damageInstances.put(plan, plan.percentDamage);
     }
+  }
+
+  private void cancelPlan(ActionPlan evicted)
+  {
+    if( null == evicted )
+      return;
+    if( null != evicted.actor.unit )
+      plansByUnit.remove(evicted.actor.unit);
+    XYCoord moveLoc = evicted.action.getMoveLocation();
+    UnitPrediction predToChange = mapPlan[moveLoc.x][moveLoc.y];
+    if( evicted == predToChange.toAchieve )
+    {
+      predToChange.identity = null;
+      predToChange.toAchieve = null;
+    }
+    // Assume only one attack vs any given target - this is not always true, but I don't care
+    if( evicted.action.getType() == UnitActionFactory.ATTACK )
+    {
+      final XYCoord ctt = evicted.action.getTargetLocation();
+      mapPlan[ctt.x][ctt.y].damageInstances.remove(evicted);
+    }
+    // Don't mess with canceling attacks that clear tiles, at least for now
+    //      final XYCoord cct = canceled.clearTile;
+    //      if( null != cct )
+    //        mapPlan[cct.x][cct.y].identity =
+    // Don't chain cancellations - if Wally is dumb enough to cause that, he can recalculate :P
   }
 
   /**
@@ -461,7 +475,7 @@ public class WallyAI extends ModularAI
         ai.mapPlan[x][y].identity = null;
         ai.mapPlan[x][y].toAchieve = null;
         if( null != unit )
-          ai.plannedUnits.remove(unit);
+          ai.plansByUnit.remove(unit);
       }
 
       if( ai.queuedActions.isEmpty() )
@@ -602,7 +616,7 @@ public class WallyAI extends ModularAI
     @Override
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
-      if( ai.plannedUnits.contains(unit) )
+      if( ai.plansByUnit.containsKey(unit) )
         return null;
       boolean isSiege = unit.model.hasImmobileWeapon();
       if( !isSiege )
@@ -697,7 +711,7 @@ public class WallyAI extends ModularAI
       }
 
       ArrayList<Unit> attackerOptions = new ArrayList<>(unitQueue);
-      attackerOptions.removeAll(ai.plannedUnits);
+      attackerOptions.removeAll(ai.plansByUnit.keySet());
       XYCoord targetLoc = null;
       for( XYCoord coord : new ArrayList<XYCoord>(targets) )
       {
@@ -797,7 +811,7 @@ public class WallyAI extends ModularAI
             ai.mapPlan[x][y].identity = new UnitContext(gameMap, resident);
           }
         }
-      ai.plannedUnits.clear();
+      ai.plansByUnit.clear();
 
       Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, gameMap);
       for( Commander co : unitLists.keySet() )
@@ -907,9 +921,6 @@ public class WallyAI extends ModularAI
     @Override
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
-      if( ai.plannedUnits.contains(unit) )
-        return null;
-
       planValueAction(this, unit.CO, ai, unit, gameMap);
 
       return null;
@@ -935,10 +946,13 @@ public class WallyAI extends ModularAI
       Utils.sortLocationsByDistance(position, destinations);
       Collections.reverse(destinations);
 
+      ActionPlan myOldPlan = ai.plansByUnit.get(unit);
       UnitContext actor = new UnitContext(gameMap, unit);
       GamePath bestPath = null;
       GameAction bestAction = null;
       int bestFundsDelta = 0;
+      if( null != myOldPlan )
+        bestFundsDelta = myOldPlan.score;
       boolean isAttack = false;
       int percentDamage = 0;
       for( Utils.SearchNode moveCoord : destinations )
@@ -1032,7 +1046,7 @@ public class WallyAI extends ModularAI
     @Override
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
-      if( ai.plannedUnits.contains(unit) )
+      if( ai.plansByUnit.containsKey(unit) )
         return null;
       final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
       if( null == evicter )
@@ -1082,7 +1096,7 @@ public class WallyAI extends ModularAI
     @Override
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
-      if( ai.plannedUnits.contains(unit) )
+      if( ai.plansByUnit.containsKey(unit) )
         return null;
       boolean isSiege = unit.model.hasImmobileWeapon();
       if( isSiege )
@@ -1135,7 +1149,7 @@ public class WallyAI extends ModularAI
     @Override
     public GameAction getUnitAction(Unit unit, GameMap gameMap)
     {
-      if( ai.plannedUnits.contains(unit) )
+      if( ai.plansByUnit.containsKey(unit) )
         return null;
       boolean isSiege = unit.model.hasImmobileWeapon();
       if( !isSiege )
@@ -1498,7 +1512,8 @@ public class WallyAI extends ModularAI
       Unit currentResident = gameMap.getResident(xyc);
       if( evictionStack.contains(currentResident) )
         continue;
-      boolean currentResidentHasPlans = plannedUnits.contains(currentResident);
+      // TODO: Hmm.
+      boolean currentResidentHasPlans = plansByUnit.containsKey(currentResident);
       if( !currentResidentHasPlans )
         // If whatever's in our landing pad has no plans yet, poke and see if some can be made
         if( null != currentResident && currentResident.CO.army == myArmy )
@@ -1649,7 +1664,8 @@ public class WallyAI extends ModularAI
 
       ActionPlan  ap       = mapPlan[xyc.x][xyc.y].toAchieve;
       Unit currentResident = gameMap.getResident(xyc);
-      boolean currentResidentHasPlans = plannedUnits.contains(currentResident);
+      // TODO: Hmm.
+      boolean currentResidentHasPlans = plansByUnit.containsKey(currentResident);
       if( !currentResidentHasPlans && null != currentResident )
         evictees.add(currentResident);
       if( null != ap )
@@ -2250,7 +2266,11 @@ public class WallyAI extends ModularAI
       int targetValue = WallyAI.valueUnit(gameMap, target.unit, false);
       int captureValue = 0;
       if( target.unit.getCaptureProgress() > 0 ) // Assume we deny a turn of income
+      {
         captureValue = actor.CO.gameRules.incomePerCity;
+        if( target.CO.unitProductionByTerrain.containsKey(target.env.terrainType) )
+          captureValue += TERRAIN_INDUSTRY_WEIGHT;
+      }
 
       BattleSummary results = CombatEngine.simulateBattleResults(actor, target, gameMap, CALC);
       hpLoss   = actor .getHP() - Math.max(0, results.attacker.after.getHP());
@@ -2286,10 +2306,10 @@ public class WallyAI extends ModularAI
     int capThreshold = gameMap.getEnvironment(capCoord).terrainType.getCaptureThreshold();
     int capTurns = (capThreshold - capProgress + capValue-1) / capValue;
 
-    if( capTurns == 1 )
-      return Integer.MAX_VALUE/42; // I can't think of very many good reasons to skip finishing a capture
-
     int yeetFactor = valueTerrain(unit.CO, gameMap.getEnvironment(capCoord).terrainType);
+    if( capTurns == 1 )
+      return (int) (yeetFactor * COMPLETE_CAPTURE_WEIGHT);
+
     yeetFactor *= 2; // To restore the previous value scale for full-HP caps
     // Since we can't be certain of a capture, ballpark the terrain value scaled by the capture time.
     return yeetFactor / capTurns;
