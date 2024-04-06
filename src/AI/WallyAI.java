@@ -348,6 +348,13 @@ public class WallyAI extends ModularAI
       {
         mapPlan[moveLoc.x][moveLoc.y].identity = null;
         mapPlan[moveLoc.x][moveLoc.y].toAchieve = null;
+        // TODO: Revisit if I add join/load
+        if( !map.isLocationEmpty(action.getActor(), moveLoc) )
+        {
+          log(String.format("  Discarding invalid movement for: %s", ae.action));
+          ae = queuedActions.poll();
+          continue;
+        }
       }
 
       Unit victim = map.getResident(ae.action.getTargetLocation());
