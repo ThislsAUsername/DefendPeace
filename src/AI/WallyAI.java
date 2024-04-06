@@ -36,9 +36,8 @@ public class WallyAI extends ModularAI
             new PowerActivator(army, CommanderAbility.PHASE_BUY),
             new BuildStuff(army, this),
             new FreeRealEstate(army, this),
-            new Travel(army, this, false),
             new SiegeTravel(army, this),
-            new Travel(army, this, true),
+            new Travel(army, this),
             new Eviction(army, this, false), // Getting dudes out of the way
 
             new FillActionQueue(army, this),
@@ -1062,13 +1061,11 @@ public class WallyAI extends ModularAI
         ai.evictionStack.add(evictionID);
         evictionValue = valueAction(ai, gameMap, evicterPlan);
       }
-      boolean avoidProduction = false;
       boolean shouldWander = false;
-      boolean canEvictSiege = true;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
                                           this, gameMap, ai.threatMap,
-                                          unit, avoidProduction, shouldWander,
-                                          canEvictSiege, evictionValue, EVICTION_DEPTH,
+                                          unit, shouldWander,
+                                          evictionValue, EVICTION_DEPTH,
                                           null);
 
       if( null != evictionID )
@@ -1086,11 +1083,9 @@ public class WallyAI extends ModularAI
   public static class Travel extends UnitActionFinder<WallyAI>
   {
     private static final long serialVersionUID = 1L;
-    boolean canEvictSiege;
-    public Travel(Army co, WallyAI ai, boolean canEvictSiege)
+    public Travel(Army co, WallyAI ai)
     {
       super(co, ai);
-      this.canEvictSiege = canEvictSiege;
     }
 
     @Override
@@ -1113,12 +1108,12 @@ public class WallyAI extends ModularAI
         ai.evictionStack.add(evictionID);
         evictionValue = valueAction(ai, gameMap, evicterPlan);
       }
-      boolean avoidProduction = false;
+      boolean shouldYeet = false;
       boolean shouldWander = false;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
                                           this, gameMap, ai.threatMap,
-                                          unit, avoidProduction, shouldWander,
-                                          canEvictSiege, evictionValue, EVICTION_DEPTH,
+                                          unit, shouldYeet, shouldWander,
+                                          evictionValue, EVICTION_DEPTH,
                                           null);
 
       if( null != evictionID )
@@ -1166,13 +1161,11 @@ public class WallyAI extends ModularAI
         ai.evictionStack.add(evictionID);
         evictionValue = valueAction(ai, gameMap, evicterPlan);
       }
-      boolean avoidProduction = true;
       boolean shouldWander = false;
-      boolean canEvictSiege = true;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(
                                           this, gameMap, ai.threatMap,
-                                          unit, avoidProduction, shouldWander,
-                                          canEvictSiege, evictionValue, EVICTION_DEPTH,
+                                          unit, shouldWander,
+                                          evictionValue, EVICTION_DEPTH,
                                           null);
 
       if( null != evictionID )
@@ -1242,8 +1235,7 @@ public class WallyAI extends ModularAI
   private TravelPurpose fillTravelDestinations(
                                   GameMap gameMap,
                                   ArrayList<XYCoord> goals,
-                                  Unit unit,
-                                  boolean avoidProduction )
+                                  Unit unit )
   {
     UnitContext uc = new UnitContext(gameMap, unit);
     uc.calculateActionTypes();
@@ -1281,8 +1273,7 @@ public class WallyAI extends ModularAI
     {
       log(String.format("  %s needs supplies.", unit.toStringWithLocation()));
       goals.addAll(stations);
-      if( avoidProduction )
-        goals.removeAll(AIUtils.findAlliedIndustries(predMap, myArmy, goals, !avoidProduction));
+      goals.removeAll(AIUtils.findAlliedIndustries(predMap, myArmy, goals, true));
       if( !goals.isEmpty() )
         travelPurpose = TravelPurpose.SUPPLIES;
     }
@@ -1398,21 +1389,21 @@ public class WallyAI extends ModularAI
   private ArrayList<ActionPlan> planTravelActions(
                         AIModule whodunit, GameMap gameMap,
                         ArrayList<TileThreat>[][] threatMap, Unit unit,
-                        boolean avoidProduction, boolean shouldWander,
-                        boolean canEvictSiege, int evictionValue, int recurseDepth,
+                        boolean shouldWander,
+                        int evictionValue, int recurseDepth,
                         ArrayList<XYCoord> bannedTiles)
   {
     return planTravelActions(whodunit, gameMap,
                              threatMap, unit,
-                             avoidProduction, shouldWander,
-                             canEvictSiege, true, evictionValue, recurseDepth,
+                             true, shouldWander,
+                             evictionValue, recurseDepth,
                              bannedTiles);
   }
   private ArrayList<ActionPlan> planTravelActions(
                         AIModule whodunit, GameMap gameMap,
                         ArrayList<TileThreat>[][] threatMap, Unit unit,
-                        boolean avoidProduction, boolean shouldWander,
-                        boolean canEvictSiege, boolean canEvict, int evictionValue, int recurseDepth,
+                        boolean shouldYeet, boolean shouldWander,
+                        int evictionValue, int recurseDepth,
                         ArrayList<XYCoord> bannedTiles)
   {
     if( evictionStack.contains(unit) )
@@ -1423,14 +1414,14 @@ public class WallyAI extends ModularAI
     PathCalcParams pcp = new PathCalcParams(unit, predMap);
     pcp.includeOccupiedSpaces = ignoreResident;
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
-    destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, destinations, !avoidProduction));
+    destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, destinations, true));
 
     // TODO: Jump in a transport, if available, or join?
 
     XYCoord goal = null;
     GamePath path = null;
     ArrayList<XYCoord> validTargets = new ArrayList<XYCoord>();
-    TravelPurpose travelPurpose = fillTravelDestinations(predMap, validTargets, unit, avoidProduction);
+    TravelPurpose travelPurpose = fillTravelDestinations(predMap, validTargets, unit);
 
     final boolean mustMove = evictionValue > 0;
     if( !mustMove && !shouldWander && travelPurpose == TravelPurpose.WANDER )
@@ -1492,7 +1483,7 @@ public class WallyAI extends ModularAI
         new PriorityQueue<>(13, new EntryValueComparator<>());
 
     int minFundsDelta = Math.min(0, -1 * evictionValue);
-    boolean ignoreWallValue = !avoidProduction;
+    boolean ignoreWallValue = !shouldYeet;
     for( Utils.SearchNode xyc : destinations )
     {
 //      log(String.format("    is it safe to go to %s?", xyc));
@@ -1503,7 +1494,7 @@ public class WallyAI extends ModularAI
       // Figure out how to get here.
       boolean spaceFree = null == plannedResident;
       if( !spaceFree &&
-          ( null == ap || !canEvict || ap.purpose.priority > travelPurpose.priority) )
+          ( null == ap || ap.purpose.priority > travelPurpose.priority) )
         continue; // Bail if:
       // There's no other action to evaluate against ours
       // Not allowed to evict
@@ -1518,12 +1509,10 @@ public class WallyAI extends ModularAI
         // If whatever's in our landing pad has no plans yet, poke and see if some can be made
         if( null != currentResident && currentResident.CO.army == myArmy )
         {
-          if( evictionStack.contains(currentResident) || !canEvict )
+          if( evictionStack.contains(currentResident) )
             continue;
           boolean residentIsEvictable = !currentResident.isTurnOver;
 
-          if( !canEvictSiege && currentResident.model.hasImmobileWeapon() )
-            continue;
           if( !residentIsEvictable || recurseDepth <= 0 )
             continue;
         } // ~if resident
@@ -1690,21 +1679,12 @@ public class WallyAI extends ModularAI
         int planEvictionValue = evictionValue + entry.getValue();
         // Prevent reflexive eviction
         evictionStack.add(unit);
-        boolean evicteeEvicts = false;
         // Try evicting our evictee without evicting anyone else first
         ArrayList<ActionPlan> evictionPlans = planTravelActions(
                                               whodunit, gameMap, threatMap,
-                                              ev, avoidProduction, true, // Always enable wandering
-                                              canEvictSiege, evicteeEvicts, planEvictionValue, recurseDepth - 1,
+                                              ev, shouldYeet, true, // Always enable wandering
+                                              planEvictionValue, recurseDepth - 1,
                                               evicteeBannedTiles);
-        if( null == evictionPlans )
-        {
-          evicteeEvicts = true;
-          evictionPlans = planTravelActions(whodunit, gameMap, threatMap,
-                                            ev, avoidProduction, true, // Always enable wandering
-                                            canEvictSiege, evicteeEvicts, planEvictionValue, recurseDepth - 1,
-                                            evicteeBannedTiles);
-        }
         evictionStack.remove(unit);
         if( null == evictionPlans )
           continue;
