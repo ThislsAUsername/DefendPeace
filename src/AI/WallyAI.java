@@ -311,14 +311,26 @@ public class WallyAI extends ModularAI
       if( null != actor ) // Make sure only our unit is in the start and end position
       {
         if( !gameMap.isLocationEmpty(actor, lastAction.startPos) )
+        {
+          log(String.format("  Unexpected condition:"));
+          log(String.format("    Actor didn't move for action: %s", lastAction));
           theUnexpected = true;
+        }
         // Consider removing this check if I am yeeting my unit
         if( actor != gameMap.getResident(action.getMoveLocation()) )
+        {
+          log(String.format("  Unexpected condition:"));
+          log(String.format("    Actor died for action: %s", lastAction));
           theUnexpected = true;
+        }
       }
       final XYCoord clearTile = lastAction.clearTile;
       if( null != clearTile && null != gameMap.getResident(clearTile) )
+      {
+        log(String.format("  Unexpected condition:"));
+        log(String.format("    Failed to clear tile %s for action: %s", clearTile, lastAction));
         theUnexpected = true;
+      }
     }
     return theUnexpected;
   }
@@ -480,8 +492,8 @@ public class WallyAI extends ModularAI
       if( ai.queuedActions.isEmpty() )
         return null;
 
+      ai.log(String.format("  Actions:\n%s", ai.queuedActions));
       GameAction action = ai.pollAndCleanUpAction(map);
-      ai.log(String.format("  First queued action: %s", action));
       return action;
     }
 
@@ -661,8 +673,8 @@ public class WallyAI extends ModularAI
       }
       if( null != bestAttack )
       {
-        ai.log(String.format("%s is shooting %s",
-            unit.toStringWithLocation(), gameMap.getLocation(bestAttack.getTargetLocation()).getResident()));
+//        ai.log(String.format("%s is shooting %s",
+//            unit.toStringWithLocation(), gameMap.getLocation(bestAttack.getTargetLocation()).getResident()));
       }
 
       boolean isAttack = true;
@@ -751,7 +763,7 @@ public class WallyAI extends ModularAI
           BattleSummary results = CombatEngine.simulateBattleResults(attacker, target, ai.predMap, CALC);
           final int percentDamage = results.defender.getPreciseHealthDamage();
           damageTotal += percentDamage;
-          ai.log(String.format("    %s hits for %s, total: %s", unit.toStringWithLocation(), percentDamage, target));
+//          ai.log(String.format("    %s hits for %s, total: %s", unit.toStringWithLocation(), percentDamage, target));
 
           boolean isAttack = true;
           final BattleAction attack = new BattleAction(ai.predMap, unit, movePath, targetLoc.x, targetLoc.y);
@@ -977,7 +989,7 @@ public class WallyAI extends ModularAI
       if( null == evicter )
         return null;
 
-      ai.log(String.format("Evaluating eviction for %s.", unit.toStringWithLocation()));
+//      ai.log(String.format("Evaluating eviction for %s.", unit.toStringWithLocation()));
       EvictionContext ec = new EvictionContext(this, gameMap, EVICTION_DEPTH);
       final ActionPlan evicterPlan = ai.mapPlan[unit.x][unit.y].toAchieve;
       Unit evictionID = null;
@@ -1022,7 +1034,7 @@ public class WallyAI extends ModularAI
       if( isSiege )
         return null;
 
-      ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
+//      ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
       final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
       Unit evictionID = null;
       EvictionContext ec = new EvictionContext(this, gameMap, EVICTION_DEPTH);
@@ -1073,7 +1085,7 @@ public class WallyAI extends ModularAI
       if( !isSiege )
         return null;
 
-      ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
+//      ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
       final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
       Unit evictionID = null;
       EvictionContext ec = new EvictionContext(this, gameMap, EVICTION_DEPTH);
@@ -1516,10 +1528,10 @@ public class WallyAI extends ModularAI
     // and build a GameAction to move to the closest one.
     Utils.sortLocationsByDistance(pathPoint, destinations);
 
-    log(String.format("  %s is traveling toward %s at %s via %s  mustMove?: %s  evictionValue?: %s",
-                          unit.toStringWithLocation(),
-                          ec.map.getLocation(goal).getEnvironment().terrainType, goal,
-                          pathPoint, mustMove, evictionValue));
+//    log(String.format("  %s is traveling toward %s at %s via %s  mustMove?: %s  evictionValue?: %s",
+//                          unit.toStringWithLocation(),
+//                          ec.map.getLocation(goal).getEnvironment().terrainType, goal,
+//                          pathPoint, mustMove, evictionValue));
 
     Queue<Entry<ActionPlan, Integer>> rankedTravelPlans =
         new PriorityQueue<>(13, new EntryValueComparator<>());
@@ -1612,7 +1624,7 @@ public class WallyAI extends ModularAI
             final int thisDelta = (int) fundsDelta + bonusPoints;
             if( thisDelta > minFundsDelta )
             {
-              log(String.format("      Best en passant attack deals %s", fundsDelta));
+//              log(String.format("      Best en passant attack deals %s", fundsDelta));
               ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), attack, thisDelta);
               plan.path = movePath;
               plan.purpose = travelPurpose;
@@ -1634,7 +1646,6 @@ public class WallyAI extends ModularAI
           for( GameAction capture : actionSet.getGameActions() )
           {
             final int fundsDelta = valueCapture((CaptureAction) capture, gameMap);
-            XYCoord capLoc = capture.getMoveLocation();
 
             int opportunityCost = 0;
             if( !spaceFree )
@@ -1644,7 +1655,6 @@ public class WallyAI extends ModularAI
             final int thisDelta = fundsDelta - opportunityCost; // Ignore threats, capping is delicious.
             if( thisDelta > minFundsDelta )
             {
-              log(String.format("      I can start a cap on %s", capLoc));
               ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), capture, thisDelta);
               plan.path = movePath;
               plan.purpose = TravelPurpose.CONQUER;
@@ -2020,10 +2030,11 @@ public class WallyAI extends ModularAI
     for( MapLocation prop : CPI.availableProperties )
     {
       XYCoord coord = prop.getCoordinates();
-      UnitContext resident = mapPlan[coord.x][coord.y].identity;
+      Unit resident = predMap.getResident(coord);
       if( null != resident )
       {
-        log(String.format("  Can't evict unit %s to build", resident));
+        if( !resident.isTurnOver )
+          log(String.format("  Can't evict %s to build at %s", resident, coord));
         blockedByActions.add(prop);
       }
     }
