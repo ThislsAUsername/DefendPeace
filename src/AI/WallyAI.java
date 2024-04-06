@@ -2248,7 +2248,7 @@ public class WallyAI extends ModularAI
       if( target.unit.getCaptureProgress() > 0 ) // Assume we deny a turn of income
       {
         captureValue = actor.CO.gameRules.incomePerCity;
-        if( target.CO.unitProductionByTerrain.containsKey(target.env.terrainType) )
+        if( target.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(target.coord).terrainType) )
           captureValue += TERRAIN_INDUSTRY_WEIGHT;
       }
 
