@@ -1634,8 +1634,7 @@ public class WallyAI extends ModularAI
               int defLevel = gameMap.getEnvironment(targetXYC).terrainType.getDefLevel();
               int range = attack.getMoveLocation().getDistance(target);
               boolean attackerMoved = 0 < attack.getMoveLocation().getDistance(unit);
-              double hpDamage = CombatEngine.calculateOneStrikeDamage(unit, range, target, gameMap, defLevel, attackerMoved);
-              plan.percentDamage = (int) (hpDamage * 10);
+              plan.percentDamage = CombatEngine.calculateOneStrikeDamage(unit, range, target, gameMap, defLevel, attackerMoved);
               rankedTravelPlans.add(new AbstractMap.SimpleEntry<>(plan, thisDelta));
             }
           }
