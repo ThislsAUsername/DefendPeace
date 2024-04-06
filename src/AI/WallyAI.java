@@ -959,10 +959,10 @@ public class WallyAI extends ModularAI
         // Figure out how to get here.
         GamePath movePath = moveCoord.getMyPath();
         actor.setPath(movePath);
-        Unit resident = ai.predMap.getResident(moveCoord);
-        ActionPlan  ap = ai.mapPlan[moveCoord.x][moveCoord.y].toAchieve;
+        Unit       resident = ai.predMap.getResident(moveCoord);
+        ActionPlan resiPlan = ai.mapPlan[moveCoord.x][moveCoord.y].toAchieve;
         boolean spaceFree = null == resident;
-        if( !spaceFree && ( null == ap || ai.predMap.helpsClearTile(ap) ) )
+        if( !spaceFree && ( null == resiPlan || ai.predMap.helpsClearTile(resiPlan) ) )
           continue; // Bail if we can't clear the space
 
         // Figure out what I can do here.
@@ -991,7 +991,7 @@ public class WallyAI extends ModularAI
               int opportunityCost = 0;
               if( !spaceFree )
               {
-                opportunityCost = valueAction(ai, gameMap, ap);
+                opportunityCost = resiPlan.score;
               }
               if( fundsDelta - opportunityCost <= bestFundsDelta )
                 continue;
@@ -1015,7 +1015,7 @@ public class WallyAI extends ModularAI
             int opportunityCost = 0;
             if( !spaceFree )
             {
-              opportunityCost = valueAction(ai, gameMap, ap);
+              opportunityCost = resiPlan.score;
             }
             final int finalCapValue = fundsDelta - opportunityCost + wallValue;
             if( finalCapValue <= bestFundsDelta )
@@ -1490,11 +1490,11 @@ public class WallyAI extends ModularAI
 //    log(String.format("    Yes"));
 
       Unit plannedResident = predMap.getResident(xyc);
-      ActionPlan  ap       = mapPlan[xyc.x][xyc.y].toAchieve;
+      ActionPlan  resiPlan = mapPlan[xyc.x][xyc.y].toAchieve;
       // Figure out how to get here.
       boolean spaceFree = null == plannedResident;
       if( !spaceFree &&
-          ( null == ap || ap.purpose.priority > travelPurpose.priority) )
+          ( null == resiPlan || resiPlan.purpose.priority > travelPurpose.priority) )
         continue; // Bail if:
       // There's no other action to evaluate against ours
       // Not allowed to evict
@@ -1597,7 +1597,7 @@ public class WallyAI extends ModularAI
             int opportunityCost = 0;
             if( !spaceFree )
             {
-              opportunityCost = valueAction(this, gameMap, ap);
+              opportunityCost = resiPlan.score;
             }
             final int thisDelta = fundsDelta - opportunityCost; // Ignore threats, capping is delicious.
             if( thisDelta > minFundsDelta )
