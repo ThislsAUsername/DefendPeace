@@ -1335,6 +1335,8 @@ public class WallyAI extends ModularAI
                                          int evictionValue, int recurseDepth,
                                          ArrayList<XYCoord> bannedTiles)
   {
+    if( ec.evictionStack.contains(unit) )
+      return null;
     ActionPlan myOldPlan = plansByUnit.get(unit);
     if( null != myOldPlan && predMap.helpsClearTile(myOldPlan) )
       return null;
@@ -1400,6 +1402,8 @@ public class WallyAI extends ModularAI
             actor.setWeapon(null);
             target.setWeapon(null);
             final AttackValue results = new AttackValue(this, actor, target, predMap, true); // TODO true?
+            if( results.fundsDelta <= 0 )
+              continue;
 
             ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), ga, results.fundsDelta);
             plan.path = movePath;
@@ -1418,6 +1422,8 @@ public class WallyAI extends ModularAI
 
           int wallValue = wallFundsValue(ec.map, threatMap, unit, moveCoord, null);
           final int finalCapValue = fundsDelta + wallValue;
+          if( finalCapValue <= 0 )
+            continue;
 
           ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), ga, finalCapValue);
           plan.path = movePath;
@@ -1755,14 +1761,14 @@ public class WallyAI extends ModularAI
         // Prevent reflexive eviction
         ec.evictionStack.add(unit);
         // Try evicting our evictee without evicting anyone else first
-        ArrayList<ActionPlan> evictionPlans = planTravelActions(ec, ev,
-                                              shouldYeet, true, // Always enable wandering
-                                              planEvictionValue, recurseDepth - 1,
-                                              evicteeBannedTiles);
+        ArrayList<ActionPlan> evictionPlans = planValueActions(ec, ev,
+                                                               planEvictionValue, recurseDepth - 1,
+                                                               evicteeBannedTiles);
         if( null == evictionPlans )
-          evictionPlans = planValueActions(ec, ev,
-                                           planEvictionValue, recurseDepth - 1,
-                                           evicteeBannedTiles);
+          evictionPlans = planTravelActions(ec, ev,
+                                            shouldYeet, true, // Always enable wandering
+                                            planEvictionValue, recurseDepth - 1,
+                                            evicteeBannedTiles);
         ec.evictionStack.remove(unit);
         if( null == evictionPlans )
           continue;
