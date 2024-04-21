@@ -78,6 +78,7 @@ public class TestAIBehavior extends TestCase
     }
     testPassed &= validate(testProductionClearing(WallyAI.info), "  Free up industry test failed.");
     testPassed &= validate(testUnCapture(WallyAI.info), "  Inf distraction test failed.");
+    testPassed &= validate(testInfOptimization(WallyAI.info), "  Inf optimization test failed.");
 
     return testPassed;
   }
@@ -385,6 +386,54 @@ public class TestAIBehavior extends TestCase
 
     testPassed &= validate(interrupter.getCaptureProgress() == 0, "    "+ai.getName()+" didn't stop capturing");
     testPassed &= validate(target     .getHP() < 10, "    "+ai.getName()+" didn't hit the target");
+
+    // Clean up
+    cleanupTest();
+
+    return testPassed;
+  }
+
+  /**
+   * We have 3 objectives:
+   * Clear the neutral factory of a capping inf
+   * Start capping that factory
+   * Also start capping the tile the factory capper was previously capping
+   */
+  private boolean testInfOptimization(AIMaker ai)
+  {
+    setupTest(MapReader.readSingleMap("src/Test/TestInfOptimization.map"), ai,
+              CommandingOfficers.AW1.YC.Kanbei.getInfo(),
+              CommandingOfficers.AW4.BrennerWolves.Will.getInfo());
+
+    // Starts capping the city after cappy abandons it
+    Unit scab        = addUnit(testMap, testCo1, "Mech", new XYCoord(0, 1));
+    // Stops capping to go to greener pastures
+    Unit cappy       = testMap.getResident(2, 1);
+    // Shoots from the north tile
+    Unit shootyOne   = addUnit(testMap, testCo1, "Infantry", new XYCoord(2, 0));
+    // Shoots from the west tile
+    Unit shootyTwo   = addUnit(testMap, testCo1, "Infantry", new XYCoord(2, 2));
+    // Did nothing wrong
+    Unit target      = testMap.getResident(5, 1);
+    cappy .capture(testMap);
+    target.capture(testMap);
+    turn(testGame);
+
+    GameAction act = null;
+    boolean testPassed = true;
+    do
+    {
+      act = testCo1.army.getNextAIAction(testMap);
+      if( null != act )
+        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
+    } while( null != act && testPassed );
+
+    testPassed &= validate(target.getHP() == 0                 , "    "+ai.getName()+" didn't kill the target");
+    testPassed &= validate(5 == shootyOne.x && 0 == shootyOne.y, "    "+ai.getName()+" didn't hit the factory with ShootyOne");
+    testPassed &= validate(4 == shootyTwo.x && 1 == shootyTwo.y, "    "+ai.getName()+" didn't hit the factory with ShootyTwo");
+    testPassed &= validate(cappy .getCaptureProgress() > 0     , "    "+ai.getName()+" didn't restart capturing with cappy");
+    testPassed &= validate(5 == cappy.x && 1 == cappy.y        , "    "+ai.getName()+" didn't go to the factory with cappy");
+    testPassed &= validate(scab  .getCaptureProgress() > 0     , "    "+ai.getName()+" didn't start capturing with the scab");
 
     // Clean up
     cleanupTest();

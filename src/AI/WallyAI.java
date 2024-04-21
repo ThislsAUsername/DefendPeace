@@ -957,7 +957,7 @@ public class WallyAI extends ModularAI
                                                                 evictionValue, EVICTION_DEPTH,
                                                                 null);
           if( null == actionSeq )
-            return null;
+            continue;
           for( ActionPlan plan : actionSeq )
           {
             ai.updatePlan(plan);
