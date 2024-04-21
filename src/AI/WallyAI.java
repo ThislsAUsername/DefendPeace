@@ -569,8 +569,13 @@ public class WallyAI extends ModularAI
         final UnitPrediction targetPredictTile = ai.mapPlan[tt.x][tt.y];
         final UnitContext target = targetPredictTile.identity;
 
+        if( null == target )
+        {
+          plan.clearTile = tt;
+          vacatedTiles.add(tt);
+        }
         // Predict board state, if we still have the info banging around
-        if( targetPredictTile.damageInstances.containsKey(plan) )
+        else if( targetPredictTile.damageInstances.containsKey(plan) )
         {
           int percentDamage = targetPredictTile.damageInstances.get(plan);
           targetPredictTile.damageInstances.remove(plan);
