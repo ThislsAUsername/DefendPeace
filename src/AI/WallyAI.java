@@ -173,7 +173,13 @@ public class WallyAI extends ModularAI
   private void init(GameMap map)
   {
     lastAction = null;
-    allThreats = new ArrayList<Unit>();
+    if( !queuedActions.isEmpty() )
+      queuedActions.clear();
+    allThreats = new ArrayList<Unit>(); // implicitly resets ThreatMap
+
+    if( null != unitEffectiveMove )
+      return;
+
     capPhase = new CapPhaseAnalyzer(map, myArmy);
     mapPlan = new UnitPrediction[map.mapWidth][map.mapHeight];
     predMap = new PredictionMap(myArmy, mapPlan);
@@ -201,10 +207,7 @@ public class WallyAI extends ModularAI
   @Override
   public void initTurn(GameMap gameMap)
   {
-    if( null == unitEffectiveMove )
-      init(gameMap);
-    queuedActions.clear();
-    lastAction = null;
+    init(gameMap);
     super.initTurn(gameMap);
     log(String.format("[======== Wally initializing turn %s for %s =========]", turnNum, myArmy));
   }
@@ -413,7 +416,7 @@ public class WallyAI extends ModularAI
       boolean theUnexpected = ai.checkIfUnexpected(map);
       // If anything we didn't expect happened, scrap and re-plan everything
       if( theUnexpected )
-        ai.queuedActions.clear();
+        ai.init(map);
 
       return ai.pollAndCleanUpAction(map);
     }
@@ -799,15 +802,8 @@ public class WallyAI extends ModularAI
     }
 
     @Override
-    public void initTurn(GameMap gameMap) { ai.allThreats.clear(); }
-    @Override
     public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap gameMap)
     {
-      boolean theUnexpected = ai.checkIfUnexpected(gameMap);
-      // If anything we didn't expect happened, scrap and re-plan everything
-      if( theUnexpected )
-        ai.allThreats.clear();
-
       // We're already init'd, and nothing unexpected has happened. No need to recalc.
       if( 0 < ai.allThreats.size() )
         return null;
@@ -1008,12 +1004,18 @@ public class WallyAI extends ModularAI
         evictionValue = valueAction(ai, gameMap, evicterPlan);
       }
       boolean shouldWander = true;
-      boolean shouldYeet   = true;
+      boolean shouldYeet   = false;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(ec, unit,
                                           shouldYeet, shouldWander,
                                           evictionValue, EVICTION_DEPTH,
                                           null);
 
+      shouldYeet = true;
+      if( null == travelPlans )
+        travelPlans = ai.planTravelActions(ec, unit,
+                                           shouldYeet, shouldWander,
+                                           evictionValue, EVICTION_DEPTH,
+                                           null);
       if( null == travelPlans )
         return null;
       for( ActionPlan plan : travelPlans )
