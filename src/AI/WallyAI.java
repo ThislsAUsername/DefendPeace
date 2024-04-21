@@ -15,6 +15,7 @@ import Engine.Combat.CombatContext.CalcType;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Engine.UnitActionLifecycles.BattleLifecycle.BattleAction;
 import Engine.UnitActionLifecycles.CaptureLifecycle.CaptureAction;
+import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.*;
 import Units.*;
 import Units.MoveTypes.MoveType;
@@ -1356,7 +1357,7 @@ public class WallyAI extends ModularAI
     pcp.includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
-    final boolean mustMove = evictionValue > 0;
+    final boolean mustMove = evictionValue > 0 || null != mapPlan[unit.x][unit.y].toAchieve;
     if( null != bannedTiles )
     {
       destinations.removeAll(bannedTiles);
@@ -1659,14 +1660,9 @@ public class WallyAI extends ModularAI
         {
           for( GameAction capture : actionSet.getGameActions() )
           {
-            final int fundsDelta = valueCapture((CaptureAction) capture, gameMap);
+            final int thisDelta = valueCapture((CaptureAction) capture, gameMap);
 
-            int opportunityCost = 0;
-            if( !spaceFree )
-            {
-              opportunityCost = resiPlan.score;
-            }
-            final int thisDelta = fundsDelta - opportunityCost; // Ignore threats, capping is delicious.
+            // Ignore threats, capping is delicious.
             if( thisDelta > minFundsDelta )
             {
               ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), capture, thisDelta);
@@ -1721,46 +1717,60 @@ public class WallyAI extends ModularAI
     while (!rankedTravelPlans.isEmpty())
     {
       final Entry<ActionPlan, Integer> entry = rankedTravelPlans.poll();
-      ActionPlan plan = entry.getKey();
-      XYCoord xyc = plan.action.getMoveLocation();
+      ActionPlan evictingPlan = entry.getKey();
+      XYCoord xyc = evictingPlan.action.getMoveLocation();
       ArrayList<ActionPlan> prereqPlans = new ArrayList<>();
 
       ArrayList<Unit> evictees = new ArrayList<>();
+      ArrayList<ActionPlan> evicteePlans = new ArrayList<>();
       ArrayList<XYCoord> evicteeBannedTiles = new ArrayList<>();
       evicteeBannedTiles.add(xyc);
       evicteeBannedTiles.add(new XYCoord(unit));
 
-      ActionPlan  resiPlan = mapPlan[xyc.x][xyc.y].toAchieve;
+      // Handle the unit that's literally on the map right now
       Unit currentResident = ec.map.getResident(xyc);
-      // TODO: Hmm.
       boolean currentResidentHasPlans = plansByUnit.containsKey(currentResident);
-      if( !currentResidentHasPlans && null != currentResident )
+      if( !currentResidentHasPlans
+          && unit != currentResident && null != currentResident // Resident exists and isn't me
+          && !unit.CO.isEnemy(currentResident.CO) ) // If the unit is an enemy, we assume we will have planned to "evict" it otherwise before planning this
+      {
+        if( currentResident.isTurnOver )
+          continue;
         evictees.add(currentResident);
+        GameAction stayPut = new WaitLifecycle.WaitAction(currentResident, GamePath.stayPut(currentResident));
+        int stayPutScore = wallFundsValue(ec.map, threatMap, currentResident, xyc, null);
+        evicteePlans.add(new ActionPlan(ec.whodunit, new UnitContext(currentResident), stayPut, stayPutScore));
+      }
+
+      // Handle any unit that has planned to take my spot
+      ActionPlan  resiPlan = mapPlan[xyc.x][xyc.y].toAchieve;
       if( null != resiPlan )
       {
-        if( resiPlan.score >= plan.score )
-          continue;
         evictees.add(resiPlan.actor.unit);
         if( resiPlan.fromEviction )
           evicteeBannedTiles.add(new XYCoord(resiPlan.actor.unit));
+        evicteePlans.add(resiPlan);
       }
 
-      boolean evictionFalure = false;
+      boolean evictionFailure = false;
       for( Unit ev : evictees )
       {
-        evictionFalure |= ( ec.evictionStack.contains(ev) );
-        evictionFalure |= ( ev.isTurnOver && ev.CO.army == myArmy );
+        evictionFailure |= ( ec.evictionStack.contains(ev) );
+        evictionFailure |= ( ev.isTurnOver && ev.CO.army == myArmy );
       }
-      if( evictionFalure )
+      if( evictionFailure )
         continue;
 
-      for( Unit ev : evictees )
+      for( int evicteeIndex = 0; evicteeIndex < evictees.size(); ++evicteeIndex )
       {
-        if( ec.evictionStack.contains(ev) )
+        Unit ev = evictees.get(evicteeIndex);
+        evictionFailure |= ec.evictionStack.contains(ev);
+        if( evictionFailure )
           continue;
         boolean residentIsEvictable = !ev.isTurnOver;
 
-        if( !residentIsEvictable || recurseDepth <= 0 )
+        evictionFailure |= !residentIsEvictable || recurseDepth <= 0;
+        if( evictionFailure )
           continue;
         // If nobody's there, no need to evict.
         // If the resident is evictable, try to evict and bail if we can't.
@@ -1769,6 +1779,7 @@ public class WallyAI extends ModularAI
         int planEvictionValue = evictionValue + entry.getValue();
         // Prevent reflexive eviction
         ec.evictionStack.add(unit);
+
         // Try evicting our evictee without evicting anyone else first
         ArrayList<ActionPlan> evictionPlans = planValueActions(ec, ev,
                                                                planEvictionValue, recurseDepth - 1,
@@ -1779,13 +1790,23 @@ public class WallyAI extends ModularAI
                                             planEvictionValue, recurseDepth - 1,
                                             evicteeBannedTiles);
         ec.evictionStack.remove(unit);
-        if( null == evictionPlans )
+        evictionFailure |= null == evictionPlans;
+        if( evictionFailure )
           continue;
+
+        ActionPlan evicteeNewPlan = evictionPlans.get(0);
+        int opportunityCost = evicteePlans.get(evicteeIndex).score - evicteeNewPlan.score;
+        evictionFailure |= evictingPlan.score < opportunityCost;
+        if( evictionFailure )
+          continue;
+
         prereqPlans.addAll(evictionPlans);
       } // ~for evictees
 
+      if( evictionFailure )
+        continue;
       bestPlans = new ArrayList<>();
-      bestPlans.add(plan); // Since this cancels ap implicitly, ap's replacement needs to be cached after this one is
+      bestPlans.add(evictingPlan); // Since this cancels resiPlan implicitly, resiPlan's replacement needs to be cached after this one is
       bestPlans.addAll(prereqPlans);
       break; // We found a workable one. Ship it
     }
