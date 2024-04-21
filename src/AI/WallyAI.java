@@ -80,6 +80,7 @@ public class WallyAI extends ModularAI
   // What % damage I'll ignore when checking safety (currently for just builds)
   private static final int INDIRECT_THREAT_THRESHOLD = 13;
   private static final int DIRECT_THREAT_THRESHOLD = 60;
+  private static final int    UNIT_CAPTURE_RANGE = 4; // number of turns of movement to consider capture goals within
   private static final int    UNIT_HEAL_THRESHOLD = 6; // HP at which units heal
   private static final double UNIT_REFUEL_THRESHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
@@ -120,6 +121,7 @@ public class WallyAI extends ModularAI
     final GameAction action;
     final XYCoord startPos;
     GamePath path = null;
+    public XYCoord goal;
     boolean isAttack = false;
     boolean fromEviction = false;
     int percentDamage = -1; // The damage we expect to deal with our attack
@@ -156,6 +158,7 @@ public class WallyAI extends ModularAI
   private UnitPrediction[][] mapPlan; // TODO: Invalidate if any unit gets trapped/ends up not where we expect - cache unit+destination on offer action
   public PredictionMap predMap; // Owns a reference to the above, to expose its contents to Utils
   private HashMap<Unit, ActionPlan> plansByUnit;
+  private HashMap<XYCoord, TravelPurpose> travelPlanCoords = new HashMap<>();;
   private static class TileThreat
   {
     UnitContext identity;
@@ -177,6 +180,7 @@ public class WallyAI extends ModularAI
     if( !queuedActions.isEmpty() )
       queuedActions.clear();
     allThreats = new ArrayList<Unit>(); // implicitly resets ThreatMap
+    travelPlanCoords.clear();
 
     if( null != unitEffectiveMove )
       return;
@@ -268,6 +272,8 @@ public class WallyAI extends ModularAI
     plan.actor.coord = dest;
     if( null != actorIdentity )
       plansByUnit.put(actorIdentity, plan);
+    if( null != plan.goal )
+      travelPlanCoords.put(plan.goal, plan.purpose);
 
     if( plan.isAttack )
     {
@@ -295,6 +301,8 @@ public class WallyAI extends ModularAI
       final XYCoord ctt = evicted.action.getTargetLocation();
       mapPlan[ctt.x][ctt.y].damageInstances.remove(evicted);
     }
+    if( null != evicted.goal )
+      travelPlanCoords.remove(evicted.goal);
     // Don't mess with canceling attacks that clear tiles, at least for now
     //      final XYCoord cct = canceled.clearTile;
     //      if( null != cct )
@@ -1176,6 +1184,11 @@ public class WallyAI extends ModularAI
     }
   }
 
+  private int prevTravelPrio(XYCoord xyc)
+  {
+    return travelPlanCoords.getOrDefault(xyc, TravelPurpose.WANDER).priority;
+  }
+
   /** Produces a list of destinations for the unit, ordered by their relative precedence */
   private TravelPurpose fillTravelDestinations(
                                   GameMap gameMap,
@@ -1191,6 +1204,8 @@ public class WallyAI extends ModularAI
     for( int i = 0; i < stations.size(); )
     {
       XYCoord xyc = stations.get(i);
+      if( prevTravelPrio(xyc) >= TravelPurpose.SUPPLIES.priority )
+        stations.remove(xyc);
       if( null != predMap.getResident(xyc) )
         stations.remove(xyc);
       else
@@ -1222,14 +1237,18 @@ public class WallyAI extends ModularAI
       if( !goals.isEmpty() )
         travelPurpose = TravelPurpose.SUPPLIES;
     }
+    int distThreshold = uc.calculateMovePower() * UNIT_CAPTURE_RANGE;
     if( goals.isEmpty() && uc.actionTypes.contains(UnitActionFactory.CAPTURE) )
     {
       for( XYCoord xyc : futureCapTargets )
       {
+        if( prevTravelPrio(xyc) >= TravelPurpose.CONQUER.priority )
+          continue;
         // predMap shouldn't meaningfully diverge from reality here, I think
         boolean validCapDest = !AIUtils.isCapturing(gameMap, myArmy.cos[0], xyc);
         // If the turf is taken by someone else, it's a KILL objective
         validCapDest &= null == predMap.getResident(xyc) || myArmy == gameMap.getResident(xyc).CO.army;
+        validCapDest &= xyc.getDistance(unit) <= distThreshold;
         if( validCapDest )
           goals.add(xyc);
       }
@@ -1644,6 +1663,7 @@ public class WallyAI extends ModularAI
 //              log(String.format("      Best en passant attack deals %s", fundsDelta));
               ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), attack, thisDelta);
               plan.path = movePath;
+              plan.goal = goal;
               plan.purpose = travelPurpose;
               plan.isAttack = true;
               plan.fromEviction = mustMove;
@@ -1668,6 +1688,7 @@ public class WallyAI extends ModularAI
             {
               ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), capture, thisDelta);
               plan.path = movePath;
+              plan.goal = goal;
               plan.purpose = TravelPurpose.CONQUER;
               plan.isAttack = false;
               plan.fromEviction = mustMove;
@@ -1691,6 +1712,7 @@ public class WallyAI extends ModularAI
             {
               ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), move, waitScore);
               plan.path = movePath;
+              plan.goal = goal;
               plan.purpose = travelPurpose;
               plan.fromEviction = mustMove;
               rankedTravelPlans.add(new AbstractMap.SimpleEntry<>(plan, waitScore));
