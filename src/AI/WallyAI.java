@@ -1348,6 +1348,7 @@ public class WallyAI extends ModularAI
     if( ec.evictionStack.contains(unit) )
       return null;
     ActionPlan myOldPlan = plansByUnit.get(unit);
+    ActionPlan evictingPlan = mapPlan[unit.x][unit.y].toAchieve;
     if( null != myOldPlan && predMap.helpsClearTile(myOldPlan) )
       return null;
 
@@ -1357,7 +1358,7 @@ public class WallyAI extends ModularAI
     pcp.includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
-    final boolean mustMove = evictionValue > 0 || null != mapPlan[unit.x][unit.y].toAchieve;
+    final boolean mustMove = null != evictingPlan && evictingPlan != myOldPlan; // Don't evict yourself
     if( null != bannedTiles )
     {
       destinations.removeAll(bannedTiles);
@@ -1366,10 +1367,10 @@ public class WallyAI extends ModularAI
     {
       destinations.remove(new XYCoord(unit));
     }
-    boolean attackEviction = mustMove && null != mapPlan[unit.x][unit.y].toAchieve && mapPlan[unit.x][unit.y].toAchieve.action.getType() == UnitActionFactory.ATTACK;
+    boolean attackEviction = null != evictingPlan && evictingPlan.action.getType() == UnitActionFactory.ATTACK;
     if( attackEviction ) // Don't assume we can hop into our evicter's target's space, since that won't work
     {
-      XYCoord target = mapPlan[unit.x][unit.y].toAchieve.action.getTargetLocation();
+      XYCoord target = evictingPlan.action.getTargetLocation();
       destinations.remove(target);
     }
 
@@ -1730,7 +1731,7 @@ public class WallyAI extends ModularAI
       // Handle the unit that's literally on the map right now
       Unit currentResident = ec.map.getResident(xyc);
       boolean currentResidentHasPlans = plansByUnit.containsKey(currentResident);
-      if( !currentResidentHasPlans
+      if( !currentResidentHasPlans // This case is handled by the next conditional
           && unit != currentResident && null != currentResident // Resident exists and isn't me
           && !unit.CO.isEnemy(currentResident.CO) ) // If the unit is an enemy, we assume we will have planned to "evict" it otherwise before planning this
       {
@@ -1743,13 +1744,16 @@ public class WallyAI extends ModularAI
       }
 
       // Handle any unit that has planned to take my spot
-      ActionPlan  resiPlan = mapPlan[xyc.x][xyc.y].toAchieve;
-      if( null != resiPlan )
+      ActionPlan  evictablePlan = mapPlan[xyc.x][xyc.y].toAchieve;
+      if( null != evictablePlan )
       {
-        evictees.add(resiPlan.actor.unit);
-        if( resiPlan.fromEviction )
-          evicteeBannedTiles.add(new XYCoord(resiPlan.actor.unit));
-        evicteePlans.add(resiPlan);
+        Unit futureResident = evictablePlan.actor.unit;
+        if( unit == futureResident )
+          return null; // Trying to evict yourself is dumb
+        evictees.add(futureResident);
+        if( evictablePlan.fromEviction )
+          evicteeBannedTiles.add(new XYCoord(futureResident));
+        evicteePlans.add(evictablePlan);
       }
 
       boolean evictionFailure = false;
