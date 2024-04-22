@@ -251,7 +251,12 @@ public class KaijuWarsUnits extends UnitModelScheme
   // These go for all units that aren't experiments
   private static KaijuWarsUnitModelBuilder<?, ?> baseBuilder()
   {
-    var b = KaijuWarsUnitModel.builder();
+    return baseBuilder(null);
+  }
+  private static KaijuWarsUnitModelBuilder<?, ?> baseBuilder(KaijuWarsUnitModelBuilder<?, ?> b)
+  {
+    if( null == b )
+      b = KaijuWarsUnitModel.builder();
     b.costBase(UNIT_COST);
     b.abilityPowerValue(10);
     b.maxFuel(99);
@@ -407,7 +412,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   }
   public KaijuWarsUnitModel Radar()
   {
-    var b = Radar.builder();
+    var b = baseBuilder(Radar.builder());
     b.role(UnitModel.RECON | UnitModel.TANK | UnitModel.LAND);
 
     b.baseMovePower(2);
