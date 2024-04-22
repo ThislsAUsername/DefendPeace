@@ -60,9 +60,6 @@ public class KaijuWarsUnits extends UnitModelScheme
     factoryModels.add(Artillery());
     factoryModels.add(Maser());
     factoryModels.add(LigerPanther());
-    KaijuWarsUnitModel z2Hurt = SuperZ2Hurt();
-    factoryModels.add(SuperZ2(z2Hurt));
-    extras.add(z2Hurt);
     factoryModels.add(OGRPlatform());
 
     // Inscribe those war machines obtainable from an Airport.
@@ -78,6 +75,9 @@ public class KaijuWarsUnits extends UnitModelScheme
       carrier.baseActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(airportModels.get(i)));
 
     airportModels.add(BigBoy());
+    KaijuWarsUnitModel z2Hurt = SuperZ2Hurt();
+    airportModels.add(SuperZ2(z2Hurt));
+    extras.add(z2Hurt);
     KaijuWarsUnitModel gunBot = GuncrossRobot();
     airportModels.add(GuncrossWing(gunBot));
     airportModels.add(Kaputnik());
@@ -278,22 +278,6 @@ public class KaijuWarsUnits extends UnitModelScheme
       super();
       setMoveCost(TerrainType.MOUNTAIN, 2);
       setMoveCost(Weathers.RAIN, TerrainType.MOUNTAIN, 3);
-    }
-  }
-  public static class Hovercraft extends FootMech
-  {
-    private static final long serialVersionUID = 1L;
-
-    public Hovercraft()
-    {
-      super();
-      moveCosts.get(Weathers.CLEAR).setAllSeaCosts(1);
-      moveCosts.get(Weathers.RAIN).setAllSeaCosts(1);
-      moveCosts.get(Weathers.SNOW).setAllSeaCosts(1);
-      moveCosts.get(Weathers.SANDSTORM).setAllSeaCosts(1);
-
-      setMoveCost(TerrainType.REEF, 2);
-      setMoveCost(Weathers.SNOW, TerrainType.SEA, 2);
     }
   }
 
@@ -636,12 +620,12 @@ public class KaijuWarsUnits extends UnitModelScheme
   public KaijuWarsUnitModel SuperZ2(UnitModel rezTo)
   {
     var b = baseBuilder();
-    b.role(UnitModel.ASSAULT | UnitModel.SURFACE_TO_AIR | UnitModel.TANK | UnitModel.LAND);
+    b.role(UnitModel.ASSAULT | UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.TANK | UnitModel.HOVER | UnitModel.AIR_LOW);
 
     b.baseMovePower(3);
     b.costBase(PREP_COST * 4);
 
-    b.baseMoveType(new Hovercraft());
+    b.baseMoveType(new Flight());
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new KaijuWarsWeapons.SuperZ2() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
