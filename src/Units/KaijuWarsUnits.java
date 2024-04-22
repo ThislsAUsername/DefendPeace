@@ -654,17 +654,9 @@ public class KaijuWarsUnits extends UnitModelScheme
   }
   public KaijuWarsUnitModel SuperZ2Hurt()
   {
-    var b = baseBuilder();
-    b.role(UnitModel.ASSAULT | UnitModel.SURFACE_TO_AIR | UnitModel.TANK | UnitModel.LAND);
+    var b = SuperZ2(null).toBuilder();
 
-    b.baseMovePower(3);
     b.costBase(PREP_COST * 1);
-
-    b.baseMoveType(new Hovercraft());
-    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
-    WeaponModel[] weapons = { new KaijuWarsWeapons.SuperZ2() };
-    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
-
     b.name("Super Z2 hurt");
     b.kaijuCounter(1);
     KaijuWarsUnitModel output = b.build();
