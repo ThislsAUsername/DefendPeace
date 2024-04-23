@@ -373,19 +373,17 @@ public class KaijuWarsWeapons
     @Override
     public void modifyMovePower(UnitContext uc)
     {
-      if( uc.map == null )
-        return;
-      if( !uc.map.isLocationValid(uc.coord) )
+      if( uc.env == null )
         return;
       if( uc.model.isAirUnit() )
       {
-        TerrainType tt = uc.map.getEnvironment(uc.coord).terrainType;
+        TerrainType tt = uc.env.terrainType;
         if( tt.healsAir() )
           uc.movePower += 3;
       }
       if( uc.model.isLandUnit() )
       {
-        TerrainType tt = uc.map.getEnvironment(uc.coord).terrainType;
+        TerrainType tt = uc.env.terrainType;
         if( TerrainType.BRIDGE == tt || TerrainType.ROAD == tt )
           uc.movePower += 2;
       }

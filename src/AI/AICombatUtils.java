@@ -73,43 +73,44 @@ public class AICombatUtils
   }
   public static Map<XYCoord, Integer> findThreatPower(GameMap gameMap, Unit unit, XYCoord origin, UnitModel target)
   {
+    UnitContext uc = new UnitContext(gameMap, unit, null, null, origin);
     Map<XYCoord, Integer> shootableTiles = new HashMap<>();
-    PathCalcParams pcp = new PathCalcParams(unit, gameMap);
+    PathCalcParams pcp = new PathCalcParams(uc, gameMap);
     pcp.start = origin;
     pcp.includeOccupiedSpaces = true; // We assume the enemy knows how to manage positioning within his turn
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
     for( WeaponModel wep : unit.model.weapons )
     {
+      if( null != target && !unit.canTarget(target) )
+        continue;
+      // Consider using the full combat calc?
       int damage = (null == target)? 1 : wep.getDamage(target) * unit.getHealth() / UnitModel.MAXIMUM_HEALTH;
-      if( null == target || unit.canTarget(target) )
+      uc.setWeapon(wep);
+
+      if( !wep.canFireAfterMoving() )
       {
-        if( !wep.canFireAfterMoving() )
+        for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, uc))
         {
-          UnitContext uc = new UnitContext(gameMap, unit, wep, null, origin);
-          for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, uc))
-          {
-            int val = damage;
-            if (shootableTiles.containsKey(xyc))
-              val = Math.max(val, shootableTiles.get(xyc));
-            shootableTiles.put(xyc, val);
-          }
+          int val = damage;
+          if (shootableTiles.containsKey(xyc))
+            val = Math.max(val, shootableTiles.get(xyc));
+          shootableTiles.put(xyc, val);
         }
-        else
+        continue;
+      }
+
+      for( Utils.SearchNode dest : destinations )
+      {
+        uc.setPath(dest.getMyPath());
+        for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, uc))
         {
-          for( Utils.SearchNode dest : destinations )
-          {
-            UnitContext uc = new UnitContext(gameMap, unit, wep, dest.getMyPath(), dest);
-            for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, uc))
-            {
-              int val = damage;
-              if (shootableTiles.containsKey(xyc))
-                val = Math.max(val, shootableTiles.get(xyc));
-              shootableTiles.put(xyc, val);
-            }
-          }
+          int val = damage;
+          if (shootableTiles.containsKey(xyc))
+            val = Math.max(val, shootableTiles.get(xyc));
+          shootableTiles.put(xyc, val);
         }
       }
-    }
+    } // ~for each weapon
     return shootableTiles;
   }
 
