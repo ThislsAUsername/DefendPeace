@@ -6,13 +6,12 @@ import Terrain.TerrainType;
 import Units.AWBWUnits.AWBWUnitModel;
 import Units.DoRUnits.DoRUnitModel;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Accessors(fluent = true)
-@Getter(AccessLevel.PUBLIC)
+@Getter
 @ToString
 public abstract class WeaponModel implements Serializable
 {
