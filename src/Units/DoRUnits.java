@@ -1,15 +1,13 @@
 package Units;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import Engine.UnitActionFactory;
-import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.HealUnitEvent;
-import Engine.GameEvents.ResupplyEvent;
 import Engine.UnitActionLifecycles.FlareLifecycle;
 import Engine.UnitActionLifecycles.TerraformLifecycle;
 import Engine.UnitActionLifecycles.TransformLifecycle;
 import Engine.UnitActionLifecycles.UnitProduceLifecycle;
-import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.MoveTypes.Flight;
 import Units.MoveTypes.FloatHeavy;
@@ -21,6 +19,8 @@ import Units.MoveTypes.MoveTypeFey;
 import Units.MoveTypes.Tires;
 import Units.MoveTypes.TiresRugged;
 import Units.MoveTypes.Tread;
+import lombok.var;
+import lombok.experimental.SuperBuilder;
 
 public class DoRUnits extends UnitModelScheme
 {
@@ -48,37 +48,37 @@ public class DoRUnits extends UnitModelScheme
     ArrayList<UnitModel> airportModels = new ArrayList<UnitModel>();
 
     // Define everything we can build from a Factory.
-    factoryModels.add(new InfantryModel());
-    factoryModels.add(new MechModel());
-    factoryModels.add(new BikeModel());
-    factoryModels.add(new ReconModel());
-    factoryModels.add(new FlareModel());
-    factoryModels.add(new AntiAirModel());
-    factoryModels.add(new TankModel());
-    factoryModels.add(new MDTankModel());
-    factoryModels.add(new WarTankModel());
-    factoryModels.add(new ArtilleryModel());
-    factoryModels.add(new AntiTankModel());
-    factoryModels.add(new RocketsModel());
-    factoryModels.add(new MobileSAMModel());
-    factoryModels.add(new RigModel());
+    factoryModels.add(InfantryModel());
+    factoryModels.add(MechModel());
+    factoryModels.add(BikeModel());
+    factoryModels.add(ReconModel());
+    factoryModels.add(FlareModel());
+    factoryModels.add(AntiAirModel());
+    factoryModels.add(TankModel());
+    factoryModels.add(MDTankModel());
+    factoryModels.add(WarTankModel());
+    factoryModels.add(ArtilleryModel());
+    factoryModels.add(AntiTankModel());
+    factoryModels.add(RocketsModel());
+    factoryModels.add(MobileSAMModel());
+    factoryModels.add(RigModel());
 
     // Record those units we can get from a Seaport.
-    seaportModels.add(new GunboatModel());
-    seaportModels.add(new CruiserModel());
-    UnitModel subsub = new SubSubModel(); // Subs are built submerged
+    seaportModels.add(GunboatModel());
+    seaportModels.add(CruiserModel());
+    UnitModel subsub  = SubSubModel(); // Subs are built submerged
     seaportModels.add(subsub);
-    UnitModel carrier = new CarrierModel();
+    UnitModel carrier = CarrierModel();
     seaportModels.add(carrier);
-    seaportModels.add(new BattleshipModel());
-    seaportModels.add(new LanderModel());
+    seaportModels.add(BattleshipModel());
+    seaportModels.add(LanderModel());
 
     // Inscribe those war machines obtainable from an Airport.
-    airportModels.add(new FighterModel());
-    airportModels.add(new BomberModel());
-    airportModels.add(new DusterModel());
-    airportModels.add(new BCopterModel());
-    airportModels.add(new TCopterModel());
+    airportModels.add(FighterModel());
+    airportModels.add(BomberModel());
+    airportModels.add(DusterModel());
+    airportModels.add(BCopterModel());
+    airportModels.add(TCopterModel());
 
     // Dump these lists into a hashmap for easy reference later.
     dorModels.shoppingList.put(TerrainType.FACTORY, factoryModels);
@@ -94,12 +94,12 @@ public class DoRUnits extends UnitModelScheme
       dorModels.unitModels.add(um);
 
     // Handle transforming units separately, since we don't want two buy-entries
-    UnitModel sub = new SubSubModel();
-    sub.baseActions.add(new TransformLifecycle.TransformFactory(subsub, "DIVE"));
+    UnitModel sub = SubModel();
+    sub   .baseActions.add(new TransformLifecycle.TransformFactory(subsub, "DIVE"));
     subsub.baseActions.add(new TransformLifecycle.TransformFactory(sub, "RISE"));
     dorModels.unitModels.add(sub);
 
-    UnitModel seaplane = new SeaplaneModel();
+    UnitModel seaplane = SeaplaneModel();
     carrier.baseActions.add(1, new UnitProduceLifecycle.UnitProduceFactory(seaplane));
     dorModels.unitModels.add(seaplane);
 
@@ -119,34 +119,11 @@ public class DoRUnits extends UnitModelScheme
 
   public static final MoveType DoRFloatHeavy = new MoveTypeFey(new FloatHeavy());
 
+  @SuperBuilder(toBuilder = true)
   public static class DoRUnitModel extends UnitModel
   {
     private static final long serialVersionUID = 1L;
     public DoRUnitEnum type;
-
-    public DoRUnitModel(String pName, DoRUnitEnum pType, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] weapons, int starValue)
-    {
-      super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
-      type = pType;
-    }
-    public DoRUnitModel(String pName, DoRUnitEnum pType, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> weapons, int starValue)
-    {
-      super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, weapons, starValue);
-      type = pType;
-    }
-
-    @Override
-    public UnitModel clone()
-    {
-      // Create a new model with the given attributes.
-      DoRUnitModel newModel = new DoRUnitModel(name, type, role, costBase, maxAmmo, maxFuel, fuelBurnIdle, visionRange, baseMovePower,
-          baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
-
-      newModel.copyValues(this);
-      return newModel;
-    }
 
     @Override
     public int getDamageRedirect(WeaponModel wm)
@@ -155,693 +132,667 @@ public class DoRUnits extends UnitModelScheme
     }
   }
 
-  public static class InfantryModel extends DoRUnitModel
+  public DoRUnitModel InfantryModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = TROOP | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.TROOP | UnitModel.LAND);
     
-    private static final int UNIT_COST = 1500;
-    private static final int STAR_VALUE = 4;
-    private static final int MAX_FUEL = 99;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = -1;
-    private static final int VISION_RANGE = 2;
-    private static final int MOVE_POWER = 3;
+    b.costBase(1500);
+    b.abilityPowerValue(4);
+    b.maxFuel(99);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(-1);
+    b.visionRange(2);
+    b.baseMovePower(3);
 
-    private static final MoveType moveType = new FootStandard();
-    private static final UnitActionFactory[] actions = UnitActionFactory.FOOTSOLDIER_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.InfantryMGun() };
+    b.baseMoveType(new FootStandard());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.FOOTSOLDIER_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.InfantryMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public InfantryModel()
-    {
-      super("Infantry", DoRUnitEnum.INFANTRY, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Infantry");
+    b.type(DoRUnitEnum.INFANTRY);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class MechModel extends DoRUnitModel
+  public DoRUnitModel MechModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = TROOP | MECH | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.TROOP | UnitModel.MECH | UnitModel.LAND);
     
-    private static final int UNIT_COST = 2500;
-    private static final int STAR_VALUE = 4;
-    private static final int MAX_FUEL = 70;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = 3;
-    private static final int VISION_RANGE = 2;
-    private static final int MOVE_POWER = 2;
+    b.costBase(2500);
+    b.abilityPowerValue(4);
+    b.maxFuel(70);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(3);
+    b.visionRange(2);
+    b.baseMovePower(2);
 
-    private static final MoveType moveType = new FootMech();
-    private static final UnitActionFactory[] actions = UnitActionFactory.FOOTSOLDIER_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.MechZooka(), new DoRWeapons.MechMGun() };
+    b.baseMoveType(new FootMech());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.FOOTSOLDIER_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.MechZooka(), new DoRWeapons.MechMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public MechModel()
-    {
-      super("Mech", DoRUnitEnum.MECH, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
-          MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Mech");
+    b.type(DoRUnitEnum.MECH);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class BikeModel extends DoRUnitModel
+  public DoRUnitModel BikeModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = TROOP | TANK | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.TROOP | UnitModel.TANK | UnitModel.LAND);
     
-    private static final int UNIT_COST = 2500;
-    private static final int STAR_VALUE = 4;
-    private static final int MAX_FUEL = 70;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = -1;
-    private static final int VISION_RANGE = 2;
-    private static final int MOVE_POWER = 5;
+    b.costBase(2500);
+    b.abilityPowerValue(4);
+    b.maxFuel(70);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(-1);
+    b.visionRange(2);
+    b.baseMovePower(5);
 
-    private static final MoveType moveType = new TiresRugged();
-    private static final UnitActionFactory[] actions = UnitActionFactory.FOOTSOLDIER_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.MechMGun() };
+    b.baseMoveType(new TiresRugged());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.FOOTSOLDIER_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.MechMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public BikeModel()
-    {
-      super("Bike", DoRUnitEnum.BIKE, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
-          MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Bike");
+    b.type(DoRUnitEnum.BIKE);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class ReconModel extends DoRUnitModel
+  public DoRUnitModel ReconModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = RECON | TANK | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.RECON | UnitModel.TANK | UnitModel.LAND);
     
-    private static final int UNIT_COST = 4000;
-    private static final int STAR_VALUE = 10;
-    private static final int MAX_FUEL = 80;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = -1;
-    private static final int VISION_RANGE = 5;
-    private static final int MOVE_POWER = 8;
+    b.costBase(4000);
+    b.abilityPowerValue(10);
+    b.maxFuel(80);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(-1);
+    b.visionRange(5);
+    b.baseMovePower(8);
 
-    private static final MoveType moveType = new Tires();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.ReconMGun() };
+    b.baseMoveType(new Tires());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.ReconMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public ReconModel()
-    {
-      super("Recon", DoRUnitEnum.RECON, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
-          MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Recon");
+    b.type(DoRUnitEnum.RECON);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class FlareModel extends DoRUnitModel
+  public DoRUnitModel FlareModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = RECON | TANK | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.RECON | UnitModel.TANK | UnitModel.LAND);
     
-    private static final int UNIT_COST = 5000;
-    private static final int STAR_VALUE = 10;
-    private static final int MAX_FUEL = 60;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = 3;
-    private static final int VISION_RANGE = 2;
-    private static final int MOVE_POWER = 5;
+    b.costBase(5000);
+    b.abilityPowerValue(10);
+    b.maxFuel(60);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(3);
+    b.visionRange(2);
+    b.baseMovePower(5);
 
-    private static final MoveType moveType = new Tread();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.FlareMGun() };
+    b.baseMoveType(new Tread());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.FlareMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public FlareModel()
-    {
-      super("Flare", DoRUnitEnum.FLARE, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE,
-          MOVE_POWER, moveType, actions, weapons, STAR_VALUE);
-      baseActions.add(0, new FlareLifecycle.FlareFactory(0, 5, 2));
-    }
+    b.name("Flare");
+    b.type(DoRUnitEnum.FLARE);
+    DoRUnitModel output = b.build();
+    output.baseActions.add(0, new FlareLifecycle.FlareFactory(0, 5, 2));
+    return output;
   }
 
-  public static class AntiAirModel extends DoRUnitModel
+  public DoRUnitModel AntiAirModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = SURFACE_TO_AIR | TANK | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.SURFACE_TO_AIR | UnitModel.TANK | UnitModel.LAND);
     
-    private static final int UNIT_COST = 7000;
-    private static final int STAR_VALUE = 10;
-    private static final int MAX_FUEL = 60;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = 6;
-    private static final int VISION_RANGE = 3;
-    private static final int MOVE_POWER = 6;
-    private static final MoveType moveType = new Tread();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.AntiAirMGun() };
+    b.costBase(7000);
+    b.abilityPowerValue(10);
+    b.maxFuel(60);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(6);
+    b.visionRange(3);
+    b.baseMovePower(6);
+    b.baseMoveType(new Tread());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.AntiAirMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public AntiAirModel()
-    {
-      super("Anti-Air", DoRUnitEnum.ANTI_AIR, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Anti-Air");
+    b.type(DoRUnitEnum.ANTI_AIR);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class TankModel extends DoRUnitModel
+  public DoRUnitModel TankModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = ASSAULT | TANK | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.ASSAULT | UnitModel.TANK | UnitModel.LAND);
     
-    private static final int UNIT_COST = 7000;
-    private static final int STAR_VALUE = 10;
-    private static final int MAX_FUEL = 70;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = 6;
-    private static final int VISION_RANGE = 3;
-    private static final int MOVE_POWER = 6;
+    b.costBase(7000);
+    b.abilityPowerValue(10);
+    b.maxFuel(70);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(6);
+    b.visionRange(3);
+    b.baseMovePower(6);
 
-    private static final MoveType moveType = new Tread();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.TankCannon(), new DoRWeapons.TankMGun() };
+    b.baseMoveType(new Tread());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.TankCannon(), new DoRWeapons.TankMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public TankModel()
-    {
-      super("Tank", DoRUnitEnum.TANK, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
-    }
+    b.name("Tank");
+    b.type(DoRUnitEnum.TANK);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class MDTankModel extends DoRUnitModel
+  public DoRUnitModel MDTankModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = ASSAULT | TANK | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.ASSAULT | UnitModel.TANK | UnitModel.LAND);
     
-    private static final int UNIT_COST = 12000;
-    private static final int STAR_VALUE = 14;
-    private static final int MAX_FUEL = 50;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = 5;
-    private static final int VISION_RANGE = 2;
-    private static final int MOVE_POWER = 5;
+    b.costBase(12000);
+    b.abilityPowerValue(14);
+    b.maxFuel(50);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(5);
+    b.visionRange(2);
+    b.baseMovePower(5);
 
-    private static final MoveType moveType = new Tread();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.MDTankCannon(), new DoRWeapons.MDTankMGun() };
+    b.baseMoveType(new Tread());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.MDTankCannon(), new DoRWeapons.MDTankMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public MDTankModel()
-    {
-      super("Md Tank", DoRUnitEnum.MD_TANK, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Md Tank");
+    b.type(DoRUnitEnum.MD_TANK);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class WarTankModel extends DoRUnitModel
+  public DoRUnitModel WarTankModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = ASSAULT | TANK | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.ASSAULT | UnitModel.TANK | UnitModel.LAND);
     
-    private static final int UNIT_COST = 16000;
-    private static final int STAR_VALUE = 16;
-    private static final int MAX_FUEL = 50;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = 5;
-    private static final int VISION_RANGE = 2;
-    private static final int MOVE_POWER = 4;
+    b.costBase(16000);
+    b.abilityPowerValue(16);
+    b.maxFuel(50);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(5);
+    b.visionRange(2);
+    b.baseMovePower(4);
 
-    private static final MoveType moveType = new Tread();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.WarCannon(), new DoRWeapons.WarMGun() };
+    b.baseMoveType(new Tread());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.WarCannon(), new DoRWeapons.WarMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public WarTankModel()
-    {
-      super("War Tank", DoRUnitEnum.WAR_TANK, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("War Tank");
+    b.type(DoRUnitEnum.WAR_TANK);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class ArtilleryModel extends DoRUnitModel
+  public DoRUnitModel ArtilleryModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = SIEGE | TANK | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.SIEGE | UnitModel.TANK | UnitModel.LAND);
     
-    private static final int UNIT_COST = 6000;
-    private static final int STAR_VALUE = 10;
-    private static final int MAX_FUEL = 50;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = 6;
-    private static final int VISION_RANGE = 3;
-    private static final int MOVE_POWER = 5;
+    b.costBase(6000);
+    b.abilityPowerValue(10);
+    b.maxFuel(50);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(6);
+    b.visionRange(3);
+    b.baseMovePower(5);
 
-    private static final MoveType moveType = new Tread();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.ArtilleryCannon() };
+    b.baseMoveType(new Tread());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.ArtilleryCannon() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public ArtilleryModel()
-    {
-      super("Artillery", DoRUnitEnum.ARTILLERY, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Artillery");
+    b.type(DoRUnitEnum.ARTILLERY);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class AntiTankModel extends DoRUnitModel
+  public DoRUnitModel AntiTankModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = SIEGE | TANK | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.SIEGE | UnitModel.TANK | UnitModel.LAND);
     
-    private static final int UNIT_COST = 11000;
-    private static final int STAR_VALUE = 14;
-    private static final int MAX_FUEL = 50;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = 6;
-    private static final int VISION_RANGE = 2;
-    private static final int MOVE_POWER = 4;
+    b.costBase(11000);
+    b.abilityPowerValue(14);
+    b.maxFuel(50);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(6);
+    b.visionRange(2);
+    b.baseMovePower(4);
 
-    private static final MoveType moveType = new TiresRugged();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.AntiTankCannon() };
+    b.baseMoveType(new TiresRugged());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.AntiTankCannon() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public AntiTankModel()
-    {
-      super("AntiTank", DoRUnitEnum.ANTITANK, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("AntiTank");
+    b.type(DoRUnitEnum.ANTITANK);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class RocketsModel extends DoRUnitModel
+  public DoRUnitModel RocketsModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = SIEGE | TANK | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.SIEGE | UnitModel.TANK | UnitModel.LAND);
     
-    private static final int UNIT_COST = 15000;
-    private static final int STAR_VALUE = 14;
-    private static final int MAX_FUEL = 50;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = 5;
-    private static final int VISION_RANGE = 3;
-    private static final int MOVE_POWER = 5;
+    b.costBase(15000);
+    b.abilityPowerValue(14);
+    b.maxFuel(50);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(5);
+    b.visionRange(3);
+    b.baseMovePower(5);
 
-    private static final MoveType moveType = new Tires();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.RocketRockets() };
+    b.baseMoveType(new Tires());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.RocketRockets() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public RocketsModel()
-    {
-      super("Rockets", DoRUnitEnum.ROCKETS, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Rockets");
+    b.type(DoRUnitEnum.ROCKETS);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class MobileSAMModel extends DoRUnitModel
+  public DoRUnitModel MobileSAMModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = SIEGE | SURFACE_TO_AIR | TANK | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.SIEGE | UnitModel.SURFACE_TO_AIR | UnitModel.TANK | UnitModel.LAND);
     
-    private static final int UNIT_COST = 12000;
-    private static final int STAR_VALUE = 14;
-    private static final int MAX_FUEL = 50;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = 5;
-    private static final int VISION_RANGE = 5;
-    private static final int MOVE_POWER = 5; // Finally, sigh
+    b.costBase(12000);
+    b.abilityPowerValue(14);
+    b.maxFuel(50);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(5);
+    b.visionRange(5);
+    b.baseMovePower(5); // Finally, sigh
 
-    private static final MoveType moveType = new Tires();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.MobileSAMWeapon() };
+    b.baseMoveType(new Tires());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.MobileSAMWeapon() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public MobileSAMModel()
-    {
-      super("Missiles", DoRUnitEnum.MOBILESAM, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Missiles");
+    b.type(DoRUnitEnum.MOBILESAM);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class RigModel extends DoRUnitModel
+  public DoRUnitModel RigModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = TRANSPORT | TANK | LAND;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.TRANSPORT | UnitModel.TANK | UnitModel.LAND);
     
-    private static final int UNIT_COST = 5000;
-    private static final int STAR_VALUE = 8;
-    private static final int MAX_FUEL = 99;
-    private static final int IDLE_FUEL_BURN = 0;
-    private static final int MAX_AMMO = -1;
-    private static final int VISION_RANGE = 1;
-    private static final int MOVE_POWER = 6;
-    private static final MoveType moveType = new Tread();
-    private static final UnitActionFactory[] actions = UnitActionFactory.APC_ACTIONS;
+    b.costBase(5000);
+    b.abilityPowerValue(8);
+    b.maxFuel(99);
+    b.fuelBurnIdle(0);
+    b.maxAmmo(-1);
+    b.visionRange(1);
+    b.baseMovePower(6);
+    b.baseMoveType(new Tread());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.APC_ACTIONS)));
 
-    public RigModel()
-    {
-      super("APC", DoRUnitEnum.RIG, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, new WeaponModel[0], STAR_VALUE);
-      baseCargoCapacity = 1;
-      carryableMask = TROOP;
-      carryableExclusionMask = TANK; // Can't carry Bikes
+    b.name("APC");
+    b.type(DoRUnitEnum.RIG);
+    b.baseCargoCapacity(1);
+    b.carryableMask(UnitModel.TROOP);
+    b.carryableExclusionMask(UnitModel.TANK); // Can't carry Bikes
 
-      maxMaterials = 1;
-      baseActions.add(
+    b.maxMaterials(1);
+    DoRUnitModel output = b.build();
+          output.baseActions.add(
           new TerraformLifecycle.TerraformFactory(TerrainType.GRASS, TerrainType.TEMP_AIRPORT, "BUILD"));
-      baseActions.add(
+          output.baseActions.add(
           new TerraformLifecycle.TerraformFactory(TerrainType.SHOAL, TerrainType.TEMP_SEAPORT, "BUILD"));
-    }
+    return output;
   }
 
   // air
 
-  public static class FighterModel extends DoRUnitModel
+  public DoRUnitModel FighterModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = AIR_TO_AIR | JET | AIR_HIGH;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR_HIGH);
     
-    private static final int UNIT_COST = 20000;
-    private static final int STAR_VALUE = 18;
-    private static final int MAX_FUEL = 99;
-    private static final int IDLE_FUEL_BURN = 5;
-    private static final int MAX_AMMO = 6;
-    private static final int VISION_RANGE = 5;
-    private static final int MOVE_POWER = 9;
+    b.costBase(20000);
+    b.abilityPowerValue(18);
+    b.maxFuel(99);
+    b.fuelBurnIdle(5);
+    b.maxAmmo(6);
+    b.visionRange(5);
+    b.baseMovePower(9);
 
-    private static final MoveType moveType = new Flight();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.FighterMissiles() };
+    b.baseMoveType(new Flight());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.FighterMissiles() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public FighterModel()
-    {
-      super("Fighter", DoRUnitEnum.FIGHTER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Fighter");
+    b.type(DoRUnitEnum.FIGHTER);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class BomberModel extends DoRUnitModel
+  public DoRUnitModel BomberModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = AIR_TO_SURFACE | ASSAULT | JET | AIR_HIGH;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR_HIGH);
     
-    private static final int UNIT_COST = 20000;
-    private static final int STAR_VALUE = 18;
-    private static final int MAX_FUEL = 99;
-    private static final int IDLE_FUEL_BURN = 5;
-    private static final int MAX_AMMO = 6;
-    private static final int VISION_RANGE = 3;
-    private static final int MOVE_POWER = 7;
+    b.costBase(20000);
+    b.abilityPowerValue(18);
+    b.maxFuel(99);
+    b.fuelBurnIdle(5);
+    b.maxAmmo(6);
+    b.visionRange(3);
+    b.baseMovePower(7);
 
-    private static final MoveType moveType = new Flight();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.BomberBombs() };
+    b.baseMoveType(new Flight());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.BomberBombs() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public BomberModel()
-    {
-      super("Bomber", DoRUnitEnum.BOMBER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Bomber");
+    b.type(DoRUnitEnum.BOMBER);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class SeaplaneModel extends DoRUnitModel
+  public DoRUnitModel SeaplaneModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = AIR_TO_SURFACE | AIR_TO_AIR | ASSAULT | JET | AIR_HIGH;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR_HIGH);
     
-    private static final int UNIT_COST = 15000;
-    private static final int STAR_VALUE = 14;
-    private static final int MAX_FUEL = 40;
-    private static final int IDLE_FUEL_BURN = 5;
-    private static final int MAX_AMMO = 3;
-    private static final int VISION_RANGE = 4;
-    private static final int MOVE_POWER = 7;
+    b.costBase(15000);
+    b.abilityPowerValue(14);
+    b.maxFuel(40);
+    b.fuelBurnIdle(5);
+    b.maxAmmo(3);
+    b.visionRange(4);
+    b.baseMovePower(7);
 
-    private static final MoveType moveType = new Flight();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.SeaplaneShots() };
+    b.baseMoveType(new Flight());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.SeaplaneShots() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public SeaplaneModel()
-    {
-      super("Seaplane", DoRUnitEnum.SEAPLANE, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Seaplane");
+    b.type(DoRUnitEnum.SEAPLANE);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class DusterModel extends DoRUnitModel
+  public DoRUnitModel DusterModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = AIR_TO_AIR | JET | AIR_HIGH;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR_HIGH);
     
-    private static final int UNIT_COST = 13000;
-    private static final int STAR_VALUE = 14;
-    private static final int MAX_FUEL = 99;
-    private static final int IDLE_FUEL_BURN = 5;
-    private static final int MAX_AMMO = 9;
-    private static final int VISION_RANGE = 4;
-    private static final int MOVE_POWER = 8;
+    b.costBase(13000);
+    b.abilityPowerValue(14);
+    b.maxFuel(99);
+    b.fuelBurnIdle(5);
+    b.maxAmmo(9);
+    b.visionRange(4);
+    b.baseMovePower(8);
 
-    private static final MoveType moveType = new Flight();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.DusterMGun() };
+    b.baseMoveType(new Flight());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.DusterMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public DusterModel()
-    {
-      super("Duster", DoRUnitEnum.DUSTER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Duster");
+    b.type(DoRUnitEnum.DUSTER);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class BCopterModel extends DoRUnitModel
+  public DoRUnitModel BCopterModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = AIR_TO_SURFACE | ASSAULT | HOVER | AIR_LOW;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.HOVER | UnitModel.AIR_LOW);
     
-    private static final int UNIT_COST = 9000;
-    private static final int STAR_VALUE = 12;
-    private static final int MAX_FUEL = 99;
-    private static final int IDLE_FUEL_BURN = 2;
-    private static final int MAX_AMMO = 6;
-    private static final int VISION_RANGE = 2;
-    private static final int MOVE_POWER = 6;
+    b.costBase(9000);
+    b.abilityPowerValue(12);
+    b.maxFuel(99);
+    b.fuelBurnIdle(2);
+    b.maxAmmo(6);
+    b.visionRange(2);
+    b.baseMovePower(6);
 
-    private static final MoveType moveType = new Flight();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.CopterRockets(), new DoRWeapons.CopterMGun() };
+    b.baseMoveType(new Flight());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.CopterRockets(), new DoRWeapons.CopterMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public BCopterModel()
-    {
-      super("B-Copter", DoRUnitEnum.B_COPTER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("B-Copter");
+    b.type(DoRUnitEnum.B_COPTER);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class TCopterModel extends DoRUnitModel
+  public DoRUnitModel TCopterModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = TRANSPORT | HOVER | AIR_LOW;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.TRANSPORT | UnitModel.HOVER | UnitModel.AIR_LOW);
     
-    private static final int UNIT_COST = 5000;
-    private static final int STAR_VALUE = 10;
-    private static final int MAX_FUEL = 99;
-    private static final int IDLE_FUEL_BURN = 2;
-    private static final int MAX_AMMO = -1;
-    private static final int VISION_RANGE = 1;
-    private static final int MOVE_POWER = 6;
+    b.costBase(5000);
+    b.abilityPowerValue(10);
+    b.maxFuel(99);
+    b.fuelBurnIdle(2);
+    b.maxAmmo(-1);
+    b.visionRange(1);
+    b.baseMovePower(6);
 
-    private static final MoveType moveType = new Flight();
-    private static final UnitActionFactory[] actions = UnitActionFactory.TRANSPORT_ACTIONS;
+    b.baseMoveType(new Flight());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.TRANSPORT_ACTIONS)));
 
-    public TCopterModel()
-    {
-      super("T-Copter", DoRUnitEnum.T_COPTER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, new WeaponModel[0], STAR_VALUE);
-      baseCargoCapacity = 1;
-      carryableMask = TROOP;
-      carryableExclusionMask = TANK; // Can't carry Bikes
-    }
+    b.name("T-Copter");
+    b.type(DoRUnitEnum.T_COPTER);
+    b.baseCargoCapacity(1);
+    b.carryableMask(UnitModel.TROOP);
+    b.carryableExclusionMask(UnitModel.TANK); // Can't carry Bikes
+    DoRUnitModel output = b.build();
+    return output;
   }
 
   // sea
 
-  public static class GunboatModel extends DoRUnitModel
+  public DoRUnitModel GunboatModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = TRANSPORT | SHIP | SEA;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.TRANSPORT | UnitModel.SHIP | UnitModel.SEA);
     
-    private static final int UNIT_COST = 6000;
-    private static final int STAR_VALUE = 10;
-    private static final int MAX_FUEL = 99;
-    private static final int IDLE_FUEL_BURN = 1;
-    private static final int MAX_AMMO = 1;
-    private static final int VISION_RANGE = 2;
-    private static final int MOVE_POWER = 7;
+    b.costBase(6000);
+    b.abilityPowerValue(10);
+    b.maxFuel(99);
+    b.fuelBurnIdle(1);
+    b.maxAmmo(1);
+    b.visionRange(2);
+    b.baseMovePower(7);
 
-    private static final MoveType moveType = new FloatLight();
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.GunBoatGun() };
+    b.baseMoveType(new FloatLight());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_TRANSPORT_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.GunBoatGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public GunboatModel()
-    {
-      super("Gunboat", DoRUnitEnum.GUNBOAT, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-      baseCargoCapacity = 1;
-      carryableMask = TROOP;
-      carryableExclusionMask = TANK; // Can't carry Bikes
-      unloadExclusionTerrain.add(TerrainType.BRIDGE);
-    }
+    b.name("Gunboat");
+    b.type(DoRUnitEnum.GUNBOAT);
+    b.baseCargoCapacity(1);
+    b.carryableMask(UnitModel.TROOP);
+    b.carryableExclusionMask(UnitModel.TANK); // Can't carry Bikes
+    DoRUnitModel output = b.build();
+    output.unloadExclusionTerrain.add(TerrainType.BRIDGE);
+    return output;
   }
 
-  public static class CruiserModel extends DoRUnitModel
+  public DoRUnitModel CruiserModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = SURFACE_TO_AIR | TRANSPORT | SHIP | SEA;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.SURFACE_TO_AIR | UnitModel.TRANSPORT | UnitModel.SHIP | UnitModel.SEA);
     
-    private static final int UNIT_COST = 16000;
-    private static final int STAR_VALUE = 16;
-    private static final int MAX_FUEL = 99;
-    private static final int IDLE_FUEL_BURN = 1;
-    private static final int MAX_AMMO = 9;
-    private static final int VISION_RANGE = 5;
-    private static final int MOVE_POWER = 6;
+    b.costBase(16000);
+    b.abilityPowerValue(16);
+    b.maxFuel(99);
+    b.fuelBurnIdle(1);
+    b.maxAmmo(9);
+    b.visionRange(5);
+    b.baseMovePower(6);
 
-    private static final MoveType moveType = DoRFloatHeavy;
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.CruiserTorpedoes(), new DoRWeapons.CruiserMGun() };
+    b.baseMoveType(DoRFloatHeavy);
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_TRANSPORT_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.CruiserTorpedoes(), new DoRWeapons.CruiserMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public CruiserModel()
-    {
-      super("Cruiser", DoRUnitEnum.CRUISER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-      baseCargoCapacity = 2;
-      carryableMask = AIR_LOW;
-    }
+    b.name("Cruiser");
+    b.type(DoRUnitEnum.CRUISER);
+    b.baseCargoCapacity(2);
+    b.carryableMask(UnitModel.AIR_LOW);
 
-    /** Cruisers supply their cargo at the beginning of every turn. Make it so. */
-    @Override
-    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
-    {
-      GameEventQueue events = super.getTurnInitEvents(self, map);
-      for( Unit cargo : self.heldUnits )
-        if( !cargo.isFullySupplied() )
-          events.add(new ResupplyEvent(self, cargo));
-      return events;
-    }
+      /** Cruisers supply their cargo at the beginning of every turn. Make it so. */
+    b.supplyCargo(true);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class SubModel extends DoRUnitModel
+  public DoRUnitModel SubModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = SHIP | SEA;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.SHIP | UnitModel.SEA);
     
-    private static final int UNIT_COST = 20000;
-    private static final int STAR_VALUE = 18;
-    private static final int MAX_FUEL = 70;
-    private static final int IDLE_FUEL_BURN = 1;
-    private static final int MAX_AMMO = 6;
-    private static final int VISION_RANGE = 5;
-    private static final int MOVE_POWER = 6;
+    b.costBase(20000);
+    b.abilityPowerValue(18);
+    b.maxFuel(70);
+    b.fuelBurnIdle(1);
+    b.maxAmmo(6);
+    b.visionRange(5);
+    b.baseMovePower(6);
 
-    private static final MoveType moveType = DoRFloatHeavy;
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.SubTorpedoes() };
+    b.baseMoveType(DoRFloatHeavy);
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.SubTorpedoes() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public SubModel()
-    {
-      super("Sub", DoRUnitEnum.SUB, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, weapons, STAR_VALUE);
-    }
+    b.name("Sub");
+    b.type(DoRUnitEnum.SUB);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class SubSubModel extends SubModel
+  public DoRUnitModel SubSubModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final int IDLE_FUEL_BURN = 5;
-
-    public SubSubModel()
-    {
-      super();
-      type = DoRUnitEnum.SUB_SUB;
-      role |= SUBSURFACE;
-      fuelBurnIdle = IDLE_FUEL_BURN;
-      hidden = true;
-    }
+    var b = SubModel().toBuilder();
+    b.fuelBurnIdle(5);
+    b.type(DoRUnitEnum.SUB_SUB);
+    b.hidden(true);
+    DoRUnitModel output = b.build();
+    output.role |= UnitModel.SUBSURFACE;
+    return output;
   }
 
-  public static class CarrierModel extends DoRUnitModel
+  public DoRUnitModel CarrierModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = SURFACE_TO_AIR | TRANSPORT | SHIP | SEA;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.SURFACE_TO_AIR | UnitModel.TRANSPORT | UnitModel.SHIP | UnitModel.SEA);
     
-    private static final int UNIT_COST = 28000;
-    private static final int STAR_VALUE = 22;
-    private static final int MAX_FUEL = 99;
-    private static final int IDLE_FUEL_BURN = 1;
-    private static final int MAX_AMMO = -1;
-    private static final int VISION_RANGE = 4;
-    private static final int MOVE_POWER = 5;
+    b.costBase(28000);
+    b.abilityPowerValue(22);
+    b.maxFuel(99);
+    b.fuelBurnIdle(1);
+    b.maxAmmo(-1);
+    b.visionRange(4);
+    b.baseMovePower(5);
 
-    private static final MoveType moveType = DoRFloatHeavy;
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.CarrierMGun() };
+    b.baseMoveType(DoRFloatHeavy);
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.CarrierMGun() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public CarrierModel()
-    {
-      super("Carrier", DoRUnitEnum.CARRIER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-      maxMaterials = 4;
-      baseCargoCapacity = 2;
-      carryableMask = AIR_LOW | AIR_HIGH;
-      baseActions.add(0, UnitActionFactory.LAUNCH);
-    }
-
+    b.name("Carrier");
+    b.type(DoRUnitEnum.CARRIER);
+    b.maxMaterials(4);
+    b.baseCargoCapacity(2);
+    b.carryableMask(UnitModel.AIR_LOW | UnitModel.AIR_HIGH);
     /** DoR Carriers repair and supply their cargo at the beginning of every turn. Make it so. */
-    @Override
-    public GameEventQueue getTurnInitEvents(Unit self, MapMaster map)
-    {
-      GameEventQueue events = super.getTurnInitEvents(self, map);
-      for( Unit cargo : self.heldUnits )
-      {
-        events.add(new HealUnitEvent(cargo, self.CO.getRepairPower(), self.CO.army)); // Event handles cost logic
-        if( !cargo.isFullySupplied() )
-          events.add(new ResupplyEvent(self, cargo));
-      }
-      return events;
-    }
+    b.repairCargo(true);
+    b.supplyCargo(true);
+    DoRUnitModel output = b.build();
+    output.baseActions.add(0, UnitActionFactory.LAUNCH);
+    return output;
   }
 
-  public static class BattleshipModel extends DoRUnitModel
+  public DoRUnitModel BattleshipModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = SIEGE | SHIP | SEA;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.SIEGE | UnitModel.SHIP | UnitModel.SEA);
     
-    private static final int UNIT_COST = 25000;
-    private static final int STAR_VALUE = 20;
-    private static final int MAX_FUEL = 99;
-    private static final int IDLE_FUEL_BURN = 1;
-    private static final int MAX_AMMO = 6;
-    private static final int VISION_RANGE = 3;
-    private static final int MOVE_POWER = 5;
+    b.costBase(25000);
+    b.abilityPowerValue(20);
+    b.maxFuel(99);
+    b.fuelBurnIdle(1);
+    b.maxAmmo(6);
+    b.visionRange(3);
+    b.baseMovePower(5);
 
-    private static final MoveType moveType = DoRFloatHeavy;
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-    private static final WeaponModel[] weapons = { new DoRWeapons.BattleshipCannon() };
+    b.baseMoveType(DoRFloatHeavy);
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    WeaponModel[] weapons = { new DoRWeapons.BattleshipCannon() };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    public BattleshipModel()
-    {
-      super("Battleship", DoRUnitEnum.BATTLESHIP, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-    }
+    b.name("Battleship");
+    b.type(DoRUnitEnum.BATTLESHIP);
+    DoRUnitModel output = b.build();
+    return output;
   }
 
-  public static class LanderModel extends DoRUnitModel
+  public DoRUnitModel LanderModel()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = TRANSPORT | SHIP | SEA;
+    var b = DoRUnitModel.builder();
+    b.role(UnitModel.TRANSPORT | UnitModel.SHIP | UnitModel.SEA);
     
-    private static final int UNIT_COST = 10000;
-    private static final int STAR_VALUE = 12;
-    private static final int MAX_FUEL = 99;
-    private static final int IDLE_FUEL_BURN = 1;
-    private static final int MAX_AMMO = -1;
-    private static final int VISION_RANGE = 1;
-    private static final int MOVE_POWER = 6;
+    b.costBase(10000);
+    b.abilityPowerValue(12);
+    b.maxFuel(99);
+    b.fuelBurnIdle(1);
+    b.maxAmmo(-1);
+    b.visionRange(1);
+    b.baseMovePower(6);
 
-    private static final MoveType moveType = new FloatLight();
-    private static final UnitActionFactory[] actions = UnitActionFactory.TRANSPORT_ACTIONS;
+    b.baseMoveType(new FloatLight());
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.TRANSPORT_ACTIONS)));
 
-    public LanderModel()
-    {
-      super("Lander", DoRUnitEnum.LANDER, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER, moveType,
-          actions, new WeaponModel[0], STAR_VALUE);
-      baseCargoCapacity = 2;
-      carryableMask = TROOP | TANK;
-      unloadExclusionTerrain.add(TerrainType.BRIDGE);
-    }
+    b.name("Lander");
+    b.type(DoRUnitEnum.LANDER);
+    b.baseCargoCapacity(2);
+    b.carryableMask(UnitModel.TROOP | UnitModel.TANK);
+    DoRUnitModel output = b.build();
+    output.unloadExclusionTerrain.add(TerrainType.BRIDGE);
+    return output;
   }
 
 }

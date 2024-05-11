@@ -37,6 +37,8 @@ public abstract class UnitModelScheme implements Serializable
     if(grms != null)
       return grms;
     grms = buildGameReadyModels();
+    for( UnitModel um : grms.unitModels )
+      um.setCalculatedProps();
     return grms;
   }
   protected abstract GameReadyModels buildGameReadyModels();

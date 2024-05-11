@@ -83,7 +83,7 @@ public class AICombatUtils
       int damage = (null == target)? 1 : wep.getDamage(target) * unit.getHealth() / UnitModel.MAXIMUM_HEALTH;
       if( null == target || unit.canTarget(target) )
       {
-        if( !wep.canFireAfterMoving )
+        if( !wep.canFireAfterMoving() )
         {
           UnitContext uc = new UnitContext(gameMap, unit, wep, null, origin);
           for (XYCoord xyc : Utils.findLocationsInRange(gameMap, origin, uc))
@@ -126,8 +126,8 @@ public class AICombatUtils
         // Consider refining this?
         // I REALLY don't want this to become a loop over all units for all possible move locations;
         //   that would likely defeat the main purpose of this function (saving computation power)
-        if( wm.canFireAfterMoving )
-          range = Math.max(range, wm.rangeMax);
+        if( wm.canFireAfterMoving() )
+          range = Math.max(range, wm.rangeMax());
       }
     }
     return range;
@@ -150,7 +150,7 @@ public class AICombatUtils
       {
         // Evaluate this weapon for targets if it has ammo, and if either the weapon
         // is mobile or we don't care if it's mobile (because we aren't moving).
-        if( wpn.loaded(unit) && (!moved || wpn.canFireAfterMoving) )
+        if( wpn.loaded(unit) && (!moved || wpn.canFireAfterMoving()) )
         {
           UnitContext uc = new UnitContext(gameMap, unit, wpn, move.getMyPath(), move);
           ArrayList<XYCoord> locations = Utils.findTargetsInRange(gameMap, uc, includeTerrain);
