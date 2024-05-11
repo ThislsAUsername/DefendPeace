@@ -160,6 +160,8 @@ public class MapSelectMenuArtist
     propCounts.put(TerrainType.AIRPORT, 0);
     propCounts.put(TerrainType.SEAPORT, 0);
     countCapturables(selectedMapInfo, propCounts);
+    propCounts.remove(TerrainType.HEADQUARTERS);
+    propCounts.remove(TerrainType.LAB);
     for(Entry<TerrainType, Integer> propEntry : propCounts.entrySet())
     {
       TerrainType terrain = propEntry.getKey();
