@@ -5,6 +5,9 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import Terrain.MapInfo;
 import Terrain.MapLibrary;
@@ -150,18 +153,24 @@ public class MapSelectMenuArtist
     int propsDrawX = nameSectionDrawWidth + (2*buffer) - sqSize; // Map name pane plus generous buffer, minus one square (building sprites are 2x2).
     int propsDrawY = maxMiniMapHeight+buffer+(font.getHeight())+buffer - (sqSize/2); // Map  pane plus "# players" string plus buffer, minus 1/2sq.
 
-    // Define an array with all the property types we care to enumerate.
-    TerrainType[] propertyTypes = {TerrainType.CITY, TerrainType.FACTORY, TerrainType.AIRPORT, TerrainType.SEAPORT};
-    for(int i = 0; i < propertyTypes.length; ++i)
+    // Prepopulate zeroes for some specific property types, so the first few sprites are consistent.
+    Map<TerrainType, Integer> propCounts = new LinkedHashMap<>();
+    propCounts.put(TerrainType.CITY, 0);
+    propCounts.put(TerrainType.FACTORY, 0);
+    propCounts.put(TerrainType.AIRPORT, 0);
+    propCounts.put(TerrainType.SEAPORT, 0);
+    countCapturables(selectedMapInfo, propCounts);
+    propCounts.remove(TerrainType.HEADQUARTERS);
+    propCounts.remove(TerrainType.LAB);
+    for(Entry<TerrainType, Integer> propEntry : propCounts.entrySet())
     {
-      TerrainType terrain = propertyTypes[i];
-      int num = countTiles(selectedMapInfo, terrain);
+      TerrainType terrain = propEntry.getKey();
       // Get the first image of the first variation of the specified terrain type.
       BufferedImage image = SpriteLibrary.getTerrainSpriteSet(terrain).getTerrainSprite().getFrame(0);
       // Draw it, with the number of times it occurs on the map.
       menuGraphics.drawImage(image, propsDrawX, propsDrawY, sqSize*2, sqSize*2, null);
 
-      drawPropertyNumber(menuGraphics, num, propsDrawX, propsDrawY);
+      drawPropertyNumber(menuGraphics, propEntry.getValue(), propsDrawX, propsDrawY);
 
       // Increment x draw location a fair bit for the next one.
       propsDrawX += sqSize + 3*buffer;
@@ -174,23 +183,20 @@ public class MapSelectMenuArtist
     SpriteUIUtils.drawImageCenteredOnPoint(g, miniMap, drawScale*miniMapCenterX, drawScale*miniMapCenterY, mmScale);
   }
 
-  /**
-   * Count and return the number of tiles of the provided type in the given MapInfo.
-   */
-  private static int countTiles(MapInfo mapInfo, TerrainType tileType)
+  private static void countCapturables(MapInfo mapInfo, Map<TerrainType, Integer> propCounts)
   {
-    int count = 0;
     for(int y = 0; y < mapInfo.getHeight(); ++y)
     {
       for(int x = 0; x < mapInfo.getWidth(); ++x)
       {
-        if(mapInfo.terrain[x][y] == tileType)
+        TerrainType tt = mapInfo.terrain[x][y];
+        if( tt.isCapturable() )
         {
-          ++count;
+          int oldCount = propCounts.getOrDefault(tt, 0);
+          propCounts.put(tt, ++oldCount);
         }
       }
     }
-    return count;
   }
 
   /**

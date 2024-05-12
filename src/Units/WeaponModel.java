@@ -6,15 +6,21 @@ import Terrain.TerrainType;
 import Units.AWBWUnits.AWBWUnitModel;
 import Units.DoRUnits.DoRUnitModel;
 import Units.KaijuWarsUnits.KaijuWarsUnitModel;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
+@Accessors(fluent = true)
+@Getter
+@ToString
 public abstract class WeaponModel implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
-  public boolean canFireAfterMoving;
-  public boolean hasInfiniteAmmo;
-  public int rangeMin;
-  public int rangeMax;
+  protected boolean canFireAfterMoving;
+  protected boolean hasInfiniteAmmo;
+  protected int rangeMin;
+  protected int rangeMax;
 
   protected WeaponModel(boolean infiniteAmmo, int minRange, int maxRange)
   {
