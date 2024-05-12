@@ -130,12 +130,23 @@ public class CombatEngine
     XYCoord dest = new XYCoord(attacker);
     UnitContext attackerContext = new UnitContext(map, attacker, null, null, dest);
     attackerContext.chooseWeapon(defender.model, battleRange, attackerMoved);
-    if( null == attackerContext.weapon )
+    UnitContext defenderContext = new UnitContext(map, defender);
+    defenderContext.terrainStars = terrainStars;
+    return calculateOneStrikeDamage(attackerContext, battleRange, defenderContext, map, CalcType.PESSIMISTIC);
+  }
+  /**
+   * Calculates the damage of a single attack with your chosen weapon.
+   */
+  public static int calculateOneStrikeDamage( UnitContext attacker, int battleRange, UnitContext defender, GameMap map, CalcType calcType )
+  {
+    if( null == attacker.weapon )
       return 0;
-    CombatContext context = new CombatContext(map.game, map, attackerContext, new UnitContext(map, defender), CalcType.PESSIMISTIC);
+    if( battleRange > attacker.rangeMax || attacker.rangeMin > battleRange )
+      return 0;
+    CombatContext context = new CombatContext(map.game, map, attacker, defender, battleRange, calcType);
     return StrikeParams.buildBattleParams(
-        attackerContext,
-        context.defender,
+        attacker,
+        defender,
         context,
         false).calculateDamage();
   }

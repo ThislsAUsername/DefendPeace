@@ -97,7 +97,7 @@ public class Strong extends Commander
   public void modifyUnitAttackOnUnit(BattleParams params)
   {
     // Grant a firepower increase if we are attacking and the defender is on foot.
-    if( (params.attacker.unit.CO == this) && params.defender.unit.model.isTroop() )
+    if( (params.attacker.CO == this) && params.defender.model.isTroop() )
     {
       params.attackPower += PASSIVE_ANTI_INF_BUFF;
     }
