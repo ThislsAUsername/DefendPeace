@@ -242,6 +242,10 @@ public class MapReader extends IMapBuilder
         return SR;
       case "TW":
         return TW;
+      case "T3":
+        return TW;
+      case "T4":
+        return T4;
       default:
         return GR;
     }

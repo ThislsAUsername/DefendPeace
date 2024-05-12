@@ -3,10 +3,13 @@ package Engine.Combat;
 import java.util.ArrayList;
 import java.util.List;
 
+import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
+import Terrain.MapLocation;
+import Terrain.TerrainType;
 import Units.UnitContext;
 
 /**
@@ -50,6 +53,8 @@ public class CombatContext
     int defenderY = defender.coord.y;
 
     battleRange = Math.abs(attackerX - defenderX) + Math.abs(attackerY - defenderY);
+    setTowerCounts(map, attacker);
+    setTowerCounts(map, defender);
 
     if ( map.isLocationValid(attacker.coord))
     {
@@ -89,7 +94,7 @@ public class CombatContext
   /**
    * Call during combat calculations
    */
-  public void applyModifiers()
+  public CombatContext applyModifiers()
   {
     // Make local shallow copies to avoid funny business
     List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
@@ -99,6 +104,7 @@ public class CombatContext
       mod.changeCombatContext(this);
     for( UnitModifier mod : dMods )
       mod.changeCombatContext(this);
+    return this;
   }
 
   /**
@@ -116,6 +122,32 @@ public class CombatContext
       calcType = CalcType.OPTIMISTIC;
     else if( calcType == CalcType.OPTIMISTIC )
       calcType = CalcType.PESSIMISTIC;
+  }
+
+  public static void setTowerCounts(GameMap map, UnitContext uc)
+  {
+    // Count number of towers, and apply new modifiers
+    final int minX = 0;
+    final int minY = 0;
+    final int maxX = map.mapWidth  - 1;
+    final int maxY = map.mapHeight - 1;
+
+    uc.towerCountDoR = 0;
+    uc.towerCountDS  = 0;
+    for( int y = minY; y <= maxY; y++ ) // Top to bottom, left to right
+    {
+      for( int x = minX; x <= maxX; x++ )
+      {
+        MapLocation loc = map.getLocation(x, y);
+        Commander owner = loc.getOwner();
+        if( null == owner || uc.CO.army != owner.army )
+          continue;
+        if( loc.getEnvironment().terrainType.equals(TerrainType.DOR_TOWER) )
+          uc.towerCountDoR += 1;
+        if( loc.getEnvironment().terrainType.equals(TerrainType.DS_TOWER) )
+          uc.towerCountDS += 1;
+      }
+    }
   }
 
   public BattleParams getAttack()

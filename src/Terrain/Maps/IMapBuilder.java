@@ -30,5 +30,6 @@ public class IMapBuilder
   
   protected static final TerrainType LB = TerrainType.LAB;
   protected static final TerrainType SR = TerrainType.BUNKER; // full silo, but empty because lol
-  protected static final TerrainType TW = TerrainType.BUNKER; // tower
+  protected static final TerrainType TW = TerrainType.DS_TOWER;
+  protected static final TerrainType T4 = TerrainType.DOR_TOWER;
 }

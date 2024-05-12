@@ -152,7 +152,7 @@ public class Strong extends Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageMod);
       modList.add(defenseMod);
@@ -214,7 +214,7 @@ public class Strong extends Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(damageMod);
       modList.add(defenseMod);

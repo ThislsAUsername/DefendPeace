@@ -240,7 +240,7 @@ public class Bear_Bull extends Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(new UnitDiscount(BOOMBUST_BUFF));
     }

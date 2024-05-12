@@ -128,7 +128,7 @@ public class Meridian extends Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(baseMod);
     }
@@ -192,7 +192,7 @@ public class Meridian extends Commander
     }
 
     @Override
-    protected void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(baseMod);
       UnitInstanceFilter uif = new UnitInstanceFilter(debuffMod);

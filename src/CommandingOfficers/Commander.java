@@ -12,6 +12,8 @@ import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.XYCoord;
+import Engine.Combat.StrikeParams;
+import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.CommanderAbilityRevertEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -342,6 +344,18 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     power += (lostHealth * getCost(minion.model)) / UnitModel.MAXIMUM_HEALTH;
 
     return power;
+  }
+
+  public void applyTowerAttack(StrikeParams params)
+  {
+    UnitContext minion = params.attacker;
+    params.attackPower += minion.towerCountDS * 10;
+    params.attackPower += minion.towerCountDoR * 5;
+  }
+  public void applyTowerDefense(BattleParams params)
+  {
+    UnitContext minion = params.defender;
+    params.defenseDivision += minion.towerCountDoR * 5;
   }
 
   /**
