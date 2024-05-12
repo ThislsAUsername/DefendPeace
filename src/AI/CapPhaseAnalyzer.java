@@ -223,7 +223,7 @@ public class CapPhaseAnalyzer implements Serializable
         if( possibleOwners.containsKey(owner.army) )
           oldDistance = possibleOwners.get(owner.army);
 
-        int distance = infPath.getFuelCost(inf, map) * 100 / inf.getMovePower(map);
+        int distance = infPath.getMoveCost(inf, map) * 100 / inf.getMovePower(map);
         if( distance < oldDistance )
           possibleOwners.put(owner.army, distance);
       }
@@ -277,7 +277,7 @@ public class CapPhaseAnalyzer implements Serializable
       if( null == infPath || infPath.getPathLength() < 1 )
         continue; // Can't reach
 
-      int distance = infPath.getFuelCost(inf, map);
+      int distance = infPath.getMoveCost(inf, map);
 
       ArrayList<CapStop> chain = new ArrayList<>();
       CapStop build = new CapStop(start);
