@@ -905,7 +905,7 @@ public class WallyAI extends ModularAI
       {
         if( !wep.loaded(threat) )
           continue; // Ignore it if it can't shoot
-        if( !wep.canFireAfterMoving && !threat.coord.equals(dest) )
+        if( !wep.canFireAfterMoving() && !threat.coord.equals(dest) )
           continue; // Ignore it if it can't shoot
 
         UnitContext rangeContext = new UnitContext(threat);
@@ -2305,10 +2305,10 @@ public class WallyAI extends ModularAI
     {
       tc.setWeapon(wm);
       double range = tc.rangeMax;
-      if( wm.canFireAfterMoving )
+      if( wm.canFireAfterMoving() )
         range += getEffectiveMove(target);
       else
-        range -= (Math.pow(wm.rangeMin, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
+        range -= (Math.pow(wm.rangeMin(), MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
       enemyRange = Math.max(enemyRange, range);
       enemyDamage = Math.max(enemyDamage, CombatEngine.calculateOneStrikeDamage(tc, tc.rangeMax, mc, predMap, CalcType.OPTIMISTIC));
     }
@@ -2319,10 +2319,10 @@ public class WallyAI extends ModularAI
       double damage = CombatEngine.calculateOneStrikeDamage(mc, mc.rangeMax, tc, predMap, CalcType.OPTIMISTIC);
 
       double myRange = mc.rangeMax;
-      if( wm.canFireAfterMoving )
+      if( wm.canFireAfterMoving() )
         myRange += getEffectiveMove(model);
       else
-        myRange -= (Math.pow(wm.rangeMin, MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
+        myRange -= (Math.pow(wm.rangeMin(), MIN_SIEGE_RANGE_WEIGHT) - 1); // penalize range based on inner range
 
       double rangeMod = Math.pow(myRange / enemyRange, RANGE_WEIGHT);
       if( !Double.isFinite(rangeMod) )
