@@ -19,6 +19,7 @@ import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.*;
 import Units.*;
 import Units.MoveTypes.MoveType;
+import lombok.var;
 
 public class WallyAI extends ModularAI
 {
@@ -1699,9 +1700,16 @@ public class WallyAI extends ModularAI
             int endDist   = movePath.getEndCoord().getDistance(pathPoint);
             int walkGain = startDist - endDist;
             int wallPoints = 0;
+            int healBonus  = 0;
             if( !ignoreWallValue )
               wallPoints = wallFundsValue(predMap, threatMap, unit, xyc, null);
-            int waitScore = movePath.getPathLength() + wallPoints + walkGain + bonusPoints;
+            var loc = gameMap.getLocation(movePath.getEndCoord());
+            if( unit.isHurt() &&
+                !myArmy.isEnemy(loc.getOwner()) &&
+                unit.model.healableHabs.contains(loc.getEnvironment().terrainType)
+              )
+              healBonus = unit.CO.getRepairPower() * unit.CO.getCost(unit.model) / 10;
+            int waitScore = movePath.getPathLength() + wallPoints + walkGain + bonusPoints + healBonus;
             if( minFundsDelta < waitScore && movePath.getPathLength() > 1 ) // Just wait if we can't do anything cool
             {
               ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), move, waitScore);
