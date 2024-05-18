@@ -255,18 +255,7 @@ public class WallyAI extends ModularAI
     cancelPlan(evicted);
     cancelPlan(actorPrevPlan);
 
-    // Assuming our path has been planned well re:terrain, running into enemies is the only obstacle
-    GamePath path = plan.path;
     final Unit actorIdentity = plan.actor.unit;
-    if( null != path )
-    {
-      if( path.getPathLength() < path.getEndCoord().getDistance(actorIdentity) ) // Assume unit is real if it's moving
-      {
-        log(String.format("      %s generated bad path: %s", plan.whodunit, path));
-        return;
-      }
-    }
-
     destPredictTile.toAchieve = plan;
     destPredictTile.identity = plan.actor;
     plan.actor.coord = dest;
