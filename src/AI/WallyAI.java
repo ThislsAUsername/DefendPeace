@@ -357,6 +357,13 @@ public class WallyAI extends ModularAI
           ae = queuedActions.poll();
           continue;
         }
+        // If we do an HQ cap, don't surrender the rest of the turn
+        if( ae.action.getType() == UnitActionFactory.CAPTURE && !myArmy.isEnemy(map.getLocation(moveLoc).getOwner()) )
+        {
+          log(String.format("  Discarding invalid capture: %s", ae.action));
+          ae = queuedActions.poll();
+          continue;
+        }
       }
 
       Unit victim = map.getResident(ae.action.getTargetLocation());
