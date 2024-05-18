@@ -337,12 +337,20 @@ public class UIUtils
 
   public enum SourceGames
   {
-    AW1(OS), AW2(BM), AW3(GE), AW4(IDS), AWBW(CO), DEFEND_PEACE(RT); // More? :v
+    // In order of CO name discriminator resolution
+    AW3(GE,  "3"),
+    AW2(BM,  "2"),
+    AW1(OS,  "1"),
+    AW4(IDS, ""),
+    AWBW(CO, "BW"),
+    DEFEND_PEACE(RT, ""); // More? :v
 
     public final COSpriteSpec uiColorSpec;
-    SourceGames(COSpriteSpec uiColorSpec)
+    public final String discriminator;
+    SourceGames(COSpriteSpec uiColorSpec, String discriminator)
     {
       this.uiColorSpec = new COSpriteSpec(new Faction(this.name()), uiColorSpec.color);
+      this.discriminator = discriminator;
     }
   }
 

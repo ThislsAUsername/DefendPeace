@@ -12,11 +12,13 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderInfo;
 import Terrain.MapLocation;
 import Terrain.TerrainType;
 import UI.UIUtils;
 import UI.UIUtils.COSpriteSpec;
 import UI.UIUtils.Faction;
+import UI.UIUtils.SourceGames;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -609,7 +611,7 @@ public class SpriteLibrary
       overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 
       // Draw the Commander's mug on top of the overlay.
-      BufferedImage coMug = getCommanderSprites(co.coInfo.name).eyes;
+      BufferedImage coMug = getCommanderSprites(co.coInfo).eyes;
       int mugW = coMug.getWidth();
       Graphics g = overlay.getFrame(0).getGraphics();
       g.drawImage(coMug, mugW, 1, -mugW, coMug.getHeight(), null);
@@ -760,30 +762,45 @@ public class SpriteLibrary
 
   private static HashMap<String, CommanderSpriteSet> coSpriteSets = new HashMap<String, CommanderSpriteSet>();
 
-  public static CommanderSpriteSet getCommanderSprites( String whichCo )
+  public static CommanderSpriteSet getCommanderSprites( CommanderInfo whichCo )
   {
     CommanderSpriteSet css = null;
 
-    if(!coSpriteSets.containsKey(whichCo))
+    if(!coSpriteSets.containsKey(whichCo.name))
     {
       // We don't have it, so we need to load it.
-      String baseFileName = Engine.Driver.JAR_DIR + "res/co/" + whichCo;
-      String basePlaceholder = Engine.Driver.JAR_DIR + "res/co/placeholder";
+      String formatBase = Engine.Driver.JAR_DIR + "res/co/"+whichCo.name+"%s%s.png";
 
-      // Find out if the images exist. If they don't, use placeholders.
-      String bodyString = ((new File(baseFileName + ".png").isFile())? baseFileName : basePlaceholder) + ".png";
-      String headString = ((new File(baseFileName + "_face.png").isFile())? baseFileName : basePlaceholder) + "_face.png";
-      String eyesString = ((new File(baseFileName + "_eyes.png").isFile())? baseFileName : basePlaceholder) + "_eyes.png";
+      BufferedImage body = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, whichCo.discriminator, ""));
+      if( null == body )                      body = getCommanderSpriteAlt(formatBase, "");
+      BufferedImage head = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, whichCo.discriminator, "_face"));
+      if( null == head )                      head = getCommanderSpriteAlt(formatBase, "_face");
+      BufferedImage eyes = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, whichCo.discriminator, "_eyes"));
+      if( null == eyes )                      eyes = getCommanderSpriteAlt(formatBase, "_eyes");
 
-      BufferedImage body = createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(bodyString));
-      BufferedImage head = createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(headString));
-      BufferedImage eyes = createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(eyesString));
-
-      coSpriteSets.put(whichCo, new CommanderSpriteSet(body, head, eyes));
+      coSpriteSets.put(whichCo.name, new CommanderSpriteSet(body, head, eyes));
     }
 
-    css = coSpriteSets.get(whichCo);
+    css = coSpriteSets.get(whichCo.name);
 
     return css;
+  }
+  private static BufferedImage getCommanderSpriteAlt(String format, String mugType)
+  {
+    String formatPlaceholder = Engine.Driver.JAR_DIR + "res/co/placeholder%s.png";
+
+    // Try all the possible discriminators to see if we get an alternate. If no, use a placeholder instead.
+    BufferedImage output = SpriteLibrary.loadSpriteSheetFile(String.format(formatPlaceholder, mugType));
+    for( SourceGames game : SourceGames.values() )
+    {
+      String discrim = (game.discriminator.length() > 0 ? "_" : "") + game.discriminator;
+      BufferedImage temp = SpriteLibrary.loadSpriteSheetFile(String.format(format, discrim, mugType));
+      if( null != temp )
+      {
+        output = temp;
+        break;
+      }
+    }
+    return output;
   }
 }

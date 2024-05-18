@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import CommandingOfficers.CommanderInfo;
+import CommandingOfficers.DefendPeace.RoseThorn.Strong;
 import Engine.IController;
 import Engine.OptionSelector;
 import Engine.XYCoord;
@@ -245,7 +246,7 @@ public class PlayerSetupCommanderArtist
     {
       CommanderInfo coInfo = infos.get(taggedCOs.get(tagToDraw));
 
-      BufferedImage playerImage = SpriteLibrary.getCommanderSprites( coInfo.name ).eyes;
+      BufferedImage playerImage = SpriteLibrary.getCommanderSprites( coInfo ).eyes;
 
       int drawX = 4 + (tagToDraw*panelXShift);
       myG.setColor(Color.BLACK);
@@ -295,8 +296,8 @@ public class PlayerSetupCommanderArtist
   private static class CommanderPanel
   {
     // A couple of helper quantities.
-    public static final int eyesWidth = SpriteLibrary.getCommanderSprites( "STRONG" ).eyes.getWidth();
-    public static final int eyesHeight = SpriteLibrary.getCommanderSprites( "STRONG" ).eyes.getHeight();
+    public static final int eyesWidth  = SpriteLibrary.getCommanderSprites( Strong.getInfo() ).eyes.getWidth();
+    public static final int eyesHeight = SpriteLibrary.getCommanderSprites( Strong.getInfo() ).eyes.getHeight();
 
     // Total vertical panel space, sans scaling.
     public static final int PANEL_HEIGHT = eyesHeight + 2; // Eyes plus 1 above and below.
@@ -320,7 +321,7 @@ public class PlayerSetupCommanderArtist
       {
         myColor = color;
         commanderFace = new SpriteUIUtils.ImageFrame(1, 1, eyesWidth, eyesHeight, color,
-            color, true, SpriteLibrary.getCommanderSprites( coInfo.name ).eyes);
+            color, true, SpriteLibrary.getCommanderSprites( coInfo ).eyes);
 
         // Re-render the panel.
         myImage = SpriteLibrary.createTransparentSprite( commanderFace.width + 2, PANEL_HEIGHT );

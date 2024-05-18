@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import CommandingOfficers.DefendPeace.RoseThorn.Strong;
 import Engine.IController;
 import Engine.XYCoord;
 import Terrain.MapInfo;
@@ -144,7 +145,7 @@ public class PlayerSetupTeamArtist
   {
     // A couple of helper quantities.
     private static int textBuffer = 2;
-    private static int portraitPx = SpriteLibrary.getCommanderSprites( "STRONG" ).head.getHeight(); // Faces are square.
+    private static int portraitPx = SpriteLibrary.getCommanderSprites( Strong.getInfo() ).head.getHeight(); // Faces are square.
 
     // Total horizontal panel space, sans scaling.
     public static final int PANEL_WIDTH = 2 + portraitPx + 2 + "TEAM".length()*SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth() + textBuffer*2 + 1 + 4;
