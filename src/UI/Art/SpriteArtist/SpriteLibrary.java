@@ -3,6 +3,7 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -762,30 +763,32 @@ public class SpriteLibrary
 
   private static HashMap<String, CommanderSpriteSet> coSpriteSets = new HashMap<String, CommanderSpriteSet>();
 
-  public static CommanderSpriteSet getCommanderSprites( CommanderInfo whichCo )
+  public static CommanderSpriteSet getCommanderSprites( CommanderInfo whichCO )
   {
     CommanderSpriteSet css = null;
 
-    if(!coSpriteSets.containsKey(whichCo.name))
+    String cmdrKey = whichCO.name + whichCO.discriminator;
+    if(!coSpriteSets.containsKey(cmdrKey))
     {
       // We don't have it, so we need to load it.
-      String formatBase = Engine.Driver.JAR_DIR + "res/co/"+whichCo.name+"%s%s.png";
+      String formatBase = Engine.Driver.JAR_DIR + "res/co/"+whichCO.name+"%s%s.png";
 
-      BufferedImage body = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, whichCo.discriminator, ""));
-      if( null == body )                      body = getCommanderSpriteAlt(formatBase, "");
-      BufferedImage head = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, whichCo.discriminator, "_face"));
-      if( null == head )                      head = getCommanderSpriteAlt(formatBase, "_face");
-      BufferedImage eyes = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, whichCo.discriminator, "_eyes"));
-      if( null == eyes )                      eyes = getCommanderSpriteAlt(formatBase, "_eyes");
+      String discrim = (whichCO.discriminator.length() > 0 ? "_" : "") + whichCO.discriminator;
+      BufferedImage body = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, discrim, ""));
+      if( null == body )                      body = getCommanderSpriteAlt(formatBase, discrim, "");
+      BufferedImage head = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, discrim, "_face"));
+      if( null == head )                      head = getCommanderSpriteAlt(formatBase, discrim, "_face");
+      BufferedImage eyes = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, discrim, "_eyes"));
+      if( null == eyes )                      eyes = getCommanderSpriteAlt(formatBase, discrim, "_eyes");
 
-      coSpriteSets.put(whichCo.name, new CommanderSpriteSet(body, head, eyes));
+      coSpriteSets.put(cmdrKey, new CommanderSpriteSet(body, head, eyes));
     }
 
-    css = coSpriteSets.get(whichCo.name);
+    css = coSpriteSets.get(cmdrKey);
 
     return css;
   }
-  private static BufferedImage getCommanderSpriteAlt(String format, String mugType)
+  private static BufferedImage getCommanderSpriteAlt(String format, String realDiscrim, String mugType)
   {
     String formatPlaceholder = Engine.Driver.JAR_DIR + "res/co/placeholder%s.png";
 
@@ -793,14 +796,32 @@ public class SpriteLibrary
     BufferedImage output = SpriteLibrary.loadSpriteSheetFile(String.format(formatPlaceholder, mugType));
     for( SourceGames game : SourceGames.values() )
     {
-      String discrim = (game.discriminator.length() > 0 ? "_" : "") + game.discriminator;
-      BufferedImage temp = SpriteLibrary.loadSpriteSheetFile(String.format(format, discrim, mugType));
+      String gameDiscrim = (game.discriminator.length() > 0 ? "_" : "") + game.discriminator;
+      BufferedImage temp = SpriteLibrary.loadSpriteSheetFile(String.format(format, gameDiscrim, mugType));
       if( null != temp )
       {
         output = temp;
         break;
       }
     }
+
+    // Apply the CO's discriminator text as a "watermark"
+    Map<Character, BufferedImage> allChars = SpriteLibrary.getColoredMapTextSprites(Color.WHITE);
+    int charSize = allChars.get('A').getWidth(); // They're square
+
+    Graphics2D graphics = output.createGraphics();
+    int maxIter = realDiscrim.length();
+    int drawX = output.getWidth()  - charSize*(maxIter);
+    int drawY = output.getHeight() - charSize;
+    for( int i = 0; i < maxIter; ++i )
+    {
+      char foundChar = realDiscrim.charAt(i);
+      BufferedImage letter = allChars.getOrDefault(foundChar, null);
+      if( null != letter )
+        graphics.drawImage(letter, drawX, drawY, null);
+      drawX += charSize;
+    }
+
     return output;
   }
 }
