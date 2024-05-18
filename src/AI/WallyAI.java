@@ -253,10 +253,18 @@ public class WallyAI extends ModularAI
     final UnitPrediction destPredictTile = mapPlan[dest.x][dest.y];
     ActionPlan evicted = destPredictTile.toAchieve;
     ActionPlan actorPrevPlan = plansByUnit.get(plan.actor.unit);
+
+    final Unit predResident = predMap.getResident(dest);
+    final Unit actorIdentity = plan.actor.unit;
+    if( null != predResident && predResident != actorIdentity )
+    {
+      var clearTiles = predMap.calcPredictedClearTiles();
+      clearTiles.clear();
+    }
+
     cancelPlan(evicted);
     cancelPlan(actorPrevPlan);
 
-    final Unit actorIdentity = plan.actor.unit;
     destPredictTile.toAchieve = plan;
     destPredictTile.identity = plan.actor;
     plan.actor.coord = dest;
@@ -2477,38 +2485,15 @@ public class WallyAI extends ModularAI
       MapLocation masterLoc = master.getLocation(coord);
       MapLocation returnLoc = new MapLocation(masterLoc.getEnvironment(), coord);
       returnLoc.setOwner(masterLoc.getOwner());
-      UnitContext resSource = mapPlan[x][y].identity;
 
-      if( null == resSource )
-        return returnLoc;
-
-      // Collect planned damage so far
-      int damagePercent = 0;
-      for( int hit : mapPlan[x][y].damageInstances.values() )
-        damagePercent += hit;
-      int realHealth = resSource.getHealth();
-      if( damagePercent >= realHealth )
-        return returnLoc; // If we think it will be dead, don't report its presence
-
-      Unit resident = resSource.unit;
-      if( null == resident )
-      {
-        // If we've planned a unit that doesn't exist, make stuff up
-        resident = new Unit(resSource.CO, resSource.model);
-        resident.x = x;
-        resident.y = y;
-      }
-      // If the actual unit is gone (i.e. off the map, because it's dead) and is an enemy, treat it as dead
-      if( viewer.isEnemy(resident.CO) && 0 < new XYCoord(resident).getDistance(x, y) )
-        return returnLoc;
-
+      Unit resident = calcResident(x, y);
       returnLoc.setResident(resident);
       return returnLoc;
     }
     @Override
     public boolean isLocationEmpty(Unit unit, int x, int y)
     {
-      Unit resident = getResident(x, y);
+      Unit resident = calcResident(x, y);
       return null == resident || resident == unit;
     }
     public boolean helpsClearTile(ActionPlan plan)
@@ -2519,6 +2504,81 @@ public class WallyAI extends ModularAI
       Unit resident = getResident(tt);
       // If it's empty or we've already planned to fill it with our own dude, we planned to kill with this action.
       return null == resident || !viewer.isEnemy(resident.CO);
+    }
+    public Unit calcResident(int x, int y)
+    {
+      Unit        resSource  = master.getResident(x, y);
+      UnitContext resPlanned = mapPlan[x][y].identity;
+
+      if( null == resSource && null == resPlanned )
+        return null;
+
+      // Default to returning the planned unit. Return the "real" unit if we have to.
+      Unit resFake = null;
+      if( null != resPlanned )
+      {
+        resFake = resPlanned.unit;
+        if( null == resFake )
+        {
+          // If we've planned a unit that doesn't exist, make stuff up
+          resFake = new Unit(resSource.CO, resSource.model);
+          resFake.x = x;
+          resFake.y = y;
+        }
+      }
+
+      // Use the planned unit if there's nobody in the way, or the other body in the problem is mine.
+      if( null == resSource ||
+          (!resSource.isTurnOver && viewer == resSource.CO.army) )
+        return resFake;
+
+      // If the actual unit is not in its "assigned seat" (i.e. off the map, because it's dead), treat it as dead.
+      // Note that this check is only valid for enemy units, since planned units usually *won't* actually be on the tile we're looking at.
+      if( viewer.isEnemy(resSource.CO) &&
+          0 < new XYCoord(resSource).getDistance(x, y) )
+        return resFake;
+
+      // Collect planned damage so far
+      int damagePercent = 0;
+      for( int hit : mapPlan[x][y].damageInstances.values() )
+        damagePercent += hit;
+      int realHealth = resSource.getHealth();
+      if( damagePercent >= realHealth )
+      {
+        // If we think it will be dead, don't report its presence
+        if( resSource == resFake )
+          return null;
+        return resFake;
+      }
+
+      if( null != resSource && null != resPlanned && resSource != resFake )
+        System.out.println(String.format("Warning: PredictionMap[%s][%s] is double-booked with:\n\t%s\n\t%s",
+                                          x, y, resSource.toStringWithLocation(), resFake.toStringWithLocation()));
+      // If the real unit is still alive, then it is the realest of answers..
+      return resSource;
+    }
+    /** Debugging function - see what tiles we think we've planned to kill the residents of */
+    public HashMap<XYCoord, HashMap<ActionPlan, Integer>> calcPredictedClearTiles()
+    {
+      var result = new HashMap<XYCoord, HashMap<ActionPlan, Integer>>();
+      final int minX = 0;
+      final int minY = 0;
+      final int maxX = mapWidth  - 1;
+      final int maxY = mapHeight - 1;
+
+      for( int y = minY; y <= maxY; y++ ) // Top to bottom, left to right
+      {
+        for( int x = minX; x <= maxX; x++ )
+        {
+          Unit resident  = calcResident(x, y);
+          Unit resSource = master.getResident(x, y);
+
+          if( resSource != resident && null != resSource && viewer.isEnemy(resSource.CO) )
+            result.put(new XYCoord(x, y), mapPlan[x][y].damageInstances);
+        }
+      }
+
+      return result;
     }
   }
 }
