@@ -35,7 +35,7 @@ public class Sami extends AW1Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sami_1", UIUtils.SourceGames.AW1, UIUtils.OS);
+      super("Sami", UIUtils.SourceGames.AW1, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Sami (AW1)\n"
           + "A graduate of special forces training. Has a strong sense of duty.\n"

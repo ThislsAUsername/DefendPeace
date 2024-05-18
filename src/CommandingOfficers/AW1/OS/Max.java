@@ -30,7 +30,7 @@ public class Max extends AW1Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Max_1", UIUtils.SourceGames.AW1, UIUtils.OS);
+      super("Max", UIUtils.SourceGames.AW1, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Max (AW1)\n"
           + "Dependable and brave. Over-protective of Sami and Andy.\n"

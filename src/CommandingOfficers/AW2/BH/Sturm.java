@@ -37,7 +37,7 @@ public class Sturm extends AW2Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sturm_2", UIUtils.SourceGames.AW2, UIUtils.BH);
+      super("Sturm", UIUtils.SourceGames.AW2, UIUtils.BH);
       infoPages.add(new InfoPage(
             "Sturm (AW2)\n"
           + "Commander of Black Hole's forces. A mysterious invader from another world.\n"

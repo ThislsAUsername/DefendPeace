@@ -24,7 +24,7 @@ public class Nell extends AW1Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Nell_1", UIUtils.SourceGames.AW1, UIUtils.OS);
+      super("Nell", UIUtils.SourceGames.AW1, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Nell (AW1)\n"
           + "A respected CO of no mean ability.\n"

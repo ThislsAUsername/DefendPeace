@@ -21,7 +21,7 @@ public class Andy extends AW1Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Andy_1", UIUtils.SourceGames.AW1, UIUtils.OS);
+      super("Andy", UIUtils.SourceGames.AW1, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Andy (AW1)\n"
           + "A brash and energetic boy wonder.\n"

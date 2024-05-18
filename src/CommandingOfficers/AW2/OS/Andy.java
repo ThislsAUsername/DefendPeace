@@ -27,7 +27,7 @@ public class Andy extends AW2Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Andy_2", UIUtils.SourceGames.AW2, UIUtils.OS);
+      super("Andy", UIUtils.SourceGames.AW2, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Andy (AW2)\n"
           + "A mechanical boy wonder. Impulsive to a fault, he’s fiercely protective of friends.\n"

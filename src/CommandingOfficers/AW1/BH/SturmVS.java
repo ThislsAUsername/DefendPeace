@@ -37,7 +37,7 @@ public class SturmVS extends AW1Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sturm_VS", UIUtils.SourceGames.AW1, UIUtils.BH);
+      super("Sturm", UIUtils.SourceGames.AW1, UIUtils.BH, "VS");
       infoPages.add(new InfoPage(
             "Sturm (AW1 VS)\n"
           + "A riddle within a shadow, revealing nothing.\n"

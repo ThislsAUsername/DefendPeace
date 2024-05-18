@@ -27,7 +27,7 @@ public class Grit extends AW1Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Grit_1", UIUtils.SourceGames.AW1, UIUtils.BM);
+      super("Grit", UIUtils.SourceGames.AW1, UIUtils.BM);
       infoPages.add(new InfoPage(
             "Grit (AW1)\n"
           + "Laid-back style masks dependability. A peerless marksman.\n"

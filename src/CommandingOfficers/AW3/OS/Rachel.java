@@ -32,7 +32,7 @@ public class Rachel extends AW3Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Rachel", UIUtils.SourceGames.AW3, UIUtils.OS);
+      super("Rachel", UIUtils.SourceGames.AW3, UIUtils.OS, "");
       infoPages.add(new InfoPage(
             "Rachel (AW3)\n"
           + "A young Orange Star CO. She strives to follow in the footsteps of her big sister, Nell.\n"

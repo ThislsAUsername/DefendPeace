@@ -29,7 +29,7 @@ public class Eagle extends AW1Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Eagle_1", UIUtils.SourceGames.AW1, UIUtils.GE);
+      super("Eagle", UIUtils.SourceGames.AW1, UIUtils.GE);
       infoPages.add(new InfoPage(
             "Eagle (AW1)\n"
           + "An ace pilot who’s as tough as nails.\n"

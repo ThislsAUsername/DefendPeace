@@ -25,7 +25,7 @@ public class Sonja extends AW1Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sonja_1", UIUtils.SourceGames.AW1, UIUtils.YC);
+      super("Sonja", UIUtils.SourceGames.AW1, UIUtils.YC);
       infoPages.add(new InfoPage(
             "Sonja (AW1)\n"
           + "Kanbei's daughter. An intel gathering genius.\n"
