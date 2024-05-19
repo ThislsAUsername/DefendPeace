@@ -971,15 +971,7 @@ public class WallyAI extends ModularAI
         int evictionValue = 0;
         for( Unit unit : unitQueue )
         {
-          ArrayList<ActionPlan> actionSeq = ai.planValueActions(ec, unit,
-                                                                evictionValue, EVICTION_DEPTH,
-                                                                null);
-          if( null == actionSeq )
-            continue;
-          for( ActionPlan plan : actionSeq )
-          {
-            ai.updatePlan(plan);
-          }
+          planSeqDebuggably(ec, evictionValue, unit);
         }
         lastClearAttacks = clearAttacks;
         clearAttacks = 0;
@@ -990,6 +982,19 @@ public class WallyAI extends ModularAI
         }
       }
       return null;
+    }
+
+    private void planSeqDebuggably(EvictionContext ec, int evictionValue, Unit unit)
+    {
+      ArrayList<ActionPlan> actionSeq = ai.planValueActions(ec, unit,
+                                                            evictionValue, EVICTION_DEPTH,
+                                                            new ArrayList<XYCoord>());
+      if( null == actionSeq )
+        return;
+      for( ActionPlan plan : actionSeq )
+      {
+        ai.updatePlan(plan);
+      }
     }
   } // ~FreeRealEstate
 
