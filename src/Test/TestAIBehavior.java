@@ -95,12 +95,12 @@ public class TestAIBehavior extends TestCase
     turn(testGame);
     boolean testPassed = true;
     GameAction act = testCo1.army.getNextAIAction(testMap);
-    testPassed &= validate(null != act, "    Failed to produce an action!");
-    performGameAction(act, testGame);
+    testPassed &= validate(performGameAction(act, testGame), "    Produced an invalid action!");
 
     // Should have built a Megatank as the best/only viable unit to counter an enemy Megatank.
     testPassed &= validate(testCo1.units.size() > 0, "    Failed to produce a unit!");
-    testPassed &= validate(testCo1.units.get(0).model.name.contentEquals("Megatank"), "    "+ai.getName()+" didn't build the right thing!");
+    if( testPassed )
+      testPassed &= validate(testCo1.units.get(0).model.name.contentEquals("Megatank"), "    "+ai.getName()+" didn't build the right thing!");
 
     // Clean up
     cleanupTest();
