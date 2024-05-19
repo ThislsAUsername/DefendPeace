@@ -1779,7 +1779,9 @@ public class WallyAI extends ModularAI
         evictees.add(currentResident);
         GameAction stayPut = new WaitLifecycle.WaitAction(currentResident, GamePath.stayPut(currentResident));
         int stayPutScore = wallFundsValue(ec.map, threatMap, currentResident, xyc, null);
-        evicteePlans.add(new ActionPlan(ec.whodunit, new UnitContext(currentResident), stayPut, stayPutScore));
+        // Penalize evictions so spurious ones happen less
+        stayPutScore -= valueUnit(ec.map, currentResident, true);
+        evicteePlans.add(new ActionPlan(ec.whodunit, new UnitContext(currentResident), stayPut, stayPutScore, bannedTiles));
       }
 
       // Handle any unit that has planned to take my spot
@@ -1820,25 +1822,40 @@ public class WallyAI extends ModularAI
         // If the resident isn't evictable, we think it will be dead soon, so just keep going.
 
         int planEvictionValue = evictionValue + entry.getValue();
+        int evictionPenalty = 0;
+        ActionPlan evicteeOldPlan = evicteePlans.get(evicteeIndex);
         // Prevent reflexive eviction
         ec.evictionStack.add(unit);
 
-        // Try evicting our evictee without evicting anyone else first
-        ArrayList<ActionPlan> evictionPlans = planValueActions(ec, ev,
-                                                               planEvictionValue, recurseDepth - 1,
-                                                               evicteeBannedTiles);
-        if( null == evictionPlans )
-          evictionPlans = planTravelActions(ec, ev,
-                                            shouldYeet, true, // Always enable wandering
-                                            planEvictionValue, recurseDepth - 1,
-                                            evicteeBannedTiles);
+        // Do a BFS on possible evictions
+        ArrayList<ActionPlan> evictionPlans = null;
+        for( int remainingDepth = 0;
+            null == evictionPlans && remainingDepth < recurseDepth - 1;
+            remainingDepth++ )
+        {
+          // Try for a value action first?
+          evictionPlans = planValueActions(ec, ev,
+                                           planEvictionValue, remainingDepth,
+                                           evicteeBannedTiles);
+          if( null == evictionPlans )
+          {
+            evictionPlans = planTravelActions(ec, ev,
+                                              shouldYeet, true, // Always enable wandering
+                                              planEvictionValue, remainingDepth,
+                                              evicteeBannedTiles);
+            // Penalize evictions so spurious ones happen less
+            evictionPenalty = valueUnit(ec.map, ev, true);
+          }
+        }
+
         ec.evictionStack.remove(unit);
         evictionFailure |= null == evictionPlans;
         if( evictionFailure )
           continue;
 
         ActionPlan evicteeNewPlan = evictionPlans.get(0);
-        int opportunityCost = evicteePlans.get(evicteeIndex).score - evicteeNewPlan.score;
+        evicteeNewPlan.score -= evictionPenalty;
+        int opportunityCost = evicteeOldPlan.score - evicteeNewPlan.score;
         evictionFailure |= evictingPlan.score < opportunityCost;
         if( evictionFailure )
           continue;
