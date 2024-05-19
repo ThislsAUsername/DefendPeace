@@ -1393,6 +1393,8 @@ public class WallyAI extends ModularAI
     pcp.includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
+    if( null != myOldPlan )
+      bannedTiles.addAll(myOldPlan.bannedTiles); // Carry forward any previous banned tiles
     destinations.removeAll(bannedTiles);
     boolean attackEviction = null != evictingPlan && evictingPlan.action.getType() == UnitActionFactory.ATTACK;
     if( attackEviction ) // Don't assume we can hop into our evicter's target's space, since that won't work
@@ -1504,6 +1506,7 @@ public class WallyAI extends ModularAI
   {
     if( ec.evictionStack.contains(unit) )
       return null;
+    ActionPlan myOldPlan = plansByUnit.get(unit);
     GameMap gameMap = ec.map;
 
     boolean ignoreResident = true;
@@ -1520,6 +1523,8 @@ public class WallyAI extends ModularAI
     ArrayList<XYCoord> validTargets = new ArrayList<XYCoord>();
     TravelPurpose travelPurpose = fillTravelDestinations(predMap, validTargets, unit);
 
+    if( null != myOldPlan )
+      bannedTiles.addAll(myOldPlan.bannedTiles); // Carry forward any previous banned tiles
     final boolean mustMove = bannedTiles.contains(new XYCoord(unit));
     if( !mustMove && !shouldWander && travelPurpose == TravelPurpose.WANDER )
       return null; // Don't clutter the queue with pointless movements
