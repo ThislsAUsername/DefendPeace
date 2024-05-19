@@ -772,7 +772,7 @@ public class WallyAI extends ModularAI
           continue;
 
         // All hits get the same score since they're all needed for a kill.
-        int score = valueUnit(targetID, gameMap.getLocation(targetLoc), true);
+        int score = valueUnit(targetID, gameMap.getLocation(targetLoc), true) * 100;
         for( XYCoord xyc : neededAttacks.keySet() )
         {
           Unit unit = neededAttacks.get(xyc);
@@ -2032,9 +2032,12 @@ public class WallyAI extends ModularAI
             && locale.isCaptureable() )
       value += valueTerrain(unit.CO, locale.getEnvironment().terrainType); // Strongly value units that threaten capture
 
-    if( includeCurrentHealth )
-      value *= unit.getHealth();
     value -= locale.getEnvironment().terrainType.getDefLevel(); // Value things on lower terrain more, so we wall for equal units if we can get on better terrain
+    if( includeCurrentHealth )
+    {
+      value *= unit.getHealth();
+      value /= UnitModel.MAXIMUM_HEALTH;
+    }
 
     return value;
   }
