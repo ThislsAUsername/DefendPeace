@@ -1752,6 +1752,7 @@ public class WallyAI extends ModularAI
       final Entry<ActionPlan, Integer> entry = rankedTravelPlans.poll();
       ActionPlan evictingPlan = entry.getKey();
       XYCoord xyc = evictingPlan.action.getMoveLocation();
+      int planEvictionValue = evictionValue + entry.getValue();
       ArrayList<ActionPlan> prereqPlans = new ArrayList<>();
 
       ArrayList<Unit> evictees = new ArrayList<>();
@@ -1802,20 +1803,6 @@ public class WallyAI extends ModularAI
       for( int evicteeIndex = 0; evicteeIndex < evictees.size(); ++evicteeIndex )
       {
         Unit ev = evictees.get(evicteeIndex);
-        evictionFailure |= ec.evictionStack.contains(ev);
-        if( evictionFailure )
-          continue;
-        boolean residentIsEvictable = !ev.isTurnOver;
-
-        evictionFailure |= !residentIsEvictable || recurseDepth <= 0;
-        if( evictionFailure )
-          continue;
-        // If nobody's there, no need to evict.
-        // If the resident is evictable, try to evict and bail if we can't.
-        // If the resident isn't evictable, we think it will be dead soon, so just keep going.
-
-        int planEvictionValue = evictionValue + entry.getValue();
-        int evictionPenalty = 0;
         ActionPlan evicteeOldPlan = evicteePlans.get(evicteeIndex);
         // Prevent reflexive eviction
         ec.evictionStack.add(unit);
@@ -1826,19 +1813,10 @@ public class WallyAI extends ModularAI
             null == evictionPlans && remainingDepth < recurseDepth - 1;
             remainingDepth++ )
         {
-          // Try for a value action first?
-          evictionPlans = planValueActions(ec, ev,
-                                           planEvictionValue, remainingDepth,
-                                           evicteeBannedTiles);
-          if( null == evictionPlans )
-          {
-            evictionPlans = planTravelActions(ec, ev,
-                                              shouldYeet, true, // Always enable wandering
-                                              planEvictionValue, remainingDepth,
-                                              evicteeBannedTiles);
-            // Penalize evictions so spurious ones happen less
-            evictionPenalty = valueUnit(ec.map, ev, true);
-          }
+          evictionPlans = calcEvictedActions(ec, ev, evicteeOldPlan,
+                                             shouldYeet,
+                                             planEvictionValue, remainingDepth,
+                                             evicteeBannedTiles);
         }
 
         ec.evictionStack.remove(unit);
@@ -1847,7 +1825,6 @@ public class WallyAI extends ModularAI
           continue;
 
         ActionPlan evicteeNewPlan = evictionPlans.get(0);
-        evicteeNewPlan.score -= evictionPenalty;
         int opportunityCost = evicteeOldPlan.score - evicteeNewPlan.score;
         evictionFailure |= evictingPlan.score < opportunityCost;
         if( evictionFailure )
@@ -1861,10 +1838,47 @@ public class WallyAI extends ModularAI
       bestPlans = new ArrayList<>();
       bestPlans.add(evictingPlan); // Since this cancels resiPlan implicitly, resiPlan's replacement needs to be cached after this one is
       bestPlans.addAll(prereqPlans);
+
       break; // We found a workable one. Ship it
     }
 
     return bestPlans;
+  }
+
+  private ArrayList<ActionPlan> calcEvictedActions(
+                                    EvictionContext ec, Unit evictee, ActionPlan evicteeOldPlan,
+                                    boolean shouldYeet,
+                                    int evictionValue, int recurseDepth,
+                                    ArrayList<XYCoord> bannedTiles)
+  {
+    boolean evictionFailure = ec.evictionStack.contains(evictee);
+    if( evictionFailure )
+      return null;
+    boolean residentIsEvictable = !evictee.isTurnOver;
+
+    evictionFailure |= !residentIsEvictable || recurseDepth <= 0;
+    if( evictionFailure )
+      return null;
+    // If nobody's there, no need to evict.
+    // If the resident is evictable, try to evict and bail if we can't.
+    // If the resident isn't evictable, we think it will be dead soon, so just keep going.
+
+    ArrayList<ActionPlan> evictionPlans;
+    // Try for a value action first
+    evictionPlans = planValueActions(ec, evictee,
+                                     evictionValue, recurseDepth,
+                                     bannedTiles);
+    if( null == evictionPlans )
+    {
+      evictionPlans = planTravelActions(ec, evictee,
+                                        shouldYeet, true, // Always enable wandering
+                                        evictionValue, recurseDepth,
+                                        bannedTiles);
+      // Penalize move-only evictions so spurious ones happen less
+      if( null != evictionPlans )
+        evictionPlans.get(0).score -= valueUnit(ec.map, evictee, true);
+    }
+    return evictionPlans;
   }
 
   /**
