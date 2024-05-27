@@ -1365,6 +1365,13 @@ public class WallyAI extends ModularAI
         if( tile != null ) bannedTiles.add(tile);
         tile = plan.action.getMoveLocation();
         if( tile != null ) bannedTiles.add(tile);
+        // If this is a WAIT other than the first action, ban any tiles that that WAIT could have gone to - this saves compute and unit-turns.
+        if( plan != postrequisites.get(0) && plan.action.getType() == UnitActionFactory.WAIT )
+        {
+          PathCalcParams pcp = new PathCalcParams(plan.actor.unit, map);
+          ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
+          bannedTiles.addAll(destinations);
+        }
         // Will need to consider UNLOAD here at some point?
       }
 
