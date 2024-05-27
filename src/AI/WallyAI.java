@@ -1708,25 +1708,39 @@ public class WallyAI extends ModularAI
 
   private static boolean canReachHitFromZone(PredictionMap predMap, TileThreat tt)
   {
-    HashSet<SearchNode> tilesVisited = new HashSet<>(tt.hitFrom); // We hate infinite loops
-    ArrayList<SearchNode> tileCache = new ArrayList<>(tilesVisited);
-    while (!tileCache.isEmpty())
+    PathCalcParams pcp = new PathCalcParams(tt.identity, predMap);
+    return canReachHitFromZone(predMap, pcp, tt.hitFrom);
+  }
+  private static boolean canReachHitFromZone(PredictionMap predMap, PathCalcParams pcp, Collection<SearchNode> roots)
+  {
+    for( SearchNode hitRoot : roots )
     {
-      SearchNode node = tileCache.remove(tileCache.size() - 1); // Remove at the tail for a DFS/less moving elements?
-
-      Unit resident = predMap.getResident(node);
-      if( null != resident && tt.identity.CO.isEnemy(resident.CO) )
-        continue; // Threat is blocked on this path
-
+      var node = hitRoot;
       if( null == node.parent )
-        return true;
-      else
-        for( SearchNode parent : node.allParents )
-          if( !tilesVisited.contains(parent) )
-          {
-            tileCache.add(parent);
-            tilesVisited.add(parent);
-          }
+        return true; // If we're the start of the path, GG
+      int costTotal = pcp.mt.getTransitionCost(predMap, node.parent, node, pcp.team, pcp.canTravelThroughEnemies);
+      if( costTotal > pcp.initialMovePower )
+        continue; // If the hit tile is blocked, GG
+
+      // Iterate through the nominal path, to see if it's blocked.
+      while (true)
+      {
+        if( null == node.parent.parent )
+          return true;
+        final int toReachParent = pcp.mt.getTransitionCost(predMap, node.parent.parent, node.parent, pcp.team, pcp.canTravelThroughEnemies);
+        if( costTotal + toReachParent > pcp.initialMovePower ) // Nominal path is impassible
+        {
+          final int startMP = pcp.initialMovePower;
+          pcp.initialMovePower = startMP - costTotal; // Consider only the remaining movepower
+          if( canReachHitFromZone(predMap, pcp, node.allParents) )
+            return true;
+          pcp.initialMovePower = startMP;
+          break;
+        }
+        costTotal += toReachParent;
+        node = node.parent;
+      }
+      // If it is blocked, check if it's possible to route around
     }
     return false;
   }

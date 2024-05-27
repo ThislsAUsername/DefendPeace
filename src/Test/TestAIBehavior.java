@@ -1,5 +1,6 @@
 package Test;
 
+import AI.AICombatUtils;
 import AI.AIController;
 import AI.AIMaker;
 import AI.Muriel;
@@ -19,6 +20,7 @@ import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Maps.MapReader;
 import Units.Unit;
+import lombok.var;
 
 public class TestAIBehavior extends TestCase
 {
@@ -79,6 +81,7 @@ public class TestAIBehavior extends TestCase
     testPassed &= validate(testProductionClearing(WallyAI.info), "  Free up industry test failed.");
     testPassed &= validate(testUnCapture(WallyAI.info), "  Inf distraction test failed.");
     testPassed &= validate(testInfOptimization(WallyAI.info), "  Inf optimization test failed.");
+    testPassed &= validate(testWalling(WallyAI.info), "  Walling test failed.");
 
     return testPassed;
   }
@@ -434,6 +437,42 @@ public class TestAIBehavior extends TestCase
     testPassed &= validate(cappy .getCaptureProgress() > 0     , "    "+ai.getName()+" didn't restart capturing with cappy");
     testPassed &= validate(5 == cappy.x && 1 == cappy.y        , "    "+ai.getName()+" didn't go to the factory with cappy");
     testPassed &= validate(scab  .getCaptureProgress() > 0     , "    "+ai.getName()+" didn't start capturing with the scab");
+
+    // Clean up
+    cleanupTest();
+
+    return testPassed;
+  }
+
+  /**
+   * The AI needs to block with the inf, and support the inf with the artillery
+   */
+  private boolean testWalling(AIMaker ai)
+  {
+    setupTest(MapReader.readSingleMap("src/Test/TestWalling.map"), ai,
+              CommandingOfficers.AW1.YC.Kanbei.getInfo(),
+              CommandingOfficers.AW4.BrennerWolves.Will.getInfo());
+
+    Unit arty   = testMap.getResident(1, 1);
+    Unit blocky = testMap.getResident(1, 2);
+    Unit tanky  = testMap.getResident(5, 1);
+    turn(testGame);
+
+    GameAction act = null;
+    boolean testPassed = true;
+    do
+    {
+      act = testCo1.army.getNextAIAction(testMap);
+      if( null != act )
+        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
+    } while( null != act && testPassed );
+
+    var artyXyc   = new XYCoord(arty);
+    var blockyXyc = new XYCoord(blocky);
+    var tankyXyc  = new XYCoord(tanky);
+    var tankZone  = AICombatUtils.findThreatPower(testMap, tanky, tankyXyc, arty.model).keySet();
+    testPassed &= validate(2 >= artyXyc.getDistance(blockyXyc), "    "+ai.getName()+" didn't protect blocky with arty");
+    testPassed &= validate(!tankZone.contains(artyXyc),         "    "+ai.getName()+" didn't protect arty with blocky");
 
     // Clean up
     cleanupTest();
