@@ -1411,8 +1411,7 @@ public class WallyAI extends ModularAI
     {
       // Figure out how to get here.
       GamePath movePath = moveCoord.getMyPath();
-      boolean collisionDetected = preReqConflictExists(ec.map, unit, movePath, ec.postrequisites);
-      if( collisionDetected )
+      if( preReqConflictExists(ec.map, unit, movePath, ec.postrequisites) )
         continue;
       actor.setPath(movePath);
       Unit       resident = predMap.getResident(moveCoord);
@@ -1591,8 +1590,7 @@ public class WallyAI extends ModularAI
         } // ~if resident
 
       GamePath movePath = xyc.getMyPath();
-      boolean collisionDetected = preReqConflictExists(ec.map, unit, movePath, ec.postrequisites);
-      if( collisionDetected )
+      if( preReqConflictExists(ec.map, unit, movePath, ec.postrequisites) )
         continue;
 
       int bonusPoints = 0;
