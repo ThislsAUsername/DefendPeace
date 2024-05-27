@@ -159,7 +159,7 @@ public class WallyAI extends ModularAI
   {
     UnitContext identity;
     ArrayList<WeaponModel> relevantWeapons = new ArrayList<>();
-    ArrayList<Utils.SearchNode> hitFrom = new ArrayList<>();
+    HashSet<Utils.SearchNode> hitFrom = new HashSet<>();
   }
   /**
    * For each X/Y coordinate, stores the enemies that can threaten this tile and what weapon(s) they can do it with
@@ -348,7 +348,6 @@ public class WallyAI extends ModularAI
       XYCoord moveLoc = action.getMoveLocation();
       if( null != moveLoc )
       {
-        mapPlan[moveLoc.x][moveLoc.y].identity = null;
         mapPlan[moveLoc.x][moveLoc.y].toAchieve = null;
         // TODO: Revisit if I add join/load
         if( !map.isLocationEmpty(action.getActor(), moveLoc) )
@@ -447,9 +446,10 @@ public class WallyAI extends ModularAI
       HashSet<XYCoord> revisitTiles = new HashSet<>();
       HashMap<Unit, ActionPlan> actionsBooked = new HashMap<>();
 
-      for( int x = 0; x < map.mapWidth; ++x )
-        for( int y = 0; y < map.mapHeight; ++y )
+      for( var plan : ai.plansByUnit.values() )
         {
+          var coord = plan.path.getEndCoord();
+          int x = coord.x, y = coord.y;
           ActionPlan readyPlan = fetchPlanAndVacateTiles(vacatedTiles, ai, map, x, y);
           if( null != readyPlan )
           {
@@ -1708,8 +1708,8 @@ public class WallyAI extends ModularAI
 
   private static boolean canReachHitFromZone(PredictionMap predMap, TileThreat tt)
   {
-    ArrayList<SearchNode> tileCache = new ArrayList<>(tt.hitFrom);
     HashSet<SearchNode> tilesVisited = new HashSet<>(tt.hitFrom); // We hate infinite loops
+    ArrayList<SearchNode> tileCache = new ArrayList<>(tilesVisited);
     while (!tileCache.isEmpty())
     {
       SearchNode node = tileCache.remove(tileCache.size() - 1); // Remove at the tail for a DFS/less moving elements?
