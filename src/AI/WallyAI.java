@@ -2446,11 +2446,11 @@ public class WallyAI extends ModularAI
   private boolean preReqConflictExists(GameMap map, Unit unit, GamePath path, Collection<ActionPlan> postrequisites)
   {
     // Note: postrequisites will contain the root plan (see above), so don't check for that.
-    return preReqConflictExists(map, unit, path, postrequisites, 0);
+    return preReqConflictExists(map, unit, path, postrequisites, new HashSet<>());
   }
-  private boolean preReqConflictExists(GameMap map, Unit unit, GamePath path, Collection<ActionPlan> postrequisites, int depth)
+  private boolean preReqConflictExists(GameMap map, Unit unit, GamePath path, Collection<ActionPlan> postrequisites, HashSet<ActionPlan> foundPrereqs)
   {
-    if( depth > 42 )
+    if( foundPrereqs.size() > 42 )
       return true;
     var evictee = map.getResident(path.getEndCoord());
     // I need this unit to move so I can take his space - that's a prerequisite
@@ -2461,7 +2461,10 @@ public class WallyAI extends ModularAI
       {
         if( postrequisites.contains(prereq) )
           return true;
-        if( preReqConflictExists(map, prereq.actor.unit, prereq.path, postrequisites, depth+1) )
+        if( foundPrereqs.contains(prereq) )
+          return true;
+        foundPrereqs.add(prereq);
+        if( preReqConflictExists(map, prereq.actor.unit, prereq.path, postrequisites, foundPrereqs) )
           return true;
       }
     }
@@ -2475,7 +2478,10 @@ public class WallyAI extends ModularAI
       {
         if( postrequisites.contains(prereq) )
           return true;
-        if( preReqConflictExists(map, prereq.actor.unit, prereq.path, postrequisites, depth+1) )
+        if( foundPrereqs.contains(prereq) )
+          return true;
+        foundPrereqs.add(prereq);
+        if( preReqConflictExists(map, prereq.actor.unit, prereq.path, postrequisites, foundPrereqs) )
           return true;
       }
     }
