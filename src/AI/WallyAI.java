@@ -1380,7 +1380,6 @@ public class WallyAI extends ModularAI
     int minFundsDelta = Math.min(0, -1 * ec.getEvictionValue());
     if( myOldPlan != null )
       minFundsDelta += myOldPlan.score;
-    boolean ignoreWallValue = !shouldYeet;
     for( Utils.SearchNode xyc : destinations )
     {
 //      log(String.format("    is it safe to go to %s?", xyc));
@@ -1437,9 +1436,9 @@ public class WallyAI extends ModularAI
             XYCoord targetXYC = attack.getTargetLocation();
             Unit targetUnit   = ec.map.getResident(targetXYC);
             if( null != targetUnit )
-              results = new AttackValue(this, actor, new UnitContext(targetUnit), predMap, ignoreWallValue);
+              results = new AttackValue(this, actor, new UnitContext(targetUnit), predMap, shouldYeet);
             else
-              results = new AttackValue(this, actor, targetXYC                  , predMap, ignoreWallValue);
+              results = new AttackValue(this, actor, targetXYC                  , predMap, shouldYeet);
             final int fundsDelta = results.fundsDelta;
 
             final int thisDelta = (int) fundsDelta + bonusPoints;
@@ -1464,7 +1463,7 @@ public class WallyAI extends ModularAI
             final int thisDelta = valueCapture((CaptureAction) capture, gameMap);
 
             int wallPoints = 0;
-            if( !ignoreWallValue )
+            if( !shouldYeet )
               wallPoints = wallFundsValue(predMap, threatMap, unit, xyc, null);
             final int finalCapValue = thisDelta + wallPoints;
             if( finalCapValue <= minFundsDelta )
@@ -1493,7 +1492,7 @@ public class WallyAI extends ModularAI
             int walkGain = startDist - endDist;
             int wallPoints = 0;
             int healBonus  = 0;
-            if( !ignoreWallValue )
+            if( !shouldYeet )
               wallPoints = wallFundsValue(predMap, threatMap, unit, xyc, null);
             var loc = gameMap.getLocation(movePath.getEndCoord());
             if( unit.isHurt() &&
