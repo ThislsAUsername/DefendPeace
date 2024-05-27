@@ -119,27 +119,23 @@ public class WallyAI extends ModularAI
   {
     final Object whodunit;
     final UnitContext actor;
-    final ArrayList<XYCoord> bannedTiles;
     final GameAction action;
     final XYCoord startPos;
-    GamePath path = null;
+    GamePath path;
     public XYCoord goal;
     boolean isAttack = false;
     int percentDamage = -1; // The damage we expect to deal with our attack
     int score;
     XYCoord clearTile; // The tile we expect to have emptied with our attack, if any; populated when queueing our final action order
     TravelPurpose purpose = TravelPurpose.NA;
-    ActionPlan(Object whodunit, UnitContext uc, GameAction action, int pScore, ArrayList<XYCoord> bannedTiles)
+    ActionPlan(Object whodunit, UnitContext uc, GameAction action, int pScore)
     {
       this.whodunit = whodunit;
-      this.bannedTiles = bannedTiles;
       this.action = action;
-      this.actor = uc;
-      if( null != action.getActor() )
-        startPos = new XYCoord(action.getActor());
-      else
-        startPos = action.getTargetLocation();
-      score = pScore;
+      this.actor  = uc;
+      this.path   = uc.path;
+      startPos    = uc.path.getWaypoint(0).GetCoordinates();
+      score       = pScore;
     }
     @Override
     public String toString()
@@ -230,20 +226,17 @@ public class WallyAI extends ModularAI
   {
     updatePlan(whodunit, score, unit, path, action, false, 42);
   }
-  private void updatePlan(Object whodunit, int score, UnitContext uc, GamePath path, GameAction action)
-  {
-    updatePlan(whodunit, score, uc, path, action, false, 42);
-  }
   private void updatePlan(Object whodunit, int score, Unit unit, GamePath path, GameAction action, boolean isAttack, int percentDamage)
   {
-    updatePlan(whodunit, score, new UnitContext(unit), path, action, isAttack, percentDamage);
+    UnitContext uc = new UnitContext(unit);
+    uc.path = path;
+    updatePlan(whodunit, score, uc, action, isAttack, percentDamage);
   }
-  private void updatePlan(Object whodunit, int score, UnitContext uc, GamePath path, GameAction action, boolean isAttack, int percentDamage)
+  private void updatePlan(Object whodunit, int score, UnitContext uc, GameAction action, boolean isAttack, int percentDamage)
   {
     if( null == action )
       return;
-    final ActionPlan plan = new ActionPlan(whodunit, uc, action, score, new ArrayList<>());
-    plan.path = path;
+    final ActionPlan plan = new ActionPlan(whodunit, uc, action, score);
     plan.isAttack = isAttack;
     plan.percentDamage = percentDamage;
     updatePlan(plan);
@@ -641,7 +634,7 @@ public class WallyAI extends ModularAI
       int capScore = 500;
       if( capAction instanceof CaptureLifecycle.CaptureAction )
         capScore = ai.valueCapture((CaptureLifecycle.CaptureAction) capAction, map);
-      ai.updatePlan(this, capScore, unit, null, capAction);
+      ai.updatePlan(this, capScore, unit, GamePath.stayPut(unit), capAction);
       return null;
     }
   }
@@ -968,10 +961,10 @@ public class WallyAI extends ModularAI
       }
       while (lastClearAttacks < clearAttacks)
       {
-        EvictionContext ec = new EvictionContext(this, gameMap, EVICTION_DEPTH);
         int evictionValue = 0;
         for( Unit unit : unitQueue )
         {
+          EvictionContext ec = new EvictionContext(this, gameMap, ai.mapPlan, EVICTION_DEPTH, unit);
           planSeqDebuggably(ec, evictionValue, unit);
         }
         lastClearAttacks = clearAttacks;
@@ -987,9 +980,7 @@ public class WallyAI extends ModularAI
 
     private void planSeqDebuggably(EvictionContext ec, int evictionValue, Unit unit)
     {
-      ArrayList<ActionPlan> actionSeq = ai.planValueActions(ec, unit,
-                                                            evictionValue, EVICTION_DEPTH,
-                                                            new ArrayList<XYCoord>());
+      ArrayList<ActionPlan> actionSeq = ai.planValueActions(ec, unit);
       if( null == actionSeq )
         return;
       for( ActionPlan plan : actionSeq )
@@ -1018,29 +1009,13 @@ public class WallyAI extends ModularAI
         return null;
 
 //      ai.log(String.format("Evaluating eviction for %s.", unit.toStringWithLocation()));
-      EvictionContext ec = new EvictionContext(this, gameMap, EVICTION_DEPTH);
-      final ActionPlan evicterPlan = ai.mapPlan[unit.x][unit.y].toAchieve;
-      Unit evictionID = null;
-      int evictionValue = 0;
-      if( null != evicter && unit != evicter.unit && null != evicterPlan )
-      {
-        evictionID = evicter.unit;
-        ec.evictionStack.add(evictionID);
-        evictionValue = valueAction(ai, gameMap, evicterPlan);
-      }
-      boolean shouldWander = true;
+      EvictionContext ec = new EvictionContext(this, gameMap, ai.mapPlan, EVICTION_DEPTH, unit);
       boolean shouldYeet   = false;
-      ArrayList<ActionPlan> travelPlans = ai.planTravelActions(ec, unit,
-                                          shouldYeet, shouldWander,
-                                          evictionValue, EVICTION_DEPTH,
-                                          new ArrayList<XYCoord>());
+      ArrayList<ActionPlan> travelPlans = ai.planTravelActions(ec, unit, shouldYeet);
 
       shouldYeet = true;
       if( null == travelPlans )
-        travelPlans = ai.planTravelActions(ec, unit,
-                                           shouldYeet, shouldWander,
-                                           evictionValue, EVICTION_DEPTH,
-                                           new ArrayList<XYCoord>());
+        travelPlans = ai.planTravelActions(ec, unit, shouldYeet);
       if( null == travelPlans )
         return null;
       for( ActionPlan plan : travelPlans )
@@ -1069,23 +1044,10 @@ public class WallyAI extends ModularAI
         return null;
 
 //      ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
-      final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
-      Unit evictionID = null;
-      EvictionContext ec = new EvictionContext(this, gameMap, EVICTION_DEPTH);
-      final ActionPlan evicterPlan = ai.mapPlan[unit.x][unit.y].toAchieve;
-      int evictionValue = 0;
-      if( null != evicter && unit != evicter.unit && null != evicterPlan )
-      {
-        evictionID = evicter.unit;
-        ec.evictionStack.add(evictionID);
-        evictionValue = valueAction(ai, gameMap, evicterPlan);
-      }
+      EvictionContext ec = new EvictionContext(this, gameMap, ai.mapPlan, EVICTION_DEPTH, unit);
       boolean shouldYeet = false;
-      boolean shouldWander = false;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(ec,
-                                          unit, shouldYeet, shouldWander,
-                                          evictionValue, EVICTION_DEPTH,
-                                          new ArrayList<XYCoord>());
+                                          unit, shouldYeet);
 
       if( null == travelPlans )
         return null;
@@ -1120,25 +1082,11 @@ public class WallyAI extends ModularAI
         return null;
 
 //      ai.log(String.format("Evaluating travel for %s.", unit.toStringWithLocation()));
-      final UnitContext evicter = ai.mapPlan[unit.x][unit.y].identity;
-      Unit evictionID = null;
-      EvictionContext ec = new EvictionContext(this, gameMap, EVICTION_DEPTH);
-      final ActionPlan evicterPlan = ai.mapPlan[unit.x][unit.y].toAchieve;
-      int evictionValue = 0;
-      if( null != evicter && unit != evicter.unit && null != evicterPlan )
-      {
-        evictionID = evicter.unit;
-        ec.evictionStack.add(evictionID);
-        evictionValue = valueAction(ai, gameMap, evicterPlan);
-      }
+      EvictionContext ec = new EvictionContext(this, gameMap, ai.mapPlan, EVICTION_DEPTH, unit);
       boolean shouldWander = false;
       ArrayList<ActionPlan> travelPlans = ai.planTravelActions(ec,
-                                          unit, shouldWander,
-                                          evictionValue, EVICTION_DEPTH,
-                                          new ArrayList<>());
+                                          unit, shouldWander);
 
-      if( null != evictionID )
-        ec.evictionStack.remove(evictionID);
       if( null == travelPlans )
         return null;
       for( ActionPlan plan : travelPlans )
@@ -1187,7 +1135,9 @@ public class WallyAI extends ModularAI
           fakeUnit.x = coord.x;
           fakeUnit.y = coord.y;
           fakeUnit.isTurnOver = false; // To pull a sneaky on FillActionQueue
-          ai.updatePlan(this, 2500 + buyCost / 2, new UnitContext(fakeUnit), null, buyAction);
+          UnitContext fakeContext = new UnitContext(fakeUnit);
+          fakeContext.path = GamePath.stayPut(fakeUnit);
+          ai.updatePlan(this, 2500 + buyCost / 2, fakeContext, buyAction, false, 0);
         }
         else
         {
@@ -1366,24 +1316,69 @@ public class WallyAI extends ModularAI
   {
     AIModule whodunit;
     GameMap map;
-    HashSet<Unit> evictionStack;
-    public EvictionContext(AIModule whodunit, GameMap gameMap, int evictionDepth)
+    @SuppressWarnings("unused")
+    UnitPrediction[][] mapPlan;
+    int maxEvictionDepth;
+    private Stack<Unit> evictionStack;
+    private Stack<ActionPlan> postrequisites;
+    public EvictionContext(AIModule whodunit, GameMap gameMap, UnitPrediction[][] mapPlan, int evictionDepth, Unit toMove)
     {
       this.whodunit = whodunit;
-      this.map = gameMap;
-      this.evictionStack = new HashSet<>(evictionDepth);
+      this.map      = gameMap;
+      this.mapPlan  = mapPlan;
+      maxEvictionDepth = evictionDepth;
+      this.evictionStack = new Stack<>();
+      postrequisites = new Stack<>();
+      enqueuePostReqPlans(mapPlan, mapPlan[toMove.x][toMove.y].toAchieve, postrequisites);
+    }
+    public void push(Unit unit, ActionPlan plan)
+    {
+      evictionStack.push(unit);
+      postrequisites.push(plan);
+    }
+    public void pop()
+    {
+      evictionStack.pop();
+      postrequisites.pop();
+    }
+    public int getEvictionValue()
+    {
+      int value = 0;
+      for( ActionPlan plan : postrequisites )
+      {
+        value += plan.score;
+      }
+      return value;
+    }
+    public int remainingDepth()
+    {
+      return maxEvictionDepth - evictionStack.size();
+    }
+    /** Find the tiles a unit on startTile shouldn't go, based on any planned actions that need that tile to be open. */
+    public ArrayList<XYCoord> calcPostReqBans()
+    {
+      var bannedTiles = new ArrayList<XYCoord>();
+
+      for( ActionPlan plan : postrequisites )
+      {
+        var tile = plan.actor.coord;
+        if( tile != null ) bannedTiles.add(tile);
+        tile = plan.action.getMoveLocation();
+        if( tile != null ) bannedTiles.add(tile);
+        // Will need to consider UNLOAD here at some point?
+      }
+
+      return bannedTiles;
     }
   }
 
   ArrayList<ActionPlan> planValueActions(EvictionContext ec,
-                                         Unit unit,
-                                         int evictionValue, int recurseDepth,
-                                         ArrayList<XYCoord> bannedTiles)
+                                         Unit unit
+                                         )
   {
     if( ec.evictionStack.contains(unit) )
       return null;
     ActionPlan myOldPlan = plansByUnit.get(unit);
-    ActionPlan evictingPlan = mapPlan[unit.x][unit.y].toAchieve;
     if( null != myOldPlan && predMap.helpsClearTile(myOldPlan) )
       return null;
 
@@ -1393,15 +1388,8 @@ public class WallyAI extends ModularAI
     pcp.includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
     ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
 
-    if( null != myOldPlan )
-      bannedTiles.addAll(myOldPlan.bannedTiles); // Carry forward any previous banned tiles
+    var bannedTiles = ec.calcPostReqBans();
     destinations.removeAll(bannedTiles);
-    boolean attackEviction = null != evictingPlan && evictingPlan.action.getType() == UnitActionFactory.ATTACK;
-    if( attackEviction ) // Don't assume we can hop into our evicter's target's space, since that won't work
-    {
-      XYCoord target = evictingPlan.action.getTargetLocation();
-      destinations.remove(target);
-    }
 
     destinations.removeAll(AIUtils.findAlliedIndustries(predMap, myArmy, destinations, true));
     // sort by furthest away, good for capturing
@@ -1416,6 +1404,9 @@ public class WallyAI extends ModularAI
     {
       // Figure out how to get here.
       GamePath movePath = moveCoord.getMyPath();
+      boolean collisionDetected = preReqConflictExists(ec.map, unit, movePath, ec.postrequisites);
+      if( collisionDetected )
+        continue;
       actor.setPath(movePath);
       Unit       resident = predMap.getResident(moveCoord);
       ActionPlan resiPlan = mapPlan[moveCoord.x][moveCoord.y].toAchieve;
@@ -1445,7 +1436,7 @@ public class WallyAI extends ModularAI
             if( results.fundsDelta <= 0 )
               continue;
 
-            ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), ga, results.fundsDelta, bannedTiles);
+            ActionPlan plan = new ActionPlan(ec.whodunit, actor, ga, results.fundsDelta);
             plan.path = movePath;
             plan.purpose = TravelPurpose.NA;
             plan.isAttack = true;
@@ -1464,7 +1455,7 @@ public class WallyAI extends ModularAI
           if( finalCapValue <= 0 )
             continue;
 
-          ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), ga, finalCapValue, bannedTiles);
+          ActionPlan plan = new ActionPlan(ec.whodunit, actor, ga, finalCapValue);
           plan.path = movePath;
           plan.purpose = TravelPurpose.NA;
           plan.isAttack = false;
@@ -1476,9 +1467,7 @@ public class WallyAI extends ModularAI
     boolean shouldYeet = false;
     ArrayList<ActionPlan> bestPlans = calcEvictionPlans(ec,
                                           unit, shouldYeet,
-                                          evictionValue, recurseDepth,
-                                          rankedTravelPlans,
-                                          bannedTiles);
+                                          rankedTravelPlans);
 
     return bestPlans;
   } // ~planValueAction
@@ -1488,26 +1477,19 @@ public class WallyAI extends ModularAI
    * <p>Defaults to allowing evictions of other travelers.
    */
   ArrayList<ActionPlan> planTravelActions(
-                        EvictionContext ec, Unit unit,
-                        boolean shouldWander,
-                        int evictionValue, int recurseDepth,
-                        ArrayList<XYCoord> bannedTiles)
+                        EvictionContext ec, Unit unit)
   {
-    return planTravelActions(ec, unit,
-                             true, shouldWander,
-                             evictionValue, recurseDepth,
-                             bannedTiles);
+    return planTravelActions(ec, unit, false);
   }
   ArrayList<ActionPlan> planTravelActions(
                         EvictionContext ec, Unit unit,
-                        boolean shouldYeet, boolean shouldWander,
-                        int evictionValue, int recurseDepth,
-                        ArrayList<XYCoord> bannedTiles)
+                        boolean shouldYeet)
   {
     if( ec.evictionStack.contains(unit) )
       return null;
-    ActionPlan myOldPlan = plansByUnit.get(unit);
     GameMap gameMap = ec.map;
+    var bannedTiles = ec.calcPostReqBans();
+    final boolean mustMove = bannedTiles.contains(new XYCoord(unit));
 
     boolean ignoreResident = true;
     // Find the possible destinations.
@@ -1523,21 +1505,11 @@ public class WallyAI extends ModularAI
     ArrayList<XYCoord> validTargets = new ArrayList<XYCoord>();
     TravelPurpose travelPurpose = fillTravelDestinations(predMap, validTargets, unit);
 
-    if( null != myOldPlan )
-      bannedTiles.addAll(myOldPlan.bannedTiles); // Carry forward any previous banned tiles
-    final boolean mustMove = bannedTiles.contains(new XYCoord(unit));
-    if( !mustMove && !shouldWander && travelPurpose == TravelPurpose.WANDER )
+    if( !mustMove && travelPurpose == TravelPurpose.WANDER )
       return null; // Don't clutter the queue with pointless movements
 
     destinations.removeAll(bannedTiles);
     validTargets.removeAll(bannedTiles);
-    boolean attackEviction = mustMove && null != mapPlan[unit.x][unit.y].toAchieve && mapPlan[unit.x][unit.y].toAchieve.action.getType() == UnitActionFactory.ATTACK;
-    if( attackEviction ) // Don't assume we can hop into our evicter's target's space, since that won't work
-    {
-      XYCoord target = mapPlan[unit.x][unit.y].toAchieve.action.getTargetLocation();
-      destinations.remove(target);
-      validTargets.remove(target);
-    }
 
     for( XYCoord target : validTargets )
     {
@@ -1576,7 +1548,7 @@ public class WallyAI extends ModularAI
     Queue<Entry<ActionPlan, Integer>> rankedTravelPlans =
         new PriorityQueue<>(13, new EntryValueComparator<>());
 
-    int minFundsDelta = Math.min(0, -1 * evictionValue);
+    int minFundsDelta = Math.min(0, -1 * ec.getEvictionValue());
     boolean ignoreWallValue = !shouldYeet;
     for( Utils.SearchNode xyc : destinations )
     {
@@ -1607,31 +1579,14 @@ public class WallyAI extends ModularAI
             continue;
           boolean residentIsEvictable = !currentResident.isTurnOver;
 
-          if( !residentIsEvictable || recurseDepth <= 0 )
+          if( !residentIsEvictable || ec.remainingDepth() <= 0 )
             continue;
         } // ~if resident
 
       GamePath movePath = xyc.getMyPath();
-      if( movePath.getPathLength() < xyc.getDistance(unit) )
-      {
-        log(String.format("      Wally Travel generated bad path: %s", movePath));
+      boolean collisionDetected = preReqConflictExists(ec.map, unit, movePath, ec.postrequisites);
+      if( collisionDetected )
         continue;
-      }
-      if( attackEviction ) // Don't assume we can move through our evicter's target's space, since that also won't work
-      {
-        XYCoord target = mapPlan[unit.x][unit.y].toAchieve.action.getTargetLocation();
-        boolean collisionDetected = false;
-        for( PathNode wp : movePath.getWaypoints() )
-        {
-          if( target.equals(wp.GetCoordinates()) )
-          {
-            collisionDetected = true;
-            break;
-          }
-        }
-        if( collisionDetected )
-          continue;
-      }
 
       int bonusPoints = 0;
       if( xyc.equals(goal) )
@@ -1665,7 +1620,7 @@ public class WallyAI extends ModularAI
             if( thisDelta > minFundsDelta )
             {
 //              log(String.format("      Best en passant attack deals %s", fundsDelta));
-              ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), attack, thisDelta, bannedTiles);
+              ActionPlan plan = new ActionPlan(ec.whodunit, actor, attack, thisDelta);
               plan.path = movePath;
               plan.goal = goal;
               plan.purpose = travelPurpose;
@@ -1689,7 +1644,7 @@ public class WallyAI extends ModularAI
             // Ignore threats, capping is delicious.
             if( thisDelta > minFundsDelta )
             {
-              ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), capture, thisDelta, bannedTiles);
+              ActionPlan plan = new ActionPlan(ec.whodunit, actor, capture, thisDelta);
               plan.path = movePath;
               plan.goal = goal;
               plan.purpose = TravelPurpose.CONQUER;
@@ -1719,7 +1674,7 @@ public class WallyAI extends ModularAI
             int waitScore = movePath.getPathLength() + wallPoints + walkGain + bonusPoints + healBonus;
             if( minFundsDelta < waitScore && movePath.getPathLength() > 1 ) // Just wait if we can't do anything cool
             {
-              ActionPlan plan = new ActionPlan(ec.whodunit, new UnitContext(unit), move, waitScore, bannedTiles);
+              ActionPlan plan = new ActionPlan(ec.whodunit, actor, move, waitScore);
               plan.path = movePath;
               plan.goal = goal;
               plan.purpose = travelPurpose;
@@ -1732,18 +1687,14 @@ public class WallyAI extends ModularAI
 
     ArrayList<ActionPlan> bestPlans = calcEvictionPlans(ec,
                                           unit, shouldYeet,
-                                          evictionValue, recurseDepth,
-                                          rankedTravelPlans,
-                                          bannedTiles);
+                                          rankedTravelPlans);
 
     return bestPlans;
   }
 
   private ArrayList<ActionPlan> calcEvictionPlans(EvictionContext ec,
                                     Unit unit, boolean shouldYeet,
-                                    int evictionValue, int recurseDepth,
-                                    Queue<Entry<ActionPlan, Integer>> rankedTravelPlans,
-                                    ArrayList<XYCoord> bannedTiles)
+                                    Queue<Entry<ActionPlan, Integer>> rankedTravelPlans)
   {
     ArrayList<ActionPlan> bestPlans = null;
     // Now that we have an ordered list of our travel locations, figure out the best one we can accomplish (potentially requiring eviction of both current and planned residents)
@@ -1752,15 +1703,10 @@ public class WallyAI extends ModularAI
       final Entry<ActionPlan, Integer> entry = rankedTravelPlans.poll();
       ActionPlan evictingPlan = entry.getKey();
       XYCoord xyc = evictingPlan.action.getMoveLocation();
-      int planEvictionValue = evictionValue + entry.getValue();
       ArrayList<ActionPlan> prereqPlans = new ArrayList<>();
 
       ArrayList<Unit> evictees = new ArrayList<>();
       ArrayList<ActionPlan> evicteePlans = new ArrayList<>();
-      ArrayList<XYCoord> evicteeBannedTiles = new ArrayList<>();
-      evicteeBannedTiles.add(xyc);
-      evicteeBannedTiles.add(new XYCoord(unit));
-      evicteeBannedTiles.addAll(bannedTiles);
 
       // If there's a current resident with no plans, make up a "wait" in place as the action that corresponds to this evictee
       Unit currentResident = ec.map.getResident(xyc);
@@ -1772,11 +1718,15 @@ public class WallyAI extends ModularAI
         if( currentResident.isTurnOver )
           continue;
         evictees.add(currentResident);
-        GameAction stayPut = new WaitLifecycle.WaitAction(currentResident, GamePath.stayPut(currentResident));
+        GamePath path = GamePath.stayPut(currentResident);
+        GameAction stayPut = new WaitLifecycle.WaitAction(currentResident, path);
         int stayPutScore = wallFundsValue(ec.map, threatMap, currentResident, xyc, null);
         // Penalize evictions so spurious ones happen less
         stayPutScore -= valueUnit(ec.map, currentResident, true);
-        evicteePlans.add(new ActionPlan(ec.whodunit, new UnitContext(currentResident), stayPut, stayPutScore, bannedTiles));
+
+        UnitContext resiContext = new UnitContext(currentResident);
+        resiContext.path = path;
+        evicteePlans.add(new ActionPlan(ec.whodunit, resiContext, stayPut, stayPutScore));
       }
 
       // Handle any unit that has planned to take my spot
@@ -1787,7 +1737,6 @@ public class WallyAI extends ModularAI
         if( unit == futureResident )
           return null; // Trying to evict yourself is dumb
         evictees.add(futureResident);
-        evicteeBannedTiles.addAll(evictablePlan.bannedTiles);
         evicteePlans.add(evictablePlan);
       }
 
@@ -1805,21 +1754,18 @@ public class WallyAI extends ModularAI
         Unit ev = evictees.get(evicteeIndex);
         ActionPlan evicteeOldPlan = evicteePlans.get(evicteeIndex);
         // Prevent reflexive eviction
-        ec.evictionStack.add(unit);
+        ec.push(unit, evictingPlan);
 
         // Do a BFS on possible evictions
         ArrayList<ActionPlan> evictionPlans = null;
         for( int remainingDepth = 0;
-            null == evictionPlans && remainingDepth < recurseDepth - 1;
+            null == evictionPlans && remainingDepth < ec.remainingDepth() - 1;
             remainingDepth++ )
         {
-          evictionPlans = calcEvictedActions(ec, ev, evicteeOldPlan,
-                                             shouldYeet,
-                                             planEvictionValue, remainingDepth,
-                                             evicteeBannedTiles);
+          evictionPlans = calcEvictedActions(ec, ev, shouldYeet);
         }
 
-        ec.evictionStack.remove(unit);
+        ec.pop();
         evictionFailure |= null == evictionPlans;
         if( evictionFailure )
           continue;
@@ -1846,17 +1792,15 @@ public class WallyAI extends ModularAI
   }
 
   private ArrayList<ActionPlan> calcEvictedActions(
-                                    EvictionContext ec, Unit evictee, ActionPlan evicteeOldPlan,
-                                    boolean shouldYeet,
-                                    int evictionValue, int recurseDepth,
-                                    ArrayList<XYCoord> bannedTiles)
+                                    EvictionContext ec, Unit evictee,
+                                    boolean shouldYeet)
   {
     boolean evictionFailure = ec.evictionStack.contains(evictee);
     if( evictionFailure )
       return null;
     boolean residentIsEvictable = !evictee.isTurnOver;
 
-    evictionFailure |= !residentIsEvictable || recurseDepth <= 0;
+    evictionFailure |= !residentIsEvictable || ec.remainingDepth() <= 0;
     if( evictionFailure )
       return null;
     // If nobody's there, no need to evict.
@@ -1865,15 +1809,10 @@ public class WallyAI extends ModularAI
 
     ArrayList<ActionPlan> evictionPlans;
     // Try for a value action first
-    evictionPlans = planValueActions(ec, evictee,
-                                     evictionValue, recurseDepth,
-                                     bannedTiles);
+    evictionPlans = planValueActions(ec, evictee);
     if( null == evictionPlans )
     {
-      evictionPlans = planTravelActions(ec, evictee,
-                                        shouldYeet, true, // Always enable wandering
-                                        evictionValue, recurseDepth,
-                                        bannedTiles);
+      evictionPlans = planTravelActions(ec, evictee, shouldYeet);
       // Penalize move-only evictions so spurious ones happen less
       if( null != evictionPlans )
         evictionPlans.get(0).score -= valueUnit(ec.map, evictee, true);
@@ -2480,15 +2419,68 @@ public class WallyAI extends ModularAI
     return yeetFactor / capTurns;
   }
 
-  private static int valueAction(WallyAI ai, GameMap gameMap, ActionPlan ap)
+  private static void enqueuePostReqPlans(UnitPrediction[][] mapPlan, ActionPlan initialPostreq, Collection<ActionPlan> postrequisites)
   {
-    if( null == ap || null == ap.action )
+    if( null == initialPostreq )
+      return;
+    // Note: this means the initial actor's plan may end up in its own postrequisite list
+    postrequisites.add(initialPostreq);
+
+    XYCoord sourceCoord = initialPostreq.actor.coord;
+    // Other plan moves into my actor's current tile - that's a postrequisite
+    if( !initialPostreq.action.getMoveLocation().equals(sourceCoord) )
     {
-      // We shouldn't try to preempt a unit we didn't plan to be there?
-      return Integer.MAX_VALUE / 42;
+      enqueuePostReqPlans(mapPlan, mapPlan[sourceCoord.x][sourceCoord.y].toAchieve, postrequisites);
+    }
+    // Other plan moves into a tile I clear - that's also a postrequisite
+    if( initialPostreq.isAttack )
+    {
+      XYCoord target = initialPostreq.action.getTargetLocation();
+      enqueuePostReqPlans(mapPlan, mapPlan[target.x][target.y].toAchieve, postrequisites);
+    }
+  }
+
+  /**
+   * Finds all prerequisites of the input movetile/action, and returns true if any are in the provided postrequisite list
+   */
+  private boolean preReqConflictExists(GameMap map, Unit unit, GamePath path, Collection<ActionPlan> postrequisites)
+  {
+    // Note: postrequisites will contain the root plan (see above), so don't check for that.
+    return preReqConflictExists(map, unit, path, postrequisites, 0);
+  }
+  private boolean preReqConflictExists(GameMap map, Unit unit, GamePath path, Collection<ActionPlan> postrequisites, int depth)
+  {
+    if( depth > 42 )
+      return true;
+    var evictee = map.getResident(path.getEndCoord());
+    // I need this unit to move so I can take his space - that's a prerequisite
+    if( null != evictee && evictee != unit && !evictee.CO.isEnemy(myArmy) )
+    {
+      var prereq = plansByUnit.get(evictee);
+      if( null != prereq ) // If there's no plan, it can't already be a planned postrequisite. Probably.
+      {
+        if( postrequisites.contains(prereq) )
+          return true;
+        if( preReqConflictExists(map, prereq.actor.unit, prereq.path, postrequisites, depth+1) )
+          return true;
+      }
     }
 
-    return ap.score;
+    for( PathNode node : path.getWaypoints() )
+    {
+      var dest = node.GetCoordinates();
+      // I need this unit to help clear the tile I'm moving into - that's a prerequisite
+      // Note: I can't move into a tile that I'd help clear by shooting it, so don't worry about that possibility
+      for( var prereq : mapPlan[dest.x][dest.y].damageInstances.keySet() )
+      {
+        if( postrequisites.contains(prereq) )
+          return true;
+        if( preReqConflictExists(map, prereq.actor.unit, prereq.path, postrequisites, depth+1) )
+          return true;
+      }
+    }
+    // Will need to handle extra tiles for UNLOAD.
+    return false;
   }
 
   /**
@@ -2578,11 +2570,7 @@ public class WallyAI extends ModularAI
         return resFake;
       }
 
-      if( null != resSource && null != resPlanned && resSource != resFake )
-        System.out.println(String.format("Warning: PredictionMap[%s][%s] is double-booked with:\n\t%s\n\t%s",
-                                          x, y, resSource.toStringWithLocation(), resFake.toStringWithLocation()));
-      // If the real unit is still alive, then it is the realest of answers..
-      return resSource;
+      return resFake;
     }
     /** Debugging function - see what tiles we think we've planned to kill the residents of */
     public HashMap<XYCoord, HashMap<ActionPlan, Integer>> calcPredictedClearTiles()
