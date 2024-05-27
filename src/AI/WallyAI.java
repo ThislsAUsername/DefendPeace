@@ -2550,6 +2550,8 @@ public class WallyAI extends ModularAI
           resFake.x = x;
           resFake.y = y;
         }
+        else if( resFake.getHP() < 1 ) // Keep zombies at bay
+          resFake = null;
       }
 
       // Use the planned unit if there's nobody in the way, or the other body in the problem is mine.
