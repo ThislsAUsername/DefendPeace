@@ -633,7 +633,7 @@ public class WallyAI extends ModularAI
       int capScore = 500;
       if( capAction instanceof CaptureLifecycle.CaptureAction )
         capScore = ai.valueCapture((CaptureLifecycle.CaptureAction) capAction, map);
-      ai.updatePlan(this, capScore, unit, GamePath.stayPut(unit), capAction);
+      ai.updatePlan(this, capScore, unit, Utils.findShortestPath(unit, mc, map), capAction);
       return null;
     }
   }
@@ -1482,7 +1482,7 @@ public class WallyAI extends ModularAI
         {
           if( !mustMove && travelPurpose == TravelPurpose.WANDER )
             continue; // Don't clutter the queue with pointless movements
-          if( !spaceFree &&
+          if( !spaceFree && myOldPlan != resiPlan &&
               ( null == resiPlan || resiPlan.purpose.priority > travelPurpose.priority) )
             continue;
           for( GameAction move : actionSet.getGameActions() )
@@ -1740,7 +1740,6 @@ public class WallyAI extends ModularAI
         costTotal += toReachParent;
         node = node.parent;
       }
-      // If it is blocked, check if it's possible to route around
     }
     return false;
   }
