@@ -67,12 +67,12 @@ public class TestAIBehavior extends TestCase
   {
     boolean testPassed = true;
 
+    testPassed &= validate(testWalkInLine(Muriel.info), "  "+Muriel.info.getName()+" failed line walking test.");
     for( AIMaker ai : ais )
     {
       testPassed &= validate(testBuildMegatank(ai), "  "+ai.getName()+" failed build Megatank test.");
       testPassed &= validate(testHuntStall(ai), "  "+ai.getName()+" failed hunting stall-test.");
       testPassed &= validate(testClearAttackRoute(ai), "  "+ai.getName()+" failed route clearing test.");
-      testPassed &= validate(testWalkInLine(ai), "  "+ai.getName()+" failed line walking test.");
       testPassed &= validate(testInfWadeThroughTanks(ai), "  "+ai.getName()+" failed Infantry move priority test.");
       testPassed &= validate(testTankWadeThroughInfs(ai), "  "+ai.getName()+" failed Tank move priority test.");
     }
