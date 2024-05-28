@@ -76,16 +76,14 @@ public class WallyAI extends ModularAI
     return info;
   }
 
-  // What % damage I'll ignore when checking safety (currently for just builds)
-  private static final int INDIRECT_THREAT_THRESHOLD = 13;
-  private static final int DIRECT_THREAT_THRESHOLD = 60;
+  // What % funds loss of the unit will make me not build the unit
+  private static final int BUILD_SCARE_PERCENT = 50;
   private static final int    UNIT_CAPTURE_RANGE = 4; // number of turns of movement to consider capture goals within
   private static final int    UNIT_HEAL_THRESHOLD = 6; // HP at which units heal
   private static final double UNIT_REFUEL_THRESHOLD = 1.3; // Factor of cost to get to fuel to start worrying about fuel
   private static final double UNIT_REARM_THRESHOLD = 0.25; // Fraction of ammo in any weapon below which to consider resupply
   private static final double AGGRO_EFFECT_THRESHOLD = 0.55; // % of a kill required to want to attack something
   private static final double AGGRO_FUNDS_WEIGHT = 0.9; // Multiplier on damage I need to get before a sacrifice is worth it
-  private static final double AGGRO_CHEAPER_WEIGHT = 0.01; // Multiplier on the score penalty for using expensive units to blow up stragglers
   private static final int    YEET_FUNDS_BIAS = 1000; // Bias against yeets
   private static final int    KILL_FUNDS_BIAS = 500; // Bias towards kills
   private static final int    CHIP_FUNDS_BIAS = 500; // Bias towards hitting full HP units
@@ -1321,7 +1319,8 @@ public class WallyAI extends ModularAI
       return null;
     GameMap gameMap = ec.map;
     var bannedTiles = ec.calcPostReqBans();
-    final boolean mustMove = bannedTiles.contains(new XYCoord(unit));
+    XYCoord startTile = new XYCoord(unit);
+    final boolean mustMove = bannedTiles.contains(startTile);
     ActionPlan myOldPlan = plansByUnit.get(unit);
 
     boolean ignoreResident = true;
@@ -1353,7 +1352,7 @@ public class WallyAI extends ModularAI
     // If we have no destinations, consider ourselves wandering
     if( null == goal )
     {
-      goal = new XYCoord(unit);
+      goal = startTile;
       path = GamePath.stayPut(unit);
       travelPurpose = TravelPurpose.WANDER;
     }
@@ -1487,7 +1486,7 @@ public class WallyAI extends ModularAI
             continue;
           for( GameAction move : actionSet.getGameActions() )
           {
-            int startDist = new XYCoord(unit).getDistance(pathPoint);
+            int startDist = startTile.getDistance(pathPoint);
             int endDist   = movePath.getEndCoord().getDistance(pathPoint);
             int walkGain = startDist - endDist;
             int wallPoints = 0;
@@ -1637,33 +1636,37 @@ public class WallyAI extends ModularAI
   /**
    * @return The maximum expected health loss
    */
-  private int healthThreatAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
+  private int fundsThreatAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
   {
-    return healthThreatAt(gameMap, threatMap, new UnitContext(unit), xyc, target);
+    return fundsThreatAt(gameMap, threatMap, new UnitContext(unit), xyc, target);
   }
-  private int healthThreatAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, ModelForCO type, XYCoord xyc, Unit target)
+  private int fundsThreatAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, ModelForCO type, XYCoord xyc, Unit target)
   {
     UnitContext myUnit = new UnitContext(type.co, type.um);
     myUnit.coord = xyc;
     myUnit.unit = new Unit(type.co, type.um); // Make stuff up so combat modifiers don't explode?
     myUnit.unit.x = xyc.x;
     myUnit.unit.y = xyc.y;
-    return healthThreatAt(gameMap, threatMap, myUnit, xyc, target);
+    return fundsThreatAt(gameMap, threatMap, myUnit, xyc, target);
   }
-  private int healthThreatAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, UnitContext myUnit, XYCoord xyc, Unit target)
+  private int fundsThreatAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, UnitContext myUnit, XYCoord xyc, Unit target)
   {
     int threat = 0;
-    HashMap<TileThreat, Integer> realThreats = realThreatsAt(gameMap, threatMap, myUnit, xyc, target);
+    var realThreats = realThreatsAt(gameMap, threatMap, myUnit, xyc, target);
     for( TileThreat tt : realThreats.keySet() )
     {
-      threat = Math.max(threat, realThreats.get(tt));
+      AttackValue valuator = new AttackValue(this, realThreats.get(tt), gameMap, true);
+      threat = Math.max(threat, valuator.fundsDelta);
     }
 
     return threat;
   }
-  private HashMap<TileThreat, Integer> realThreatsAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, UnitContext myUnit, XYCoord xyc, Unit target)
+  /**
+   * @return a map from threats to their combat results
+   */
+  private HashMap<TileThreat, BattleSummary> realThreatsAt(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, UnitContext myUnit, XYCoord xyc, Unit target)
   {
-    HashMap<TileThreat, Integer> output = new HashMap<>();
+    HashMap<TileThreat, BattleSummary> output = new HashMap<>();
     ArrayList<TileThreat> tileThreats = threatMap[xyc.x][xyc.y];
     for( TileThreat tt : tileThreats )
     {
@@ -1688,19 +1691,20 @@ public class WallyAI extends ModularAI
         continue; // Dead people don't usually shoot
       threatContext.alterHealthNoRound(-1 * damagePercent);
 
-      int threat = 0;
+      BattleSummary bestHit = null;
       for( WeaponModel wep : tt.relevantWeapons )
       {
         threatContext.setWeapon(wep);
 
         BattleSummary results = CombatEngine.simulateBattleResults(threatContext, myUnit, gameMap, CalcType.OPTIMISTIC);
-        int damage = results.defender.getPreciseHealthDamage();
 
-        threat = Math.max(threat, damage);
+        if( null == bestHit ||
+            bestHit.defender.getPreciseHealthDamage() < results.defender.getPreciseHealthDamage() )
+          bestHit = results;
       }
 
-      if( threat > 0 )
-        output.put(tt, threat);
+      if( null != bestHit )
+        output.put(tt, bestHit);
     }
 
     return output;
@@ -1750,10 +1754,7 @@ public class WallyAI extends ModularAI
    */
   private int wallFundsValue(GameMap gameMap, ArrayList<TileThreat>[][] threatMap, Unit unit, XYCoord xyc, Unit target)
   {
-    MapLocation destination = gameMap.getLocation(xyc);
-    int wallHealthTaken = healthThreatAt(gameMap, threatMap, unit, xyc, target);
-    int wallVal = valueUnit(unit, destination, false);
-    int wallLoss = wallVal * wallHealthTaken / UnitModel.MAXIMUM_HEALTH;
+    int wallLoss = fundsThreatAt(gameMap, threatMap, unit, xyc, target);
     int wallGain = 0;
 
     ArrayList<XYCoord> adjacentCoords = Utils.findLocationsInRange(predMap, xyc, 1);
@@ -1765,8 +1766,7 @@ public class WallyAI extends ModularAI
         Unit friend = loc.getResident();
         if( friend != null && !myArmy.isEnemy(friend.CO) )
         {
-          int friendVal = valueUnit(friend, loc, false);
-          HashMap<TileThreat, Integer> friendHits = realThreatsAt(gameMap, threatMap, new UnitContext(unit), xyc, target);
+          var friendHits = realThreatsAt(gameMap, threatMap, new UnitContext(unit), xyc, target);
           for( TileThreat tt : friendHits.keySet())
           {
             // TODO: Determine whether other units can kill me to let this threat through?
@@ -1782,8 +1782,8 @@ public class WallyAI extends ModularAI
             if( !blockByMe )
               continue; // We aren't blocking this damage, so we don't get credit
 
-            int friendGain = (int) (friendHits.get(tt) * friendVal / UnitModel.MAXIMUM_HEALTH);
-            wallGain += friendGain;
+            AttackValue valuator = new AttackValue(this, friendHits.get(tt), gameMap, true);
+            wallGain += valuator.fundsDelta;
           }
         }
       }
@@ -1862,9 +1862,6 @@ public class WallyAI extends ModularAI
     if( null == desiredTerrains || desiredTerrains.size() < 1 )
       return null;
 
-    int threatThreshold = DIRECT_THREAT_THRESHOLD;
-    if( model.hasImmobileWeapon() )
-      threatThreshold = INDIRECT_THREAT_THRESHOLD;
     ArrayList<XYCoord> candidates = new ArrayList<XYCoord>();
     for( MapLocation loc : CPI.availableProperties )
     {
@@ -1872,8 +1869,9 @@ public class WallyAI extends ModularAI
       {
         final ModelForCO mfc = new ModelForCO(loc.getOwner(), model);
 
-        int hpThreat = healthThreatAt(gameMap, threatMap, mfc, loc.getCoordinates(), null);
-        if( threatThreshold < hpThreat )
+        int threat = fundsThreatAt(gameMap, threatMap, mfc, loc.getCoordinates(), null);
+        int threatThreshold = (BUILD_SCARE_PERCENT * mfc.co.getBuyCost(mfc.um, loc.getCoordinates())) / 100;
+        if( threatThreshold < threat )
           continue;
         // If we can get to a target...
         if( 0 < findCombatUnitDestinations(predMap, allThreats, loc.getCoordinates(), mfc)
@@ -2193,6 +2191,15 @@ public class WallyAI extends ModularAI
     }
     public AttackValue(WallyAI ai, UnitContext actor, UnitContext target, GameMap gameMap, boolean ignoreWallValue)
     {
+      this(ai, CombatEngine.simulateBattleResults(actor, target, gameMap, CALC), gameMap, ignoreWallValue);
+    }
+    public AttackValue(WallyAI ai, BattleSummary results, GameMap gameMap, boolean ignoreWallValue)
+    {
+      UnitContext actor  = results.attacker.before;
+      UnitContext target = results.defender.before;
+      hpLoss   = actor .getHP() - Math.max(0, results.attacker.after.getHP());
+      hpDamage = target.getHP() - Math.max(0, results.defender.after.getHP());
+
       final int actorCost = WallyAI.valueUnit(gameMap, actor.unit, false);
       int targetValue = WallyAI.valueUnit(gameMap, target.unit, false);
       int captureValue = 0;
@@ -2202,10 +2209,6 @@ public class WallyAI extends ModularAI
         if( target.CO.unitProductionByTerrain.containsKey(gameMap.getEnvironment(target.coord).terrainType) )
           captureValue += TERRAIN_INDUSTRY_WEIGHT;
       }
-
-      BattleSummary results = CombatEngine.simulateBattleResults(actor, target, gameMap, CALC);
-      hpLoss   = actor .getHP() - Math.max(0, results.attacker.after.getHP());
-      hpDamage = target.getHP() - Math.max(0, results.defender.after.getHP());
 
       int hpDiffValue = 0;
       if( results.attacker.after.getHealth() <= 0 )
@@ -2221,8 +2224,8 @@ public class WallyAI extends ModularAI
       int wallValue = 0;
       if( !ignoreWallValue )
         wallValue = ai.wallFundsValue(gameMap, ai.threatMap, actor.unit, actor.coord, target.unit);
-      //                                 funds "gained"              funds lost     term to favor using cheaper units
-      fundsDelta = (int) (damage*AGGRO_FUNDS_WEIGHT + wallValue)    -   loss    - (int) (actorCost*AGGRO_CHEAPER_WEIGHT);
+      //                                 funds "gained"              funds lost
+      fundsDelta = (int) (damage*AGGRO_FUNDS_WEIGHT + wallValue)    -   loss;
       // This double-values counterdamage on units that aren't safe, but that seems pretty harmless?
     }
   }
