@@ -1286,7 +1286,7 @@ public class WallyAI extends ModularAI
 
       for( ActionPlan plan : postrequisites )
       {
-        var tile = plan.actor.coord;
+        var tile = new XYCoord(plan.actor.unit);
         if( tile != null ) bannedTiles.add(tile);
         tile = plan.action.getMoveLocation();
         if( tile != null ) bannedTiles.add(tile);
