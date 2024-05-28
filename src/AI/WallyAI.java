@@ -1420,7 +1420,7 @@ public class WallyAI extends ModularAI
         if( travelPurpose == TravelPurpose.SUPPLIES )
           bonusPoints = unit.CO.getCost(unit.model);
       }
-      UnitContext actor = new UnitContext(gameMap, unit);
+      UnitContext actor = new UnitContext(gameMap, unit); // Define a UC per coord, so the final plan's UC has the right coordinate on it
       actor.setPath(movePath);
       ArrayList<GameActionSet> actionSets = unit.getPossibleActions(ec.map, movePath, ignoreResident);
       // Since we're moving anyway, might as well try shooting the scenery
@@ -1448,7 +1448,7 @@ public class WallyAI extends ModularAI
               ActionPlan plan = new ActionPlan(ec.whodunit, actor, attack, thisDelta);
               plan.path = movePath;
               plan.goal = goal;
-              plan.purpose = travelPurpose;
+              plan.purpose = TravelPurpose.KILL;
               plan.isAttack = true;
               plan.percentDamage = (int) (results.hpDamage * 10);
               rankedTravelPlans.add(new AbstractMap.SimpleEntry<>(plan, thisDelta));
@@ -1525,10 +1525,10 @@ public class WallyAI extends ModularAI
   {
     ArrayList<ActionPlan> bestPlans = null;
     // Now that we have an ordered list of our travel locations, figure out the best one we can accomplish (potentially requiring eviction of both current and planned residents)
-    while (!rankedTravelPlans.isEmpty())
+    var travelPlans = new ArrayList<>(rankedTravelPlans);
+    for( int i = 0; i < travelPlans.size(); ++i )
     {
-      final Entry<ActionPlan, Integer> entry = rankedTravelPlans.poll();
-      ActionPlan evictingPlan = entry.getKey();
+      ActionPlan evictingPlan = travelPlans.get(i).getKey();
       XYCoord xyc = evictingPlan.action.getMoveLocation();
       ArrayList<ActionPlan> prereqPlans = new ArrayList<>();
 
@@ -1576,29 +1576,29 @@ public class WallyAI extends ModularAI
       if( evictionFailure )
         continue;
 
+      // Prevent reflexive eviction
+      ec.push(unit, evictingPlan);
       for( int evicteeIndex = 0; evicteeIndex < evictees.size(); ++evicteeIndex )
       {
         Unit ev = evictees.get(evicteeIndex);
         ActionPlan evicteeOldPlan = evicteePlans.get(evicteeIndex);
-        // Prevent reflexive eviction
-        ec.push(unit, evictingPlan);
 
         ArrayList<ActionPlan> evictionPlans = null;
         evictionPlans = calcEvictedActions(ec, ev, shouldYeet);
 
-        ec.pop();
         evictionFailure |= null == evictionPlans;
         if( evictionFailure )
-          continue;
+          break;
 
         ActionPlan evicteeNewPlan = evictionPlans.get(0);
         int opportunityCost = evicteeOldPlan.score - evicteeNewPlan.score;
         evictionFailure |= evictingPlan.score < opportunityCost;
         if( evictionFailure )
-          continue;
+          break;
 
         prereqPlans.addAll(evictionPlans);
       } // ~for evictees
+      ec.pop();
 
       if( evictionFailure )
         continue;
