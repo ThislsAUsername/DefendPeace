@@ -149,7 +149,7 @@ public class WallyAI extends ModularAI
     HashMap<ActionPlan, Integer> damageInstances = new HashMap<>();
     ActionPlan toAchieve;
   }
-  private UnitPrediction[][] mapPlan; // TODO: Invalidate if any unit gets trapped/ends up not where we expect - cache unit+destination on offer action
+  private UnitPrediction[][] mapPlan;
   public PredictionMap predMap; // Owns a reference to the above, to expose its contents to Utils
   private HashMap<Unit, ActionPlan> plansByUnit;
   private HashMap<XYCoord, TravelPurpose> travelPlanCoords = new HashMap<>();;
@@ -622,7 +622,7 @@ public class WallyAI extends ModularAI
       }
 
       XYCoord mc = capAction.getMoveLocation();
-      int finalCapAmt = capProgress + unit.getHP(); // TODO: This probably wants a generic util
+      int finalCapAmt = capProgress + new UnitContext(unit).calculateCapturePower();
       boolean willCapture = finalCapAmt >= map.getEnvironment(mc).terrainType.getCaptureThreshold();
       // If there's a threat here, don't assume we can naively capture
       if( !willCapture && 0 < ai.threatMap[mc.x][mc.y].size() )
@@ -1394,7 +1394,6 @@ public class WallyAI extends ModularAI
       Unit currentResident = ec.map.getResident(xyc);
       if( ec.evictionStack.contains(currentResident) )
         continue;
-      // TODO: Hmm.
       boolean currentResidentHasPlans = plansByUnit.containsKey(currentResident);
       if( !currentResidentHasPlans )
         // If whatever's in our landing pad has no plans yet, poke and see if some can be made
