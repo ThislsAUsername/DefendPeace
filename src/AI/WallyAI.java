@@ -1917,9 +1917,23 @@ public class WallyAI extends ModularAI
 
     log("Evaluating Production needs");
     int budget = myArmy.money;
-    final UnitModel infModel = myArmy.cos[0].getUnitModel(UnitModel.TROOP);
-    // TODO: Fix this
-    final int infCost = infModel.costBase;
+    var infPrices = new HashMap<XYCoord, Integer>();
+    final UnitModel infModel  = myArmy.cos[0].getUnitModel(UnitModel.TROOP);
+    final UnitModel tankModel = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT);
+
+    // Set up inf builds on all my props
+    var infFacilities = CPI.getAllFacilitiesFor(infModel);
+    for( var infLoc : infFacilities )
+    {
+      XYCoord infCoord = infLoc.getCoordinates();
+      Commander infBuyer = infLoc.getOwner();
+      int cost = infBuyer.getBuyCost(infModel, infCoord);
+      if( cost > budget )
+        return builds;
+      builds.put(infCoord, infModel);
+      budget -= cost;
+      infPrices.put(infCoord, cost);
+    }
 
     // Get a count of enemy forces.
     Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, predMap);
@@ -1967,47 +1981,61 @@ public class WallyAI extends ModularAI
       }
     }
 
-    // change unit HP->funds
+    Queue<Entry<ModelForCO, Integer>> enemyModels =
+        new PriorityQueue<>(myArmy.cos[0].unitModels.size(), new EntryValueComparator<>());
+
+    // Fill the queue of enemy models, changing HP->funds
     for( Entry<ModelForCO, Integer> ent : enemyUnitHP.entrySet() )
     {
       ModelForCO tmco = ent.getKey();
-      // We don't currently have any huge cost-shift COs, so this isn't a big deal at present.
-      ent.setValue(ent.getValue() * tmco.co.getCost(tmco.um) / 10);
+      var fundsEntry = new AbstractMap.SimpleEntry<ModelForCO, Integer>(tmco, ent.getValue() * tmco.co.getCost(tmco.um) / 10);
+      enemyModels.add(fundsEntry);
     }
-
-    Queue<Entry<ModelForCO, Integer>> enemyModels =
-        new PriorityQueue<>(myArmy.cos[0].unitModels.size(), new EntryValueComparator<>());
-    enemyModels.addAll(enemyUnitHP.entrySet());
 
     // Try to purchase units that will counter the most-represented enemies.
     while (!enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
     {
-      // Find the first (most funds-invested) enemy UnitModel, and remove it. Even if we can't find an adequate counter,
-      // there is not reason to consider it again on the next iteration.
-      ModelForCO enemyToCounter = enemyModels.poll().getKey();
-      double enemyNumber = enemyUnitHP.get(enemyToCounter);
-      log(String.format("Need a counter for %s worth %s", enemyToCounter, enemyNumber));
-      log(String.format("Remaining budget: %s", budget));
+      Entry<ModelForCO, Integer> enemyEntry = enemyModels.poll();
+      ModelForCO enemyToCounter = enemyEntry.getKey();
+      int enemyHP = enemyUnitHP.get(enemyToCounter);
+      if( enemyHP < 0 ) // Just try to counter tanks if the enemy doesn't have anything "interesting"
+      {
+        enemyToCounter = new ModelForCO(enemyToCounter.co, tankModel);
+        enemyHP        = 42;
+      }
+      log(String.format("Need a counter for %s HP of %s (have %s)", enemyHP, enemyToCounter, budget));
 
       // Get our possible options for countermeasures.
+      int costBuffer = 0;
       ArrayList<ModelForCO> availableUnitModels = new ArrayList<>();
-      for( ModelForCO coModel : CPI.availableUnitModels )
-        availableUnitModels.add(coModel);
-      double idealEffect = 0;
-      UnitModel idealCounter = null;
-      XYCoord idealCoord = null;
-      int idealCost = 9001;
-      for( ModelForCO currentCounter : availableUnitModels )
+      for( ModelForCO currentCounter : CPI.availableUnitModels )
       {
         // I only want combat units, since I don't understand transports
         if( currentCounter.um.weapons.isEmpty() )
           continue;
-
+        // Filter stuff I can't afford; this breaks if we have localized discounts, but those don't exist (yet)
         XYCoord coord = getLocationToBuild(gameMap, CPI, currentCounter.um);
         if( null == coord )
           continue;
-        MapLocation loc = gameMap.getLocation(coord);
-        Commander buyer = loc.getOwner();
+        Commander buyer = gameMap.getLocation(coord).getOwner();
+        costBuffer = infPrices.getOrDefault(coord, 0);
+        final int buyCost = buyer.getBuyCost(currentCounter.um, coord);
+        if( buyCost > (budget + costBuffer) )
+          continue;
+        availableUnitModels.add(currentCounter);
+      }
+
+      double idealEffect = 0;
+      ModelForCO idealCounter = null;
+      XYCoord idealCoord = null;
+      int idealCost = 9001;
+      for( ModelForCO currentCounter : availableUnitModels )
+      {
+        XYCoord coord = getLocationToBuild(gameMap, CPI, currentCounter.um);
+        if( null == coord )
+          continue;
+        costBuffer = infPrices.getOrDefault(coord, 0);
+        Commander buyer = gameMap.getLocation(coord).getOwner();
         double effectiveness = findEffectiveness(currentCounter, enemyToCounter);
         if( !(effectiveness > 0) )
           continue;
@@ -2015,17 +2043,10 @@ public class WallyAI extends ModularAI
         final int buyCost = buyer.getBuyCost(currentCounter.um, coord);
         double scaledEfficiency = BANK_EFFICIENCY_FACTOR * effectiveness / buyCost;
 
-        // Calculate a cost buffer to ensure we have enough money left so that no factories sit idle.
-        int costBuffer = (CPI.getNumFacilitiesFor(infModel)) * infCost;
-        if( buyer.getShoppingList(gameMap.getLocation(coord)).contains(infModel) )
-          costBuffer -= infCost;
-
-        if( 0 > costBuffer )
-          costBuffer = 0; // No granting ourselves extra moolah.
-        if( buyCost > (budget - costBuffer) )
+        if( buyCost > (budget + costBuffer) )
           continue;
 
-        log(String.format("    buy %s for %s with effectiveness %s%%? (%s remaining, witholding %s)",
+        log(String.format("    buy %s for %s with effectiveness %s%%? (%s + %s remaining)",
                               currentCounter, buyCost, (int)(100*effectiveness), budget, costBuffer));
 
         boolean bankInstead = false;
@@ -2049,36 +2070,26 @@ public class WallyAI extends ModularAI
         {
           idealEffect = effectiveness;
           idealCoord = coord;
-          idealCounter = currentCounter.um;
+          idealCounter = currentCounter;
           idealCost = buyCost;
         }
       } // ~for( availableUnitModels )
 
-      if( null != idealCounter )
+      if( null == idealCounter )
+        continue;
+      log(String.format("      buying %s at %s", idealCounter, idealCoord));
+      builds.put(idealCoord, idealCounter.um);
+      budget -= idealCost - costBuffer;
+      CPI.removeBuildLocation(gameMap.getLocation(idealCoord));
+
+      int counterHPCountered    = (int) (enemyHP - idealEffect * 10);
+      int counterFundsCountered = counterHPCountered * enemyToCounter.co.getCost(enemyToCounter.um) / 10;
+      if( counterFundsCountered > 0 ) // Push it back in the queue if we haven't fully countered it.
       {
-        log(String.format("      buying %s at %s", idealCounter, idealCoord));
-        builds.put(idealCoord, idealCounter);
-        budget -= idealCost;
-        CPI.removeBuildLocation(gameMap.getLocation(idealCoord));
+        enemyEntry.setValue(counterFundsCountered);
+        enemyModels.add(enemyEntry);
       }
     } // ~while( !enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
-
-    // Build infantry from any remaining facilities.
-    log("Building infantry to fill out my production");
-    MapLocation infLoc = CPI.getLocationToBuild(infModel);
-    while (infLoc != null)
-    {
-      XYCoord infCoord = infLoc.getCoordinates();
-      Commander infBuyer = infLoc.getOwner();
-      int cost = infBuyer.getBuyCost(infModel, infCoord);
-      if (cost > budget)
-        break;
-      builds.put(infCoord, infModel);
-      budget -= cost;
-      CPI.removeBuildLocation(infLoc);
-      log(String.format("  At %s (%s remaining)", infCoord, budget));
-      infLoc = CPI.getLocationToBuild(infModel);
-    }
 
     return builds;
   }
