@@ -1672,6 +1672,8 @@ public class WallyAI extends ModularAI
     {
       if( target == tt.identity.unit )
         continue; // We aren't scared of that which we're about to shoot
+      if( tt.identity.unit.getHP() < 1 )
+        continue; // Dead people can't shoot
 
       boolean viablePaths = canReachHitFromZone(predMap, tt);
       if( !viablePaths )
