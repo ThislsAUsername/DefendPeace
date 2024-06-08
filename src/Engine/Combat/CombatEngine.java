@@ -37,6 +37,11 @@ public class CombatEngine
   {
     return simulateBattleResults(attacker, defender, map, new XYCoord(attackerX, attackerY), calcType);
   }
+  public static BattleSummary simulateBattleResults( UnitContext attacker, UnitContext defender, GameMap map, CalcType calcType )
+  {
+    CombatContext context = new CombatContext(null, map, attacker, defender, calcType);
+    return calculateBattleResults(context, map);
+  }
   public static BattleSummary simulateBattleResults( Unit attacker, Unit defender, GameMap map, XYCoord moveCoord, CalcType calcType )
   {
     UnitContext attackerContext = new UnitContext(map, attacker, null, null, moveCoord);

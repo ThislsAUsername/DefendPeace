@@ -87,8 +87,8 @@ public class JakeMan extends ModularAI
         Arrays.asList(
             new DeployCOUOnTank(army, this),
             new PowerActivator(army, CommanderAbility.PHASE_TURN_START),
-            new CapChainActuator(army, this),
-            new CaptureFinisher(army, this),
+            new CapChainActuator<JakeMan>(army, this),
+            new CaptureFinisher<JakeMan>(army, this),
             new GenerateThreatMap(army, this), // FreeRealEstate and Travel need this, and NHitKO/building do too because of eviction
 
             new PowerActivator(army, CommanderAbility.PHASE_BUY),
@@ -235,15 +235,13 @@ public class JakeMan extends ModularAI
   }
   
   // Try to get unit value by capture or attack
-  public static class GetFreeDudes extends UnitActionFinder
+  public static class GetFreeDudes extends UnitActionFinder<JakeMan>
   {
     private static final long serialVersionUID = 1L;
-    private final JakeMan ai;
     private final boolean canEvict, canStepOnProduction;
     public GetFreeDudes(Army co, JakeMan ai, boolean canEvict, boolean canStepOnProduction)
     {
       super(co, ai);
-      this.ai = ai;
       this.canEvict = canEvict;
       this.canStepOnProduction = canStepOnProduction;
     }
@@ -317,14 +315,12 @@ public class JakeMan extends ModularAI
   }
 
   // If no attack/capture actions are available now, just move around
-  public static class Travel extends UnitActionFinder
+  public static class Travel extends UnitActionFinder<JakeMan>
   {
     private static final long serialVersionUID = 1L;
-    private final JakeMan ai;
     public Travel(Army co, JakeMan ai)
     {
       super(co, ai);
-      this.ai = ai;
     }
 
     @Override

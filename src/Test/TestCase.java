@@ -90,6 +90,7 @@ public abstract class TestCase
   /** Attempts to execute the given action. Returns true if it succeeds, false otherwise. */
   protected static boolean performGameAction( GameAction action, GameInstance game )
   {
+    if( null == action ) return false;
     GameEventQueue sequence = action.getEvents(game.gameMap);
     if( sequence.size() == 0 ) return false;
     performEvents(game, sequence);

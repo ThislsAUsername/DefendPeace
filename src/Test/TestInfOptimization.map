@@ -1,0 +1,9 @@
+  GR  GR  GR  GR  RD  GR  FR
+  FR  GR  CT  CT  RD  FC  GR
+  GR  GR  FR  FR  GR  SE  SE
+  GR  SE  SE  SE  SE  SE  SE
+  SE  SE 1HQ 2HQ  SE  SE  SE
+team, unit type, x, y
+1, infantry, 2, 1
+2, infantry, 5, 1
+2, infantry, 5, 4

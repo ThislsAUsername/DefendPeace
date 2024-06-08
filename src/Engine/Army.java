@@ -91,7 +91,7 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   @Override
   public GameEventQueue receiveTurnInitEvent(MapMaster map, Army army, int turn)
   {
-    if( null != aiController )
+    if( this == army && null != aiController )
       aiController.initTurn(myView);
 
     return null;
@@ -100,7 +100,7 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   @Override
   public GameEventQueue receiveTurnEndEvent(Army army, int turn)
   {
-    if( aiController != null )
+    if( this == army && aiController != null )
       aiController.endTurn();
 
     return null;
