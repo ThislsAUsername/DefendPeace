@@ -208,6 +208,8 @@ public abstract class RuinedCommander extends DeployableCommander
 
     for( Unit cou : COUs )
     {
+      if( !army.myView.isLocationValid(cou.x, cou.x) )
+        continue; // Loaded/dead COUs shouldn't boost the top left, derp
       int distance = uc.coord.getDistance(cou);
       if( distance <= zoneRadius )
         return true;
