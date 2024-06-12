@@ -20,9 +20,9 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.UnitMods.UnitModList;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitModifierWithDefaults;
-import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
+import Terrain.MapPerspective;
 import Terrain.TerrainType;
 import UI.GameOverlay;
 import UI.UIUtils.Faction;
@@ -311,7 +311,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
     return 20;
   }
 
-  public ArrayList<GameOverlay> getMyOverlays(GameMap gameMap, boolean amIViewing)
+  public ArrayList<GameOverlay> getMyOverlays(MapPerspective gameMap, boolean amIViewing)
   {
     ArrayList<GameOverlay> overlays = new ArrayList<GameOverlay>();
     return overlays;

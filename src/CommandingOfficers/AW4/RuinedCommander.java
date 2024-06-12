@@ -30,6 +30,7 @@ import Engine.StateTrackers.StateTracker;
 import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.GameMap;
 import Terrain.MapMaster;
+import Terrain.MapPerspective;
 import UI.GameOverlay;
 import Units.Unit;
 import Units.UnitContext;
@@ -217,7 +218,7 @@ public abstract class RuinedCommander extends DeployableCommander
 
     return false;
   }
-  public ArrayList<GameOverlay> getMyOverlays(GameMap gameMap, boolean amIViewing)
+  public ArrayList<GameOverlay> getMyOverlays(MapPerspective gameMap, boolean amIViewing)
   {
     Color fill = new Color(0, 0, 0, 100);
 
@@ -228,6 +229,10 @@ public abstract class RuinedCommander extends DeployableCommander
     for( Unit cou : COUs )
     {
       if( COUsLost.contains(cou) )
+        continue;
+      if( !amIViewing && cou.model.hidden && !gameMap.isConfirmedVisible(cou) )
+        continue;
+      if( !gameMap.isLocationValid(cou.x, cou.x) )
         continue;
 
       final XYCoord coCoord = new XYCoord(cou);
