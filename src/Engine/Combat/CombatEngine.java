@@ -60,6 +60,7 @@ public class CombatEngine
     uc.map = map;
     uc.setPath(path);
     uc.chooseWeapon(target, battleRange);
+    CombatContext.setTowerCounts(map, uc);
     return StrikeParams.buildStrikeParams(uc, target, map, battleRange, targetCoord, false);
   }
 
