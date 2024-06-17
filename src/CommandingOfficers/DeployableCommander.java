@@ -37,7 +37,7 @@ public abstract class DeployableCommander extends Commander
   /** The number of COUs you can have active at once */
   public abstract int getCOUCount();
   public GameEventQueue onCOULost(Unit minion) { return null; };
-  public char getCOUMark() {return 'C';};
+  public char getCOUMark() {return '!';};
   public int deployCostPercent = 0;
   /** If the unit type matches any flag in this mask, it can be my COU */
   public long canDeployMask = Long.MAX_VALUE;
