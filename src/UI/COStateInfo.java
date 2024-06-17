@@ -22,10 +22,10 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
 
   public COStateInfo(GameMap map, Army thisArmy)
   {
-    identifier = thisArmy.cos[0].coInfo.name;
+    identifier = thisArmy.cos[0].coInfo.getFullName();
     // Start at 1 so we don't double-add the first one
     for( int i = 1; i < thisArmy.cos.length; ++i )
-      identifier += ", " + thisArmy.cos[i].coInfo.name;
+      identifier += ", " + thisArmy.cos[i].coInfo.getFullName();
 
     // map-based info
     for( int w = 0; w < map.mapWidth; ++w )
@@ -119,7 +119,7 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
     sb.append("Unit funds:")   .append("\n");
     for( Commander co : currentEnergy.keySet() )
     {
-      sb.append(co.coInfo.name + " energy:").append("\n");
+      sb.append(co.coInfo.getFullName() + " energy:").append("\n");
       sb.append(" - Next Ability:") .append("\n");
     }
 

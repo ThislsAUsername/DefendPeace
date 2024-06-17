@@ -36,6 +36,13 @@ public abstract class CommanderInfo implements Serializable
   {
   }
 
+  public String getFullName()
+  {
+    if( discriminator.length() > 0 )
+      return name + " (" + discriminator + ")";
+    return name;
+  }
+
   public static class InfoPage implements Serializable
   {
     private static final long serialVersionUID = 1L;
