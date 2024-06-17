@@ -767,7 +767,7 @@ public class SpriteLibrary
   {
     CommanderSpriteSet css = null;
 
-    String cmdrKey = whichCO.name + whichCO.discriminator;
+    String cmdrKey = whichCO.getFullName();
     if(!coSpriteSets.containsKey(cmdrKey))
     {
       // We don't have it, so we need to load it.
