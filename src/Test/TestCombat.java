@@ -9,14 +9,18 @@ import Engine.GameInstance;
 import Engine.GamePath;
 import Engine.GameScenario;
 import Engine.Utils;
+import Engine.XYCoord;
 import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Terrain.MapLibrary;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
+import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitModel;
+import lombok.var;
 
 public class TestCombat extends TestCase
 {
@@ -28,12 +32,16 @@ public class TestCombat extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
+    setupTest("Firing Range");
+  }
+  private void setupTest(String mapName)
+  {
     GameScenario scn = new GameScenario();
     testCo1 = new Strong(scn.rules);
     testCo2 = new Patch(scn.rules);
     Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
-    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, MapLibrary.getByName(mapName));
     testGame = new GameInstance(cos, testMap);
   }
 
@@ -49,6 +57,7 @@ public class TestCombat extends TestCase
     testPassed &= validate(testMoveAttack(), "  Move-Attack test failed.");
     testPassed &= validate(testCounterAttack(), "  Counterattack test failed.");
     testPassed &= validate(testKillLastUnit(), "  Last-unit death test failed.");
+    testPassed &= validate(testDemolition(), "  Demolition test failed.");
     return testPassed;
   }
 
@@ -236,6 +245,35 @@ public class TestCombat extends TestCase
       }
     }
     testPassed &= validate( hasDefeatEvent, "    No ArmyDefeatEvent generated when losing final unit!");
+
+    return testPassed;
+  }
+
+  /** Test killing a meteor. */
+  private boolean testDemolition()
+  {
+    setupTest("Test Range");
+    Unit ship = addUnit(testMap, testCo1, UnitModel.SIEGE | UnitModel.SEA, 0, 3);
+    Unit arty = addUnit(testMap, testCo1, UnitModel.SIEGE,                 1, 3);
+    Unit tank = addUnit(testMap, testCo1, UnitModel.ASSAULT,               3, 3);
+    var target = new XYCoord(4, 3);
+    MapLocation meteor = testMap.getLocation(target);
+    int lastHP = meteor.durability;
+
+    turn(testGame);
+    boolean testPassed = true;
+
+    performGameAction(new BattleLifecycle.DemolitionAction(testMap, ship, GamePath.stayPut(ship), target),
+        testGame);
+    testPassed &= validate(meteor.durability < lastHP, "    BShip dealt no damage.");
+    lastHP = meteor.durability;
+    performGameAction(new BattleLifecycle.DemolitionAction(testMap, tank, GamePath.stayPut(tank), target),
+        testGame);
+    testPassed &= validate(meteor.durability < lastHP, "    Tank dealt no damage.");
+    lastHP = meteor.durability;
+    performGameAction(new BattleLifecycle.DemolitionAction(testMap, arty, GamePath.stayPut(arty), target),
+        testGame);
+    testPassed &= validate(meteor.getEnvironment().terrainType == TerrainType.GRASS, "    Artillery didn't finish it off.");
 
     return testPassed;
   }
