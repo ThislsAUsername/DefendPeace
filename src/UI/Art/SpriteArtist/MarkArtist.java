@@ -14,22 +14,20 @@ import Engine.StateTrackers.StateTracker;
 import UI.UnitMarker;
 import UI.UnitMarker.MarkData;
 import Units.Unit;
+import lombok.var;
 
 public class MarkArtist
 {
-  /**
-   * Draws any marks for the unit or the terrain it's on, from Commanders or StateTrackers
-   * <p>Assumes the unit is on the coordinate it thinks it's on; don't use this for animations
-   */
-  public static void drawMark(Graphics g, GameInstance game, Army viewer, Unit unit, int animIndex)
+  public static ArrayList<BufferedImage> getMarksForUnit(Graphics g, GameInstance game, Army viewer, Unit unit, int animIndex)
   {
     final MarkingCache cache = MarkingCache.instance(game);
-    final XYCoord xyc = new XYCoord(unit);
-
     ArrayList<MarkData> markList = cache.getMarks(viewer, unit);
-    markList.addAll(cache.getMarks(viewer, xyc));
 
-    drawMark(g, markList, animIndex, xyc);
+    var output = new ArrayList<BufferedImage>();
+    for( var mark : markList )
+      output.add(SpriteLibrary.getColoredMapTextSprites(mark.color).get(mark.mark));
+
+    return output;
   }
   public static void drawMark(Graphics g, GameInstance game, Army viewer, XYCoord coord, int animIndex)
   {
@@ -51,7 +49,8 @@ public class MarkArtist
 
       BufferedImage symbol = SpriteLibrary.getColoredMapTextSprites(mark.color).get(mark.mark);
       // draw in the upper right corner
-      g.drawImage(symbol, drawX + ((SpriteLibrary.baseSpriteSize) / 2), drawY, symbol.getWidth(), symbol.getHeight(), null);    }
+      g.drawImage(symbol, drawX + ((SpriteLibrary.baseSpriteSize) / 2), drawY, symbol.getWidth(), symbol.getHeight(), null);
+    }
   }
 
   public static class MarkingCache implements CacheInvalidationListener

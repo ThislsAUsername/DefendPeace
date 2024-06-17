@@ -536,13 +536,10 @@ public class SpriteMapView extends MapView
           Unit resident = gameMap.getLocation(x, y).getResident();
           // If an action is being considered, draw the active unit later, not now.
           if( null == actors || !actors.contains(resident) )
-          {
             unitArtist.drawUnitIcons(g, gameMap, resident, resident.x, resident.y, animIndex);
-            MarkArtist.drawMark(g, myGame, viewer, resident, animIndex);
-          }
         }
-        else
-          MarkArtist.drawMark(g, myGame, viewer, new XYCoord(x, y), animIndex);
+        // Always draw terrain marks
+        MarkArtist.drawMark(g, myGame, viewer, new XYCoord(x, y), animIndex);
       }
     }
   }
