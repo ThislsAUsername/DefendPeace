@@ -738,7 +738,7 @@ public class AWBWUnits extends UnitModelScheme
   public AWBWUnitModel CruiserModel()
   {
     var b = AWBWUnitModel.builder();
-    b.role(UnitModel.SIEGE | UnitModel.SURFACE_TO_AIR | UnitModel.SHIP | UnitModel.SEA);
+    b.role(UnitModel.SURFACE_TO_AIR | UnitModel.TRANSPORT | UnitModel.SHIP | UnitModel.SEA);
     
     b.costBase(18000);
     b.abilityPowerValue(16);
