@@ -83,6 +83,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.GE.Javier.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Sturm.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.VonBolt.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.IDS.TabithaBW.getInfo() );
   }
 
   public static class NotACO extends Commander
