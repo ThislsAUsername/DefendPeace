@@ -216,7 +216,7 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
    * Calculates any relevant map highlight
    * @param amIViewing Whether to include information that's for my own Army's eyes only
    */
-  public ArrayList<GameOverlay> getMyOverlays(GameMap gameMap, boolean amIViewing)
+  public ArrayList<GameOverlay> getMyOverlays(MapPerspective gameMap, boolean amIViewing)
   {
     ArrayList<GameOverlay> overlays = new ArrayList<GameOverlay>();
     for( Commander co : cos )

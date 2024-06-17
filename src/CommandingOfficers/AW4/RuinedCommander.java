@@ -30,6 +30,7 @@ import Engine.StateTrackers.StateTracker;
 import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.GameMap;
 import Terrain.MapMaster;
+import Terrain.MapPerspective;
 import UI.GameOverlay;
 import Units.Unit;
 import Units.UnitContext;
@@ -208,6 +209,8 @@ public abstract class RuinedCommander extends DeployableCommander
 
     for( Unit cou : COUs )
     {
+      if( !army.myView.isLocationValid(cou.x, cou.x) )
+        continue; // Loaded/dead COUs shouldn't boost the top left, derp
       int distance = uc.coord.getDistance(cou);
       if( distance <= zoneRadius )
         return true;
@@ -215,7 +218,7 @@ public abstract class RuinedCommander extends DeployableCommander
 
     return false;
   }
-  public ArrayList<GameOverlay> getMyOverlays(GameMap gameMap, boolean amIViewing)
+  public ArrayList<GameOverlay> getMyOverlays(MapPerspective gameMap, boolean amIViewing)
   {
     Color fill = new Color(0, 0, 0, 100);
 
@@ -226,6 +229,10 @@ public abstract class RuinedCommander extends DeployableCommander
     for( Unit cou : COUs )
     {
       if( COUsLost.contains(cou) )
+        continue;
+      if( !amIViewing && cou.model.hidden && !gameMap.isConfirmedVisible(cou) )
+        continue;
+      if( !gameMap.isLocationValid(cou.x, cou.x) )
         continue;
 
       final XYCoord coCoord = new XYCoord(cou);
