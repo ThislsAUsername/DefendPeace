@@ -431,7 +431,7 @@ public class JakeMan extends ModularAI
     {
       shouldResupply = unit.getHealth() <= UNIT_HEAL_THRESHOLD;
       shouldResupply |= unit.fuel <= UNIT_REFUEL_THRESHOLD
-          * toClosestStation.getFuelCost(unit, gameMap);
+          * toClosestStation.getMoveCost(unit, gameMap);
       shouldResupply |= unit.ammo >= 0 && unit.ammo <= unit.model.maxAmmo * UNIT_REARM_THRESHOLD;
     }
 
