@@ -28,7 +28,7 @@ public class Javier extends AW3Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Javier", UIUtils.SourceGames.AW3, UIUtils.GE);
+      super("Javier", UIUtils.SourceGames.AW3, UIUtils.GE, "");
       infoPages.add(new InfoPage(
             "Javier\n"
           + "A Green Earth CO who values chivalry and honor above all else. Often commands his units to charge.\n"

@@ -27,7 +27,7 @@ public class Andy extends AW3Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Andy_3", UIUtils.SourceGames.AW3, UIUtils.OS);
+      super("Andy", UIUtils.SourceGames.AW3, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Andy (AWDS)\n"
           + "A whiz with a wrench, this mechanical boy wonder earned fame as a hero who saved Macro Land.\n"

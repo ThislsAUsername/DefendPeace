@@ -95,7 +95,7 @@ public class GameEndAnimation extends GameAnimation
       yPos = yLoc;
 
       // Build the VICTORY/DEFEAT text.
-      BufferedImage coMug = SpriteLibrary.getCommanderSprites(army.cos[0].coInfo.name).eyes;
+      BufferedImage coMug = SpriteLibrary.getCommanderSprites(army.cos[0].coInfo).eyes;
       BufferedImage resultText = (army.isDefeated)? SpriteLibrary.getGameOverDefeatText() : SpriteLibrary.getGameOverVictoryText();
 
       // Make a panel image large enough to fill the screen horizontally, and frame the CO portrait vertically.
@@ -120,7 +120,7 @@ public class GameEndAnimation extends GameAnimation
       int currentMugShift = -1 * mugShiftPerBody * (army.cos.length - 1);
       for( int i = army.cos.length - 1; i >= 0; --i )
       {
-        coMug = SpriteLibrary.getCommanderSprites(army.cos[i].coInfo.name).eyes;
+        coMug = SpriteLibrary.getCommanderSprites(army.cos[i].coInfo).eyes;
         g.drawImage(coMug, xPos + currentMugShift, 1, null);
         currentMugShift += mugShiftPerBody;
       }

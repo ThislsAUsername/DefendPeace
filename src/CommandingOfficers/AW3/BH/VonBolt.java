@@ -31,7 +31,7 @@ public class VonBolt extends AW3Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Von Bolt", UIUtils.SourceGames.AW3, UIUtils.BH);
+      super("Von Bolt", UIUtils.SourceGames.AW3, UIUtils.BH, "");
       infoPages.add(new InfoPage(
             "Von Bolt (AW3)\n"
           + "The new commander-in-chief of the Black Hole Forces. An old man who has been alive a very long time.\n"

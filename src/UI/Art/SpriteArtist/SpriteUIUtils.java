@@ -498,11 +498,11 @@ public class SpriteUIUtils
     if( coInfos.size() == 0 )
       return SpriteLibrary.createTransparentSprite(1, 1);
     if( coInfos.size() == 1 )
-      return SpriteLibrary.getCommanderSprites(coInfos.get(0).name).head;
+      return SpriteLibrary.getCommanderSprites(coInfos.get(0)).head;
 
     ArrayList<BufferedImage> frames = new ArrayList<>(coInfos.size());
     for( CommanderInfo ci : coInfos )
-      frames.add(SpriteLibrary.getCommanderSprites(ci.name).head);
+      frames.add(SpriteLibrary.getCommanderSprites(ci).head);
 
     // aggregate sizing
     BufferedImage coMug = frames.get(0);

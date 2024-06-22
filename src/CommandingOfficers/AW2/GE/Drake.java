@@ -31,7 +31,7 @@ public class Drake extends AW2Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Drake_2", UIUtils.SourceGames.AW2, UIUtils.GE);
+      super("Drake", UIUtils.SourceGames.AW2, UIUtils.GE);
       infoPages.add(new InfoPage(
             "Drake (AW2)\n"
           + "A bighearted former pirate, he often calms the waters between Jess and Eagle.\n"

@@ -28,7 +28,7 @@ public class Javier extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Javier_BW", UIUtils.SourceGames.AWBW, UIUtils.GE);
+      super("Javier", UIUtils.SourceGames.AWBW, UIUtils.GE);
       infoPages.add(new InfoPage(
             "Javier (AWBW)\n"
           + "Units gain +20% defense against indirect units. Comtowers grant all units additional +10% defense.\n"

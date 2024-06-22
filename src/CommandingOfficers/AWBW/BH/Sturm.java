@@ -35,7 +35,7 @@ public class Sturm extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sturm_BW", UIUtils.SourceGames.AWBW, UIUtils.BH);
+      super("Sturm", UIUtils.SourceGames.AWBW, UIUtils.BH);
       infoPages.add(new InfoPage(
             "Sturm (AWBW)\n"
           + "Movement cost over all terrain is reduced to 1, except in Snow. Units lose -20% attack and gain +20% defense.\n"));

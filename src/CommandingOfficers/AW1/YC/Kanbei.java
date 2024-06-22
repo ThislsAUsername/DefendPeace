@@ -28,7 +28,7 @@ public class Kanbei extends AW1Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Kanbei_1", UIUtils.SourceGames.AW1, UIUtils.YC);
+      super("Kanbei", UIUtils.SourceGames.AW1, UIUtils.YC);
       infoPages.add(new InfoPage(
             "Kanbei (AW1)\n"
           + "Fashions himself a modern samurai.\n"

@@ -30,7 +30,7 @@ public class Drake extends AW1Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Drake_1", UIUtils.SourceGames.AW1, UIUtils.GE);
+      super("Drake", UIUtils.SourceGames.AW1, UIUtils.GE);
       infoPages.add(new InfoPage(
             "Drake (AW1)\n"
           + "A relaxed and carefree swashbuckler.\n"

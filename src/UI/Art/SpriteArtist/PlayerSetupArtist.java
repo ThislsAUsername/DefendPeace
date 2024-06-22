@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderLibrary;
+import CommandingOfficers.DefendPeace.RoseThorn.Strong;
 import Engine.IController;
 import Terrain.MapInfo;
 import UI.PlayerSetupController;
@@ -194,7 +195,7 @@ public class PlayerSetupArtist
   {
     // A couple of helper quantities.
     private static int textVBuffer = 2;
-    private static int portraitPx = SpriteLibrary.getCommanderSprites( "STRONG" ).head.getHeight(); // Faces are square.
+    private static int portraitPx = SpriteLibrary.getCommanderSprites( Strong.getInfo() ).head.getHeight(); // Faces are square.
     private static final int EXPECTED_TEXT_LENGTH = 9; // Reasonable expected length for Commander, color, faction, and AI names.
 
     // Total horizontal panel space, sans scaling.
@@ -205,6 +206,7 @@ public class PlayerSetupArtist
         + /*portrait buffers*/ 2 + SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight() + textVBuffer*2 + /*bottom border*/1;
 
     private String commanderName;
+    ArrayList<CommanderInfo> commanderList = new ArrayList<>();
     private String colorName;
     private String factionName;
     private boolean flipUnit = false;
@@ -243,7 +245,7 @@ public class PlayerSetupArtist
       for( CommanderInfo coi : currentCOList )
         playerCoNames += coi.name;
       // Keep track of which things need to be redrawn.
-      boolean cmdrChanged = !playerCoNames.equals(commanderName);
+      boolean cmdrChanged = !(commanderList.size() == currentCOList.size() && commanderList.containsAll(currentCOList));
       boolean colorChanged = !UIUtils.getPaletteName(info.getCurrentColor()).equals(colorName);
       boolean factionChanged = !info.getCurrentFaction().name.equals(factionName);
       boolean flipChanged = flipUnit != info.flipUnits;
@@ -255,6 +257,8 @@ public class PlayerSetupArtist
       {
         // Update saved values.
         commanderName = playerCoNames;
+        commanderList.clear();
+        commanderList.addAll(currentCOList);
         colorName = UIUtils.getPaletteName(info.getCurrentColor());
         factionName = info.getCurrentFaction().name;
 

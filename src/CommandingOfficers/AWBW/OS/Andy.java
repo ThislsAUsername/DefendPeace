@@ -27,7 +27,7 @@ public class Andy extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Andy_BW", UIUtils.SourceGames.AWBW, UIUtils.OS);
+      super("Andy", UIUtils.SourceGames.AWBW, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Andy (AWBW)\n"
           + "No day-to-day abilities.\n"));

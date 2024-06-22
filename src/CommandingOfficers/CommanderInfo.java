@@ -14,13 +14,19 @@ public abstract class CommanderInfo implements Serializable
   public final String name;
   public final SourceGames game;
   public final COSpriteSpec baseFaction;
+  public final String discriminator;
   public ArrayList<InfoPage> infoPages;
 
   public CommanderInfo(String name, SourceGames game, COSpriteSpec f)
   {
+    this(name, game, f, game.discriminator);
+  }
+  public CommanderInfo(String name, SourceGames game, COSpriteSpec f, String discriminator)
+  {
     this.name = name;
     this.game = game;
     this.baseFaction = f;
+    this.discriminator = discriminator;
     infoPages = new ArrayList<InfoPage>();
   }
 
@@ -28,6 +34,13 @@ public abstract class CommanderInfo implements Serializable
 
   public void injectUnits(GameReadyModels grms)
   {
+  }
+
+  public String getFullName()
+  {
+    if( discriminator.length() > 0 )
+      return name + " (" + discriminator + ")";
+    return name;
   }
 
   public static class InfoPage implements Serializable

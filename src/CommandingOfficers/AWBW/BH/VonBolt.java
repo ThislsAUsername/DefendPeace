@@ -31,7 +31,7 @@ public class VonBolt extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Von Bolt_BW", UIUtils.SourceGames.AWBW, UIUtils.BH);
+      super("Von Bolt", UIUtils.SourceGames.AWBW, UIUtils.BH);
       infoPages.add(new InfoPage(
             "Von Bolt (AWBW)\n"
           + "Units gain +10% attack and +10% defense.\n"));

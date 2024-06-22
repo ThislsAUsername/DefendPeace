@@ -31,7 +31,7 @@ public class Olaf extends AW3Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Olaf_3", UIUtils.SourceGames.AW3, UIUtils.BM);
+      super("Olaf", UIUtils.SourceGames.AW3, UIUtils.BM);
       infoPages.add(new InfoPage(
             "Olaf (AW3)\n"
           + "A pompous braggart, but his tactical prowess has earned him the respect of his peers.\n"

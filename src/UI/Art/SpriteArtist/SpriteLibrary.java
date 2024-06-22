@@ -3,6 +3,7 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -12,11 +13,13 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderInfo;
 import Terrain.MapLocation;
 import Terrain.TerrainType;
 import UI.UIUtils;
 import UI.UIUtils.COSpriteSpec;
 import UI.UIUtils.Faction;
+import UI.UIUtils.SourceGames;
 import Units.Unit;
 import Units.UnitModel;
 
@@ -609,7 +612,7 @@ public class SpriteLibrary
       overlay.colorize(UIUtils.defaultMapColors, UIUtils.getMapUnitColors(co.myColor).paletteColors);
 
       // Draw the Commander's mug on top of the overlay.
-      BufferedImage coMug = getCommanderSprites(co.coInfo.name).eyes;
+      BufferedImage coMug = getCommanderSprites(co.coInfo).eyes;
       int mugW = coMug.getWidth();
       Graphics g = overlay.getFrame(0).getGraphics();
       g.drawImage(coMug, mugW, 1, -mugW, coMug.getHeight(), null);
@@ -760,30 +763,65 @@ public class SpriteLibrary
 
   private static HashMap<String, CommanderSpriteSet> coSpriteSets = new HashMap<String, CommanderSpriteSet>();
 
-  public static CommanderSpriteSet getCommanderSprites( String whichCo )
+  public static CommanderSpriteSet getCommanderSprites( CommanderInfo whichCO )
   {
     CommanderSpriteSet css = null;
 
-    if(!coSpriteSets.containsKey(whichCo))
+    String cmdrKey = whichCO.getFullName();
+    if(!coSpriteSets.containsKey(cmdrKey))
     {
       // We don't have it, so we need to load it.
-      String baseFileName = Engine.Driver.JAR_DIR + "res/co/" + whichCo;
-      String basePlaceholder = Engine.Driver.JAR_DIR + "res/co/placeholder";
+      String formatBase = Engine.Driver.JAR_DIR + "res/co/"+whichCO.name+"%s%s.png";
 
-      // Find out if the images exist. If they don't, use placeholders.
-      String bodyString = ((new File(baseFileName + ".png").isFile())? baseFileName : basePlaceholder) + ".png";
-      String headString = ((new File(baseFileName + "_face.png").isFile())? baseFileName : basePlaceholder) + "_face.png";
-      String eyesString = ((new File(baseFileName + "_eyes.png").isFile())? baseFileName : basePlaceholder) + "_eyes.png";
+      String discrim = (whichCO.discriminator.length() > 0 ? "_" : "") + whichCO.discriminator;
+      BufferedImage body = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, discrim, ""));
+      if( null == body )                      body = getCommanderSpriteAlt(formatBase, discrim, "");
+      BufferedImage head = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, discrim, "_face"));
+      if( null == head )                      head = getCommanderSpriteAlt(formatBase, discrim, "_face");
+      BufferedImage eyes = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, discrim, "_eyes"));
+      if( null == eyes )                      eyes = getCommanderSpriteAlt(formatBase, discrim, "_eyes");
 
-      BufferedImage body = createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(bodyString));
-      BufferedImage head = createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(headString));
-      BufferedImage eyes = createBlankImageIfNull(SpriteLibrary.loadSpriteSheetFile(eyesString));
-
-      coSpriteSets.put(whichCo, new CommanderSpriteSet(body, head, eyes));
+      coSpriteSets.put(cmdrKey, new CommanderSpriteSet(body, head, eyes));
     }
 
-    css = coSpriteSets.get(whichCo);
+    css = coSpriteSets.get(cmdrKey);
 
     return css;
+  }
+  private static BufferedImage getCommanderSpriteAlt(String format, String realDiscrim, String mugType)
+  {
+    String formatPlaceholder = Engine.Driver.JAR_DIR + "res/co/placeholder%s.png";
+
+    // Try all the possible discriminators to see if we get an alternate. If no, use a placeholder instead.
+    BufferedImage output = SpriteLibrary.loadSpriteSheetFile(String.format(formatPlaceholder, mugType));
+    for( SourceGames game : SourceGames.values() )
+    {
+      String gameDiscrim = (game.discriminator.length() > 0 ? "_" : "") + game.discriminator;
+      BufferedImage temp = SpriteLibrary.loadSpriteSheetFile(String.format(format, gameDiscrim, mugType));
+      if( null != temp )
+      {
+        output = temp;
+        break;
+      }
+    }
+
+    // Apply the CO's discriminator text as a "watermark"
+    Map<Character, BufferedImage> allChars = SpriteLibrary.getColoredMapTextSprites(Color.WHITE);
+    int charSize = allChars.get('A').getWidth(); // They're square
+
+    Graphics2D graphics = output.createGraphics();
+    int maxIter = realDiscrim.length();
+    int drawX = output.getWidth()  - charSize*(maxIter);
+    int drawY = output.getHeight() - charSize;
+    for( int i = 0; i < maxIter; ++i )
+    {
+      char foundChar = realDiscrim.charAt(i);
+      BufferedImage letter = allChars.getOrDefault(foundChar, null);
+      if( null != letter )
+        graphics.drawImage(letter, drawX, drawY, null);
+      drawX += charSize;
+    }
+
+    return output;
   }
 }

@@ -32,7 +32,7 @@ public class Rachel extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Rachel_BW", UIUtils.SourceGames.AWBW, UIUtils.OS);
+      super("Rachel", UIUtils.SourceGames.AWBW, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Rachel (AWBW)\n"
           + "Units repair +1 additional HP (note: liable for costs).\n"));

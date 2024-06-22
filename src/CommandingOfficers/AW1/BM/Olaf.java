@@ -26,7 +26,7 @@ public class Olaf extends AW1Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Olaf_1", UIUtils.SourceGames.AW1, UIUtils.BM);
+      super("Olaf", UIUtils.SourceGames.AW1, UIUtils.BM);
       infoPages.add(new InfoPage(
             "Olaf (AW1)\n"
           + "Plans often go awry, but he’s deadly serious.\n"
