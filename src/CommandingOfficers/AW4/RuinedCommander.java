@@ -293,7 +293,7 @@ public abstract class RuinedCommander extends DeployableCommander
   KillCountsTracker killCounts;
   public static enum VeteranRank
   {
-    NONE('\0', 0, 0), LEVEL1('I', 5, 0), LEVEL2('%', 10, 0), LEVEL3('V', 20, 20);
+    NONE('\0', 0, 0), LEVEL1('I', 5, 0), LEVEL2('Ⅱ', 10, 0), LEVEL3('V', 20, 20);
     public final char mark;
     public final int attack, defense;
     private VeteranRank(char mark, int attack, int defense)

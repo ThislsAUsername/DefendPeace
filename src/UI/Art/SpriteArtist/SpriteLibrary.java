@@ -30,7 +30,7 @@ public class SpriteLibrary
 
   public static final int baseIconSize = 8;
 
-  public static final String charKey = "%./-~,;:!?'&()_";
+  public static final String charKey = "%./-~,;:!?'&()_+Ⅱ";
   public static final String DEFAULT_FACTION = "Thorn";
 
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
