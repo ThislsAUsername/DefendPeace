@@ -80,6 +80,10 @@ public abstract class COUableCommander extends DeployableCommander
   }
 
 
+  /**
+   * An AWBW-standard power that simulates applying (part of) the COU/boost stats to your whole army.<p>
+   * Called "non-stacking" because this boost doesn't stack with the D2D "COU" boost.
+   */
   protected static class NonStackingBoost extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
