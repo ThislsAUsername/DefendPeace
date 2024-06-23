@@ -669,7 +669,7 @@ public class JakeMan extends ModularAI
 
             // Convert to abstract value
             int extraLoss = 0;
-            if( loss >= 1 && unit.getHealth() == UnitModel.MAXIMUM_HEALTH )
+            if( loss >= 10 && unit.getHealth() == UnitModel.MAXIMUM_HEALTH )
               extraLoss += STAY_UNHURT_BIAS;
             if( loss >= unit.getHealth() )
               extraLoss += STAY_ALIVE_BIAS;
