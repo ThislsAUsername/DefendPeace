@@ -234,26 +234,26 @@ public class UnitSpriteSet
   /**
    * Draw icons detailing any relevant unit information.
    * Icons are arranged as follows:
-   * Upper Left: Status icons, e.g. when stunned or low on fuel or ammo.
-   * Upper Right: Special markings, usually applied by Commander abilities.
-   * Lower Right: Activity icons, e.g. transporting units or capturing property.
-   * Lower Left: HP when not at full health (this can extend to the lower right if the unit has >10 HP).
+   * Lower Left: HP when not at 10 (this can extend to the lower right if the unit has >10 HP).
+   * Lower Right: Status/activity icons (ammo/fuel/stun/transport/capture), Commander markings, the ones' digit of HP>10.
+   * NOTE: Upper right is reserved for terrain marks, to disambiguate them from unit marks.
    */
   public void drawUnitIcons(Graphics g, GameInstance game, MapPerspective map, Unit u, int animIndex, int drawX, int drawY)
   {
     ArrayList<BufferedImage> unitIcons = new ArrayList<BufferedImage>();
 
-    // Draw the unit's HP if it is not at full health.
-    if( u.getHealth() != UnitModel.MAXIMUM_HEALTH )
+    // Draw the unit's HP if it is not at the "assumed" maximum.
+    int guiHP = u.getHP();
+    if( guiHP != 10 )
     {
+      // Unconditionally paint our highest-order digit
       BufferedImage num;
-      int guiHP = u.getHP();
-      if( u.getHealth() > UnitModel.MAXIMUM_HEALTH )
+      if( guiHP > 10 )
       {
         int tensDigit = Math.min(guiHP / 10, 9);
         num = SpriteLibrary.getMapUnitNumberSprites().getFrame(tensDigit); // Tens place.
 
-        // Ones place shares space with the activity icons below if HP > 10.
+        // Since HP>10, the ones place cycles with the activity icons below.
         int onesIndex = guiHP; // There are 10 digit sprites, so it naturally wraps at 10
         unitIcons.add( SpriteLibrary.getMapUnitNumberSprites().getFrame(onesIndex) );
       }
@@ -263,26 +263,15 @@ public class UnitSpriteSet
     }
 
     // Evaluate/draw unit status effects.
-    ArrayList<BufferedImage> statusIcons = new ArrayList<BufferedImage>();
     if( u.isStunned )
-      statusIcons.add(SpriteLibrary.MapIcons.STUN.getIcon());
+      unitIcons.add(SpriteLibrary.MapIcons.STUN.getIcon());
 
     double lowIndicatorFraction = 3.0;
     if( u.model.needsFuel() && u.fuel < u.model.maxFuel / lowIndicatorFraction )
-      statusIcons.add(SpriteLibrary.MapIcons.FUEL.getIcon());
+      unitIcons.add(SpriteLibrary.MapIcons.FUEL.getIcon());
 
     if( u.ammo >= 0 && !u.model.weapons.isEmpty() && u.ammo < u.model.maxAmmo / lowIndicatorFraction )
-      statusIcons.add(SpriteLibrary.MapIcons.AMMO.getIcon());
-
-    if( !statusIcons.isEmpty() )
-    {
-      int iconIndex = (animIndex%(statusIcons.size()*ANIM_FRAMES_PER_MARK))/ANIM_FRAMES_PER_MARK;
-      BufferedImage statusIcon = statusIcons.get(iconIndex);
-      int iconW = statusIcon.getWidth();
-      int iconH = statusIcon.getHeight();
-
-      g.drawImage( statusIcon, drawX, drawY, iconW, iconH, null );
-    }
+      unitIcons.add(SpriteLibrary.MapIcons.AMMO.getIcon());
 
     // Transport icon.
     boolean fogOn = map.game.isFogEnabled();
@@ -297,6 +286,8 @@ public class UnitSpriteSet
     // Hide icon.
     if( u.model.hidden )
       unitIcons.add(SpriteLibrary.getHideIcon(u.CO.myColor));
+
+    unitIcons.addAll(MarkArtist.getMarksForUnit(g, game, map.viewer, u, animIndex));
 
     // Draw one of the current activity icons in the lower-right.
     if( !unitIcons.isEmpty() )

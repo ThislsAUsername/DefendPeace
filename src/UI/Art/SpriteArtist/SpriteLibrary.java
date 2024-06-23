@@ -33,7 +33,7 @@ public class SpriteLibrary
 
   public static final int baseIconSize = 8;
 
-  public static final String charKey = "%./-~,;:!?'&()_";
+  public static final String charKey = "%./-~,;:!?'&()_+Ⅱ";
   public static final String DEFAULT_FACTION = "Thorn";
 
   private static HashMap<SpriteSetKey, TerrainSpriteSet> spriteSetMap = new HashMap<SpriteSetKey, TerrainSpriteSet>();
@@ -372,39 +372,48 @@ public class SpriteLibrary
     return mapUnitSymbolSprites;
   }
 
-  public static Map<Character,BufferedImage> getColoredMapTextSprites(Color color)
+  public static Map<Character, BufferedImage> getColoredMapTextSprites(Color color)
   {
     if( null == mapUnitTextSprites )
     {
-      mapUnitTextSprites = new HashMap<Color,Map<Character,BufferedImage>>();
+      mapUnitTextSprites = new HashMap<Color, Map<Character, BufferedImage>>();
     }
     if( null == mapUnitTextSprites.get(color) )
     {
-      Map<Character,BufferedImage> colorMap = new HashMap<Character,BufferedImage>();
+      Map<Character, BufferedImage> colorMap = new HashMap<Character, BufferedImage>();
 
       // Colorize the characters...
       Sprite letters = new Sprite(getMapUnitLetterSprites());
       letters.colorize(Color.WHITE, color);
       // ...and put them into our map
-      for (char ch = 'A'; ch <= 'Z'; ch++)
+      for( char ch = 'A'; ch <= 'Z'; ch++ )
       {
         int letterIndex = ch - 'A';
         colorMap.put(ch, letters.getFrame(letterIndex));
       }
-      
+
       // Do the same for numbers
       Sprite numbers = new Sprite(getMapUnitNumberSprites());
       numbers.colorize(Color.WHITE, color);
-      for (char ch = '0'; ch <= '9'; ch++)
+      for( char ch = '0'; ch <= '9'; ch++ )
       {
         int letterIndex = ch - '0';
         colorMap.put(ch, numbers.getFrame(letterIndex));
       }
-      
+
+      // Do the same for symbols
+      Sprite symbols = new Sprite(getMapUnitSymbolSprites());
+      symbols.colorize(Color.WHITE, color);
+      for( int i = 0; i < charKey.length(); ++i )
+      {
+        char ch = charKey.charAt(i);
+        colorMap.put(ch, symbols.getFrame(i));
+      }
+
       // Put our new map into the general collection, so we don't have to do this again
       mapUnitTextSprites.put(color, colorMap);
     }
-    
+
     return mapUnitTextSprites.get(color);
   }
 
