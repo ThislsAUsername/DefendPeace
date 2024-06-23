@@ -1,14 +1,16 @@
-package CommandingOfficers.AW4.IDS;
+package CommandingOfficers.AWBW.IDS;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.DeployableCommander;
-import CommandingOfficers.IValueFinder;
 import CommandingOfficers.MeteorParams;
-import CommandingOfficers.AW4.RuinedCommander;
+import CommandingOfficers.AW4.IDS.Tabitha.FirestormValueFinder;
+import CommandingOfficers.AWBW.AWBWCommander;
+import CommandingOfficers.AWBW.COUableCommander;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
@@ -17,9 +19,9 @@ import Engine.GameEvents.GameEventQueue;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 import UI.UIUtils;
-import Units.*;
+import Units.Unit;
 
-public class Tabitha extends RuinedCommander
+public class TabithaBW extends COUableCommander
 {
   private static final long serialVersionUID = 1L;
 
@@ -29,33 +31,40 @@ public class Tabitha extends RuinedCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Tabitha", UIUtils.SourceGames.AW4, UIUtils.IDS);
+      super("Tabitha", UIUtils.SourceGames.AWBW, UIUtils.IDS);
       infoPages.add(new InfoPage(
-          "Belongs to the private military company IDS. A daughter of Dr. Caulder, she is extremely cruel and vindictive.\n"));
+          "Can grant a single Mega Boost of +"+POWER+"/"+DEFENSE+" stats.\n"
+        + "This powerup lasts until the unit is destroyed.\n"));
       infoPages.add(new InfoPage(
-          "Base Zone: 0\n"
-        + "Zone Boost: All units +"+POWER+"/"+DEFENSE+".\n"));
-      infoPages.add(new InfoPage(new Firestorm(null),
-          "Damages units over a wide area.\n"
-        + "2-radius 8 HP strike that targets raw HP (gunboat HP counts as half)\n"));
+          "Firestorm (6):\n"
+        + "2-radius 4 HP strike that targets raw HP (gunboat HP counts as half)\n"
+        + "Unboosted units get +20/20 stats.\n"
+        + "All units get +10/10 stats."));
+      infoPages.add(new InfoPage(
+          "Apocalypse (10):\n"
+        + "2-radius 8 HP strike that targets raw HP (gunboat HP counts as half)\n"
+        + "Unboosted units get +"+25+"/"+25+" stats.\n"
+        + "All units get +10/10 stats."));
       infoPages.add(DeployableCommander.COU_MECHANICS_BLURB);
-      infoPages.add(RuinedCommander.DOR_MECHANICS_BLURB);
+      infoPages.add(AWBWCommander.AWBW_MECHANICS_BLURB);
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
     {
-      return new Tabitha(rules);
+      return new TabithaBW(rules);
     }
   }
-  public static final int RADIUS  = 0;
   public static final int POWER   = 50;
-  public static final int DEFENSE = 50;
+  public static final int DEFENSE = 35;
 
-  public Tabitha(GameScenario.GameRules rules)
+  public TabithaBW(GameScenario.GameRules rules)
   {
-    super(RADIUS, POWER, DEFENSE, coInfo, rules);
+    super(POWER, DEFENSE, coInfo, rules);
+    deployCostPercent = 50;
 
-    addCommanderAbility(new Firestorm(this));
+    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    addCommanderAbility(new NukeIt(this, "Firestorm",   6, cb, 4, 10, 10));
+    addCommanderAbility(new NukeIt(this, "Apocalypse", 10, cb, 8, 25, 25));
   }
 
   public static CommanderInfo getInfo()
@@ -63,34 +72,22 @@ public class Tabitha extends RuinedCommander
     return coInfo;
   }
 
-  public static class FirestormValueFinder implements IValueFinder
+  @Override
+  public GameEventQueue onCOULost(Unit minion)
   {
-    public int maxDamage = Firestorm.POWER;
-    public int getValue(Commander attacker, Unit unit)
-    {
-      int health = unit.getHealth();
-      if( health < 10 )
-        return 1;
-      health = Math.min(health, maxDamage * 10);
-
-      if( 1 == unit.model.maxAmmo )
-        health /= 2;
-
-      if( !unit.CO.isEnemy(attacker) )
-        return -health;
-      return health;
-    }
+    modifyAbilityStars(-42);
+    return null;
   }
 
-  private static class Firestorm extends RuinedAbility
+  private static class NukeIt extends NonStackingBoost
   {
     private static final long serialVersionUID = 1L;
-    private static final String NAME = "Firestorm";
-    private static final int POWER = 8;
+    public final int nukePower;
 
-    Firestorm(Tabitha commander)
+    NukeIt(TabithaBW commander, String name, int cost, CostBasis basis, int nuke, int pAtk, int pDef)
     {
-      super(commander, NAME);
+      super(commander, name, cost, basis, pAtk, pDef);
+      nukePower = nuke;
     }
 
     @Override
@@ -99,7 +96,6 @@ public class Tabitha extends RuinedCommander
       MeteorParams target = findTarget(map);
       GameEventQueue events = super.getEvents(map);
 
-      target.power = POWER;
       GameEvent event = target.getDamage(map, myCommander);
       events.add(event);
 
@@ -107,7 +103,11 @@ public class Tabitha extends RuinedCommander
     }
     private MeteorParams findTarget(GameMap map)
     {
-      return MeteorParams.planMeteor(map, myCommander, 2, new FirestormValueFinder());
+      FirestormValueFinder hitFinder = new FirestormValueFinder();
+      hitFinder.maxDamage = nukePower;
+      MeteorParams hitFound = MeteorParams.planMeteor(map, myCommander, 2, hitFinder);
+      hitFound.power = nukePower;
+      return hitFound;
     }
     @Override
     public Collection<DamagePopup> getDamagePopups(GameMap map)
