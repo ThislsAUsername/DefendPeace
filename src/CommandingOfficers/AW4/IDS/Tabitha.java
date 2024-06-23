@@ -37,7 +37,7 @@ public class Tabitha extends RuinedCommander
         + "Zone Boost: All units +"+POWER+"/"+DEFENSE+".\n"));
       infoPages.add(new InfoPage(new Firestorm(null),
           "Damages units over a wide area.\n"
-        + Firestorm.POWER + " HP strike that targets HP with gunboats counting half.\n"));
+        + "2-radius 8 HP strike that targets raw HP (gunboat HP counts as half)\n"));
       infoPages.add(DeployableCommander.COU_MECHANICS_BLURB);
       infoPages.add(RuinedCommander.DOR_MECHANICS_BLURB);
     }

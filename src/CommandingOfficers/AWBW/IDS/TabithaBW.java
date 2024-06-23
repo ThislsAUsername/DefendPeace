@@ -37,12 +37,12 @@ public class TabithaBW extends COUableCommander
         + "This powerup lasts until the unit is destroyed.\n"));
       infoPages.add(new InfoPage(
           "Firestorm (6):\n"
-        + "4 HP strike that targets HP with gunboats counting half.\n"
+        + "2-radius 4 HP strike that targets raw HP (gunboat HP counts as half)\n"
         + "Unboosted units get +20/20 stats.\n"
         + "All units get +10/10 stats."));
       infoPages.add(new InfoPage(
           "Apocalypse (10):\n"
-        + "8 HP strike that targets HP with gunboats counting half.\n"
+        + "2-radius 8 HP strike that targets raw HP (gunboat HP counts as half)\n"
         + "Unboosted units get +"+25+"/"+25+" stats.\n"
         + "All units get +10/10 stats."));
       infoPages.add(DeployableCommander.COU_MECHANICS_BLURB);
