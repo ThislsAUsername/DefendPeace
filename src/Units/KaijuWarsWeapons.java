@@ -369,19 +369,25 @@ public class KaijuWarsWeapons
         params.baseDamage = getDamage(attack, attackBoost, counterPower);
     }
 
-    // Throwing the air-airport move boost on here since this modifier's going on all units anyway
+    // Throwing the air-airport and land-road move boost on here since this modifier's going on all units anyway
     @Override
     public void modifyMovePower(UnitContext uc)
     {
-      if( uc.map == null )
+      if( uc.env == null )
         return;
-      if( !uc.map.isLocationValid(uc.coord) )
-        return;
-      if( !uc.model.isAirUnit() )
-        return;
-      TerrainType tt = uc.map.getEnvironment(uc.coord).terrainType;
-      if( tt.healsAir() )
-        uc.movePower += 3;
+      if( uc.model.isAirUnit() )
+      {
+        TerrainType tt = uc.env.terrainType;
+        if( tt.healsAir() )
+          uc.movePower += 3;
+      }
+      if( uc.model.isLandUnit() )
+      {
+        TerrainType tt = uc.env.terrainType;
+        if( TerrainType.BRIDGE == tt || TerrainType.ROAD == tt )
+          uc.movePower += 2;
+      }
+      // TODO: Snow and desert (ground only) -1 move? Ruins slow awkward?
     }
   } //~KaijuWarsFightMod
 

@@ -182,7 +182,7 @@ public class KaijuActions
 
           if( canCounter && stomperType.hasRamSkill
               // Ram activates automatically, at range 1 vs valid targets
-              && 1 == destCoord.getDistance(kaijuState.unit) && !victimType.resistsKaiju )
+              && 1 == destCoord.getDistance(kaijuState.unit) && victimType.isLandUnit() && !victimType.resistsKaiju )
           {
             // Apply Ram - you lose its bonus move, but kill the target for free
             canCounter = false;
