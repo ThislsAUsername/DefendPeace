@@ -682,8 +682,8 @@ public class JakeMan extends ModularAI
             if( isThreatenedBy(unit.model, defender.model) )
               damage *= FIRSTSTRIKE_ON_THREAT_WEIGHT;
             // Value damage to hurt units less
-            if( defender.getHealth() >= BIG_THREAT_THRESHOLD )
-              damage *= 2;
+            if( defender.getHealth() < BIG_THREAT_THRESHOLD )
+              damage /= 1.5;
 
             return damage - loss;
           }, (terrain, params) -> 0); // Don't attack terrain
