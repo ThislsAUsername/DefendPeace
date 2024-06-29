@@ -338,7 +338,7 @@ public class FightClub
         stopwatches.put(game.activeArmy, stopwatches.get(game.activeArmy) + thinkTimeNanos);
 
         // Map should-ish be covered in units by turncount == map area
-        if(game.getCurrentTurn() > game.gameMap.mapWidth * game.gameMap.mapHeight)
+        if(game.getCurrentTurn() > Math.max(game.gameMap.mapWidth, game.gameMap.mapHeight))
         {
           if(game.armies[0].getUnits().size()/2 > game.armies[1].getUnits().size() )
           {
