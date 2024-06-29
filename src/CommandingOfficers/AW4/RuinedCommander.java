@@ -209,7 +209,7 @@ public abstract class RuinedCommander extends DeployableCommander
 
     for( Unit cou : COUs )
     {
-      if( !army.myView.isLocationValid(cou.x, cou.x) )
+      if( !army.myView.isLocationValid(cou.x, cou.y) )
         continue; // Loaded/dead COUs shouldn't boost the top left, derp
       int distance = uc.coord.getDistance(cou);
       if( distance <= zoneRadius )
@@ -232,7 +232,7 @@ public abstract class RuinedCommander extends DeployableCommander
         continue;
       if( !amIViewing && cou.model.hidden && !gameMap.isConfirmedVisible(cou) )
         continue;
-      if( !gameMap.isLocationValid(cou.x, cou.x) )
+      if( !gameMap.isLocationValid(cou.x, cou.y) )
         continue;
 
       final XYCoord coCoord = new XYCoord(cou);
