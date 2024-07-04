@@ -17,10 +17,7 @@ import Engine.UnitMods.DamageMultiplierOffense;
 import Engine.UnitMods.UnitModifier;
 import UI.UIUtils;
 import Units.UnitContext;
-import Units.MoveTypes.MoveType;
 import Terrain.MapMaster;
-import Terrain.TerrainType;
-import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 
 public class Sturm extends AW1Commander
@@ -42,7 +39,7 @@ public class Sturm extends AW1Commander
             "Sturm (AW1)\n"
           + "A riddle within a shadow, revealing nothing.\n"
           + "???\n"
-          + "(1.3x/1.2x damage dealt/taken while COP isn't active, perfect movement outside snow.)"));
+          + "(1.3x/1.2x damage dealt/taken while COP isn't active, perfect movement outside cold weather.)"));
       infoPages.add(new InfoPage(new MeteorStrike(null),
             "???\n"
           + "(1.5x/1.1x damage dealt/taken.)\n"
@@ -85,15 +82,7 @@ public class Sturm extends AW1Commander
   @Override
   public void modifyMoveType(UnitContext uc)
   {
-    for( TerrainType terrain : TerrainType.TerrainTypeList )
-    {
-      final int snowCost = uc.moveType.getMoveCost(Weathers.SNOW, terrain);
-      if( MoveType.IMPASSABLE > snowCost && snowCost > 0 )
-      {
-        uc.moveType.setMoveCost(terrain, 1);
-        uc.moveType.setMoveCost(Weathers.SNOW, terrain, snowCost);
-      }
-    }
+    SturmValueFinders.modifyMoveType(uc);
   }
 
   private static class MeteorStrike extends AW1Ability

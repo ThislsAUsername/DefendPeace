@@ -15,11 +15,8 @@ import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import UI.UIUtils;
 import Units.UnitContext;
-import Units.MoveTypes.MoveType;
 import Terrain.GameMap;
 import Terrain.MapMaster;
-import Terrain.TerrainType;
-import Terrain.Environment.Weathers;
 
 public class Sturm extends AWBWCommander
 {
@@ -38,7 +35,7 @@ public class Sturm extends AWBWCommander
       super("Sturm", UIUtils.SourceGames.AWBW, UIUtils.BH);
       infoPages.add(new InfoPage(
             "Sturm (AWBW)\n"
-          + "Movement cost over all terrain is reduced to 1, except in Snow. Units lose -20% attack and gain +20% defense.\n"));
+          + "Movement cost over all terrain is reduced to 1, except in cold weather. Units lose -20% attack and gain +20% defense.\n"));
       infoPages.add(new InfoPage(
           METEOR_NAME+" ("+METEOR_COST+"):\n"
         + "A 2-range missile deals "+METEOR_POWER+"HP damage. The missile targets an enemy unit located at the greatest accumulation of unit value.\n"
@@ -86,15 +83,7 @@ public class Sturm extends AWBWCommander
   @Override
   public void modifyMoveType(UnitContext uc)
   {
-    for( TerrainType terrain : TerrainType.TerrainTypeList )
-    {
-      final int snowCost = uc.moveType.getMoveCost(Weathers.SNOW, terrain);
-      if( MoveType.IMPASSABLE > snowCost && snowCost > 0 )
-      {
-        uc.moveType.setMoveCost(terrain, 1);
-        uc.moveType.setMoveCost(Weathers.SNOW, terrain, snowCost);
-      }
-    }
+    SturmValueFinders.modifyMoveType(uc);
   }
 
 

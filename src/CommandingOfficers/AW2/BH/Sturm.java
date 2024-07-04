@@ -16,11 +16,8 @@ import Engine.UnitMods.UnitFightStatModifier;
 import Engine.UnitMods.UnitModifier;
 import UI.UIUtils;
 import Units.UnitContext;
-import Units.MoveTypes.MoveType;
 import Terrain.MapMaster;
 import Terrain.MapPerspective;
-import Terrain.TerrainType;
-import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 
 public class Sturm extends AW2Commander
@@ -42,7 +39,7 @@ public class Sturm extends AW2Commander
             "Sturm (AW2)\n"
           + "Commander of Black Hole's forces. A mysterious invader from another world.\n"
           + "All units have superior firepower. Movement cost is equal over all terrain types. Weak in the snow.\n"
-          + "(+20/20 stats, perfect movement outside snow.)"));
+          + "(+20/20 stats, perfect movement outside cold weather.)"));
       infoPages.add(new InfoPage(new MeteorStrike(null),
             "Pulls a giant meteor from space, which does 8 HP of damage to all affected units. Increases his units' firepower & defence (+20/30, 140/150 total).\n"
           + "Meteor has a 1/3 chance of targeting HP, funds, or funds with doubled indirects.\n"
@@ -78,15 +75,7 @@ public class Sturm extends AW2Commander
   @Override
   public void modifyMoveType(UnitContext uc)
   {
-    for( TerrainType terrain : TerrainType.TerrainTypeList )
-    {
-      final int snowCost = uc.moveType.getMoveCost(Weathers.SNOW, terrain);
-      if( MoveType.IMPASSABLE > snowCost && snowCost > 0 )
-      {
-        uc.moveType.setMoveCost(terrain, 1);
-        uc.moveType.setMoveCost(Weathers.SNOW, terrain, snowCost);
-      }
-    }
+    SturmValueFinders.modifyMoveType(uc);
   }
 
   private static class MeteorStrike extends AW2Ability
