@@ -58,7 +58,7 @@ public class Lash extends AWBWCommander
   {
     if( params.attacker.model.isAirUnit() )
       return;
-    params.attackPower += params.terrainStars * 10;
+    params.attackPower += params.attacker.terrainStars * 10;
   }
 
   private static class TerrainTactics extends AWBWAbility

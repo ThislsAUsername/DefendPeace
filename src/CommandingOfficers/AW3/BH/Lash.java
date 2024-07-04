@@ -67,7 +67,7 @@ public class Lash extends AW3Commander
   {
     if( params.attacker.model.isAirUnit() )
       return;
-    params.attackPower += params.terrainStars * 5;
+    params.attackPower += params.attacker.terrainStars * 5;
   }
 
   // DS Lash isn't slowed in weather

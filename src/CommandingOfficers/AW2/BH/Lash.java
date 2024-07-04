@@ -65,8 +65,9 @@ public class Lash extends AW2Commander
   {
     if( params.attacker.model.isAirUnit() )
       return;
-    final int multiplier = 100 + params.terrainStars * 10;
+    final int multiplier = 100 + params.attacker.terrainStars * 10;
     params.attackerDamageMultiplier *= multiplier;
+    params.attackerDamageMultiplier /= 100;
   }
 
   private static class TerrainTactics extends AW2Ability
