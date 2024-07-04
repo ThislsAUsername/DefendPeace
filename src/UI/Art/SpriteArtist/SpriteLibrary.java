@@ -784,11 +784,11 @@ public class SpriteLibrary
 
       String discrim = (whichCO.discriminator.length() > 0 ? "_" : "") + whichCO.discriminator;
       BufferedImage body = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, discrim, ""));
-      if( null == body )                      body = getCommanderSpriteAlt(formatBase, discrim, "");
+      if( null == body )                      body = getCommanderSpriteAlt(formatBase, whichCO.discriminator, "");
       BufferedImage head = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, discrim, "_face"));
-      if( null == head )                      head = getCommanderSpriteAlt(formatBase, discrim, "_face");
+      if( null == head )                      head = getCommanderSpriteAlt(formatBase, whichCO.discriminator, "_face");
       BufferedImage eyes = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, discrim, "_eyes"));
-      if( null == eyes )                      eyes = getCommanderSpriteAlt(formatBase, discrim, "_eyes");
+      if( null == eyes )                      eyes = getCommanderSpriteAlt(formatBase, whichCO.discriminator, "_eyes");
 
       coSpriteSets.put(cmdrKey, new CommanderSpriteSet(body, head, eyes));
     }
