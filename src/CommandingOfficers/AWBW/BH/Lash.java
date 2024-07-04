@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import CommandingOfficers.*;
 import CommandingOfficers.AWBW.AWBWCommander;
 import CommandingOfficers.CommanderAbility.CostBasis;
+import CommandingOfficers.AW2.BH.Lash.DoubleTerrainModifier;
 import Engine.GameScenario;
-import Engine.Combat.CombatContext;
 import Engine.Combat.StrikeParams;
 import Engine.UnitMods.UnitModifier;
-import Engine.UnitMods.UnitModifierWithDefaults;
 import UI.UIUtils;
 import Terrain.MapMaster;
 
@@ -82,19 +81,6 @@ public class Lash extends AWBWCommander
     }
   }
 
-  public static class DoubleTerrainModifier implements UnitModifierWithDefaults
-  {
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    public void changeCombatContext(CombatContext instance)
-    {
-      if( instance.attacker.mods.contains(this) )
-        instance.attacker.terrainStars *= 2;
-      if( instance.defender.mods.contains(this) )
-        instance.defender.terrainStars *= 2;
-    }
-  }
   private static class PrimeTactics extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;

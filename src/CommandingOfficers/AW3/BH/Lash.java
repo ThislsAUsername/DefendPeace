@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import CommandingOfficers.*;
 import CommandingOfficers.AW3.AW3Commander;
 import CommandingOfficers.CommanderAbility.CostBasis;
+import CommandingOfficers.AW2.BH.Lash.DoubleTerrainModifier;
 import Engine.GameScenario;
-import Engine.Combat.CombatContext;
 import Engine.Combat.StrikeParams;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitModifierWithDefaults;
@@ -108,19 +108,6 @@ public class Lash extends AW3Commander
     }
   }
 
-  public static class DoubleTerrainModifier implements UnitModifierWithDefaults
-  {
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    public void changeCombatContext(CombatContext instance)
-    {
-      if( instance.attacker.mods.contains(this) )
-        instance.attacker.terrainStars *= 2;
-      if( instance.defender.mods.contains(this) )
-        instance.defender.terrainStars *= 2;
-    }
-  }
   private static class PrimeTactics extends AW3Ability
   {
     private static final long serialVersionUID = 1L;

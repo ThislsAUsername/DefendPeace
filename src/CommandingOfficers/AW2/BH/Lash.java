@@ -98,6 +98,7 @@ public class Lash extends AW2Commander
     @Override
     public void changeCombatContext(CombatContext instance)
     {
+      // This should work fine since the same modifier instance shouldn't be used for both sides of a combat.
       if( instance.attacker.mods.contains(this) )
         instance.attacker.terrainStars *= 2;
       if( instance.defender.mods.contains(this) )
