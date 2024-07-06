@@ -107,6 +107,9 @@ public class MoveType implements Serializable
   /** Returns whether the unit can hang out on the specified tile. */
   public boolean canStandOn(GameMap map, XYCoord end, Unit mover, boolean includeOccupiedDestinations)
   {
+    if(null != mover && end.equals(mover.x, mover.y))
+      return true; // If we're already there, seems like we can probably stand on it
+
     final MapLocation loc = map.getLocation(end);
     if(!canStandOn(loc.getEnvironment()))
       return false;
