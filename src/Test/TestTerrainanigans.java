@@ -1,10 +1,9 @@
 package Test;
 
-import java.util.ArrayList;
-
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import Engine.Army;
+import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GamePath;
 import Engine.GameScenario;
@@ -13,7 +12,6 @@ import Engine.Combat.StrikeParams.BattleParams;
 import Engine.StateTrackers.DSSonjaDebuffTracker;
 import Engine.StateTrackers.StateTracker;
 import Engine.UnitActionLifecycles.BattleLifecycle;
-import Engine.UnitMods.UnitModifier;
 import Engine.Combat.CombatContext.CalcType;
 import Terrain.MapInfo;
 import Terrain.MapLibrary;
@@ -58,7 +56,7 @@ public class TestTerrainanigans extends TestCase
     boolean testPassed = true;
 
     testPassed &= validate(testSonjaDeath() , "  Sonja death test failed!");
-//    testPassed &= validate(testSonjaChanges() , "  Lash SCOP test failed!");
+    testPassed &= validate(testSonjaVSLash() , "  Sonja vs Lash test failed!");
 
     return testPassed;
   }
@@ -93,8 +91,52 @@ public class TestTerrainanigans extends TestCase
 
     testPassed &= validate(3 == murderCalc.attacker.terrainStars,     "    Shooting cart Sonja loses me terrain stars to Cyrus?");
     testPassed &= validate(2 == preMurderCalc.attacker.terrainStars,  "    Shooting Cyrus doesn't lose me an extra terrain star");
-    testPassed &= validate(2 == postMurderCalc.attacker.terrainStars, "    Killing Sonja gets me back my star immedately");
+    testPassed &= validate(2 == postMurderCalc.attacker.terrainStars, "    Killing Sonja gets me back my star immediately");
     testPassed &= validate(3 == postTurnCalc.attacker.terrainStars,   "    Killing Sonja never gets me back my star");
+
+    game.endGame();
+    return testPassed;
+  }
+
+  private boolean testSonjaVSLash()
+  {
+    setupTest(CommandingOfficers.AWBW.BH.Lash.getInfo());
+    boolean testPassed = true;
+
+    UnitContext aa      = new UnitContext(addUnit(map, testSubject, UnitModel.SURFACE_TO_AIR, 2, 6)); // On a mountain
+    UnitContext infCart = new UnitContext(addUnit(map, sonjaCart, UnitModel.TROOP, 1, 6)); // In forest next to mountain
+    UnitContext infBW   = new UnitContext(addUnit(map, sonjaBW, UnitModel.TROOP, 2, 7)); // On adjacent mountain
+    aa.unit.isTurnOver = false;
+    testSubject.myAbilities.get(1).enqueueUnitMods(map, aa.mods); // We can just pretend Prime Tactics is active
+    infCart.unit.health = 1; // AA can't push through all that defense to OHKO with no firepower buffs.
+
+    // Pop Sonja COPs for real - the effect of DS Sonja powers is stateful.
+    sonjaCart.modifyAbilityStars(42);
+    performGameAction(new GameAction.AbilityAction(sonjaCart.getReadyAbilities().get(0)), game);
+    sonjaBW.modifyAbilityStars(42);
+    performGameAction(new GameAction.AbilityAction(sonjaBW.getReadyAbilities().get(0)), game);
+
+    BattleParams murderCalc    = new CombatContext(game, map, aa, infCart, CalcType.NO_LUCK).applyModifiers().getAttack();
+    BattleParams preMurderCalc = new CombatContext(game, map, aa, infBW,   CalcType.NO_LUCK).applyModifiers().getAttack();
+    BattleParams preMurderDeth = new CombatContext(game, map, infBW, aa,   CalcType.NO_LUCK).applyModifiers().getAttack();
+    // Murder; this should make Cart Sonja lose.
+    performGameAction(new BattleLifecycle.BattleAction(map, aa.unit, GamePath.stayPut(aa.unit), 1, 6), game);
+    testPassed &= validate(0 == infCart.unit.health,  "    Shooting the inf didn't make it dead?");
+    testPassed &= validate(sonjaCart.army.isDefeated, "    Cart Sonja didn't lose?");
+
+    BattleParams postMurderCalc = new CombatContext(game, map, aa, infBW, CalcType.NO_LUCK).applyModifiers().getAttack();
+    turn(game);
+    BattleParams postTurnCalc   = new CombatContext(game, map, aa, infBW, CalcType.NO_LUCK).applyModifiers().getAttack();
+
+    // Mountain = 4 stars, SCOP = x2 = 8
+    // COP = 2, applies first = x2 = -4
+    testPassed &= validate((8 - 4) == murderCalc.attacker.terrainStars,         "    Shooting cart Sonja loses me terrain stars to Cyrus?");
+    // COP = 2, applies second = x1 = -2
+    testPassed &= validate((8 - 4 - 2) == preMurderCalc.attacker.terrainStars,  "    Shooting Cyrus doesn't lose me extra terrain stars");
+    // COP = 2, applies first = x2 = -4
+    testPassed &= validate((8 - 4 - 4) == preMurderDeth.defender.terrainStars,  "    Cyrus shooting Lash doesn't debuff before SCOP applies");
+    testPassed &= validate((8 - 4 - 2) == postMurderCalc.attacker.terrainStars, "    Killing Sonja gets me back my stars immediately");
+    testPassed &= validate((8 - 2) == postTurnCalc.attacker.terrainStars,       "    Killing Sonja never gets me back my stars");
 
     game.endGame();
     return testPassed;
