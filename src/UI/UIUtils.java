@@ -338,12 +338,12 @@ public class UIUtils
   public enum SourceGames
   {
     // In order of CO name discriminator resolution
+    DEFEND_PEACE(RT, ""),
     AW3(GE,  "3"),
     AW2(BM,  "2"),
     AW1(OS,  "1"),
     AW4(IDS, ""),
-    AWBW(CO, "BW"),
-    DEFEND_PEACE(RT, ""); // More? :v
+    AWBW(CO, "BW"); // More? :v
 
     public final COSpriteSpec uiColorSpec;
     public final String discriminator;
