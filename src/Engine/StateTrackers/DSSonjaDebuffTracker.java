@@ -58,6 +58,9 @@ public class DSSonjaDebuffTracker extends StateTracker implements UnitModifierWi
     if( instance.defender == buffOwner )
       return; // Apply only once per combat; everyone has this mod, so use the attacker to get in as early as possible.
     instance.attacker.terrainStars -= debuffMap.get(instance.attacker.CO.army);
+    instance.attacker.terrainStars = Math.max(0, instance.attacker.terrainStars);
+
     instance.defender.terrainStars -= debuffMap.get(instance.defender.CO.army);
+    instance.defender.terrainStars = Math.max(0, instance.defender.terrainStars);
   }
 }

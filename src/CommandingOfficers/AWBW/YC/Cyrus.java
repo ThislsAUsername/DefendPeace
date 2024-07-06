@@ -1,22 +1,20 @@
-package CommandingOfficers.AW3.YC;
+package CommandingOfficers.AWBW.YC;
 
 import java.util.ArrayList;
 
 import CommandingOfficers.*;
 import CommandingOfficers.CommanderAbility.CostBasis;
-import CommandingOfficers.AW3.AW3Commander;
+import CommandingOfficers.AWBW.AWBWCommander;
 import CommandingOfficers.DefendPeace.misc.Venge;
-import Engine.GameInstance;
 import Engine.GameScenario;
-import Engine.StateTrackers.DSSonjaDebuffTracker;
-import Engine.StateTrackers.StateTracker;
+import Engine.Combat.CombatContext;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.VisionModifier;
 import UI.UIUtils;
 import Terrain.MapMaster;
 import Units.UnitContext;
 
-public class Sonja extends AW3Commander
+public class Cyrus extends AWBWCommander
 {
   private static final long serialVersionUID = 1L;
 
@@ -30,48 +28,51 @@ public class Sonja extends AW3Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sonja", UIUtils.SourceGames.AW3, UIUtils.YC);
+      super("Cyrus", UIUtils.SourceGames.AWBW, UIUtils.YC);
       infoPages.add(new InfoPage(
-            "Sonja (AWDS)\n"
-          + "Kanbei’s calm and collected daughter who plans before acting. Excels in information warfare.\n"
-          + "All units have extended vision ranges in Fog of War. Manipulates information to reduce enemy terrain effects by one.\n"
-          + "(+1 vision, -1 terrain star to enemies even when not fighting her, 5 bad luck)\n"));
-      infoPages.add(new InfoPage(new EnhancedVision(null, new CostBasis(CHARGERATIO_AW3)),
-            "Increases the vision of units by one space and allows them to see into woods and reefs. Reduces enemy terrain effects by two.\n"
+            "Cyrus (AWDS Sonja for AWBW)\n"
+          + "+1 vision, -1 terrain star to enemies, 5 bad luck\n"
+          + "Calculation order vs Lash SCOP: combat initiator applies first.\n"));
+      infoPages.add(new InfoPage(new DefiantFlare(null, new CostBasis(CHARGERATIO_FUNDS)),
+            "+1 vision (total +2), piercing vision, -1 terrain star (total -2) to enemies.\n"
           + "+10 attack and defense.\n"));
-      infoPages.add(new InfoPage(new CounterBreak(null, new CostBasis(CHARGERATIO_AW3)),
-            "Increases vision of units by one space and allows them to see into woods and reefs. Counter-attacks are stronger. Reduces enemy terrain effects by three.\n"
-          + "(Counterattacks happen before the attacker's attack)\n"
+      infoPages.add(new InfoPage(new Sunrise(null, new CostBasis(CHARGERATIO_FUNDS)),
+            "+1 vision (total +2), piercing vision, -2 terrain star (total -3) to enemies.\n"
+          + "Counterattacks happen before the attacker's attack.\n"
           + "+10 attack and defense.\n"));
-      infoPages.add(new InfoPage(
-            "Hit: Computers\n"
-          + "Miss: Bugs"));
-      infoPages.add(AW3_MECHANICS_BLURB);
+      infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
     {
-      return new Sonja(rules);
+      return new Cyrus(rules);
     }
   }
 
   public int terrainDebuff = 1;
-  private DSSonjaDebuffTracker debuffMod;
 
-  public Sonja(GameScenario.GameRules rules)
+  public Cyrus(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_AW3);
-    addCommanderAbility(new EnhancedVision(this, cb));
-    addCommanderAbility(new CounterBreak(this, cb));
+    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    addCommanderAbility(new DefiantFlare(this, cb));
+    addCommanderAbility(new Sunrise(this, cb));
   }
+
   @Override
-  public void initForGame(GameInstance game)
+  public void changeCombatContext(CombatContext instance, UnitContext buffOwner)
   {
-    super.initForGame(game);
-    debuffMod = StateTracker.instance(game, DSSonjaDebuffTracker.class);
-    debuffMod.debuffers.add(this);
+    if( instance.attacker == buffOwner )
+    {
+      instance.defender.terrainStars -= terrainDebuff;
+      instance.defender.terrainStars = Math.max(0, instance.defender.terrainStars);
+    }
+    else // Defender owns the buff; debuff attacker
+    {
+      instance.attacker.terrainStars -= terrainDebuff;
+      instance.attacker.terrainStars = Math.max(0, instance.attacker.terrainStars);
+    }
   }
 
   @Override
@@ -80,15 +81,15 @@ public class Sonja extends AW3Commander
     uc.visionRange += 1;
   }
 
-  private static class EnhancedVision extends AW3Ability
+  private static class DefiantFlare extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String NAME = "Enhanced Vision";
+    private static final String NAME = "Defiant Flare";
     private static final int COST = 3;
-    private final Sonja COcast;
+    private final Cyrus COcast;
     UnitModifier sightMod;
 
-    EnhancedVision(Sonja commander, CostBasis basis)
+    DefiantFlare(Cyrus commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
       COcast = commander;
@@ -106,25 +107,23 @@ public class Sonja extends AW3Commander
     {
       super.perform(gameMap);
       COcast.terrainDebuff = 2;
-      COcast.debuffMod.recalcDebuffs();
     }
     @Override
     protected void revert(MapMaster gameMap)
     {
       COcast.terrainDebuff = 1;
-      COcast.debuffMod.recalcDebuffs();
     }
   }
 
-  private static class CounterBreak extends AW3Ability
+  private static class Sunrise extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String NAME = "Counter Break";
+    private static final String NAME = "Sunrise";
     private static final int COST = 5;
-    private final Sonja COcast;
+    private final Cyrus COcast;
     UnitModifier sightMod, counterMod;
 
-    CounterBreak(Sonja commander, CostBasis basis)
+    Sunrise(Cyrus commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
       COcast = commander;
@@ -145,13 +144,11 @@ public class Sonja extends AW3Commander
     {
       super.perform(gameMap);
       COcast.terrainDebuff = 3;
-      COcast.debuffMod.recalcDebuffs();
     }
     @Override
     protected void revert(MapMaster gameMap)
     {
       COcast.terrainDebuff = 1;
-      COcast.debuffMod.recalcDebuffs();
     }
   }
 
