@@ -18,7 +18,7 @@ public interface UnitModifier extends Serializable
    * Allows a UnitModifier to make drastic combat changes like counterattacking first or at 2+ range.
    * <p>Prefer using the other combat hooks when feasible.
    */
-  void changeCombatContext(CombatContext instance);
+  void changeCombatContext(CombatContext instance, UnitContext buffOwner);
 
   /**
    * Called any time a unit makes a weapon attack;

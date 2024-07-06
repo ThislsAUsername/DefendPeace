@@ -1,6 +1,5 @@
 package Engine.UnitMods;
 
-import Engine.Army;
 import Engine.Combat.CombatContext;
 import Units.UnitContext;
 
@@ -8,26 +7,16 @@ public class TowerCountMultiplier implements UnitModifierWithDefaults
 {
   private static final long serialVersionUID = 1L;
   private final int towerMult;
-  private final Army toBoost;
 
-  public TowerCountMultiplier(int towerMult, Army toBoost)
+  public TowerCountMultiplier(int towerMult)
   {
     this.towerMult = towerMult;
-    this.toBoost = toBoost;
   }
 
   @Override
-  public void changeCombatContext(CombatContext instance)
+  public void changeCombatContext(CombatContext instance, UnitContext minion)
   {
-    doTheThing(instance.attacker);
-    doTheThing(instance.defender);
-  }
-  private void doTheThing(UnitContext minion)
-  {
-    if( toBoost == minion.CO.army )
-    {
-      minion.towerCountDS  *= towerMult;
-      minion.towerCountDoR *= towerMult;
-    }
+    minion.towerCountDS  *= towerMult;
+    minion.towerCountDoR *= towerMult;
   }
 }

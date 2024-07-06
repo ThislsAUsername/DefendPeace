@@ -23,6 +23,7 @@ import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.MapMaster;
 import UI.UIUtils;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 /*
@@ -120,10 +121,10 @@ public class Venge extends Commander
     private static final long serialVersionUID = 1L;
 
     @Override
-    public void changeCombatContext(CombatContext instance)
+    public void changeCombatContext(CombatContext instance, UnitContext buffOwner)
     {
       // If we're swapping, and we can counter, and we're on the defensive, do the swap.
-      if( instance.canCounter && instance.defender.mods.contains(this) )
+      if( instance.canCounter && instance.defender == buffOwner )
       {
         instance.swapCombatants();
       }

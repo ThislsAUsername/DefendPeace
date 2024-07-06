@@ -10,6 +10,7 @@ import Engine.Combat.StrikeParams;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitModifierWithDefaults;
 import UI.UIUtils;
+import Units.UnitContext;
 import Terrain.MapMaster;
 
 public class Lash extends AW2Commander
@@ -96,13 +97,9 @@ public class Lash extends AW2Commander
     private static final long serialVersionUID = 1L;
 
     @Override
-    public void changeCombatContext(CombatContext instance)
+    public void changeCombatContext(CombatContext instance, UnitContext buffOwner)
     {
-      // This should work fine since the same modifier instance shouldn't be used for both sides of a combat.
-      if( instance.attacker.mods.contains(this) )
-        instance.attacker.terrainStars *= 2;
-      if( instance.defender.mods.contains(this) )
-        instance.defender.terrainStars *= 2;
+      buffOwner.terrainStars *= 2;
     }
   }
   private static class PrimeTactics extends AW2Ability

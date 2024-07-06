@@ -105,7 +105,7 @@ public class Javier extends AWBWCommander
     {
       // Generate mods at activation time since Javier doesn't have an army at construction time.
       modList.add(new IndirectDefenseModifier(boostDef));
-      modList.add(new TowerCountMultiplier(boostTower, myCommander.army));
+      modList.add(new TowerCountMultiplier(boostTower));
     }
   }
 }
