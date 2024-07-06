@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import CommandingOfficers.*;
 import CommandingOfficers.CommanderAbility.CostBasis;
 import CommandingOfficers.AW3.AW3Commander;
+import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.StateTrackers.DSSonjaDebuffTracker;
+import Engine.StateTrackers.StateTracker;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.VisionModifier;
 import UI.UIUtils;
@@ -51,6 +54,9 @@ public class Sonja extends AW3Commander
     }
   }
 
+  public int terrainDebuff = 1;
+  private DSSonjaDebuffTracker debuffMod;
+
   public Sonja(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
@@ -59,6 +65,14 @@ public class Sonja extends AW3Commander
     addCommanderAbility(new EnhancedVision(this, cb));
     addCommanderAbility(new CounterBreak(this, cb));
   }
+  @Override
+  public void initForGame(GameInstance game)
+  {
+    super.initForGame(game);
+    debuffMod = StateTracker.instance(game, DSSonjaDebuffTracker.class);
+    debuffMod.debuffers.add(this);
+  }
+
   @Override
   public void modifyVision(UnitContext uc)
   {
@@ -70,11 +84,13 @@ public class Sonja extends AW3Commander
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Enhanced Vision";
     private static final int COST = 3;
+    private final Sonja COcast;
     UnitModifier sightMod;
 
     EnhancedVision(Sonja commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
+      COcast = commander;
       sightMod = new VisionModifier(1);
     }
 
@@ -88,6 +104,14 @@ public class Sonja extends AW3Commander
     protected void perform(MapMaster gameMap)
     {
       super.perform(gameMap);
+      COcast.terrainDebuff = 2;
+      COcast.debuffMod.recalcDebuffs();
+    }
+    @Override
+    protected void revert(MapMaster gameMap)
+    {
+      COcast.terrainDebuff = 1;
+      COcast.debuffMod.recalcDebuffs();
     }
   }
 
@@ -96,11 +120,13 @@ public class Sonja extends AW3Commander
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Counter Break";
     private static final int COST = 5;
+    private final Sonja COcast;
     UnitModifier sightMod;
 
-    CounterBreak(Commander commander, CostBasis basis)
+    CounterBreak(Sonja commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
+      COcast = commander;
       sightMod = new VisionModifier(1);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
@@ -114,8 +140,15 @@ public class Sonja extends AW3Commander
     @Override
     protected void perform(MapMaster gameMap)
     {
-      // TODO
       super.perform(gameMap);
+      COcast.terrainDebuff = 3;
+      COcast.debuffMod.recalcDebuffs();
+    }
+    @Override
+    protected void revert(MapMaster gameMap)
+    {
+      COcast.terrainDebuff = 1;
+      COcast.debuffMod.recalcDebuffs();
     }
   }
 
