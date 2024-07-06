@@ -9,6 +9,7 @@ import CommandingOfficers.DefendPeace.misc.Venge;
 import Engine.GameScenario;
 import Engine.Combat.CombatContext;
 import Engine.UnitMods.UnitModifier;
+import Engine.UnitMods.UnitModifierWithDefaults;
 import Engine.UnitMods.VisionModifier;
 import UI.UIUtils;
 import Terrain.MapMaster;
@@ -49,8 +50,6 @@ public class Cyrus extends AWBWCommander
     }
   }
 
-  public int terrainDebuff = 1;
-
   public Cyrus(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
@@ -62,6 +61,10 @@ public class Cyrus extends AWBWCommander
 
   @Override
   public void changeCombatContext(CombatContext instance, UnitContext buffOwner)
+  {
+    debuffTerrain(instance, buffOwner, 1);
+  }
+  private static void debuffTerrain(CombatContext instance, UnitContext buffOwner, int terrainDebuff)
   {
     if( instance.attacker == buffOwner )
     {
@@ -81,37 +84,41 @@ public class Cyrus extends AWBWCommander
     uc.visionRange += 1;
   }
 
+  public static class TerrainReductionModifier implements UnitModifierWithDefaults
+  {
+    private static final long serialVersionUID = 1L;
+    private final int debuffPower;
+    public TerrainReductionModifier(int debuffPower)
+    {
+      this.debuffPower = debuffPower;
+    }
+
+    @Override
+    public void changeCombatContext(CombatContext instance, UnitContext buffOwner)
+    {
+      debuffTerrain(instance, buffOwner, debuffPower);
+    }
+  }
+
   private static class DefiantFlare extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Defiant Flare";
     private static final int COST = 3;
-    private final Cyrus COcast;
-    UnitModifier sightMod;
+    UnitModifier sightMod, fightMod;
 
     DefiantFlare(Cyrus commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
-      COcast = commander;
       sightMod = new VisionModifier(1);
+      fightMod = new TerrainReductionModifier(1);
     }
 
     @Override
     protected void enqueueMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(sightMod);
-    }
-
-    @Override
-    protected void perform(MapMaster gameMap)
-    {
-      super.perform(gameMap);
-      COcast.terrainDebuff = 2;
-    }
-    @Override
-    protected void revert(MapMaster gameMap)
-    {
-      COcast.terrainDebuff = 1;
+      modList.add(fightMod);
     }
   }
 
@@ -120,14 +127,13 @@ public class Cyrus extends AWBWCommander
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Sunrise";
     private static final int COST = 5;
-    private final Cyrus COcast;
-    UnitModifier sightMod, counterMod;
+    UnitModifier sightMod, fightMod, counterMod;
 
     Sunrise(Cyrus commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
-      COcast = commander;
       sightMod = new VisionModifier(1);
+      fightMod = new TerrainReductionModifier(2);
       counterMod = new Venge.PreEmptiveCounterMod();
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
@@ -136,19 +142,8 @@ public class Cyrus extends AWBWCommander
     protected void enqueueMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(sightMod);
+      modList.add(fightMod);
       modList.add(counterMod);
-    }
-
-    @Override
-    protected void perform(MapMaster gameMap)
-    {
-      super.perform(gameMap);
-      COcast.terrainDebuff = 3;
-    }
-    @Override
-    protected void revert(MapMaster gameMap)
-    {
-      COcast.terrainDebuff = 1;
     }
   }
 
