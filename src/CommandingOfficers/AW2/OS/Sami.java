@@ -43,7 +43,7 @@ public class Sami extends AW2Commander
           + "Their attack strength increases (+20, total 150) as well.\n"
           + "+10 defense.\n"));
       infoPages.add(new InfoPage(new VictoryMarch(null, new CostBasis(CHARGERATIO_FUNDS)),
-            "Increases all foot soldiers' movement range by 2 spaces."
+            "Increases all foot soldiers' movement range by 2 spaces.\n"
           + "They can capture in one turn even if they're not at full HP.\n"
           + "(Footsoldier +50 attack, total 180)\n"
           + "+10 defense.\n"));

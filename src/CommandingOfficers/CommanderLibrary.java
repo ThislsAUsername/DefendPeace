@@ -72,6 +72,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW2.OS.Max.getInfo() );
     commanderList.add( CommandingOfficers.AW2.OS.Sami.getInfo() );
     commanderList.add( CommandingOfficers.AW2.OS.Nell.getInfo() );
+    commanderList.add( CommandingOfficers.AW2.OS.Hachi.getInfo() );
     commanderList.add( CommandingOfficers.AW2.BM.Olaf.getInfo() );
     commanderList.add( CommandingOfficers.AW2.GE.Drake.getInfo() );
     commanderList.add( CommandingOfficers.AW2.BH.Sturm.getInfo() );
