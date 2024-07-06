@@ -56,6 +56,8 @@ public class TestMain extends TestCase
     if( !testsPassed ) return testsPassed;
     testsPassed &= validate(new TestJavier().runTest(), "Javier test failed!");
     if( !testsPassed ) return testsPassed;
+    testsPassed &= validate(new TestTerrainanigans().runTest(), "Terrainanigans test failed!");
+    if( !testsPassed ) return testsPassed;
     testsPassed &= validate(new TestCommanderBrenner().runTest(), "Brenner test failed!");
     if( !testsPassed ) return testsPassed;
     testsPassed &= validate(new TestCommanderTech().runTest(), "CommanderTech test failed!");
