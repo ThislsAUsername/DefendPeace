@@ -2,6 +2,7 @@ package CommandingOfficers;
 
 import java.util.ArrayList;
 
+import CommandingOfficers.AW4.RuinedCommander;
 import CommandingOfficers.AW4.BrennerWolves.*;
 import CommandingOfficers.DefendPeace.CyanOcean.Ave;
 import CommandingOfficers.DefendPeace.CyanOcean.Patch;
@@ -54,6 +55,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW4.IDS.Penny.getInfo() );
     commanderList.add( CommandingOfficers.AW4.IDS.Tabitha.getInfo() );
     commanderList.add( CommandingOfficers.AW4.IDS.Caulder.getInfo() );
+    commanderList.add( NotACOAW4.getInfo() );
     commanderList.add( DocLight.getInfo() );
     commanderList.add( NotACO.getInfo() );
     commanderList.add( CommandingOfficers.AW1.OS.Andy.getInfo() );
@@ -97,7 +99,7 @@ public class CommanderLibrary
       private static final long serialVersionUID = 1L;
       public instantiator()
       {
-        super("No CO", UIUtils.SourceGames.AW4, UIUtils.MISC);
+        super("No CO", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.MISC);
         infoPages.add(new InfoPage("The ultimate expression of fair play"));
       }
       @Override
@@ -115,6 +117,38 @@ public class CommanderLibrary
     public NotACO(GameRules rules)
     {
       super(coInfo, rules);
+    }
+  }
+
+  public static class NotACOAW4 extends RuinedCommander
+  {
+    private static final long serialVersionUID = 1L;
+
+    private static final CommanderInfo coInfo = new instantiator();
+    private static class instantiator extends CommanderInfo
+    {
+      private static final long serialVersionUID = 1L;
+      public instantiator()
+      {
+        super("No CO", UIUtils.SourceGames.AW4, UIUtils.MISC, "4");
+        infoPages.add(new InfoPage("DoR terrain defense and veterancy, but no COU deployment"));
+      }
+      @Override
+      public Commander create(GameScenario.GameRules rules)
+      {
+        return new NotACOAW4(rules);
+      }
+    }
+
+    public static CommanderInfo getInfo()
+    {
+      return coInfo;
+    }
+
+    public NotACOAW4(GameRules rules)
+    {
+      super(0, 0, 0, coInfo, rules);
+      canDeployMask = 0;
     }
   }
 }
