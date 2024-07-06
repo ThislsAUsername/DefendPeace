@@ -60,7 +60,7 @@ public class Nell extends AW3Commander
     super(coInfo, rules);
     luck += 10;
 
-    CostBasis cb = new CostBasis(CHARGERATIO_FUNDS);
+    CostBasis cb = new CostBasis(CHARGERATIO_AW3);
     addCommanderAbility(new NellPower(this, cb, "Lucky Star", 3, 40));
     addCommanderAbility(new NellPower(this, cb, "Lady Luck",  6, 80));
   }

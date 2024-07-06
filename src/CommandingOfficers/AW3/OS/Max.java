@@ -58,7 +58,7 @@ public class Max extends AW3Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_AW3);
     addCommanderAbility(new MaxPower(this, cb, "Max Force", 3, 30));
     addCommanderAbility(new MaxPower(this, cb, "Max Blast", 6, 60));
   }

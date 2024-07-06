@@ -34,10 +34,10 @@ public class Hachi extends AW3Commander
             "Hachi (AW3)\n"
           + "Owner of the Battle Maps shop. Rumoured to be Orange Star’s former commander-in-chief.\n"
           + "Uses secret trade routes to get lower deployment costs (90%) for all units.\n"));
-      infoPages.add(new InfoPage(new Barter(null, new CostBasis(CHARGERATIO_FUNDS)),
+      infoPages.add(new InfoPage(new Barter(null, new CostBasis(CHARGERATIO_AW3)),
             "Speaks with such authority that he obtains even lower (50%) deployment costs.\n"
           + "+10 attack and defense.\n"));
-      infoPages.add(new InfoPage(new MerchantUnion(null, new CostBasis(CHARGERATIO_FUNDS)),
+      infoPages.add(new InfoPage(new MerchantUnion(null, new CostBasis(CHARGERATIO_AW3)),
             "Deployment costs drop (50%). Merchant pals gather from around the globe and help him deploy ground units from any allied property.\n"
           + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(
@@ -56,7 +56,7 @@ public class Hachi extends AW3Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_AW3);
     addCommanderAbility(new Barter(this, cb));
     addCommanderAbility(new MerchantUnion(this, cb));
   }
