@@ -27,7 +27,7 @@ public class Lash extends AW2Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Lash", UIUtils.SourceGames.AW2, UIUtils.BH);
+      super("Lash", UIUtils.SourceGames.AW2, UIUtils.BH, "");
       infoPages.add(new InfoPage(
             "Lash (AW2)\n"
           + "The wunderkind of the Black Hole forces. A small, fierce, and brilliant inventor.\n"
