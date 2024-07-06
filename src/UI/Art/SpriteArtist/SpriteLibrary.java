@@ -803,7 +803,7 @@ public class SpriteLibrary
 
     // Try all the possible discriminators to see if we get an alternate. If no, use a placeholder instead.
     BufferedImage output = SpriteLibrary.loadSpriteSheetFile(String.format(formatPlaceholder, mugType));
-    for( SourceGames game : SourceGames.values() )
+    for( SourceGames game : UIUtils.GAME_RESOLUTION_ORDER )
     {
       String gameDiscrim = (game.discriminator.length() > 0 ? "_" : "") + game.discriminator;
       BufferedImage temp = SpriteLibrary.loadSpriteSheetFile(String.format(format, gameDiscrim, mugType));

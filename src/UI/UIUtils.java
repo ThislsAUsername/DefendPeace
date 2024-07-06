@@ -335,14 +335,17 @@ public class UIUtils
   public static final COSpriteSpec LA = COSpriteSpec.fromDisk("Lazurian"      , "Army");
   public static final COSpriteSpec IDS = COSpriteSpec.fromDisk("IDS"          , "Army");
 
+  public static COSpriteSpec[] CANON_FACTIONS;
+  public static SourceGames[] GAME_RESOLUTION_ORDER;
+
   public enum SourceGames
   {
-    // In order of CO name discriminator resolution
-    DEFEND_PEACE(RT, ""),
-    AW3(GE,  "3"),
-    AW2(BM,  "2"),
+    // In display order, because programming is hard™
     AW1(OS,  "1"),
+    AW2(BM,  "2"),
+    AW3(GE,  "3"),
     AW4(IDS, ""),
+    DEFEND_PEACE(RT, ""),
     AWBW(CO, "BW"); // More? :v
 
     public final COSpriteSpec uiColorSpec;
@@ -351,6 +354,25 @@ public class UIUtils
     {
       this.uiColorSpec = new COSpriteSpec(new Faction(this.name()), uiColorSpec.color);
       this.discriminator = discriminator;
+    }
+
+    static // This block goes in here so the instances are constructed before it's executed. Null enums ain't fun.
+    {
+      CANON_FACTIONS = new COSpriteSpec[] { OS, BM, GE, YC, BH,
+          // Custom
+          RF, GS, BD, AB, JS, CI, PC, TG, PL, AR, WN, RT, CO, IDS, MISC,
+          // DoR
+          BW, NW, LA, };
+      // In order of CO name discriminator resolution
+      GAME_RESOLUTION_ORDER = new SourceGames[]
+        {
+            SourceGames.DEFEND_PEACE,
+            SourceGames.AW3,
+            SourceGames.AW2,
+            SourceGames.AW1,
+            SourceGames.AW4,
+            SourceGames.AWBW,
+        };
     }
   }
 
