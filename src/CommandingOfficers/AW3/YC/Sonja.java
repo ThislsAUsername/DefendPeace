@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import CommandingOfficers.*;
 import CommandingOfficers.CommanderAbility.CostBasis;
 import CommandingOfficers.AW3.AW3Commander;
+import CommandingOfficers.DefendPeace.misc.Venge;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.StateTrackers.DSSonjaDebuffTracker;
@@ -121,13 +122,14 @@ public class Sonja extends AW3Commander
     private static final String NAME = "Counter Break";
     private static final int COST = 5;
     private final Sonja COcast;
-    UnitModifier sightMod;
+    UnitModifier sightMod, counterMod;
 
     CounterBreak(Sonja commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
       COcast = commander;
       sightMod = new VisionModifier(1);
+      counterMod = new Venge.PreEmptiveCounterMod();
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
     }
 
@@ -135,6 +137,7 @@ public class Sonja extends AW3Commander
     protected void enqueueMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(sightMod);
+      modList.add(counterMod);
     }
 
     @Override
