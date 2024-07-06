@@ -34,7 +34,7 @@ public class TestTerrainanigans extends TestCase
     MapInfo mapInfo = MapLibrary.getByName("Deep Forest");
     GameScenario scn = new GameScenario();
     Army[] armies = new Army[mapInfo.getNumCos()];
-    armies[0] = new Army(scn, CommandingOfficers.AWBW.YC.Cyrus.getInfo().create(scn.rules));
+    armies[0] = new Army(scn, CommandingOfficers.AWBW.YC.SonjaDSBW.getInfo().create(scn.rules));
     armies[1] = new Army(scn, testSubjectInfo.create(scn.rules));
     armies[2] = new Army(scn, testSubjectInfo.create(scn.rules));
     armies[3] = new Army(scn, CommandingOfficers.AW3.YC.Sonja.getInfo().create(scn.rules));

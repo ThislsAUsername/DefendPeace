@@ -15,7 +15,7 @@ import UI.UIUtils;
 import Terrain.MapMaster;
 import Units.UnitContext;
 
-public class Cyrus extends AWBWCommander
+public class SonjaDSBW extends AWBWCommander
 {
   private static final long serialVersionUID = 1L;
 
@@ -29,15 +29,15 @@ public class Cyrus extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Cyrus", UIUtils.SourceGames.AWBW, UIUtils.YC);
+      super("Sonja", UIUtils.SourceGames.AWBW, UIUtils.YC, "DSW");
       infoPages.add(new InfoPage(
-            "Cyrus (AWDS Sonja for AWBW)\n"
+            "AWDS Sonja for AWBW\n"
           + "+1 vision, -1 terrain star to enemies, 5 bad luck\n"
           + "Calculation order vs Lash SCOP: combat initiator applies first.\n"));
-      infoPages.add(new InfoPage(new DefiantFlare(null, new CostBasis(CHARGERATIO_FUNDS)),
+      infoPages.add(new InfoPage(new EnhancedVision(null, new CostBasis(CHARGERATIO_FUNDS)),
             "+1 vision (total +2), piercing vision, -1 terrain star (total -2) to enemies.\n"
           + "+10 attack and defense.\n"));
-      infoPages.add(new InfoPage(new Sunrise(null, new CostBasis(CHARGERATIO_FUNDS)),
+      infoPages.add(new InfoPage(new CounterBreak(null, new CostBasis(CHARGERATIO_FUNDS)),
             "+1 vision (total +2), piercing vision, -2 terrain star (total -3) to enemies.\n"
           + "Counterattacks happen before the attacker's attack.\n"
           + "+10 attack and defense.\n"));
@@ -46,17 +46,17 @@ public class Cyrus extends AWBWCommander
     @Override
     public Commander create(GameScenario.GameRules rules)
     {
-      return new Cyrus(rules);
+      return new SonjaDSBW(rules);
     }
   }
 
-  public Cyrus(GameScenario.GameRules rules)
+  public SonjaDSBW(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
     CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
-    addCommanderAbility(new DefiantFlare(this, cb));
-    addCommanderAbility(new Sunrise(this, cb));
+    addCommanderAbility(new EnhancedVision(this, cb));
+    addCommanderAbility(new CounterBreak(this, cb));
   }
 
   @Override
@@ -100,14 +100,14 @@ public class Cyrus extends AWBWCommander
     }
   }
 
-  private static class DefiantFlare extends AWBWAbility
+  private static class EnhancedVision extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String NAME = "Defiant Flare";
+    private static final String NAME = "Enhanced Vision";
     private static final int COST = 3;
     UnitModifier sightMod, fightMod;
 
-    DefiantFlare(Cyrus commander, CostBasis basis)
+    EnhancedVision(SonjaDSBW commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
       sightMod = new VisionModifier(1);
@@ -122,14 +122,14 @@ public class Cyrus extends AWBWCommander
     }
   }
 
-  private static class Sunrise extends AWBWAbility
+  private static class CounterBreak extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String NAME = "Sunrise";
+    private static final String NAME = "Counter Break";
     private static final int COST = 5;
     UnitModifier sightMod, fightMod, counterMod;
 
-    Sunrise(Cyrus commander, CostBasis basis)
+    CounterBreak(SonjaDSBW commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
       sightMod = new VisionModifier(1);

@@ -84,7 +84,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.OS.Andy.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Rachel.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.GE.Javier.getInfo() );
-    commanderList.add( CommandingOfficers.AWBW.YC.Cyrus.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.YC.SonjaDSBW.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Lash.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Sturm.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.VonBolt.getInfo() );
