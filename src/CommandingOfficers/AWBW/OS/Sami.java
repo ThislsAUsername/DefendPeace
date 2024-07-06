@@ -1,9 +1,9 @@
-package CommandingOfficers.AW2.OS;
+package CommandingOfficers.AWBW.OS;
 
 import java.util.ArrayList;
 
 import CommandingOfficers.*;
-import CommandingOfficers.AW2.AW2Commander;
+import CommandingOfficers.AWBW.AWBWCommander;
 import CommandingOfficers.CommanderAbility.CostBasis;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
@@ -17,7 +17,7 @@ import UI.UIUtils;
 import Units.UnitContext;
 import Units.UnitModel;
 
-public class Sami extends AW2Commander
+public class Sami extends AWBWCommander
 {
   private static final long serialVersionUID = 1L;
 
@@ -31,26 +31,20 @@ public class Sami extends AW2Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sami", UIUtils.SourceGames.AW2, UIUtils.OS);
+      super("Sami", UIUtils.SourceGames.AWBW, UIUtils.OS);
       infoPages.add(new InfoPage(
-            "Sami (AW2)\n"
-          + "A strong-willed soldier who backs up Max and Andy. A graduate of special-forces training.\n"
-          + "Being an infantry specialist, her foot soldiers move farther, capture faster, and cause more damage. Weak vs. vehicles.\n"
-          + "(Footsoldiers +30 attack, 1.5x capture rate.)\n"
-          + "(Unarmed transports +1 move. -10/0 direct vehicle combat.)\n"));
+            "Sami (AWBW)\n"
+          + "Footsoldiers gain +30% attack and a 50% capture point bonus (rounded down).\n"
+          + "Other direct units lose -10% attack. Transports gain +1 movement.\n"));
       infoPages.add(new InfoPage(new DoubleTime(null, new CostBasis(CHARGERATIO_FUNDS)),
-            "Infantry and mech units receive a movement bonus of 1 space.\n"
+            "Footsoldiers gain +1 movement and their attack is increased to +50% (160/110 total, +10 from AW2).\n"
           + "Their attack strength increases (+20, total 150) as well.\n"
-          + "+10 defense.\n"));
+          + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(new VictoryMarch(null, new CostBasis(CHARGERATIO_FUNDS)),
-            "Increases all foot soldiers' movement range by 2 spaces.\n"
-          + "They can capture in one turn even if they're not at full HP.\n"
-          + "(Footsoldier +50 attack, total 180)\n"
-          + "+10 defense.\n"));
-      infoPages.add(new InfoPage(
-            "Hit: Chocolate\n"
-          + "Miss: Cowards"));
-      infoPages.add(AW2_MECHANICS_BLURB);
+            "Footsoldiers gain +2 movement and their attack is increased to +70% (180/110 total).\n"
+          + "Footsoldiers can capture buildings instantly (even with 1 HP).\n"
+          + "+10 attack and defense.\n"));
+      infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -88,7 +82,7 @@ public class Sami extends AW2Commander
       uc.movePower += 1;
   }
 
-  private static class DoubleTime extends AW2Ability
+  private static class DoubleTime extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Double Time";
@@ -101,7 +95,7 @@ public class Sami extends AW2Commander
       moveMod = new UnitTypeFilter(new UnitMovementModifier(1));
       moveMod.oneOf = UnitModel.TROOP;
 
-      footAtkMod = new UnitTypeFilter(new UnitDamageModifier(20));
+      footAtkMod = new UnitTypeFilter(new UnitDamageModifier(20)); // NOT -10 from AW2?!
       footAtkMod.oneOf = UnitModel.TROOP;
     }
 
@@ -113,7 +107,7 @@ public class Sami extends AW2Commander
     }
   }
 
-  private static class VictoryMarch extends AW2Ability
+  private static class VictoryMarch extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Victory March";
@@ -126,7 +120,7 @@ public class Sami extends AW2Commander
       moveMod = new UnitTypeFilter(new UnitMovementModifier(2));
       moveMod.oneOf = UnitModel.TROOP;
 
-      footAtkMod = new UnitTypeFilter(new UnitDamageModifier(50));
+      footAtkMod = new UnitTypeFilter(new UnitDamageModifier(40)); // -10 from AW2
       footAtkMod.oneOf = UnitModel.TROOP;
 
       capMod = new UnitTypeFilter(new InstaCapModifier());
