@@ -29,7 +29,7 @@ public class SonjaDSBW extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sonja", UIUtils.SourceGames.AWBW, UIUtils.YC, "DSW");
+      super("Sonja", UIUtils.SourceGames.AWBW, UIUtils.YC, "3BW");
       infoPages.add(new InfoPage(
             "AWDS Sonja for AWBW\n"
           + "+1 vision, -1 terrain star to enemies, 5 bad luck\n"
