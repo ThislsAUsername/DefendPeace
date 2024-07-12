@@ -1,8 +1,6 @@
 package AI;
 
 import java.util.*;
-import java.util.Map.Entry;
-
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.DeployableCommander;
@@ -492,17 +490,9 @@ public class JakeMan extends ModularAI
 
       // Sort all individual target lists by distance
       for (ArrayList<XYCoord> targetList : targetMap.values())
-        Utils.sortLocationsByTravelTime(unit, targetList, gameMap);
-
-      // Sort all target types by how much we want to shoot them with this unit
-      Queue<Entry<UnitModel, Double>> targetTypesInOrder = 
-          new PriorityQueue<Entry<UnitModel, Double>>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
-      targetTypesInOrder.addAll(valueMap.entrySet());
-
-      while (!targetTypesInOrder.isEmpty())
       {
-        UnitModel model = targetTypesInOrder.poll().getKey(); // peel off the juiciest
-        goals.addAll(targetMap.get(model)); // produce a list ordered by juiciness first, then distance TODO: consider a holistic "juiciness" metric that takes into account both matchup and distance?
+        Utils.sortLocationsByTravelTime(unit, targetList, gameMap);
+        goals.add(targetList.get(0));
       }
     }
 
@@ -863,19 +853,6 @@ public class JakeMan extends ModularAI
     }
 
     return builds;
-  }
-
-  /**
-   * Sort units by funds amount in descending order.
-   */
-  private static class UnitModelFundsComparator implements Comparator<Entry<UnitModel, Double>>
-  {
-    @Override
-    public int compare(Entry<UnitModel, Double> entry1, Entry<UnitModel, Double> entry2)
-    {
-      double diff = entry2.getValue() - entry1.getValue();
-      return (int) (diff * 10); // Multiply by 10 since we return an int, but don't want to lose the decimal-level discrimination.
-    }
   }
 
   private void init(GameMap map)
