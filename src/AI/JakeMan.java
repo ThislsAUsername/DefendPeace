@@ -7,6 +7,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.DeployableCommander;
 import Engine.*;
+import Engine.UnitActionLifecycles.TransformLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.*;
 import Units.*;
@@ -933,16 +934,23 @@ public class JakeMan extends ModularAI
     for( var s : stealths )
       if( s.hidden )
       {
-        stealthIsStealth = true;
-        break;
+        for( var actionType : s.baseActions )
+          if( actionType instanceof TransformLifecycle.TransformFactory )
+          {
+            stealthIsStealth = true;
+            break;
+          }
+        if( stealthIsStealth )
+          break;
       }
-    if( stealthIsStealth )
+    if( stealthIsStealth && null != fighter )
       for( var s : stealths )
       {
         counterOrder.add(s);
         var stealthCounters = counterBuildPercents.getOrDefault(s, new ArrayList<>());
-        if( null != fighter )
-          stealthCounters.add(new CounterRatio(fighter, 100));
+        CounterRatio fighterCounterStealth = new CounterRatio(fighter, 100);
+        fighterCounterStealth.roundTargetPercentUp = true; // Fighter needs to be healthy to deal
+        stealthCounters.add(fighterCounterStealth);
       }
 
     // fighter: 2 AA per, AAs built for other air units included this time
