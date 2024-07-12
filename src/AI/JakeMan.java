@@ -10,6 +10,7 @@ import Engine.*;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.*;
 import Units.*;
+import lombok.var;
 
 
 public class JakeMan extends ModularAI
@@ -66,6 +67,23 @@ public class JakeMan extends ModularAI
   ArrayList<UnitModel> allTanks;
   UnitModel antiAir;
   UnitModel copter;
+  // Order of enemy types to consider building counter units
+  ArrayList<UnitModel> counterOrder;
+  public static class CounterRatio
+  {
+    UnitModel counter;
+    int power;
+    boolean roundTargetPercentUp = false;
+    public CounterRatio(UnitModel counter, int power)
+    {
+      this.counter = counter;
+      this.power = power;
+    }
+  }
+  // For each enemy unit type, my unit types X/Y/Z counter it at this effectiveness percent
+  private Map<UnitModel, ArrayList<CounterRatio>> counterBuildPercents;
+  // For unit type of mine, enemy unit types X/Y/Z negate it as a counter unit at this effectiveness percent
+  private Map<UnitModel, Map<UnitModel, Integer>> counterBuildCounterPercents;
 
   public JakeMan(Army army)
   {
@@ -865,6 +883,78 @@ public class JakeMan extends ModularAI
     allTanks = myArmy.cos[0].getAllModels(UnitModel.ASSAULT);
     antiAir  = myArmy.cos[0].getUnitModel(UnitModel.SURFACE_TO_AIR);
     copter   = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT | UnitModel.AIR_LOW, false);
+
+    counterOrder = new ArrayList<>();
+    counterBuildPercents = new HashMap<>();
+    counterBuildCounterPercents = new HashMap<>();
+
+    // tanks: no need to calc them beyond the Md clause
+    // copters: 1.5 copters or 1AA per
+    if( null != copter )
+    {
+      counterOrder.add(copter);
+      var copterCounters = counterBuildPercents.getOrDefault(copter, new ArrayList<>());
+      CounterRatio copterCounterCopter = new CounterRatio(copter, 200/3);
+      copterCounterCopter.roundTargetPercentUp = true; // I shouldn't buy a single copter to counter an enemy copter
+      copterCounters.add(copterCounterCopter);
+      copterCounters.add(new CounterRatio(antiAir, 100));
+    }
+
+    // Md: 1 neo per 1.5 Mds? Ignore if you already have a bomber
+    var mdTank = allTanks.get(1);
+    counterOrder.add(mdTank);
+    var mdCounters = counterBuildPercents.getOrDefault(mdTank, new ArrayList<>());
+    var bomber = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_SURFACE | UnitModel.JET, false);
+    if( null != bomber )
+      mdCounters.add(new CounterRatio(bomber, 250));
+    var neoTank = allTanks.get(2);
+    if( null != neoTank )
+      mdCounters.add(new CounterRatio(neoTank, 150));
+
+    // 1 fighter per 1.7 (yes) bombers
+    //   (trunctate after the multiplicarion, so you get one in response to one bomber and a second in response to the third),
+    // or 2 non-copter-calc-involved AAs per bomber
+    var fighter = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_SURFACE | UnitModel.JET, false);
+    if( null != bomber )
+    {
+      counterOrder.add(bomber);
+      var bomberCounters = counterBuildPercents.getOrDefault(bomber, new ArrayList<>());
+      if( null != fighter )
+        bomberCounters.add(new CounterRatio(fighter, 170));
+      bomberCounters.add(new CounterRatio(antiAir, 50));
+      var aaCounterCounters = counterBuildCounterPercents.getOrDefault(antiAir, new HashMap<>());
+      if( null != copter )
+        aaCounterCounters.put(copter, 100);
+    }
+
+    // stealth: have 1 healthy fighter on the board if a stealth is present
+    var stealths = myArmy.cos[0].getAllModels(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.JET, false);
+    boolean stealthIsStealth = false;
+    for( var s : stealths )
+      if( s.hidden )
+      {
+        stealthIsStealth = true;
+        break;
+      }
+    if( stealthIsStealth )
+      for( var s : stealths )
+      {
+        counterOrder.add(s);
+        var stealthCounters = counterBuildPercents.getOrDefault(s, new ArrayList<>());
+        if( null != fighter )
+          stealthCounters.add(new CounterRatio(fighter, 100));
+      }
+
+    // fighter: 2 AA per, AAs built for other air units included this time
+    if( null != fighter )
+    {
+      counterOrder.add(fighter);
+      var fighterCounters = counterBuildPercents.getOrDefault(fighter, new ArrayList<>());
+      fighterCounters.add(new CounterRatio(antiAir, 50));
+    }
+
+    // ~counterbuilds
+
     if( null == copter ) // I clearly don't understand this unit set, so just grab something to hedge
       copter = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_AIR, false);
 
