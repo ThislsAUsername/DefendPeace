@@ -336,7 +336,7 @@ public class UIUtils
   public static final COSpriteSpec IDS = COSpriteSpec.fromDisk("IDS"          , "Army");
 
   public static COSpriteSpec[] CANON_FACTIONS;
-  public static SourceGames[] GAME_RESOLUTION_ORDER;
+  public static SourceGames[] PORTRAIT_CHOICE_ORDER;
 
   public enum SourceGames
   {
@@ -364,7 +364,7 @@ public class UIUtils
           // DoR
           BW, NW, LA, };
       // In order of CO name discriminator resolution
-      GAME_RESOLUTION_ORDER = new SourceGames[]
+      PORTRAIT_CHOICE_ORDER = new SourceGames[]
         {
             SourceGames.DEFEND_PEACE,
             SourceGames.AW3,
