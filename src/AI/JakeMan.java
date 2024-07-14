@@ -61,6 +61,7 @@ public class JakeMan extends ModularAI
 
   private Map<UnitModel, Map<XYCoord, Double>> unitMapEnemy;
   private Map<UnitModel, Map<XYCoord, Double>> unitMapFriendly;
+  private Map<Commander, ArrayList<Unit>> unitLists;
 
   UnitModel infantry;
   ArrayList<UnitModel> allTanks;
@@ -73,6 +74,8 @@ public class JakeMan extends ModularAI
     UnitModel counter;
     int power;
     boolean roundTargetPercentUp = false;
+    public static final int ROUND_UP_HEALTH = 20;
+    public static final int SAVE_BENCHMARK  = 6000; // "Buy one less tank"
     public CounterRatio(UnitModel counter, int power)
     {
       this.counter = counter;
@@ -82,7 +85,7 @@ public class JakeMan extends ModularAI
   // For each enemy unit type, my unit types X/Y/Z counter it at this effectiveness percent
   private Map<UnitModel, ArrayList<CounterRatio>> counterBuildPercents;
   // For unit type of mine, enemy unit types X/Y/Z negate it as a counter unit at this effectiveness percent
-  private Map<UnitModel, Map<UnitModel, Integer>> counterBuildCounterPercents;
+  private Map<UnitModel, ArrayList<CounterRatio>> counterBuildCounterPercents;
 
   public JakeMan(Army army)
   {
@@ -218,8 +221,8 @@ public class JakeMan extends ModularAI
     {
       ai.unitMapEnemy = new HashMap<UnitModel, Map<XYCoord, Double>>();
       ai.unitMapFriendly = new HashMap<UnitModel, Map<XYCoord, Double>>();
-      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(null, gameMap);
-      for( Commander co : unitLists.keySet() )
+      ai.unitLists = AIUtils.getEnemyUnitsByCommander(null, gameMap);
+      for( Commander co : ai.unitLists.keySet() )
       {
         Map<UnitModel, Map<XYCoord, Double>> mapToFill;
         if( myArmy.isEnemy(co) )
@@ -227,7 +230,7 @@ public class JakeMan extends ModularAI
         else
           mapToFill = ai.unitMapFriendly;
 
-        for( Unit threat : unitLists.get(co) )
+        for( Unit threat : ai.unitLists.get(co) )
         {
           // add each new threat to the existing threats
           final UnitModel um = threat.model;
@@ -250,7 +253,7 @@ public class JakeMan extends ModularAI
       return null;
     }
   }
-  
+
   // Try to get unit value by capture or attack
   public static class GetFreeDudes extends UnitActionFinder
   {
@@ -794,16 +797,131 @@ public class JakeMan extends ModularAI
       log("No properties available to build.");
       return builds;
     }
+    int budget = myArmy.money;
 
+    // Fill out production with inf first, to trim the budget
+    ArrayList<MapLocation> infBases = CPI.getAllFacilitiesFor(infantry);
+    for( MapLocation loc : infBases )
+    {
+      Commander buyer = loc.getOwner();
+      final XYCoord coord = loc.getCoordinates();
+      final int cost = buyer.getBuyCost(infantry, coord);
+
+      if( cost <= budget )
+      {
+        builds.put(coord, infantry);
+        budget -= cost;
+      }
+      else
+        budget = -1;
+    }
+    if( budget < 3000 ) // arbitrary
+      return builds;
     log("Evaluating Production needs");
-    ArrayList<UnitModel> wantedTypes = new ArrayList<>();
 
+    // "Net health" of the units I might want to build counters for, or use as counters.
+    HashMap<UnitModel, Integer> niceHealth = new HashMap<>();
+    HashMap<UnitModel, Integer> meanHealth = new HashMap<>();
+    for( Commander co : unitLists.keySet() )
+    {
+      HashMap<UnitModel, Integer> mapToFill;
+      if( myArmy.isEnemy(co) )
+        mapToFill = meanHealth;
+      else
+        mapToFill = niceHealth;
+
+      for( Unit threat : unitLists.get(co) )
+      {
+        final UnitModel um = threat.model;
+        if( !counterBuildPercents.containsKey(um) )
+          continue; // Only consider threats we have counters for
+        int oldVal = mapToFill.getOrDefault(um, 0);
+        int newVal = oldVal + threat.getHealth();
+        mapToFill.put(um, newVal);
+      }
+    }
+    boolean counterNeeded = false;
+    boolean shouldSave = true;
+    // If I need to do a counterbuild, either:
+    //   add it to the list before the normal builds
+    //   reduce my budget this turn to save up
+    for( var threatType : meanHealth.keySet() )
+    {
+      int remainingHealth = meanHealth.get(threatType);
+      ArrayList<CounterRatio> counters = counterBuildPercents.get(threatType);
+
+      // Chip down remainingHealth based on unit totals.
+      for( var ratio : counters )
+      {
+        if( !niceHealth.containsKey(ratio.counter) )
+          continue;
+        int counterHealth = niceHealth.get(ratio.counter);
+        if( counterBuildCounterPercents.containsKey(ratio.counter) )
+          for( var ccRatio : counterBuildCounterPercents.get(ratio.counter) )
+          {
+            if( !meanHealth.containsKey(ratio.counter) )
+              continue;
+            int ccHealth = meanHealth.get(ccRatio.counter);
+            int ccPower  = ccHealth * ccRatio.power / UnitModel.MAXIMUM_HEALTH;
+            counterHealth -= ccPower;
+          }
+        int counterPower  = counterHealth * ratio.power / UnitModel.MAXIMUM_HEALTH;
+        remainingHealth  -= counterPower;
+        if( ratio.roundTargetPercentUp )
+        {
+          int roundable = remainingHealth % UnitModel.MAXIMUM_HEALTH;
+          if( roundable >= CounterRatio.ROUND_UP_HEALTH )
+            remainingHealth += UnitModel.MAXIMUM_HEALTH - roundable;
+        }
+      }
+      if( remainingHealth < UnitModel.MAXIMUM_HEALTH )
+        continue; // We consider it fully-countered
+      counterNeeded = true;
+
+      // Chip down remainingHealth with new builds.
+      for( var ratio : counters )
+      {
+        ArrayList<MapLocation> facilities = CPI.getAllFacilitiesFor(ratio.counter);
+        for( MapLocation loc : facilities )
+        {
+          Commander buyer = loc.getOwner();
+          final XYCoord coord = loc.getCoordinates();
+          final int cost = buyer.getBuyCost(ratio.counter, coord);
+
+          int marginalCost = cost;
+          if( builds.containsKey(coord) )
+            marginalCost -= buyer.getBuyCost(builds.get(coord), coord);
+
+          if( marginalCost <= budget )
+          {
+            builds.put(coord, ratio.counter);
+            budget -= marginalCost;
+            shouldSave = false; // If we've already built some counter units, don't worry about saving for more
+            log(String.format("Building %s to counter %s health of %s",
+                ratio.counter, remainingHealth, threatType));
+            remainingHealth -= ratio.power;
+          }
+          if( remainingHealth < UnitModel.MAXIMUM_HEALTH )
+            break; // We consider it fully-countered
+        }
+        if( remainingHealth < UnitModel.MAXIMUM_HEALTH )
+          break; // We consider it fully-countered
+      }
+    }
+
+    // If we can't counter all of the threats and don't have enough to buy counters, save money
+    if( counterNeeded && shouldSave )
+      budget -= CounterRatio.SAVE_BENCHMARK;
+
+    if( budget < 3000 ) // arbitrary
+      return builds;
+
+    ArrayList<UnitModel> wantedTypes = new ArrayList<>();
     wantedTypes.add(infantry);
     wantedTypes.add(allTanks.get(0));
     wantedTypes.add(copter);
     wantedTypes.add(allTanks.get(1));
 
-    int budget = myArmy.money;
     // Try to purchase as many of the biggest units I can
     for(int i = 0; i < wantedTypes.size(); ++i)
     {
@@ -820,7 +938,12 @@ public class JakeMan extends ModularAI
 
         int marginalCost = cost;
         if( builds.containsKey(coord) )
-          marginalCost -= buyer.getBuyCost(builds.get(coord), coord);
+        {
+          UnitModel currentBuild = builds.get(coord);
+          if( !wantedTypes.contains(currentBuild) )
+            continue; // If it's not a standard build, don't override
+          marginalCost -= buyer.getBuyCost(currentBuild, coord);
+        }
 
         if( marginalCost <= budget )
         {
@@ -864,16 +987,17 @@ public class JakeMan extends ModularAI
 
     counterOrder = new ArrayList<>();
     counterBuildPercents = new HashMap<>();
-    counterBuildCounterPercents = new HashMap<>();
+    counterBuildCounterPercents = new HashMap<>(); // Note: we assume all second-level keys in here are primary keys above
 
     // tanks: no need to calc them beyond the Md clause
     // copters: 1.5 copters or 1AA per
     if( null != copter )
     {
       counterOrder.add(copter);
-      var copterCounters = counterBuildPercents.getOrDefault(copter, new ArrayList<>());
+      counterBuildPercents.put(copter, new ArrayList<>());
+      var copterCounters = counterBuildPercents.get(copter);
       CounterRatio copterCounterCopter = new CounterRatio(copter, 200/3);
-      copterCounterCopter.roundTargetPercentUp = true; // I shouldn't buy a single copter to counter an enemy copter
+      copterCounterCopter.roundTargetPercentUp = true; // I don't consider a single existing copter a full counter to an enemy copter
       copterCounters.add(copterCounterCopter);
       copterCounters.add(new CounterRatio(antiAir, 100));
     }
@@ -881,7 +1005,8 @@ public class JakeMan extends ModularAI
     // Md: 1 neo per 1.5 Mds? Ignore if you already have a bomber
     var mdTank = allTanks.get(1);
     counterOrder.add(mdTank);
-    var mdCounters = counterBuildPercents.getOrDefault(mdTank, new ArrayList<>());
+    counterBuildPercents.put(mdTank, new ArrayList<>());
+    var mdCounters = counterBuildPercents.get(mdTank);
     var bomber = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_SURFACE | UnitModel.JET, false);
     if( null != bomber )
       mdCounters.add(new CounterRatio(bomber, 250));
@@ -896,13 +1021,15 @@ public class JakeMan extends ModularAI
     if( null != bomber )
     {
       counterOrder.add(bomber);
-      var bomberCounters = counterBuildPercents.getOrDefault(bomber, new ArrayList<>());
+      counterBuildPercents.put(bomber, new ArrayList<>());
+      var bomberCounters = counterBuildPercents.get(bomber);
       if( null != fighter )
         bomberCounters.add(new CounterRatio(fighter, 170));
       bomberCounters.add(new CounterRatio(antiAir, 50));
-      var aaCounterCounters = counterBuildCounterPercents.getOrDefault(antiAir, new HashMap<>());
+      counterBuildCounterPercents.put(antiAir, new ArrayList<>());
+      var aaCounterCounters = counterBuildCounterPercents.get(antiAir);
       if( null != copter )
-        aaCounterCounters.put(copter, 100);
+        aaCounterCounters.add(new CounterRatio(copter, 100));
     }
 
     // stealth: have 1 healthy fighter on the board if a stealth is present
@@ -924,7 +1051,8 @@ public class JakeMan extends ModularAI
       for( var s : stealths )
       {
         counterOrder.add(s);
-        var stealthCounters = counterBuildPercents.getOrDefault(s, new ArrayList<>());
+        counterBuildPercents.put(s, new ArrayList<>());
+        var stealthCounters = counterBuildPercents.get(s);
         CounterRatio fighterCounterStealth = new CounterRatio(fighter, 100);
         fighterCounterStealth.roundTargetPercentUp = true; // Fighter needs to be healthy to deal
         stealthCounters.add(fighterCounterStealth);
@@ -934,8 +1062,11 @@ public class JakeMan extends ModularAI
     if( null != fighter )
     {
       counterOrder.add(fighter);
-      var fighterCounters = counterBuildPercents.getOrDefault(fighter, new ArrayList<>());
-      fighterCounters.add(new CounterRatio(antiAir, 50));
+      counterBuildPercents.put(fighter, new ArrayList<>());
+      var fighterCounters = counterBuildPercents.get(fighter);
+      CounterRatio aaVSfighter = new CounterRatio(antiAir, 50);
+      aaVSfighter.roundTargetPercentUp = true; // 2 whole AA per fighter
+      fighterCounters.add(aaVSfighter);
     }
 
     // ~counterbuilds
