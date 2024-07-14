@@ -47,7 +47,7 @@ public class FightClub
     // Select CO(s).
     List<CommanderInfo> COs = Arrays.asList(Patch.getInfo(), Patch.getInfo());
     // Select AI(s).
-    List<AIMaker> AIs = Arrays.asList(Muriel.info, JakeMan.info);
+    List<AIMaker> AIs = Arrays.asList(JakeMan.oldSchoolCool, JakeMan.info);
 
     // Run a set of games on each map.
     for( int setNum = 0; setNum < maps.size(); ++setNum )

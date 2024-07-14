@@ -16,16 +16,18 @@ public class JakeMan extends ModularAI
 {
   private static class instantiator implements AIMaker
   {
+    private boolean buildCounters = true;
+    private String name = "JakeMan";
     @Override
     public AIController create(Army army)
     {
-      return new JakeMan(army);
+      return new JakeMan(army, this);
     }
 
     @Override
     public String getName()
     {
-      return "JakeMan";
+      return name;
     }
 
     @Override
@@ -38,11 +40,20 @@ public class JakeMan extends ModularAI
     }
   }
   public static final AIMaker info = new instantiator();
+  public static final AIMaker oldSchoolCool;
+  static
+  {
+    var oldSchool = new instantiator();
+    oldSchool.buildCounters = false;
+    oldSchool.name = "OldSchoolCool";
+    oldSchoolCool = oldSchool;
+  }
+  public final instantiator myInfo;
 
   @Override
   public AIMaker getAIInfo()
   {
-    return info;
+    return myInfo;
   }
 
   // What % base damage I'll ignore when checking safety
@@ -87,9 +98,10 @@ public class JakeMan extends ModularAI
   // For unit type of mine, enemy unit types X/Y/Z negate it as a counter unit at this effectiveness percent
   private Map<UnitModel, ArrayList<CounterRatio>> counterBuildCounterPercents;
 
-  public JakeMan(Army army)
+  public JakeMan(Army army, instantiator info)
   {
     super(army);
+    myInfo = info;
 
     // look where all vehicles are and what their threat ranges are (yes, mechs are vehicles)
     // take free dudes that you have more defenders for than them
@@ -985,9 +997,21 @@ public class JakeMan extends ModularAI
     antiAir  = myArmy.cos[0].getUnitModel(UnitModel.SURFACE_TO_AIR);
     copter   = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT | UnitModel.AIR_LOW, false);
 
+    counterBuildSetup();
+
+    if( null == copter ) // I clearly don't understand this unit set, so just grab something to hedge
+      copter = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_AIR, false);
+
+    capPhase = new CapPhaseAnalyzer(map, myArmy);
+  }
+
+  private void counterBuildSetup()
+  {
     counterOrder = new ArrayList<>();
     counterBuildPercents = new HashMap<>();
     counterBuildCounterPercents = new HashMap<>(); // Note: we assume all second-level keys in here are primary keys above
+    if( !myInfo.buildCounters )
+      return;
 
     // tanks: no need to calc them beyond the Md clause
     // copters: 1.5 copters or 1AA per
@@ -1068,13 +1092,6 @@ public class JakeMan extends ModularAI
       aaVSfighter.roundTargetPercentUp = true; // 2 whole AA per fighter
       fighterCounters.add(aaVSfighter);
     }
-
-    // ~counterbuilds
-
-    if( null == copter ) // I clearly don't understand this unit set, so just grab something to hedge
-      copter = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_AIR, false);
-
-    capPhase = new CapPhaseAnalyzer(map, myArmy);
   }
 
 }
