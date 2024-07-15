@@ -59,6 +59,7 @@ public class JakeMan extends ModularAI
   // What % base damage I'll ignore when checking safety
   private static final int    INDIRECT_THREAT_THRESHOLD = 7;
   private static final int    DIRECT_THREAT_THRESHOLD   = 30;
+  private static final int    MASSIVE_THREAT_THRESHOLD  = 70;
   // Value to scale the funds damage I deal to something that threatens me
   private static final double FIRSTSTRIKE_ON_THREAT_WEIGHT = 2.0;
   private static final int    STAY_ALIVE_BIAS = 2000;
@@ -90,6 +91,11 @@ public class JakeMan extends ModularAI
     {
       this.counter = counter;
       this.power = power;
+    }
+    @Override
+    public String toString()
+    {
+      return counter.name + " countering for " + power;
     }
   }
   // For each enemy unit type, my unit types X/Y/Z counter it at this effectiveness percent
@@ -905,6 +911,27 @@ public class JakeMan extends ModularAI
 
           if( marginalCost <= budget )
           {
+            boolean safeToBuild = true; // Don't build counter units in range of units they're squishy to.
+            for( UnitModel threat : unitMapEnemy.keySet() )
+            {
+              if( unitMapEnemy.get(threat).containsKey(coord) )
+              {
+                double power = unitMapEnemy.get(threat).get(coord);
+                UnitContext tc = new UnitContext(myArmy.cos[0], threat);
+                tc.chooseWeapon(ratio.counter);
+                if( null == tc.weapon )
+                  continue;
+                int damage = (int) (tc.weapon.getDamage(ratio.counter) * power);
+                if( damage > MASSIVE_THREAT_THRESHOLD )
+                {
+                  safeToBuild = false;
+                  break;
+                }
+              }
+            }
+            if( !safeToBuild )
+              continue;
+
             builds.put(coord, ratio.counter);
             budget -= marginalCost;
             shouldSave = false; // If we've already built some counter units, don't worry about saving for more
