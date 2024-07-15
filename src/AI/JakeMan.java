@@ -58,10 +58,9 @@ public class JakeMan extends ModularAI
 
   // What % base damage I'll ignore when checking safety
   private static final int    INDIRECT_THREAT_THRESHOLD = 7;
-  private static final int    DIRECT_THREAT_THRESHOLD = 13;
+  private static final int    DIRECT_THREAT_THRESHOLD   = 30;
   // Value to scale the funds damage I deal to something that threatens me
   private static final double FIRSTSTRIKE_ON_THREAT_WEIGHT = 2.0;
-  private static final int    STAY_UNHURT_BIAS = 1000;
   private static final int    STAY_ALIVE_BIAS = 2000;
   private static final int    BIG_THREAT_THRESHOLD = 80; // Enemy health at which I double the expected value of dealing damage
   // Fraction of the unit to remove from the counter-threat power of my unit type if I'm not attacking
@@ -693,8 +692,6 @@ public class JakeMan extends ModularAI
 
             // Convert to abstract value
             int extraLoss = 0;
-            if( loss >= 10 && unit.getHealth() == UnitModel.MAXIMUM_HEALTH )
-              extraLoss += STAY_UNHURT_BIAS;
             if( loss >= unit.getHealth() )
               extraLoss += STAY_ALIVE_BIAS;
             loss *= unit.getCost();
@@ -781,17 +778,19 @@ public class JakeMan extends ModularAI
     // If there are no threats we can't handle, dude is free.
     if( threatCounts.size() < 1 )
       return true;
-    double totalThreat = 0;
-    for( UnitModel threat : threatCounts.keySet() )
-    {
-      totalThreat += threatCounts.get(threat);
-      // Be extra scared of stuff we can't hit back against
-      if( isWeakTo(unit.model, threat) )
-        totalThreat += threatCounts.get(threat) * 2;
-    }
-    // If we have threats, but we have good terrain, that's good enough
+
+    // Count dude as free if:
+    //   we get 3+ terrain stars
+    //   the threat surplus is small
+    //   that threat is of the same unit type
     final int defLevel = gameMap.getEnvironment(xyc).terrainType.getDefLevel();
-    if( defLevel > totalThreat )
+    if( defLevel < 3 || unit.model.isAirUnit() )
+      return false;
+    if( threatCounts.size() > 1 )
+      return false;
+    if( !threatCounts.containsKey(unit.model) )
+      return false; // Our one threat is not same-type
+    if( threatCounts.get(unit.model) < 1.3 )
       return true;
     return false;
   }
