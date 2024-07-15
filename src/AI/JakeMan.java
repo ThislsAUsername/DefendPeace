@@ -74,10 +74,8 @@ public class JakeMan extends ModularAI
   private Map<UnitModel, Map<XYCoord, Double>> unitMapFriendly;
   private Map<Commander, ArrayList<Unit>> unitLists;
 
-  UnitModel infantry;
   ArrayList<UnitModel> allTanks;
-  UnitModel antiAir;
-  UnitModel copter;
+  UnitModel infantry, tank, mdTank, antiAir, copter;
   // Order of enemy types to consider building counter units
   ArrayList<UnitModel> counterOrder;
   public static class CounterRatio
@@ -801,6 +799,55 @@ public class JakeMan extends ModularAI
     return false;
   }
 
+  // Build an Md if the enemy has 3+ more ground vehicles within 2 tank moves of your base
+  // ...but don't if there are 2+ Mds in the area
+  private static class FactoryThreatState
+  {
+    public final JakeMan ai;
+    public final XYCoord coord;
+    public final ArrayList<Utils.SearchNode> checkTiles;
+    public int niceMdCount = 0, meanVehCount = 0, niceVehCount = 0;
+    public FactoryThreatState(JakeMan ai, XYCoord coord, GameMap map, UnitContext theVeh)
+    {
+      this.coord = coord;
+      this.ai    = ai;
+      theVeh.setCoord(coord);
+      PathCalcParams pcp = new PathCalcParams(theVeh, map);
+      pcp.initialMovePower *= 2;
+      pcp.canTravelThroughEnemies = true;
+      checkTiles = pcp.findAllPaths();
+    }
+    public void trackUnit(Unit threat)
+    {
+      if( !checkTiles.contains(new XYCoord(threat)) )
+        return;
+      if( ai.myArmy.isEnemy(threat.CO) )
+      {
+        if( threat.model.isAny(UnitModel.TANK) )
+          ++meanVehCount;
+      }
+      else
+      {
+        if( threat.model.isAny(UnitModel.TANK) )
+          ++niceVehCount;
+        if( ai.mdTank == threat.model )
+          ++niceMdCount;
+      }
+    }
+    public boolean shouldBuildMd()
+    {
+      if( niceMdCount > 1 )
+        return false;
+      int vehDiff = meanVehCount - niceVehCount;
+      return vehDiff > 2;
+    }
+    @Override
+    public String toString()
+    {
+      return "FTS for " + coord;
+    }
+  }
+
   private Map<XYCoord, UnitModel> queueUnitProductionActions(GameMap gameMap)
   {
     // build tank unless proven otherwise
@@ -836,6 +883,12 @@ public class JakeMan extends ModularAI
       return builds;
     log("Evaluating Production needs");
 
+    ArrayList<FactoryThreatState> potentialMdBuilds = new ArrayList<>();
+    ArrayList<MapLocation> mdBases = CPI.getAllFacilitiesFor(mdTank);
+    UnitContext theVeh = new UnitContext(myArmy.cos[0], tank); // for getting the zone of concern
+    for( MapLocation loc : mdBases )
+      potentialMdBuilds.add(new FactoryThreatState(this, loc.getCoordinates(), gameMap, theVeh));
+
     // "Net health" of the units I might want to build counters for, or use as counters.
     HashMap<UnitModel, Integer> niceHealth = new HashMap<>();
     HashMap<UnitModel, Integer> meanHealth = new HashMap<>();
@@ -849,6 +902,8 @@ public class JakeMan extends ModularAI
 
       for( Unit threat : unitLists.get(co) )
       {
+        for( var fts : potentialMdBuilds )
+          fts.trackUnit(threat);
         final UnitModel um = threat.model;
         if( !counterBuildPercents.containsKey(um) )
           continue; // Only consider threats we have counters for
@@ -857,8 +912,31 @@ public class JakeMan extends ModularAI
         mapToFill.put(um, newVal);
       }
     }
-    boolean counterNeeded = false;
+
     boolean shouldSave = true;
+    for( var fts : potentialMdBuilds )
+    {
+      if( !fts.shouldBuildMd() )
+        continue;
+      MapLocation loc = gameMap.getLocation(fts.coord);
+      Commander buyer = loc.getOwner();
+      final XYCoord coord = loc.getCoordinates();
+      final int cost = buyer.getBuyCost(mdTank, coord);
+
+      int marginalCost = cost;
+      if( builds.containsKey(coord) )
+        marginalCost -= buyer.getBuyCost(builds.get(coord), coord);
+
+      if( marginalCost <= budget )
+      {
+        builds.put(coord, mdTank);
+        budget -= marginalCost;
+        shouldSave = false; // If we've already built some counter units, don't worry about saving for more
+        log(String.format("Building MD to protect %s", fts.coord));
+      }
+    }
+
+    boolean counterNeeded = false;
     // If I need to do a counterbuild, either:
     //   add it to the list before the normal builds
     //   reduce my budget this turn to save up
@@ -956,9 +1034,9 @@ public class JakeMan extends ModularAI
 
     ArrayList<UnitModel> wantedTypes = new ArrayList<>();
     wantedTypes.add(infantry);
-    wantedTypes.add(allTanks.get(0));
+    wantedTypes.add(tank);
     wantedTypes.add(copter);
-    wantedTypes.add(allTanks.get(1));
+    wantedTypes.add(mdTank);
 
     // Try to purchase as many of the biggest units I can
     for(int i = 0; i < wantedTypes.size(); ++i)
@@ -980,6 +1058,8 @@ public class JakeMan extends ModularAI
           UnitModel currentBuild = builds.get(coord);
           if( !wantedTypes.contains(currentBuild) )
             continue; // If it's not a standard build, don't override
+          if( um.costBase < currentBuild.costBase )
+            continue; // If it's a standard build that's more expensive, it's a counter unit
           marginalCost -= buyer.getBuyCost(currentBuild, coord);
         }
 
@@ -993,7 +1073,7 @@ public class JakeMan extends ModularAI
         {
           for( XYCoord tankCoord : builds.keySet().toArray(new XYCoord[0]) )
           {
-            if( allTanks.get(0) == builds.get(tankCoord) )
+            if( tank == builds.get(tankCoord) )
             {
               int downgradeSavings = 0;
               downgradeSavings += buyer.getBuyCost(builds.get(tankCoord), coord);
@@ -1020,6 +1100,8 @@ public class JakeMan extends ModularAI
   {
     infantry = myArmy.cos[0].getUnitModel(UnitModel.TROOP);
     allTanks = myArmy.cos[0].getAllModels(UnitModel.ASSAULT);
+    tank     = allTanks.get(0);
+    mdTank   = allTanks.get(1);
     antiAir  = myArmy.cos[0].getUnitModel(UnitModel.SURFACE_TO_AIR);
     copter   = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT | UnitModel.AIR_LOW, false);
 
@@ -1053,7 +1135,6 @@ public class JakeMan extends ModularAI
     }
 
     // Md: 1 neo per 1.5 Mds? Ignore if you already have a bomber
-    var mdTank = allTanks.get(1);
     counterOrder.add(mdTank);
     counterBuildPercents.put(mdTank, new ArrayList<>());
     var mdCounters = counterBuildPercents.get(mdTank);
