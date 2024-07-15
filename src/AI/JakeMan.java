@@ -16,7 +16,8 @@ public class JakeMan extends ModularAI
 {
   private static class instantiator implements AIMaker
   {
-    private boolean buildCounters = true;
+    private boolean buildCounters   = true;
+    private boolean buildMdCounters = true;
     private String name = "JakeMan";
     @Override
     public AIController create(Army army)
@@ -44,7 +45,8 @@ public class JakeMan extends ModularAI
   static
   {
     var oldSchool = new instantiator();
-    oldSchool.buildCounters = false;
+    oldSchool.buildCounters   = true;
+    oldSchool.buildMdCounters = false;
     oldSchool.name = "OldSchoolCool";
     oldSchoolCool = oldSchool;
   }
@@ -836,6 +838,8 @@ public class JakeMan extends ModularAI
     }
     public boolean shouldBuildMd()
     {
+      if( !ai.myInfo.buildMdCounters )
+        return false;
       if( niceMdCount > 1 )
         return false;
       int vehDiff = meanVehCount - niceVehCount;
