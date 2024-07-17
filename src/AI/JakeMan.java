@@ -99,9 +99,9 @@ public class JakeMan extends ModularAI
     }
   }
   // For each enemy unit type, my unit types X/Y/Z counter it at this effectiveness percent
-  private Map<UnitModel, ArrayList<CounterRatio>> counterBuildPercents;
-  // For unit type of mine, enemy unit types X/Y/Z negate it as a counter unit at this effectiveness percent
-  private Map<UnitModel, ArrayList<CounterRatio>> counterBuildCounterPercents;
+  private Map<UnitModel, ArrayList<CounterRatio>> unitTypeToCounterMap;
+  // For each enemy unit type, my own counter unit type is negated by X/Y/Z at this ratio
+  private Map<UnitModel, Map<UnitModel, ArrayList<CounterRatio>>> counterTypeNegationMap;
 
   public JakeMan(Army army, instantiator info)
   {
@@ -909,7 +909,7 @@ public class JakeMan extends ModularAI
         for( var fts : potentialMdBuilds )
           fts.trackUnit(threat);
         final UnitModel um = threat.model;
-        if( !counterBuildPercents.containsKey(um) )
+        if( !unitTypeToCounterMap.containsKey(um) )
           continue; // Only consider threats we have counters for
         int oldVal = mapToFill.getOrDefault(um, 0);
         int newVal = oldVal + threat.getHealth();
@@ -947,7 +947,7 @@ public class JakeMan extends ModularAI
     for( var threatType : meanHealth.keySet() )
     {
       int remainingHealth = meanHealth.get(threatType);
-      ArrayList<CounterRatio> counters = counterBuildPercents.get(threatType);
+      ArrayList<CounterRatio> counters = unitTypeToCounterMap.get(threatType);
 
       // Chip down remainingHealth based on unit totals.
       for( var ratio : counters )
@@ -955,8 +955,10 @@ public class JakeMan extends ModularAI
         if( !niceHealth.containsKey(ratio.counter) )
           continue;
         int counterHealth = niceHealth.get(ratio.counter);
-        if( counterBuildCounterPercents.containsKey(ratio.counter) )
-          for( var ccRatio : counterBuildCounterPercents.get(ratio.counter) )
+        if( counterTypeNegationMap.containsKey(threatType) )
+        {
+          var negationRatios = counterTypeNegationMap.get(threatType).getOrDefault(ratio.counter, new ArrayList<>());
+          for( var ccRatio : negationRatios )
           {
             if( !meanHealth.containsKey(ratio.counter) )
               continue;
@@ -964,6 +966,7 @@ public class JakeMan extends ModularAI
             int ccPower  = ccHealth * ccRatio.power / UnitModel.MAXIMUM_HEALTH;
             counterHealth -= ccPower;
           }
+        }
         int counterPower  = counterHealth * ratio.power / UnitModel.MAXIMUM_HEALTH;
         remainingHealth  -= counterPower;
         if( ratio.roundTargetPercentUp )
@@ -1120,8 +1123,8 @@ public class JakeMan extends ModularAI
   private void counterBuildSetup()
   {
     counterOrder = new ArrayList<>();
-    counterBuildPercents = new HashMap<>();
-    counterBuildCounterPercents = new HashMap<>(); // Note: we assume all second-level keys in here are primary keys above
+    unitTypeToCounterMap = new HashMap<>();
+    counterTypeNegationMap = new HashMap<>(); // Note: we assume all UnitModels referenced in here are in the above
     if( !myInfo.buildCounters )
       return;
 
@@ -1130,8 +1133,8 @@ public class JakeMan extends ModularAI
     if( null != copter )
     {
       counterOrder.add(copter);
-      counterBuildPercents.put(copter, new ArrayList<>());
-      var copterCounters = counterBuildPercents.get(copter);
+      unitTypeToCounterMap.put(copter, new ArrayList<>());
+      var copterCounters = unitTypeToCounterMap.get(copter);
       CounterRatio copterCounterCopter = new CounterRatio(copter, 200/3);
       copterCounterCopter.roundTargetPercentUp = true; // I don't consider a single existing copter a full counter to an enemy copter
       copterCounters.add(copterCounterCopter);
@@ -1140,8 +1143,8 @@ public class JakeMan extends ModularAI
 
     // Md: 1 neo per 1.5 Mds? Ignore if you already have a bomber
     counterOrder.add(mdTank);
-    counterBuildPercents.put(mdTank, new ArrayList<>());
-    var mdCounters = counterBuildPercents.get(mdTank);
+    unitTypeToCounterMap.put(mdTank, new ArrayList<>());
+    var mdCounters = unitTypeToCounterMap.get(mdTank);
     var bomber = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_SURFACE | UnitModel.JET, false);
     if( null != bomber )
       mdCounters.add(new CounterRatio(bomber, 250));
@@ -1151,20 +1154,25 @@ public class JakeMan extends ModularAI
 
     // 1 fighter per 1.7 (yes) bombers
     //   (trunctate after the multiplicarion, so you get one in response to one bomber and a second in response to the third),
-    // or 2 non-copter-calc-involved AAs per bomber
     var fighter = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_SURFACE | UnitModel.JET, false);
     if( null != bomber )
     {
       counterOrder.add(bomber);
-      counterBuildPercents.put(bomber, new ArrayList<>());
-      var bomberCounters = counterBuildPercents.get(bomber);
+      unitTypeToCounterMap.put(bomber, new ArrayList<>());
+      var bomberCounters = unitTypeToCounterMap.get(bomber);
       if( null != fighter )
         bomberCounters.add(new CounterRatio(fighter, 170));
       bomberCounters.add(new CounterRatio(antiAir, 50));
-      counterBuildCounterPercents.put(antiAir, new ArrayList<>());
-      var aaCounterCounters = counterBuildCounterPercents.get(antiAir);
+
+      // or 2 non-copter-calc-involved AAs per bomber
       if( null != copter )
+      {
+        counterTypeNegationMap.put(bomber, new HashMap<>());
+        var bomberCounterNegators = counterTypeNegationMap.get(bomber);
+        bomberCounterNegators.put(antiAir, new ArrayList<>());
+        var aaCounterCounters = bomberCounterNegators.get(antiAir);
         aaCounterCounters.add(new CounterRatio(copter, 100));
+      }
     }
 
     // stealth: have 1 healthy fighter on the board if a stealth is present
@@ -1186,8 +1194,8 @@ public class JakeMan extends ModularAI
       for( var s : stealths )
       {
         counterOrder.add(s);
-        counterBuildPercents.put(s, new ArrayList<>());
-        var stealthCounters = counterBuildPercents.get(s);
+        unitTypeToCounterMap.put(s, new ArrayList<>());
+        var stealthCounters = unitTypeToCounterMap.get(s);
         CounterRatio fighterCounterStealth = new CounterRatio(fighter, 100);
         fighterCounterStealth.roundTargetPercentUp = true; // Fighter needs to be healthy to deal
         stealthCounters.add(fighterCounterStealth);
@@ -1197,8 +1205,8 @@ public class JakeMan extends ModularAI
     if( null != fighter )
     {
       counterOrder.add(fighter);
-      counterBuildPercents.put(fighter, new ArrayList<>());
-      var fighterCounters = counterBuildPercents.get(fighter);
+      unitTypeToCounterMap.put(fighter, new ArrayList<>());
+      var fighterCounters = unitTypeToCounterMap.get(fighter);
       CounterRatio aaVSfighter = new CounterRatio(antiAir, 50);
       aaVSfighter.roundTargetPercentUp = true; // 2 whole AA per fighter
       fighterCounters.add(aaVSfighter);
