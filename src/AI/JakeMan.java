@@ -102,6 +102,8 @@ public class JakeMan extends ModularAI
   private Map<UnitModel, ArrayList<CounterRatio>> unitTypeToCounterMap;
   // For each enemy unit type, my own counter unit type is negated by X/Y/Z at this ratio
   private Map<UnitModel, Map<UnitModel, ArrayList<CounterRatio>>> counterTypeNegationMap;
+  // All unit types that I should track for calculating counterbuilds
+  HashSet<UnitModel> allCounterContestants;
 
   public JakeMan(Army army, instantiator info)
   {
@@ -909,8 +911,8 @@ public class JakeMan extends ModularAI
         for( var fts : potentialMdBuilds )
           fts.trackUnit(threat);
         final UnitModel um = threat.model;
-        if( !unitTypeToCounterMap.containsKey(um) )
-          continue; // Only consider threats we have counters for
+        if( !allCounterContestants.contains(um) )
+          continue;
         int oldVal = mapToFill.getOrDefault(um, 0);
         int newVal = oldVal + threat.getHealth();
         mapToFill.put(um, newVal);
@@ -946,6 +948,8 @@ public class JakeMan extends ModularAI
     //   reduce my budget this turn to save up
     for( var threatType : meanHealth.keySet() )
     {
+      if( !unitTypeToCounterMap.containsKey(threatType) )
+        continue; // This isn't on our list of things to counter (e.g. AA)
       int remainingHealth = meanHealth.get(threatType);
       ArrayList<CounterRatio> counters = unitTypeToCounterMap.get(threatType);
 
@@ -960,7 +964,7 @@ public class JakeMan extends ModularAI
           var negationRatios = counterTypeNegationMap.get(threatType).getOrDefault(ratio.counter, new ArrayList<>());
           for( var ccRatio : negationRatios )
           {
-            if( !meanHealth.containsKey(ratio.counter) )
+            if( !meanHealth.containsKey(ccRatio.counter) )
               continue;
             int ccHealth = meanHealth.get(ccRatio.counter);
             int ccPower  = ccHealth * ccRatio.power / UnitModel.MAXIMUM_HEALTH;
@@ -1113,6 +1117,14 @@ public class JakeMan extends ModularAI
     copter   = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT | UnitModel.AIR_LOW, false);
 
     counterBuildSetup();
+
+    allCounterContestants = new HashSet<>();
+    for( UnitModel counterable : unitTypeToCounterMap.keySet() )
+    {
+      allCounterContestants.add(counterable);
+      for( CounterRatio ratio : unitTypeToCounterMap.get(counterable) )
+        allCounterContestants.add(ratio.counter);
+    }
 
     if( null == copter ) // I clearly don't understand this unit set, so just grab something to hedge
       copter = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_AIR, false);
