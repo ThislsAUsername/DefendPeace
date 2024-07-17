@@ -11,7 +11,7 @@ import java.util.List;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.DefendPeace.CyanOcean.Patch;
+import CommandingOfficers.CommanderLibrary.NotACO;
 import Engine.Army;
 import Engine.GameAction;
 import Engine.GameAction.EndTurnAction;
@@ -45,7 +45,7 @@ public class FightClub
     // How many bouts per map?
     int numGamesPerSet = 3;
     // Select CO(s).
-    List<CommanderInfo> COs = Arrays.asList(Patch.getInfo(), Patch.getInfo());
+    List<CommanderInfo> COs = Arrays.asList(NotACO.getInfo(), NotACO.getInfo());
     // Select AI(s).
     List<AIMaker> AIs = Arrays.asList(JakeMan.oldSchoolCool, JakeMan.info);
 
