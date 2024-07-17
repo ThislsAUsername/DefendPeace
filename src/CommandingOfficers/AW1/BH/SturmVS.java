@@ -39,7 +39,7 @@ public class SturmVS extends AW1Commander
             "Sturm (AW1 VS)\n"
           + "A riddle within a shadow, revealing nothing.\n"
           + "???\n"
-          + "(0.8x/0.8x damage dealt/taken while COP isn't active, perfect movement outside cold weather.)"));
+          + "(0.8x/0.8x damage dealt/taken while COP isn't active, perfect movement except in cold weather.)"));
       infoPages.add(new InfoPage(new MeteorStrike(null),
             "???\n"
           + "(0.9x/0.7x damage dealt/taken.)\n"
