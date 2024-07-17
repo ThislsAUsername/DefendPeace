@@ -1154,7 +1154,7 @@ public class JakeMan extends ModularAI
 
     // 1 fighter per 1.7 (yes) bombers
     //   (trunctate after the multiplicarion, so you get one in response to one bomber and a second in response to the third),
-    var fighter = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_SURFACE | UnitModel.JET, false);
+    var fighter = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_AIR | UnitModel.JET, false);
     if( null != bomber )
     {
       counterOrder.add(bomber);
