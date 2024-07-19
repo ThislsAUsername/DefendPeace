@@ -318,6 +318,16 @@ public class UnitContext extends UnitState
   /**
    * Assign weapon to the available one that can inflict the most damage against the chosen target
    */
+  public void chooseWeapon(ITargetable targetType)
+  {
+    boolean afterMoving = false;
+    if( null != path )
+      afterMoving = path.getPathLength() > 1;
+    else if( null != unit && null != coord )
+      afterMoving = unit.x != coord.x || unit.y != coord.y;
+
+    chooseWeapon(targetType, null, afterMoving);
+  }
   public void chooseWeapon(ITargetable targetType, int range)
   {
     boolean afterMoving = false;
@@ -328,7 +338,7 @@ public class UnitContext extends UnitState
 
     chooseWeapon(targetType, range, afterMoving);
   }
-  public void chooseWeapon(ITargetable targetType, int range, boolean afterMoving)
+  public void chooseWeapon(ITargetable targetType, Integer range, boolean afterMoving)
   {
     // if we have no weapons, we can't hurt things
     if( model.weapons == null )
@@ -349,7 +359,7 @@ public class UnitContext extends UnitState
       UnitContext uc = new UnitContext(this);
       uc.setWeapon(w);
 
-      if( uc.rangeMax < range || uc.rangeMin > range )
+      if( null != range && (uc.rangeMax < range || uc.rangeMin > range) )
       {
         // Can only hit things inside our range
         continue;

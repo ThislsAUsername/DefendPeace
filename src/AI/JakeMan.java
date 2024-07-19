@@ -1,31 +1,34 @@
 package AI;
 
 import java.util.*;
-import java.util.Map.Entry;
-
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.DeployableCommander;
 import Engine.*;
+import Engine.UnitActionLifecycles.TransformLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.*;
 import Units.*;
+import lombok.var;
 
 
 public class JakeMan extends ModularAI
 {
   private static class instantiator implements AIMaker
   {
+    private boolean buildCounters   = true;
+    private boolean buildMdCounters = true;
+    private String name = "JakeMan";
     @Override
     public AIController create(Army army)
     {
-      return new JakeMan(army);
+      return new JakeMan(army, this);
     }
 
     @Override
     public String getName()
     {
-      return "JakeMan";
+      return name;
     }
 
     @Override
@@ -38,19 +41,29 @@ public class JakeMan extends ModularAI
     }
   }
   public static final AIMaker info = new instantiator();
+  public static final AIMaker oldSchoolCool;
+  static
+  {
+    var oldSchool = new instantiator();
+    oldSchool.buildCounters   = true;
+    oldSchool.buildMdCounters = false;
+    oldSchool.name = "OldSchoolCool";
+    oldSchoolCool = oldSchool;
+  }
+  public final instantiator myInfo;
 
   @Override
   public AIMaker getAIInfo()
   {
-    return info;
+    return myInfo;
   }
 
   // What % base damage I'll ignore when checking safety
   private static final int    INDIRECT_THREAT_THRESHOLD = 7;
-  private static final int    DIRECT_THREAT_THRESHOLD = 13;
+  private static final int    DIRECT_THREAT_THRESHOLD   = 30;
+  private static final int    MASSIVE_THREAT_THRESHOLD  = 70;
   // Value to scale the funds damage I deal to something that threatens me
   private static final double FIRSTSTRIKE_ON_THREAT_WEIGHT = 2.0;
-  private static final int    STAY_UNHURT_BIAS = 1000;
   private static final int    STAY_ALIVE_BIAS = 2000;
   private static final int    BIG_THREAT_THRESHOLD = 80; // Enemy health at which I double the expected value of dealing damage
   // Fraction of the unit to remove from the counter-threat power of my unit type if I'm not attacking
@@ -61,15 +74,41 @@ public class JakeMan extends ModularAI
 
   private Map<UnitModel, Map<XYCoord, Double>> unitMapEnemy;
   private Map<UnitModel, Map<XYCoord, Double>> unitMapFriendly;
+  private Map<Commander, ArrayList<Unit>> unitLists;
 
-  UnitModel infantry;
   ArrayList<UnitModel> allTanks;
-  UnitModel antiAir;
-  UnitModel copter;
+  UnitModel infantry, tank, mdTank, antiAir, copter;
+  // Order of enemy types to consider building counter units
+  ArrayList<UnitModel> counterOrder;
+  public static class CounterRatio
+  {
+    UnitModel counter;
+    int power;
+    boolean roundTargetPercentUp = false;
+    public static final int ROUND_UP_HEALTH = 20;
+    public static final int SAVE_BENCHMARK  = 6000; // "Buy one less tank"
+    public CounterRatio(UnitModel counter, int power)
+    {
+      this.counter = counter;
+      this.power = power;
+    }
+    @Override
+    public String toString()
+    {
+      return counter.name + " countering for " + power;
+    }
+  }
+  // For each enemy unit type, my unit types X/Y/Z counter it at this effectiveness percent
+  private Map<UnitModel, ArrayList<CounterRatio>> unitTypeToCounterMap;
+  // For each enemy unit type, my own counter unit type is negated by X/Y/Z at this ratio
+  private Map<UnitModel, Map<UnitModel, ArrayList<CounterRatio>>> counterTypeNegationMap;
+  // All unit types that I should track for calculating counterbuilds
+  HashSet<UnitModel> allCounterContestants;
 
-  public JakeMan(Army army)
+  public JakeMan(Army army, instantiator info)
   {
     super(army);
+    myInfo = info;
 
     // look where all vehicles are and what their threat ranges are (yes, mechs are vehicles)
     // take free dudes that you have more defenders for than them
@@ -201,8 +240,8 @@ public class JakeMan extends ModularAI
     {
       ai.unitMapEnemy = new HashMap<UnitModel, Map<XYCoord, Double>>();
       ai.unitMapFriendly = new HashMap<UnitModel, Map<XYCoord, Double>>();
-      Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(null, gameMap);
-      for( Commander co : unitLists.keySet() )
+      ai.unitLists = AIUtils.getEnemyUnitsByCommander(null, gameMap);
+      for( Commander co : ai.unitLists.keySet() )
       {
         Map<UnitModel, Map<XYCoord, Double>> mapToFill;
         if( myArmy.isEnemy(co) )
@@ -210,7 +249,7 @@ public class JakeMan extends ModularAI
         else
           mapToFill = ai.unitMapFriendly;
 
-        for( Unit threat : unitLists.get(co) )
+        for( Unit threat : ai.unitLists.get(co) )
         {
           // add each new threat to the existing threats
           final UnitModel um = threat.model;
@@ -233,7 +272,7 @@ public class JakeMan extends ModularAI
       return null;
     }
   }
-  
+
   // Try to get unit value by capture or attack
   public static class GetFreeDudes extends UnitActionFinder
   {
@@ -473,17 +512,9 @@ public class JakeMan extends ModularAI
 
       // Sort all individual target lists by distance
       for (ArrayList<XYCoord> targetList : targetMap.values())
-        Utils.sortLocationsByTravelTime(unit, targetList, gameMap);
-
-      // Sort all target types by how much we want to shoot them with this unit
-      Queue<Entry<UnitModel, Double>> targetTypesInOrder = 
-          new PriorityQueue<Entry<UnitModel, Double>>(myArmy.cos[0].unitModels.size(), new UnitModelFundsComparator());
-      targetTypesInOrder.addAll(valueMap.entrySet());
-
-      while (!targetTypesInOrder.isEmpty())
       {
-        UnitModel model = targetTypesInOrder.poll().getKey(); // peel off the juiciest
-        goals.addAll(targetMap.get(model)); // produce a list ordered by juiciness first, then distance TODO: consider a holistic "juiciness" metric that takes into account both matchup and distance?
+        Utils.sortLocationsByTravelTime(unit, targetList, gameMap);
+        goals.add(targetList.get(0));
       }
     }
 
@@ -669,8 +700,6 @@ public class JakeMan extends ModularAI
 
             // Convert to abstract value
             int extraLoss = 0;
-            if( loss >= 10 && unit.getHealth() == UnitModel.MAXIMUM_HEALTH )
-              extraLoss += STAY_UNHURT_BIAS;
             if( loss >= unit.getHealth() )
               extraLoss += STAY_ALIVE_BIAS;
             loss *= unit.getCost();
@@ -682,8 +711,8 @@ public class JakeMan extends ModularAI
             if( isThreatenedBy(unit.model, defender.model) )
               damage *= FIRSTSTRIKE_ON_THREAT_WEIGHT;
             // Value damage to hurt units less
-            if( defender.getHealth() >= BIG_THREAT_THRESHOLD )
-              damage *= 2;
+            if( defender.getHealth() < BIG_THREAT_THRESHOLD )
+              damage /= 1.5;
 
             return damage - loss;
           }, (terrain, params) -> 0); // Don't attack terrain
@@ -757,19 +786,72 @@ public class JakeMan extends ModularAI
     // If there are no threats we can't handle, dude is free.
     if( threatCounts.size() < 1 )
       return true;
-    double totalThreat = 0;
-    for( UnitModel threat : threatCounts.keySet() )
-    {
-      totalThreat += threatCounts.get(threat);
-      // Be extra scared of stuff we can't hit back against
-      if( isWeakTo(unit.model, threat) )
-        totalThreat += threatCounts.get(threat) * 2;
-    }
-    // If we have threats, but we have good terrain, that's good enough
+
+    // Count dude as free if:
+    //   we get 3+ terrain stars
+    //   the threat surplus is small
+    //   that threat is of the same unit type
     final int defLevel = gameMap.getEnvironment(xyc).terrainType.getDefLevel();
-    if( defLevel > totalThreat )
+    if( defLevel < 3 || unit.model.isAirUnit() )
+      return false;
+    if( threatCounts.size() > 1 )
+      return false;
+    if( !threatCounts.containsKey(unit.model) )
+      return false; // Our one threat is not same-type
+    if( threatCounts.get(unit.model) < 1.3 )
       return true;
     return false;
+  }
+
+  // Build an Md if the enemy has 3+ more ground vehicles within 2 tank moves of your base
+  // ...but don't if there are 2+ Mds in the area
+  private static class FactoryThreatState
+  {
+    public final JakeMan ai;
+    public final XYCoord coord;
+    public final ArrayList<Utils.SearchNode> checkTiles;
+    public int niceMdCount = 0, meanVehCount = 0, niceVehCount = 0;
+    public FactoryThreatState(JakeMan ai, XYCoord coord, GameMap map, UnitContext theVeh)
+    {
+      this.coord = coord;
+      this.ai    = ai;
+      theVeh.setCoord(coord);
+      PathCalcParams pcp = new PathCalcParams(theVeh, map);
+      pcp.initialMovePower *= 2;
+      pcp.canTravelThroughEnemies = true;
+      checkTiles = pcp.findAllPaths();
+    }
+    public void trackUnit(Unit threat)
+    {
+      if( !checkTiles.contains(new XYCoord(threat)) )
+        return;
+      if( ai.myArmy.isEnemy(threat.CO) )
+      {
+        if( threat.model.isAny(UnitModel.TANK) )
+          ++meanVehCount;
+      }
+      else
+      {
+        if( threat.model.isAny(UnitModel.TANK) )
+          ++niceVehCount;
+        if( ai.mdTank == threat.model )
+          ++niceMdCount;
+      }
+    }
+    public boolean shouldBuildMd()
+    {
+      if( !ai.myInfo.buildMdCounters )
+        return false;
+      if( niceMdCount > 1 )
+        return false;
+      int vehDiff = meanVehCount - niceVehCount;
+      return vehDiff > 2;
+    }
+    @Override
+    public String toString()
+    {
+      return "FTS for " + coord;
+    }
   }
 
   private Map<XYCoord, UnitModel> queueUnitProductionActions(GameMap gameMap)
@@ -785,16 +867,188 @@ public class JakeMan extends ModularAI
       log("No properties available to build.");
       return builds;
     }
-
-    log("Evaluating Production needs");
-    ArrayList<UnitModel> wantedTypes = new ArrayList<>();
-
-    wantedTypes.add(infantry);
-    wantedTypes.add(allTanks.get(0));
-    wantedTypes.add(copter);
-    wantedTypes.add(allTanks.get(1));
-
     int budget = myArmy.money;
+
+    // Fill out production with inf first, to trim the budget
+    ArrayList<MapLocation> infBases = CPI.getAllFacilitiesFor(infantry);
+    for( MapLocation loc : infBases )
+    {
+      Commander buyer = loc.getOwner();
+      final XYCoord coord = loc.getCoordinates();
+      final int cost = buyer.getBuyCost(infantry, coord);
+
+      if( cost <= budget )
+      {
+        builds.put(coord, infantry);
+        budget -= cost;
+      }
+      else
+        budget = -1;
+    }
+    if( budget < 3000 ) // arbitrary
+      return builds;
+    log("Evaluating Production needs");
+
+    ArrayList<FactoryThreatState> potentialMdBuilds = new ArrayList<>();
+    ArrayList<MapLocation> mdBases = CPI.getAllFacilitiesFor(mdTank);
+    UnitContext theVeh = new UnitContext(myArmy.cos[0], tank); // for getting the zone of concern
+    for( MapLocation loc : mdBases )
+      potentialMdBuilds.add(new FactoryThreatState(this, loc.getCoordinates(), gameMap, theVeh));
+
+    // "Net health" of the units I might want to build counters for, or use as counters.
+    HashMap<UnitModel, Integer> niceHealth = new HashMap<>();
+    HashMap<UnitModel, Integer> meanHealth = new HashMap<>();
+    for( Commander co : unitLists.keySet() )
+    {
+      HashMap<UnitModel, Integer> mapToFill;
+      if( myArmy.isEnemy(co) )
+        mapToFill = meanHealth;
+      else
+        mapToFill = niceHealth;
+
+      for( Unit threat : unitLists.get(co) )
+      {
+        for( var fts : potentialMdBuilds )
+          fts.trackUnit(threat);
+        final UnitModel um = threat.model;
+        if( !allCounterContestants.contains(um) )
+          continue;
+        int oldVal = mapToFill.getOrDefault(um, 0);
+        int newVal = oldVal + threat.getHealth();
+        mapToFill.put(um, newVal);
+      }
+    }
+
+    boolean shouldSave = true;
+    for( var fts : potentialMdBuilds )
+    {
+      if( !fts.shouldBuildMd() )
+        continue;
+      MapLocation loc = gameMap.getLocation(fts.coord);
+      Commander buyer = loc.getOwner();
+      final XYCoord coord = loc.getCoordinates();
+      final int cost = buyer.getBuyCost(mdTank, coord);
+
+      int marginalCost = cost;
+      if( builds.containsKey(coord) )
+        marginalCost -= buyer.getBuyCost(builds.get(coord), coord);
+
+      if( marginalCost <= budget )
+      {
+        builds.put(coord, mdTank);
+        budget -= marginalCost;
+        shouldSave = false; // If we've already built some counter units, don't worry about saving for more
+        log(String.format("Building MD to protect %s", fts.coord));
+      }
+    }
+
+    boolean counterNeeded = false;
+    // If I need to do a counterbuild, either:
+    //   add it to the list before the normal builds
+    //   reduce my budget this turn to save up
+    for( var threatType : meanHealth.keySet() )
+    {
+      if( !unitTypeToCounterMap.containsKey(threatType) )
+        continue; // This isn't on our list of things to counter (e.g. AA)
+      int remainingHealth = meanHealth.get(threatType);
+      ArrayList<CounterRatio> counters = unitTypeToCounterMap.get(threatType);
+
+      // Chip down remainingHealth based on unit totals.
+      for( var ratio : counters )
+      {
+        if( !niceHealth.containsKey(ratio.counter) )
+          continue;
+        int counterHealth = niceHealth.get(ratio.counter);
+        if( counterTypeNegationMap.containsKey(threatType) )
+        {
+          var negationRatios = counterTypeNegationMap.get(threatType).getOrDefault(ratio.counter, new ArrayList<>());
+          for( var ccRatio : negationRatios )
+          {
+            if( !meanHealth.containsKey(ccRatio.counter) )
+              continue;
+            int ccHealth = meanHealth.get(ccRatio.counter);
+            int ccPower  = ccHealth * ccRatio.power / UnitModel.MAXIMUM_HEALTH;
+            counterHealth -= ccPower;
+          }
+        }
+        int counterPower  = counterHealth * ratio.power / UnitModel.MAXIMUM_HEALTH;
+        remainingHealth  -= counterPower;
+        if( ratio.roundTargetPercentUp )
+        {
+          int roundable = remainingHealth % UnitModel.MAXIMUM_HEALTH;
+          if( roundable >= CounterRatio.ROUND_UP_HEALTH )
+            remainingHealth += UnitModel.MAXIMUM_HEALTH - roundable;
+        }
+      }
+      if( remainingHealth < UnitModel.MAXIMUM_HEALTH )
+        continue; // We consider it fully-countered
+      counterNeeded = true;
+
+      // Chip down remainingHealth with new builds.
+      for( var ratio : counters )
+      {
+        ArrayList<MapLocation> facilities = CPI.getAllFacilitiesFor(ratio.counter);
+        for( MapLocation loc : facilities )
+        {
+          Commander buyer = loc.getOwner();
+          final XYCoord coord = loc.getCoordinates();
+          final int cost = buyer.getBuyCost(ratio.counter, coord);
+
+          int marginalCost = cost;
+          if( builds.containsKey(coord) )
+            marginalCost -= buyer.getBuyCost(builds.get(coord), coord);
+
+          if( marginalCost <= budget )
+          {
+            boolean safeToBuild = true; // Don't build counter units in range of units they're squishy to.
+            for( UnitModel threat : unitMapEnemy.keySet() )
+            {
+              if( unitMapEnemy.get(threat).containsKey(coord) )
+              {
+                double power = unitMapEnemy.get(threat).get(coord);
+                UnitContext tc = new UnitContext(myArmy.cos[0], threat);
+                tc.chooseWeapon(ratio.counter);
+                if( null == tc.weapon )
+                  continue;
+                int damage = (int) (tc.weapon.getDamage(ratio.counter) * power);
+                if( damage > MASSIVE_THREAT_THRESHOLD )
+                {
+                  safeToBuild = false;
+                  break;
+                }
+              }
+            }
+            if( !safeToBuild )
+              continue;
+
+            builds.put(coord, ratio.counter);
+            budget -= marginalCost;
+            shouldSave = false; // If we've already built some counter units, don't worry about saving for more
+            log(String.format("Building %s to counter %s health of %s",
+                ratio.counter, remainingHealth, threatType));
+            remainingHealth -= ratio.power;
+          }
+          if( remainingHealth < UnitModel.MAXIMUM_HEALTH )
+            break; // We consider it fully-countered
+        }
+        if( remainingHealth < UnitModel.MAXIMUM_HEALTH )
+          break; // We consider it fully-countered
+      }
+    }
+
+    // If we can't counter all of the threats and don't have enough to buy counters, save money
+    if( counterNeeded && shouldSave )
+      budget -= CounterRatio.SAVE_BENCHMARK;
+
+    if( budget < 3000 ) // arbitrary
+      return builds;
+
+    ArrayList<UnitModel> wantedTypes = new ArrayList<>();
+    wantedTypes.add(infantry);
+    wantedTypes.add(tank);
+    wantedTypes.add(copter);
+    wantedTypes.add(mdTank);
+
     // Try to purchase as many of the biggest units I can
     for(int i = 0; i < wantedTypes.size(); ++i)
     {
@@ -811,7 +1065,14 @@ public class JakeMan extends ModularAI
 
         int marginalCost = cost;
         if( builds.containsKey(coord) )
-          marginalCost -= buyer.getBuyCost(builds.get(coord), coord);
+        {
+          UnitModel currentBuild = builds.get(coord);
+          if( !wantedTypes.contains(currentBuild) )
+            continue; // If it's not a standard build, don't override
+          if( um.costBase < currentBuild.costBase )
+            continue; // If it's a standard build that's more expensive, it's a counter unit
+          marginalCost -= buyer.getBuyCost(currentBuild, coord);
+        }
 
         if( marginalCost <= budget )
         {
@@ -823,7 +1084,7 @@ public class JakeMan extends ModularAI
         {
           for( XYCoord tankCoord : builds.keySet().toArray(new XYCoord[0]) )
           {
-            if( allTanks.get(0) == builds.get(tankCoord) )
+            if( tank == builds.get(tankCoord) )
             {
               int downgradeSavings = 0;
               downgradeSavings += buyer.getBuyCost(builds.get(tankCoord), coord);
@@ -846,29 +1107,122 @@ public class JakeMan extends ModularAI
     return builds;
   }
 
-  /**
-   * Sort units by funds amount in descending order.
-   */
-  private static class UnitModelFundsComparator implements Comparator<Entry<UnitModel, Double>>
-  {
-    @Override
-    public int compare(Entry<UnitModel, Double> entry1, Entry<UnitModel, Double> entry2)
-    {
-      double diff = entry2.getValue() - entry1.getValue();
-      return (int) (diff * 10); // Multiply by 10 since we return an int, but don't want to lose the decimal-level discrimination.
-    }
-  }
-
   private void init(GameMap map)
   {
     infantry = myArmy.cos[0].getUnitModel(UnitModel.TROOP);
     allTanks = myArmy.cos[0].getAllModels(UnitModel.ASSAULT);
+    tank     = allTanks.get(0);
+    mdTank   = allTanks.get(1);
     antiAir  = myArmy.cos[0].getUnitModel(UnitModel.SURFACE_TO_AIR);
     copter   = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT | UnitModel.AIR_LOW, false);
+
+    counterBuildSetup();
+
+    allCounterContestants = new HashSet<>();
+    for( UnitModel counterable : unitTypeToCounterMap.keySet() )
+    {
+      allCounterContestants.add(counterable);
+      for( CounterRatio ratio : unitTypeToCounterMap.get(counterable) )
+        allCounterContestants.add(ratio.counter);
+    }
+
     if( null == copter ) // I clearly don't understand this unit set, so just grab something to hedge
       copter = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_AIR, false);
 
     capPhase = new CapPhaseAnalyzer(map, myArmy);
+  }
+
+  private void counterBuildSetup()
+  {
+    counterOrder = new ArrayList<>();
+    unitTypeToCounterMap = new HashMap<>();
+    counterTypeNegationMap = new HashMap<>(); // Note: we assume all UnitModels referenced in here are in the above
+    if( !myInfo.buildCounters )
+      return;
+
+    // tanks: no need to calc them beyond the Md clause
+    // copters: 1.5 copters or 1AA per
+    if( null != copter )
+    {
+      counterOrder.add(copter);
+      unitTypeToCounterMap.put(copter, new ArrayList<>());
+      var copterCounters = unitTypeToCounterMap.get(copter);
+      CounterRatio copterCounterCopter = new CounterRatio(copter, 200/3);
+      copterCounterCopter.roundTargetPercentUp = true; // I don't consider a single existing copter a full counter to an enemy copter
+      copterCounters.add(copterCounterCopter);
+      copterCounters.add(new CounterRatio(antiAir, 100));
+    }
+
+    // Md: 1 neo per 1.5 Mds? Ignore if you already have a bomber
+    counterOrder.add(mdTank);
+    unitTypeToCounterMap.put(mdTank, new ArrayList<>());
+    var mdCounters = unitTypeToCounterMap.get(mdTank);
+    var bomber = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_SURFACE | UnitModel.JET, false);
+    if( null != bomber )
+      mdCounters.add(new CounterRatio(bomber, 250));
+    var neoTank = allTanks.get(2);
+    if( null != neoTank )
+      mdCounters.add(new CounterRatio(neoTank, 150));
+
+    // 1 fighter per 1.7 (yes) bombers
+    //   (trunctate after the multiplicarion, so you get one in response to one bomber and a second in response to the third),
+    var fighter = myArmy.cos[0].getUnitModel(UnitModel.AIR_TO_AIR | UnitModel.JET, false);
+    if( null != bomber )
+    {
+      counterOrder.add(bomber);
+      unitTypeToCounterMap.put(bomber, new ArrayList<>());
+      var bomberCounters = unitTypeToCounterMap.get(bomber);
+      if( null != fighter )
+        bomberCounters.add(new CounterRatio(fighter, 170));
+      bomberCounters.add(new CounterRatio(antiAir, 50));
+
+      // or 2 non-copter-calc-involved AAs per bomber
+      if( null != copter )
+      {
+        counterTypeNegationMap.put(bomber, new HashMap<>());
+        var bomberCounterNegators = counterTypeNegationMap.get(bomber);
+        bomberCounterNegators.put(antiAir, new ArrayList<>());
+        var aaCounterCounters = bomberCounterNegators.get(antiAir);
+        aaCounterCounters.add(new CounterRatio(copter, 100));
+      }
+    }
+
+    // stealth: have 1 healthy fighter on the board if a stealth is present
+    var stealths = myArmy.cos[0].getAllModels(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.JET, false);
+    boolean stealthIsStealth = false;
+    for( var s : stealths )
+      if( s.hidden )
+      {
+        for( var actionType : s.baseActions )
+          if( actionType instanceof TransformLifecycle.TransformFactory )
+          {
+            stealthIsStealth = true;
+            break;
+          }
+        if( stealthIsStealth )
+          break;
+      }
+    if( stealthIsStealth && null != fighter )
+      for( var s : stealths )
+      {
+        counterOrder.add(s);
+        unitTypeToCounterMap.put(s, new ArrayList<>());
+        var stealthCounters = unitTypeToCounterMap.get(s);
+        CounterRatio fighterCounterStealth = new CounterRatio(fighter, 100);
+        fighterCounterStealth.roundTargetPercentUp = true; // Fighter needs to be healthy to deal
+        stealthCounters.add(fighterCounterStealth);
+      }
+
+    // fighter: 2 AA per, AAs built for other air units included this time
+    if( null != fighter )
+    {
+      counterOrder.add(fighter);
+      unitTypeToCounterMap.put(fighter, new ArrayList<>());
+      var fighterCounters = unitTypeToCounterMap.get(fighter);
+      CounterRatio aaVSfighter = new CounterRatio(antiAir, 50);
+      aaVSfighter.roundTargetPercentUp = true; // 2 whole AA per fighter
+      fighterCounters.add(aaVSfighter);
+    }
   }
 
 }
