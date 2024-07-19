@@ -17,10 +17,7 @@ import Engine.UnitMods.DamageMultiplierOffense;
 import Engine.UnitMods.UnitModifier;
 import UI.UIUtils;
 import Units.UnitContext;
-import Units.MoveTypes.MoveType;
 import Terrain.MapMaster;
-import Terrain.TerrainType;
-import Terrain.Environment.Weathers;
 import Terrain.GameMap;
 
 public class SturmVS extends AW1Commander
@@ -42,7 +39,7 @@ public class SturmVS extends AW1Commander
             "Sturm (AW1 VS)\n"
           + "A riddle within a shadow, revealing nothing.\n"
           + "???\n"
-          + "(0.8x/0.8x damage dealt/taken while COP isn't active, perfect movement outside snow.)"));
+          + "(0.8x/0.8x damage dealt/taken while COP isn't active, perfect movement except in cold weather.)"));
       infoPages.add(new InfoPage(new MeteorStrike(null),
             "???\n"
           + "(0.9x/0.7x damage dealt/taken.)\n"
@@ -85,15 +82,7 @@ public class SturmVS extends AW1Commander
   @Override
   public void modifyMoveType(UnitContext uc)
   {
-    for( TerrainType terrain : TerrainType.TerrainTypeList )
-    {
-      final int snowCost = uc.moveType.getMoveCost(Weathers.SNOW, terrain);
-      if( MoveType.IMPASSABLE > snowCost && snowCost > 0 )
-      {
-        uc.moveType.setMoveCost(terrain, 1);
-        uc.moveType.setMoveCost(Weathers.SNOW, terrain, snowCost);
-      }
-    }
+    SturmUtils.modifyMoveType(uc);
   }
 
   private static class MeteorStrike extends AW1Ability
@@ -137,9 +126,9 @@ public class SturmVS extends AW1Commander
     private MeteorParams[] findTargets(GameMap map)
     {
       MeteorParams[] targets = new MeteorParams[3];
-      targets[0] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, new SturmValueFinders.HPValueFinder());
-      targets[1] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, new SturmValueFinders.CostValueFinder());
-      SturmValueFinders.CostValueFinder artyFinder = new SturmValueFinders.CostValueFinder();
+      targets[0] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, new SturmUtils.HPValueFinder());
+      targets[1] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, new SturmUtils.CostValueFinder());
+      SturmUtils.CostValueFinder artyFinder = new SturmUtils.CostValueFinder();
       artyFinder.indirectMultiplier = 2;
       targets[2] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, artyFinder);
       return targets;

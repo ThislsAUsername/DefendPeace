@@ -322,7 +322,7 @@ public class KaijuWarsWeapons
     private static final long serialVersionUID = 1L;
 
     @Override
-    public void changeCombatContext(CombatContext instance)
+    public void changeCombatContext(CombatContext instance, UnitContext buffOwner)
     {
       KaijuWarsWeapon gun = (KaijuWarsWeapon) instance.attacker.weapon;
       if( gun.negateCounterBonuses )

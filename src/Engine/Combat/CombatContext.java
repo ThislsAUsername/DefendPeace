@@ -113,9 +113,9 @@ public class CombatContext
     List<UnitModifier> dMods = new ArrayList<>(defender.mods);
     // apply modifiers...
     for( UnitModifier mod : aMods )
-      mod.changeCombatContext(this);
+      mod.changeCombatContext(this, attacker);
     for( UnitModifier mod : dMods )
-      mod.changeCombatContext(this);
+      mod.changeCombatContext(this, defender);
     return this;
   }
 

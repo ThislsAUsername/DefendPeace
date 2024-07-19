@@ -11,7 +11,7 @@ import Units.UnitContext;
 public interface UnitModifierWithDefaults extends UnitModifier
 {
   @Override
-  default void changeCombatContext(CombatContext instance)
+  default void changeCombatContext(CombatContext instance, UnitContext buffOwner)
   {
   }
 

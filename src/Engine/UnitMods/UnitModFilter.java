@@ -22,11 +22,11 @@ public abstract class UnitModFilter implements UnitModifier
   public abstract boolean shouldApplyTo(UnitContext uc);
 
   @Override
-  public void changeCombatContext(CombatContext instance)
+  public void changeCombatContext(CombatContext instance, UnitContext buffOwner)
   {
     if(   shouldApplyTo(instance.attacker)
        || shouldApplyTo(instance.defender) )
-      effect.changeCombatContext(instance);
+      effect.changeCombatContext(instance, buffOwner);
   }
 
   @Override

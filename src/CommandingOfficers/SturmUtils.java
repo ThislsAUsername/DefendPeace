@@ -1,9 +1,15 @@
 package CommandingOfficers;
 
+import Engine.UnitMods.UnitModifierWithDefaults;
+import Terrain.TerrainType;
+import Terrain.Environment.Weathers;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
+import Units.MoveTypes.MoveType;
+import lombok.var;
 
-public abstract class SturmValueFinders // Until such time as we find out AW1 works substantially differently
+public abstract class SturmUtils
 {
   public static class HPValueFinder implements IValueFinder
   {
@@ -41,6 +47,31 @@ public abstract class SturmValueFinders // Until such time as we find out AW1 wo
       if( !countHidden && unit.model.hidden )
         return 0;
       return value;
+    }
+  }
+
+  public static void modifyMoveType(UnitContext uc)
+  {
+    for( TerrainType terrain : TerrainType.TerrainTypeList )
+    {
+      final int moveCost = uc.moveType.getMoveCost(Weathers.CLEAR, terrain);
+      // Non-impassable, non-teleport tiles
+      if( MoveType.IMPASSABLE > moveCost && moveCost > 0 )
+      {
+        for( var weather : Weathers.values() )
+          if( !weather.isCold )
+            uc.moveType.setMoveCost(weather, terrain, 1);
+      }
+    }
+  }
+  public static class PerfectMoveModifier implements UnitModifierWithDefaults
+  {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public void modifyMoveType(UnitContext uc)
+    {
+      SturmUtils.modifyMoveType(uc);
     }
   }
 }
