@@ -1,10 +1,12 @@
 package Test;
 
+import AI.AICombatUtils;
 import AI.AIController;
 import AI.AIMaker;
 import AI.Muriel;
 import AI.WallyAI;
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.DefendPeace.CyanOcean.Patch;
 import CommandingOfficers.DefendPeace.RoseThorn.Strong;
 import Engine.Army;
@@ -18,6 +20,7 @@ import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Maps.MapReader;
 import Units.Unit;
+import lombok.var;
 
 public class TestAIBehavior extends TestCase
 {
@@ -36,9 +39,13 @@ public class TestAIBehavior extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest(MapInfo mapInfo, AIMaker ai)
   {
+    setupTest(mapInfo, ai, Strong.getInfo(), Patch.getInfo());
+  }
+  private void setupTest(MapInfo mapInfo, AIMaker ai, CommanderInfo co1, CommanderInfo co2)
+  {
     GameScenario scn = new GameScenario();
-    testCo1 = new Strong(scn.rules);
-    testCo2 = new Patch(scn.rules);
+    testCo1 = co1.create(scn.rules);
+    testCo2 = co2.create(scn.rules);
     Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
     AIController testAI = ai.create(cos[0]);
@@ -62,17 +69,19 @@ public class TestAIBehavior extends TestCase
   {
     boolean testPassed = true;
 
+    testPassed &= validate(testWalkInLine(Muriel.info), "  "+Muriel.info.getName()+" failed line walking test.");
     for( AIMaker ai : ais )
     {
       testPassed &= validate(testBuildMegatank(ai), "  "+ai.getName()+" failed build Megatank test.");
       testPassed &= validate(testHuntStall(ai), "  "+ai.getName()+" failed hunting stall-test.");
       testPassed &= validate(testClearAttackRoute(ai), "  "+ai.getName()+" failed route clearing test.");
-      testPassed &= validate(testWalkInLine(ai), "  "+ai.getName()+" failed line walking test.");
       testPassed &= validate(testInfWadeThroughTanks(ai), "  "+ai.getName()+" failed Infantry move priority test.");
+      testPassed &= validate(testTankWadeThroughInfs(ai), "  "+ai.getName()+" failed Tank move priority test.");
     }
-    testPassed &= validate(testTankWadeThroughInfs(Muriel.info), "  Tank move priority test failed.");
-    // TODO: Consider making Wally pass the above
     testPassed &= validate(testProductionClearing(WallyAI.info), "  Free up industry test failed.");
+    testPassed &= validate(testUnCapture(WallyAI.info), "  Inf distraction test failed.");
+    testPassed &= validate(testInfOptimization(WallyAI.info), "  Inf optimization test failed.");
+    testPassed &= validate(testWalling(WallyAI.info), "  Walling test failed.");
 
     return testPassed;
   }
@@ -89,12 +98,12 @@ public class TestAIBehavior extends TestCase
     turn(testGame);
     boolean testPassed = true;
     GameAction act = testCo1.army.getNextAIAction(testMap);
-    testPassed &= validate(null != act, "    Failed to produce an action!");
-    performGameAction(act, testGame);
+    testPassed &= validate(performGameAction(act, testGame), "    Produced an invalid action!");
 
     // Should have built a Megatank as the best/only viable unit to counter an enemy Megatank.
     testPassed &= validate(testCo1.units.size() > 0, "    Failed to produce a unit!");
-    testPassed &= validate(testCo1.units.get(0).model.name.contentEquals("Megatank"), "    "+ai.getName()+" didn't build the right thing!");
+    if( testPassed )
+      testPassed &= validate(testCo1.units.get(0).model.name.contentEquals("Megatank"), "    "+ai.getName()+" didn't build the right thing!");
 
     // Clean up
     cleanupTest();
@@ -349,6 +358,121 @@ public class TestAIBehavior extends TestCase
         break;
     }
     testPassed &= validate(foundMega, "    "+ai.getName()+" didn't build the right thing!");
+
+    // Clean up
+    cleanupTest();
+
+    return testPassed;
+  }
+
+  /** Test that I will interrupt a city capture to interrupt a neutral factory capture */
+  private boolean testUnCapture(AIMaker ai)
+  {
+    setupTest(MapReader.readSingleMap("src/Test/TestInfOptimization.map"), ai,
+              CommandingOfficers.AW1.YC.Kanbei.getInfo(),
+              CommandingOfficers.AW4.BrennerWolves.Will.getInfo());
+
+    Unit interrupter = testMap.getResident(2, 1);
+    Unit target      = testMap.getResident(5, 1);
+    interrupter.capture(testMap);
+    target     .capture(testMap);
+    turn(testGame);
+
+    GameAction act = null;
+    boolean testPassed = true;
+    do
+    {
+      act = testCo1.army.getNextAIAction(testMap);
+      if( null != act )
+        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
+    } while( null != act && testPassed );
+
+    testPassed &= validate(interrupter.getCaptureProgress() == 0, "    "+ai.getName()+" didn't stop capturing");
+    testPassed &= validate(target     .getHP() < 10, "    "+ai.getName()+" didn't hit the target");
+
+    // Clean up
+    cleanupTest();
+
+    return testPassed;
+  }
+
+  /**
+   * We have 3 objectives:
+   * Clear the neutral factory of a capping inf
+   * Start capping that factory
+   * Also start capping the tile the factory capper was previously capping
+   */
+  private boolean testInfOptimization(AIMaker ai)
+  {
+    setupTest(MapReader.readSingleMap("src/Test/TestInfOptimization.map"), ai,
+              CommandingOfficers.AW1.YC.Kanbei.getInfo(),
+              CommandingOfficers.AW4.BrennerWolves.Will.getInfo());
+
+    // Starts capping the city after cappy abandons it
+    Unit scab        = addUnit(testMap, testCo1, "Mech", new XYCoord(0, 1));
+    // Stops capping to go to greener pastures
+    Unit cappy       = testMap.getResident(2, 1);
+    // Shoots from the north tile
+    Unit shootyOne   = addUnit(testMap, testCo1, "Infantry", new XYCoord(2, 0));
+    // Shoots from the west tile
+    Unit shootyTwo   = addUnit(testMap, testCo1, "Infantry", new XYCoord(2, 2));
+    // Did nothing wrong
+    Unit target      = testMap.getResident(5, 1);
+    cappy .capture(testMap);
+    target.capture(testMap);
+    turn(testGame);
+
+    GameAction act = null;
+    boolean testPassed = true;
+    do
+    {
+      act = testCo1.army.getNextAIAction(testMap);
+      if( null != act )
+        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
+    } while( null != act && testPassed );
+
+    testPassed &= validate(target.getHP() == 0                 , "    "+ai.getName()+" didn't kill the target");
+    testPassed &= validate(5 == shootyOne.x && 0 == shootyOne.y, "    "+ai.getName()+" didn't hit the factory with ShootyOne");
+    testPassed &= validate(4 == shootyTwo.x && 1 == shootyTwo.y, "    "+ai.getName()+" didn't hit the factory with ShootyTwo");
+    testPassed &= validate(cappy .getCaptureProgress() > 0     , "    "+ai.getName()+" didn't restart capturing with cappy");
+    testPassed &= validate(5 == cappy.x && 1 == cappy.y        , "    "+ai.getName()+" didn't go to the factory with cappy");
+    testPassed &= validate(scab  .getCaptureProgress() > 0     , "    "+ai.getName()+" didn't start capturing with the scab");
+
+    // Clean up
+    cleanupTest();
+
+    return testPassed;
+  }
+
+  /**
+   * The AI needs to block with the inf, and support the inf with the artillery
+   */
+  private boolean testWalling(AIMaker ai)
+  {
+    setupTest(MapReader.readSingleMap("src/Test/TestWalling.map"), ai,
+              CommandingOfficers.AW1.YC.Kanbei.getInfo(),
+              CommandingOfficers.AW4.BrennerWolves.Will.getInfo());
+
+    Unit arty   = testMap.getResident(1, 1);
+    Unit blocky = testMap.getResident(1, 2);
+    Unit tanky  = testMap.getResident(5, 1);
+    turn(testGame);
+
+    GameAction act = null;
+    boolean testPassed = true;
+    do
+    {
+      act = testCo1.army.getNextAIAction(testMap);
+      if( null != act )
+        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
+    } while( null != act && testPassed );
+
+    var artyXyc   = new XYCoord(arty);
+    var blockyXyc = new XYCoord(blocky);
+    var tankyXyc  = new XYCoord(tanky);
+    var tankZone  = AICombatUtils.findThreatPower(testMap, tanky, tankyXyc, arty.model).keySet();
+    testPassed &= validate(2 >= artyXyc.getDistance(blockyXyc), "    "+ai.getName()+" didn't protect blocky with arty");
+    testPassed &= validate(!tankZone.contains(artyXyc),         "    "+ai.getName()+" didn't protect arty with blocky");
 
     // Clean up
     cleanupTest();

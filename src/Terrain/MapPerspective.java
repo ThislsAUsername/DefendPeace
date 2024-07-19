@@ -15,14 +15,14 @@ import Units.UnitContext;
 public class MapPerspective extends GameMap
 {
   private static final long serialVersionUID = 1L;
-  MapMaster master;
+  protected GameMap master;
   public final Army viewer; // can be null
   private boolean[][] isFogged;
   private Commander[][] lastOwnerSeen;
   private ArrayList<Unit> confirmedVisibles;
   private ArrayList<XYCoord> flaredTiles;
 
-  public MapPerspective(MapMaster pMaster, Army pViewer)
+  public MapPerspective(GameMap pMaster, Army pViewer)
   {
     super(pMaster.mapWidth, pMaster.mapHeight);
     master = pMaster;
