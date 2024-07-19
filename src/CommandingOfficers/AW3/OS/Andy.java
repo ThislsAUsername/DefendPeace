@@ -32,10 +32,10 @@ public class Andy extends AW3Commander
             "Andy (AWDS)\n"
           + "A whiz with a wrench, this mechanical boy wonder earned fame as a hero who saved Macro Land.\n"
           + "No real weaknesses. Proficient with air, sea, and land units. Ready to fight wherever and whenever.\n"));
-      infoPages.add(new InfoPage(new HyperRepair(null, new CostBasis(CHARGERATIO_FUNDS)),
+      infoPages.add(new InfoPage(new HyperRepair(null, new CostBasis(CHARGERATIO_AW3)),
             "Restores 2 HP to all units.\n"
           + "+10 attack and defense.\n"));
-      infoPages.add(new InfoPage(new HyperUpgrade(null, new CostBasis(CHARGERATIO_FUNDS)),
+      infoPages.add(new InfoPage(new HyperUpgrade(null, new CostBasis(CHARGERATIO_AW3)),
             "Restores "+HyperUpgrade.HEAL+" HP to all units.\n"
           + "Firepower rises (+"+HyperUpgrade.BUFF+"), and unit movement increases by 1 space.\n"
           + "+10 attack and defense.\n"));
