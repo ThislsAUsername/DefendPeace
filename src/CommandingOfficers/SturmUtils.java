@@ -9,7 +9,7 @@ import Units.UnitModel;
 import Units.MoveTypes.MoveType;
 import lombok.var;
 
-public abstract class SturmValueFinders // Until such time as we find out AW1 works substantially differently
+public abstract class SturmUtils
 {
   public static class HPValueFinder implements IValueFinder
   {
@@ -71,7 +71,7 @@ public abstract class SturmValueFinders // Until such time as we find out AW1 wo
     @Override
     public void modifyMoveType(UnitContext uc)
     {
-      SturmValueFinders.modifyMoveType(uc);
+      SturmUtils.modifyMoveType(uc);
     }
   }
 }

@@ -83,7 +83,7 @@ public class Sturm extends AWBWCommander
   @Override
   public void modifyMoveType(UnitContext uc)
   {
-    SturmValueFinders.modifyMoveType(uc);
+    SturmUtils.modifyMoveType(uc);
   }
 
 

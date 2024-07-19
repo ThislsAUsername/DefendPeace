@@ -82,7 +82,7 @@ public class Sturm extends AW1Commander
   @Override
   public void modifyMoveType(UnitContext uc)
   {
-    SturmValueFinders.modifyMoveType(uc);
+    SturmUtils.modifyMoveType(uc);
   }
 
   private static class MeteorStrike extends AW1Ability
@@ -126,9 +126,9 @@ public class Sturm extends AW1Commander
     private MeteorParams[] findTargets(GameMap map)
     {
       MeteorParams[] targets = new MeteorParams[3];
-      targets[0] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, new SturmValueFinders.HPValueFinder());
-      targets[1] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, new SturmValueFinders.CostValueFinder());
-      SturmValueFinders.CostValueFinder artyFinder = new SturmValueFinders.CostValueFinder();
+      targets[0] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, new SturmUtils.HPValueFinder());
+      targets[1] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, new SturmUtils.CostValueFinder());
+      SturmUtils.CostValueFinder artyFinder = new SturmUtils.CostValueFinder();
       artyFinder.indirectMultiplier = 2;
       targets[2] = MeteorParams.planMeteorOnEnemy(map, map, myCommander, 2, artyFinder);
       return targets;

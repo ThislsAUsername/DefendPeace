@@ -75,7 +75,7 @@ public class Sturm extends AW2Commander
   @Override
   public void modifyMoveType(UnitContext uc)
   {
-    SturmValueFinders.modifyMoveType(uc);
+    SturmUtils.modifyMoveType(uc);
   }
 
   private static class MeteorStrike extends AW2Ability
@@ -116,11 +116,11 @@ public class Sturm extends AW2Commander
     private MeteorParams[] findTargets(GameMap map)
     {
       MeteorParams[] targets = new MeteorParams[3];
-      SturmValueFinders.HPValueFinder hpFinder = new SturmValueFinders.HPValueFinder();
+      SturmUtils.HPValueFinder hpFinder = new SturmUtils.HPValueFinder();
       hpFinder.countHidden = false;
-      SturmValueFinders.CostValueFinder costFinder = new SturmValueFinders.CostValueFinder();
+      SturmUtils.CostValueFinder costFinder = new SturmUtils.CostValueFinder();
       costFinder.countHidden = false;
-      SturmValueFinders.CostValueFinder artyFinder = new SturmValueFinders.CostValueFinder();
+      SturmUtils.CostValueFinder artyFinder = new SturmUtils.CostValueFinder();
       artyFinder.countHidden = false;
       artyFinder.indirectMultiplier = 2;
       MapPerspective scoringMap = myCommander.army.myView;

@@ -81,7 +81,7 @@ public class Lash extends AW2Commander
     TerrainTactics(Lash commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
-      moveMod = new SturmValueFinders.PerfectMoveModifier();
+      moveMod = new SturmUtils.PerfectMoveModifier();
       AIFlags = 0; // Whyyyyy does this cost 4?
     }
 
@@ -112,7 +112,7 @@ public class Lash extends AW2Commander
     PrimeTactics(Lash commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
-      moveMod = new SturmValueFinders.PerfectMoveModifier();
+      moveMod = new SturmUtils.PerfectMoveModifier();
       defMod  = new DoubleTerrainModifier();
     }
 
