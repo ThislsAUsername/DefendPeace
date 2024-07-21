@@ -525,7 +525,7 @@ public class PlayerSetupCommanderArtist
     if( sortByGameThenFaction )
     {
       outerMax = UIUtils.SourceGames.values().length;
-      innerMax = myControl.canonFactions.length;
+      innerMax = UIUtils.CANON_FACTIONS.length;
       outerSel = selectedInfo.game.ordinal();
 
       // outer bin = game
@@ -533,19 +533,19 @@ public class PlayerSetupCommanderArtist
         outerBinColorSpec.add(game.uiColorSpec);
       // Factions for both
       allCmdrLists = myControl.cosByGameFaction;
-      for( COSpriteSpec spec : myControl.canonFactions )
+      for( COSpriteSpec spec : UIUtils.CANON_FACTIONS )
         binColorSpec.add(spec);
     }
     else
     {
-      outerMax = myControl.canonFactions.length;
+      outerMax = UIUtils.CANON_FACTIONS.length;
       innerMax = UIUtils.SourceGames.values().length;
       outerSel = 0;
-      for( ; outerSel < myControl.canonFactions.length; ++outerSel )
-        if( selectedInfo.baseFaction == myControl.canonFactions[outerSel] )
+      for( ; outerSel < UIUtils.CANON_FACTIONS.length; ++outerSel )
+        if( selectedInfo.baseFaction == UIUtils.CANON_FACTIONS[outerSel] )
           break;
       // outer bin = faction
-      for( COSpriteSpec spec : myControl.canonFactions )
+      for( COSpriteSpec spec : UIUtils.CANON_FACTIONS )
         outerBinColorSpec.add(spec);
       // Games for both
       allCmdrLists = myControl.cosByFactionGame;
