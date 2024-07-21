@@ -37,11 +37,11 @@ public class Olaf extends AW3Commander
           + "A pompous braggart, but his tactical prowess has earned him the respect of his peers.\n"
           + "Winter weather poses no problem for Olaf or his troops. Snow causes his firepower to rise, and his troops can move with no penalty.\n"
           + "(Normal movement and +20 attack in cold weather.)"));
-      infoPages.add(new InfoPage(new Blizzard(null, new CommanderAbility.CostBasis(CHARGERATIO_AW3)),
-            "Causes cold weather (doubled fuel consumption) for two days.\n"
+      infoPages.add(new InfoPage(new Blizzard(null, null),
+            "Causes chill (doubled fuel consumption) for two days.\n"
           + "+10 attack and defense.\n"));
-      infoPages.add(new InfoPage(new WinterFury(null, new CommanderAbility.CostBasis(CHARGERATIO_AW3)),
-            "A mighty blizzard causes two HP of damage to all enemy troops. The cold weather also persists for two days.\n"
+      infoPages.add(new InfoPage(new WinterFury(null, null),
+            "A mighty blizzard causes two HP of damage to all enemy troops. The chill also persists for two days.\n"
           + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(
             "Hit: Warm Boots\n"
