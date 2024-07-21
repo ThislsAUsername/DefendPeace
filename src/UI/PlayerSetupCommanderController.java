@@ -1,8 +1,6 @@
 package UI;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-
 import CommandingOfficers.*;
 import Engine.Driver;
 import Engine.IController;
@@ -10,8 +8,8 @@ import Engine.IView;
 import Engine.GameScenario.TagMode;
 import UI.InputHandler.InputAction;
 import UI.PlayerSetupInfo.CODeets;
-import UI.UIUtils.COSpriteSpec;
 import UI.Art.SpriteArtist.PlayerSetupCommanderArtist;
+import lombok.var;
 
 public class PlayerSetupCommanderController implements IController
 {
@@ -19,7 +17,6 @@ public class PlayerSetupCommanderController implements IController
   public final ArrayList<CommanderInfo> cmdrInfos;
   public final boolean shouldSelectMultiCO;
   public final int noCmdr;
-  public final COSpriteSpec[] canonFactions;
   // Lists, organized by x then y, of indices into the canonical commander list
   public final ArrayList<Integer>[][] cosByGameFaction;
   public final ArrayList<Integer>[][] cosByFactionGame;
@@ -33,10 +30,7 @@ public class PlayerSetupCommanderController implements IController
     myPlayerInfo = playerInfo;
     shouldSelectMultiCO = tagMode.supportsMultiCmdrSelect;
 
-    HashSet<COSpriteSpec> uniqueFactions = new HashSet<>();
-    for( int co = 0; co < cmdrInfos.size(); ++co )
-      uniqueFactions.add(cmdrInfos.get(co).baseFaction);
-    canonFactions = uniqueFactions.toArray(new COSpriteSpec[0]);
+    var canonFactions = UIUtils.CANON_FACTIONS;
 
     int gameCount = UIUtils.SourceGames.values().length;
     int factionCount = canonFactions.length;

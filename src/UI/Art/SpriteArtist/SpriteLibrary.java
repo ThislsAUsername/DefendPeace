@@ -784,11 +784,11 @@ public class SpriteLibrary
 
       String discrim = (whichCO.discriminator.length() > 0 ? "_" : "") + whichCO.discriminator;
       BufferedImage body = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, discrim, ""));
-      if( null == body )                      body = getCommanderSpriteAlt(formatBase, discrim, "");
+      if( null == body )                      body = getCommanderSpriteAlt(formatBase, whichCO.discriminator, "");
       BufferedImage head = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, discrim, "_face"));
-      if( null == head )                      head = getCommanderSpriteAlt(formatBase, discrim, "_face");
+      if( null == head )                      head = getCommanderSpriteAlt(formatBase, whichCO.discriminator, "_face");
       BufferedImage eyes = SpriteLibrary.loadSpriteSheetFile(String.format(formatBase, discrim, "_eyes"));
-      if( null == eyes )                      eyes = getCommanderSpriteAlt(formatBase, discrim, "_eyes");
+      if( null == eyes )                      eyes = getCommanderSpriteAlt(formatBase, whichCO.discriminator, "_eyes");
 
       coSpriteSets.put(cmdrKey, new CommanderSpriteSet(body, head, eyes));
     }
@@ -803,7 +803,7 @@ public class SpriteLibrary
 
     // Try all the possible discriminators to see if we get an alternate. If no, use a placeholder instead.
     BufferedImage output = SpriteLibrary.loadSpriteSheetFile(String.format(formatPlaceholder, mugType));
-    for( SourceGames game : SourceGames.values() )
+    for( SourceGames game : UIUtils.PORTRAIT_CHOICE_ORDER )
     {
       String gameDiscrim = (game.discriminator.length() > 0 ? "_" : "") + game.discriminator;
       BufferedImage temp = SpriteLibrary.loadSpriteSheetFile(String.format(format, gameDiscrim, mugType));
