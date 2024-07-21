@@ -92,6 +92,17 @@ public class TestHealing extends TestCase
     // If the loop iterated the wrong number of times, something unexpected happened.
     testPassed &= validate(iteration == 6, "    Heal test iterated an incorrect (" + iteration + ") number of times.");
 
+    // Test that the full cost of a full-HP repair is used
+    victim.health = 80;
+    testCo1.army.money = 10;
+    GameEventQueue debtEvents = victim.model.getTurnInitEvents(victim, testMap); // Make the unit try to heal itself.
+    for( GameEvent event : debtEvents )
+    {
+      event.performEvent(testMap);
+    }
+    testPassed &= validate(victim.health == 80   , "    Victim healed with insufficient funds.");
+    testPassed &= validate(testCo1.army.money > 0, "    Victim put me into debt to heal.");
+
     // Clean up.
     testMap.removeUnit(victim);
 
