@@ -29,7 +29,7 @@ public class Olaf extends AW1Commander
       super("Olaf", UIUtils.SourceGames.AW1, UIUtils.BM);
       infoPages.add(new InfoPage(
             "Olaf (AW1)\n"
-          + "Plans often go awry, but he’s deadly serious.\n"
+          + "Plans often go awry, but he's deadly serious.\n"
           + "Strong in the snow, weak in the rain. A solid CO of above-average ability.\n"
           + "(Normal movement in snow, snow movement in rain.)"));
       infoPages.add(new InfoPage(new Blizzard(null),

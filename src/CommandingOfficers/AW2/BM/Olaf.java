@@ -33,7 +33,7 @@ public class Olaf extends AW2Commander
       super("Olaf", UIUtils.SourceGames.AW2, UIUtils.BM);
       infoPages.add(new InfoPage(
             "Olaf (AW2)\n"
-          + "Plans often go awry, but he’s deadly serious.\n"
+          + "Plans often go awry, but he's deadly serious.\n"
           + "Winter weather poses no problem for Olaf or his troops. Rain, however, does. His gruff nature belies his overall competence.\n"
           + "(Normal movement in snow, snow movement in rain.)"));
       infoPages.add(new InfoPage(new Blizzard(null, new CommanderAbility.CostBasis(CHARGERATIO_FUNDS)),

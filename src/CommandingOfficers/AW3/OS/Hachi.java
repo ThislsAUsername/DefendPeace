@@ -32,7 +32,7 @@ public class Hachi extends AW3Commander
       super("Hachi", UIUtils.SourceGames.AW3, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Hachi (AW3)\n"
-          + "Owner of the Battle Maps shop. Rumoured to be Orange Star’s former commander-in-chief.\n"
+          + "Owner of the Battle Maps shop. Rumoured to be Orange Star's former commander-in-chief.\n"
           + "Uses secret trade routes to get lower deployment costs (90%) for all units.\n"));
       infoPages.add(new InfoPage(new Barter(null, new CostBasis(CHARGERATIO_AW3)),
             "Speaks with such authority that he obtains even lower (50%) deployment costs.\n"

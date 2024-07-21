@@ -33,7 +33,7 @@ public class Lash extends AW3Commander
       super("Lash", UIUtils.SourceGames.AW3, UIUtils.BH);
       infoPages.add(new InfoPage(
             "Lash (AW3)\n"
-          + "The wunderkind of the Black Hole forces. She’s short, but fierce. Invented most of Black Hole’s weapons.\n"
+          + "The wunderkind of the Black Hole forces. She's short, but fierce. Invented most of Black Hole's weapons.\n"
           + "Skilled at taking advantage of terrain features. Can turn terrain effects into firepower bonuses.\n"
           + "(+5 attack per terrain star for non-air units)"));
       infoPages.add(new InfoPage(new TerrainTactics(null, new CostBasis(CHARGERATIO_AW3)),

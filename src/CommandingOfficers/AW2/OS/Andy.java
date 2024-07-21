@@ -30,7 +30,7 @@ public class Andy extends AW2Commander
       super("Andy", UIUtils.SourceGames.AW2, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Andy (AW2)\n"
-          + "A mechanical boy wonder. Impulsive to a fault, he’s fiercely protective of friends.\n"
+          + "A mechanical boy wonder. Impulsive to a fault, he's fiercely protective of friends.\n"
           + "No real weaknesses. Proficient with air, sea, and land units. Ready to fight wherever and whenever.\n"));
       infoPages.add(new InfoPage(new HyperRepair(null, new CostBasis(CHARGERATIO_FUNDS)),
             "Restores 2 HP to all units.\n"

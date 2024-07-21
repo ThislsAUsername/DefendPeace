@@ -41,7 +41,7 @@ public class Sami extends AW3Commander
             "Infantry units receive a movement bonus of one space. Their attack also increases (+30, 160 total).\n"
           + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(new VictoryMarch(null, new CostBasis(CHARGERATIO_AW3)),
-            "Increases all foot soldiers’ movement by two spaces and gives them an attack bonus (+60, 190 total).\n"
+            "Increases all foot soldiers' movement by two spaces and gives them an attack bonus (+60, 190 total).\n"
           + "They capture in one turn even below full HP.\n"
           + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(

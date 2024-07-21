@@ -31,8 +31,8 @@ public class Colin extends AW3Commander
       super("Colin", UIUtils.SourceGames.AW3, UIUtils.BM);
       infoPages.add(new InfoPage(
             "Colin (AW3)\n"
-          + "Blue Moon's rich boy CO and Sasha’s little brother. A gifted CO with a sharp, if insecure mind.\n"
-          + "Heir to a vast fortune, Colin can buy units at bargain-basement prices. His troops’ low firepower stems from his lack of experience.\n"
+          + "Blue Moon's rich boy CO and Sasha's little brother. A gifted CO with a sharp, if insecure mind.\n"
+          + "Heir to a vast fortune, Colin can buy units at bargain-basement prices. His troops' low firepower stems from his lack of experience.\n"
           + "(80% prices, -10 attack)"));
       infoPages.add(new InfoPage(new GoldRush(null, null),
             "Increases deployment funds by one and a half times.\n"

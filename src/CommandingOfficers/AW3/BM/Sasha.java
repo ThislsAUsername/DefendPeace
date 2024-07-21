@@ -26,14 +26,14 @@ public class Sasha extends AW3Commander
       super("Sasha", UIUtils.SourceGames.AW3, UIUtils.BM, "");
       infoPages.add(new InfoPage(
             "Sasha (AW3)\n"
-          + "Colin’s sister. Normally ladylike, but becomes daring when angry.\n"
+          + "Colin's sister. Normally ladylike, but becomes daring when angry.\n"
           + "Being the heir to a vast fortune, she gets an additional 100 funds from allied bases.\n"));
       infoPages.add(new InfoPage(new MarketCrash(null, null),
-            "Decreases the enemy’s CO Power meters in proportion to the funds in the treasury.\n"
+            "Decreases the enemy's CO Power meters in proportion to the funds in the treasury.\n"
           + "(100% of max for 50k funds)\n"
           + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(new WarBonds(null, null),
-            "Earn funds when she inflicts damage on a foe. She gains 50% of the unit’s cost in damage.\n"
+            "Earn funds when she inflicts damage on a foe. She gains 50% of the unit's cost in damage.\n"
           + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(
             "Hit: Truffles\n"
