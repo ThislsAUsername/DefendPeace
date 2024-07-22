@@ -261,6 +261,21 @@ public class MapMaster extends GameMap
     }
   }
 
+  @Override
+  public Commander getOwner(XYCoord coord)
+  {
+    return getOwner(coord.x, coord.y);
+  }
+  @Override
+  public Commander getOwner(int w, int h)
+  {
+    if( !isLocationValid(w, h) )
+    {
+      return null;
+    }
+    return map[w][h].getOwner();
+  }
+
   public void addNewUnit(Unit unit, int x, int y)
   {
     addNewUnit(unit, x, y, false);
