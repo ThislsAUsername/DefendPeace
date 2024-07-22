@@ -79,6 +79,9 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW2.BM.Grit.getInfo() );
     commanderList.add( CommandingOfficers.AW2.BM.Olaf.getInfo() );
     commanderList.add( CommandingOfficers.AW2.GE.Drake.getInfo() );
+    commanderList.add( CommandingOfficers.AW2.YC.Sonja.getInfo() );
+    commanderList.add( CommandingOfficers.AW2.YC.Sensei.getInfo() );
+    commanderList.add( CommandingOfficers.AW2.YC.Kanbei.getInfo() );
     commanderList.add( CommandingOfficers.AW2.BH.Lash.getInfo() );
     commanderList.add( CommandingOfficers.AW2.BH.Sturm.getInfo() );
     commanderList.add( CommandingOfficers.AW3.OS.Andy.getInfo() );
