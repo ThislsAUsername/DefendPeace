@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import CommandingOfficers.*;
 import CommandingOfficers.AW1.AW1Commander;
 import Engine.GameScenario;
+import Engine.Combat.StrikeParams;
 import Engine.UnitMods.VisionModifier;
 import Engine.UnitMods.UnitModifier;
 import UI.UIUtils;
@@ -56,6 +57,12 @@ public class Sonja extends AW1Commander
   public void modifyVision(UnitContext uc)
   {
     uc.visionRange += 1;
+  }
+  @Override
+  public void modifyUnitAttack(StrikeParams params)
+  {
+    params.luckRolled += 15;
+    params.luckBase   -= 15;
   }
 
   private static class EnhancedVision extends AW1BasicAbility

@@ -8,6 +8,7 @@ import CommandingOfficers.AW3.AW3Commander;
 import CommandingOfficers.DefendPeace.misc.Venge;
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.Combat.StrikeParams;
 import Engine.StateTrackers.DSSonjaDebuffTracker;
 import Engine.StateTrackers.StateTracker;
 import Engine.UnitMods.UnitModifier;
@@ -78,6 +79,11 @@ public class Sonja extends AW3Commander
   public void modifyVision(UnitContext uc)
   {
     uc.visionRange += 1;
+  }
+  @Override
+  public void modifyUnitAttack(StrikeParams params)
+  {
+    params.luckRolledBad += 5;
   }
 
   private static class EnhancedVision extends AW3Ability
