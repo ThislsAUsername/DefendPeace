@@ -13,7 +13,7 @@ import Units.UnitModel;
 public class CreateUnitEvent implements GameEvent
 {
   private final Commander myCommander;
-  private final Unit myNewUnit;
+  public final Unit myNewUnit;
   private final XYCoord myBuildCoords;
   private int myFudgeRadius = 0;
   private final AnimationStyle myAnimStyle;
