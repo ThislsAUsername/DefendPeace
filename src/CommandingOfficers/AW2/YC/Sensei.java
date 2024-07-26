@@ -126,8 +126,9 @@ public class Sensei extends AW2Commander
           var owner = loc.getOwner();
           if( resi == null && null != owner && myCommander.army == owner.army )
           {
-            events.add(new CreateUnitEvent(myCommander, deployable, new XYCoord(x, y), AnimationStyle.DROP_IN, unitIsReady, allowStomping));
-            //TODO: 9 HP
+            CreateUnitEvent dudeSpawn = new CreateUnitEvent(myCommander, deployable, new XYCoord(x, y), AnimationStyle.NONE, unitIsReady, allowStomping);
+            dudeSpawn.myNewUnit.health = 90;
+            events.add(dudeSpawn);
           }
         }
       }
