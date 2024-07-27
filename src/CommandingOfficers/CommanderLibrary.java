@@ -112,6 +112,9 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.BM.Grit.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BM.Olaf.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.GE.Javier.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.YC.Sonja.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.YC.Sensei.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.YC.Kanbei.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.YC.SonjaDSBW.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Lash.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Sturm.getInfo() );
