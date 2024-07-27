@@ -60,7 +60,7 @@ public class Olaf extends AW3Commander
     super(coInfo, rules);
     immuneToCold = true;
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_AW3);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new Blizzard(this, cb));
     addCommanderAbility(new WinterFury(this, cb));
   }

@@ -57,7 +57,7 @@ public class Rachel extends AWBWCommander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new LuckyLass(this, cb));
     addCommanderAbility(new CoveringFire(this, cb));
   }

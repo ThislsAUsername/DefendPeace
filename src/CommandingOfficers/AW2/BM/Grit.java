@@ -56,7 +56,7 @@ public class Grit extends AW2Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new SnipeAttack(this, cb));
     addCommanderAbility(new SuperSnipe(this, cb));
   }

@@ -59,7 +59,7 @@ public class Drake extends AW2Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new Tsunami(this, cb));
     addCommanderAbility(new Typhoon(this, cb));
   }

@@ -58,7 +58,7 @@ public class Jake extends AW3Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_AW3);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new BeatDown(this, cb));
     addCommanderAbility(new BlockRock(this, cb));
   }

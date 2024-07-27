@@ -58,7 +58,7 @@ public class Colin extends AW2Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new GoldRush(this, cb));
     addCommanderAbility(new PowerOfMoney(this, cb));
   }

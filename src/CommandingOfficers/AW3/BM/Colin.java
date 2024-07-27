@@ -57,7 +57,7 @@ public class Colin extends AW3Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_AW3);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new GoldRush(this, cb));
     addCommanderAbility(new PowerOfMoney(this, cb));
   }

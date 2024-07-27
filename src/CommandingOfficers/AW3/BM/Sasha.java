@@ -52,7 +52,7 @@ public class Sasha extends AW3Commander
     super(coInfo, rules);
     incomeAdjustment = 100;
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_AW3);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new MarketCrash(this, cb));
     addCommanderAbility(new WarBonds(this, cb));
   }

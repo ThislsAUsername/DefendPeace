@@ -51,7 +51,7 @@ public class Sasha extends AWBWCommander
     if( 0 != gameRules.incomePerCity )
       incomeAdjustment = 100;
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new MarketCrash(this, cb));
     addCommanderAbility(new WarBonds(this, cb));
   }
