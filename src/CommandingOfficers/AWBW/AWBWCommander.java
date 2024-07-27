@@ -33,6 +33,11 @@ public abstract class AWBWCommander extends Commander
     roundUpRepairs = false;
   }
 
+  public CommanderAbility.CostBasis getGameBasis()
+  {
+    return new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+  }
+
   // Charge based on funds damage taken + 1/2 dealt
   @Override
   public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy, boolean isCounter)

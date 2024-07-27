@@ -1,6 +1,7 @@
 package CommandingOfficers.AW3;
 
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.AW2And3CommanderBase;
 import CommandingOfficers.CommanderInfo.InfoPage;
@@ -21,6 +22,11 @@ public abstract class AW3Commander extends AW2And3CommanderBase
   public AW3Commander(CommanderInfo info, GameScenario.GameRules rules)
   {
     super(info, rules);
+  }
+
+  public CommanderAbility.CostBasis getGameBasis()
+  {
+    return new CommanderAbility.CostBasis(CHARGERATIO_AW3);
   }
 
   // Charge based on abilityPowerValue-scaled damage taken + 1/2 dealt
