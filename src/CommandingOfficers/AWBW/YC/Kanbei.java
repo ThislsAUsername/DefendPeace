@@ -56,7 +56,7 @@ public class Kanbei extends AWBWCommander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new MoraleBoost(this, cb));
     addCommanderAbility(new SamuraiSpirit(this, cb));
   }

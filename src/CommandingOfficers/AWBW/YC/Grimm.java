@@ -50,7 +50,7 @@ public class Grimm extends AWBWCommander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new Knuckleduster(this, cb));
     addCommanderAbility(new BeegPunch(this, cb));
   }

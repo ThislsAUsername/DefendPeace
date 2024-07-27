@@ -63,7 +63,7 @@ public class Sensei extends AW3Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_AW3);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new CopterCommand(this, cb));
     addCommanderAbility(new AirborneAssault(this, cb));
   }
