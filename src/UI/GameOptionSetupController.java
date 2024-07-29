@@ -19,7 +19,7 @@ public class GameOptionSetupController implements IController
 
   private GameOption<FogMode> fowOption = new GameOption<FogMode>("Fog of War", FogMode.values(), 0);
   private GameOption<Integer> startingFundsOption = new GameOptionInt("Starting Funds", 0, 50000, 1000, 0);
-  private GameOption<Integer> incomeOption = new GameOptionInt("Income", 250, 20000, 250, 1000);
+  private GameOption<Integer> incomeOption = new GameOptionInt("Income", 0, 20000, 250, 1000);
   private GameOption<Weathers> weatherOption = new GameOption<Weathers>("Weather", Weathers.values(), 0);
   private GameOption<UnitModelScheme> unitSchemeOption;
   private GameOption<TagMode> tagsOption = new GameOption<TagMode>("Tag Mode", TagMode.values(), 0);

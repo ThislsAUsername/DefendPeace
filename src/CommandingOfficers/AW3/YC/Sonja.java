@@ -33,7 +33,7 @@ public class Sonja extends AW3Commander
       super("Sonja", UIUtils.SourceGames.AW3, UIUtils.YC);
       infoPages.add(new InfoPage(
             "Sonja (AWDS)\n"
-          + "Kanbei’s calm and collected daughter who plans before acting. Excels in information warfare.\n"
+          + "Kanbei's calm and collected daughter who plans before acting. Excels in information warfare.\n"
           + "All units have extended vision ranges in Fog of War. Manipulates information to reduce enemy terrain effects by one.\n"
           + "(+1 vision, -1 terrain star to enemies even when not fighting her, 5 bad luck)\n"));
       infoPages.add(new InfoPage(new EnhancedVision(null, new CostBasis(CHARGERATIO_AW3)),
@@ -62,7 +62,7 @@ public class Sonja extends AW3Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_AW3);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new EnhancedVision(this, cb));
     addCommanderAbility(new CounterBreak(this, cb));
   }

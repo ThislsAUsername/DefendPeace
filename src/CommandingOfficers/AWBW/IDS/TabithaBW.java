@@ -62,7 +62,7 @@ public class TabithaBW extends COUableCommander
     super(POWER, DEFENSE, coInfo, rules);
     deployCostPercent = 50;
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new NukeIt(this, "Firestorm",   6, cb, 4, 10, 10));
     addCommanderAbility(new NukeIt(this, "Apocalypse", 10, cb, 8, 25, 25));
   }

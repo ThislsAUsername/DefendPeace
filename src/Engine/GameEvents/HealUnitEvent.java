@@ -6,7 +6,6 @@ import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
 import Units.Unit;
-import Units.UnitModel;
 
 public class HealUnitEvent implements GameEvent
 {
@@ -49,17 +48,17 @@ public class HealUnitEvent implements GameEvent
       return;
     }
 
-    int costPerHealth = unit.getRepairCost() / UnitModel.MAXIMUM_HEALTH;
+    int costPerHP = unit.getRepairCost() / 10;
 
     int actualRepair = repairPowerHealth;
-    if( costPerHealth > 0 )
+    if( costPerHP > 0 )
     {
-      int affordableHealth = payer.money / costPerHealth;
+      int affordableHealth = (payer.money / costPerHP) * 10;
       actualRepair = Math.min(repairPowerHealth, affordableHealth);
     }
 
     int deltaHealth = unit.alterHealth(actualRepair, unit.CO.roundUpRepairs, canOverheal);
-    payer.money -= deltaHealth * costPerHealth;
+    payer.money -= (deltaHealth / 10) * costPerHP;
   }
 
   @Override

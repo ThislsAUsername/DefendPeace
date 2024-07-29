@@ -52,7 +52,7 @@ public class Jake extends AWBWCommander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new BeatDown(this, cb));
     addCommanderAbility(new BlockRock(this, cb));
   }

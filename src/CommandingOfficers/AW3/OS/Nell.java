@@ -28,7 +28,7 @@ public class Nell extends AW3Commander
       super("Nell", UIUtils.SourceGames.AW3, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Nell (AW3)\n"
-          + "Rachel’s sister and the supreme commander of Orange Star. Has a superb fashion sense.\n"
+          + "Rachel's sister and the supreme commander of Orange Star. Has a superb fashion sense.\n"
           + "Sometimes strikes with more force than expected. Is the first to tell you she was born lucky.\n"
           + "(+10 max luck)\n"));
       infoPages.add(new InfoPage(

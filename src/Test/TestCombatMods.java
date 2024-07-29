@@ -196,7 +196,7 @@ public class TestCombatMods extends TestCase
       addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
       performGameAction(new BattleLifecycle.BattleAction(testMap, aa, aaPath, 7, 4), testGame);
 
-      testPassed &= validate(cinder.army.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.army.money+" instead.");
+      testPassed &= validate(cinder.army.money == currentFundsReturn * 10, "    Expected to make "+currentFundsReturn*10+", but got "+cinder.army.money+" instead.");
     }
     // Remove those amounts, and make sure that works
     for( int i = 0; i < 55; ++i )
@@ -216,7 +216,7 @@ public class TestCombatMods extends TestCase
       addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
       performGameAction(new BattleLifecycle.BattleAction(testMap, aa, aaPath, 7, 4), testGame);
 
-      testPassed &= validate(cinder.army.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.army.money+" instead.");
+      testPassed &= validate(cinder.army.money == currentFundsReturn * 10, "    Expected to make "+currentFundsReturn*10+", but got "+cinder.army.money+" instead.");
     }
     // Do the second half backwards, for giggles
     for( int i = 99; i > 42; --i )
@@ -237,7 +237,7 @@ public class TestCombatMods extends TestCase
       addUnit(testMap, venge, UnitModel.TROOP, 7, 4);
       performGameAction(new BattleLifecycle.BattleAction(testMap, aa, aaPath, 7, 4), testGame);
 
-      testPassed &= validate(cinder.army.money == currentFundsReturn * 1000, "    Expected to make "+currentFundsReturn*1000+", but got "+cinder.army.money+" instead.");
+      testPassed &= validate(cinder.army.money == currentFundsReturn * 10, "    Expected to make "+currentFundsReturn*10+", but got "+cinder.army.money+" instead.");
     }
 
     // Clean up

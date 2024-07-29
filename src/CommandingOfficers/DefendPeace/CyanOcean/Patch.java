@@ -52,12 +52,12 @@ public class Patch extends Commander
   // Variables to characterize Patch's abilities.
   private static final String PLUNDER_NAME = "Plunder";
   private static final int PLUNDER_COST = 3;
-  private static final double PLUNDER_INCOME = 0.25;
+  private static final int PLUNDER_INCOME = 25;
   private static final int PLUNDER_ATTACK_BUFF = 10;
 
   private static final String PILLAGE_NAME = "Pillage";
   private static final int PILLAGE_COST = 6;
-  private static final double PILLAGE_INCOME = 0.5;
+  private static final int PILLAGE_INCOME = 50;
   private static final int PILLAGE_ATTACK_BUFF = 25;
 
   private LootAbility myLootAbility = null;
@@ -123,10 +123,10 @@ public class Patch extends Commander
   {
     private static final long serialVersionUID = 1L;
     private UnitDamageModifier damageBuff = null;
-    private final double myIncomeRatio;
+    private final int myIncomeRatio;
     private DamageDealtToIncomeConverter tracker;
 
-    PatchAbility(Patch patch, CostBasis basis, String abilityName, int abilityCost, double incomeRatio, int unitBuff)
+    PatchAbility(Patch patch, CostBasis basis, String abilityName, int abilityCost, int incomeRatio, int unitBuff)
     {
       super(patch, abilityName, abilityCost, basis);
 

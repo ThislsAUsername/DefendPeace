@@ -16,17 +16,20 @@ public class DamageDealtToIncomeConverter extends StateTracker
 {
   private static final long serialVersionUID = 1L;
 
-  public HashMap<Army, ArrayList<Double>> incomeRatios = new HashMap<>();
+  public HashMap<Army, ArrayList<Integer>> incomeRatios = new HashMap<>();
 
-  public void startTracking(Army army, double value)
+  /**
+   * @param value in percent
+   */
+  public void startTracking(Army army, Integer value)
   {
-    ArrayList<Double> valueList = incomeRatios.getOrDefault(army, new ArrayList<Double>());
+    ArrayList<Integer> valueList = incomeRatios.getOrDefault(army, new ArrayList<>());
     valueList.add(value);
     incomeRatios.put(army, valueList);
   }
-  public void stopTracking(Army army, double value)
+  public void stopTracking(Army army, Integer value) // Note: has to be the boxed type, since the unboxed type will change the remove() call.
   {
-    ArrayList<Double> valueList = incomeRatios.getOrDefault(army, new ArrayList<Double>());
+    ArrayList<Integer> valueList = incomeRatios.getOrDefault(army, new ArrayList<>());
     if( !valueList.contains(value) )
       return;
     valueList.remove(value);
@@ -47,19 +50,19 @@ public class DamageDealtToIncomeConverter extends StateTracker
     final Army profiteer = attacker.CO.army;
     if( incomeRatios.containsKey(profiteer) )
     {
-      double myIncomeRatio = 0;
-      for( double r : incomeRatios.get(profiteer) )
+      int myIncomeRatio = 0;
+      for( Integer r : incomeRatios.get(profiteer) )
         myIncomeRatio += r;
       profiteer.money += calculateProfit(defender, myIncomeRatio);
     }
   }
 
-  private static int calculateProfit(UnitDelta delta, double myIncomeRatio)
+  private static int calculateProfit(UnitDelta delta, int myIncomeRatio)
   {
     int healthLoss = delta.getHPDamage();
     int unitCost = delta.unit.getCost();
     // Do the necessary math, then round to the nearest int.
-    int income = (int) (healthLoss * (unitCost / 10) * myIncomeRatio + 0.5);
+    int income = healthLoss * (unitCost / 10) * myIncomeRatio / 100;
     return income;
   }
 }

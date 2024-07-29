@@ -57,7 +57,7 @@ public class Lash extends AW2Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new TerrainTactics(this, cb));
     addCommanderAbility(new PrimeTactics(this, cb));
   }

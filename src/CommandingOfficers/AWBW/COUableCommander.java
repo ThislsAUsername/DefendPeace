@@ -4,6 +4,7 @@ import Engine.GameScenario;
 
 import java.util.ArrayList;
 
+import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.DeployableCommander;
 import CommandingOfficers.AWBW.AWBWCommander.AWBWAbility;
@@ -44,6 +45,11 @@ public abstract class COUableCommander extends DeployableCommander
     //     Exception: if the heal can overheal, then the chip damage will be healed for free.
     //     (8.1HP unit on city will heal to 10HP, costing 1HP of repair).
     roundUpRepairs = false;
+  }
+
+  public CommanderAbility.CostBasis getGameBasis()
+  {
+    return new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
   }
 
   @Override

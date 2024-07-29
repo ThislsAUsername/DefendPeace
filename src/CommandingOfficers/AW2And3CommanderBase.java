@@ -35,7 +35,8 @@ public abstract class AW2And3CommanderBase extends Commander
       super(commander, name, cost, basis);
       genericAttack  = new UnitDamageModifier(genericAtt);
       genericDefense = new UnitDefenseModifier(genericDef);
-      basis.maxStarRatio = basis.baseStarRatio * 2; // 18k per star
+      if( null != basis )
+        basis.maxStarRatio = basis.baseStarRatio * 2; // 18k per star
     }
 
     @Override

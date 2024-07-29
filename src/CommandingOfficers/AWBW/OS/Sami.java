@@ -57,7 +57,7 @@ public class Sami extends AWBWCommander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new DoubleTime(this, cb));
     addCommanderAbility(new VictoryMarch(this, cb));
   }

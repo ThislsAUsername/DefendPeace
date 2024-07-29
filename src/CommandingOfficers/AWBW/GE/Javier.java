@@ -60,7 +60,7 @@ public class Javier extends AWBWCommander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(TowerShield(this, cb));
     addCommanderAbility(TowerOfPower(this, cb));
   }

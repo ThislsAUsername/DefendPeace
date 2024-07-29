@@ -32,7 +32,7 @@ public class Eagle extends AW1Commander
       super("Eagle", UIUtils.SourceGames.AW1, UIUtils.GE);
       infoPages.add(new InfoPage(
             "Eagle (AW1)\n"
-          + "An ace pilot who’s as tough as nails.\n"
+          + "An ace pilot who's as tough as nails.\n"
           + "Strongest firepower in the skies. But flounders at sea.\n"
           + "(1.15x/0.9x damage dealt/taken and -2 fuel burn/turn for air, -20 attack for naval)\n"));
       infoPages.add(new InfoPage(new LightningStrike(null),

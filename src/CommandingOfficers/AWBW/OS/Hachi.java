@@ -52,7 +52,7 @@ public class Hachi extends AWBWCommander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new Barter(this, cb));
     addCommanderAbility(new MerchantUnion(this, cb));
   }

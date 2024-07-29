@@ -66,7 +66,7 @@ public class Sturm extends AWBWCommander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new MeteorStrike(this, METEOR_NAME , METEOR_COST , METEOR_POWER , METEOR_FLAGS , cb));
     addCommanderAbility(new MeteorStrike(this, MEATIER_NAME, MEATIER_COST, MEATIER_POWER, MEATIER_FLAGS, cb));
   }

@@ -54,7 +54,7 @@ public class Max extends AWBWCommander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new MaxPower(this, cb, "Max Force", 3, 1, 10)); // -10 from AW2, since the generic bonus came out of his direct bonus
     addCommanderAbility(new MaxPower(this, cb, "Max Blast", 6, 2, 30));
   }
