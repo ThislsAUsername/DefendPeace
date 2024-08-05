@@ -38,15 +38,13 @@ public class Sensei extends AWBWCommander
       super("Sensei", UIUtils.SourceGames.AWBW, UIUtils.YC);
       infoPages.add(new InfoPage(
             "Sensei (AWBW)\n"
-          + "\n"
-          + "\n"
-          + "(+50/0 copters/footsoldiers, -10/0 non-air units)\n"));
+          + "Copters gain +50% attack, footsoldiers gain +40% attack, but all other non-air units lose -10% attack. Transports gain +1 movement.\n"));
       infoPages.add(new InfoPage(new CopterCommand(null, null),
-            "\n"
-          + "+10 defense.\n"));
+            "Copters' attack is increased to +65%. 9 HP unwaited infantry are placed on every owned, empty city.\n"
+          + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(new AirborneAssault(null, null),
-            "\n"
-          + "+10 defense.\n"));
+            "Copters' attack is increased to +65%. 9 HP unwaited mechs are placed on every owned, empty city.\n"
+          + "+10 attack and defense.\n"));
       infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import CommandingOfficers.*;
 import CommandingOfficers.AW3.AW3Commander;
+import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
@@ -29,14 +30,17 @@ public class Grimm extends AW3Commander
       super("Grimm", UIUtils.SourceGames.AW3, UIUtils.YC, "");
       infoPages.add(new InfoPage(
             "Grimm (AWDS)\n"
-          + "\n"
-          + "(+30/30 stats for 1.2x prices)\n"));
+          + "A CO with a dynamic personality. Couldn't care less about the details. Nicknamed “Lightning Grimm”.\n"
+          + "Firepower of all units is increased (+30) due to his daredevil nature, but their defence is a little weak (-20).\n"));
       infoPages.add(new InfoPage(new Knuckleduster(null, null),
-            "\n"
-          + "(+20/10 stats, total 150/140)\n"));
-      infoPages.add(new InfoPage(new BeegPunch(null, null),
-            "\n"
-          + "(+20/30 stats, total 150/160; +65 attack on counters)\n"));
+            "Increases the attack (+20) of all units.\n"
+          + "+10 attack and defense (160/90)\n"));
+      infoPages.add(new InfoPage(new Haymaker(null, null),
+            "Greatly increases the attack (+50) of all units.\n"
+          + "+10 attack and defense (190/90)\n"));
+      infoPages.add(new InfoPage(
+            "Hit: Doughnuts\n"
+          + "Miss: Planning"));
       infoPages.add(AW3_MECHANICS_BLURB);
     }
     @Override
@@ -52,7 +56,7 @@ public class Grimm extends AW3Commander
 
     CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new Knuckleduster(this, cb));
-    addCommanderAbility(new BeegPunch(this, cb));
+    addCommanderAbility(new Haymaker(this, cb));
   }
   @Override
   public void modifyUnitAttack(StrikeParams params)
@@ -84,14 +88,14 @@ public class Grimm extends AW3Commander
     }
   }
 
-  private static class BeegPunch extends AW3Ability
+  private static class Haymaker extends AW3Ability
   {
     private static final long serialVersionUID = 1L;
-    private static final String NAME = "";
+    private static final String NAME = "Haymaker";
     private static final int COST = 6;
     UnitModifier atkMod;
 
-    BeegPunch(Grimm commander, CostBasis basis)
+    Haymaker(Grimm commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
       atkMod = new UnitDamageModifier(50);

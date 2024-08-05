@@ -32,14 +32,14 @@ public class Kanbei extends AW3Commander
       super("Kanbei", UIUtils.SourceGames.AW3, UIUtils.YC);
       infoPages.add(new InfoPage(
             "Kanbei (AWDS)\n"
-          + "\n"
-          + "\n"
+          + "The emperor of Yellow Comet. A skilled CO who has a soft spot for his daughter.\n"
+          + "All units have high offensive and defensive abilities, but are expensive to deploy.\n"
           + "(+20/20 stats for 1.2x prices)\n"));
       infoPages.add(new InfoPage(new MoraleBoost(null, null),
-            "Increases attack strength of all units.\n"
+            "Increases firepower for all units.\n"
           + "(+40/10 stats, total 160/130)\n"));
       infoPages.add(new InfoPage(new SamuraiSpirit(null, null),
-            "Strengthens offensive and defensive abilities of all units. Damage inflicted when counter attacking is multiplied by 1.5.\n"
+            "Greatly strengthens offensive and defensive abilities of all units. Firepower doubles when inflicting damage in counterattacks.\n"
           + "(+40/40 stats, total 160/160; 2.0x damage on counterattack)\n"));
       infoPages.add(new InfoPage(
             "Hit: Sonja\n"

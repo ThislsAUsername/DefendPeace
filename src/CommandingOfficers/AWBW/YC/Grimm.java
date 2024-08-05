@@ -29,14 +29,13 @@ public class Grimm extends AWBWCommander
       super("Grimm", UIUtils.SourceGames.AWBW, UIUtils.YC);
       infoPages.add(new InfoPage(
             "Grimm (AWBW)\n"
-          + "\n"
-          + "(+30/30 stats for 1.2x prices)\n"));
+          + "Units gain +30% attack, but lose 20% defense.\n"));
       infoPages.add(new InfoPage(new Knuckleduster(null, null),
-            "\n"
-          + "(+20/10 stats, total 150/140)\n"));
-      infoPages.add(new InfoPage(new BeegPunch(null, null),
-            "\n"
-          + "(+20/30 stats, total 150/160; +65 attack on counters)\n"));
+            "All units' attack is increased to +50%.\n"
+          + "+10 attack and defense.\n"));
+      infoPages.add(new InfoPage(new Haymaker(null, null),
+            "All units' attack is increased to +80%.\n"
+          + "+10 attack and defense.\n"));
       infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override
@@ -52,7 +51,7 @@ public class Grimm extends AWBWCommander
 
     CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new Knuckleduster(this, cb));
-    addCommanderAbility(new BeegPunch(this, cb));
+    addCommanderAbility(new Haymaker(this, cb));
   }
   @Override
   public void modifyUnitAttack(StrikeParams params)
@@ -84,14 +83,14 @@ public class Grimm extends AWBWCommander
     }
   }
 
-  private static class BeegPunch extends AWBWAbility
+  private static class Haymaker extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String NAME = "";
+    private static final String NAME = "Haymaker";
     private static final int COST = 6;
     UnitModifier atkMod;
 
-    BeegPunch(Grimm commander, CostBasis basis)
+    Haymaker(Grimm commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
       atkMod = new UnitDamageModifier(50);

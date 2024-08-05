@@ -38,15 +38,14 @@ public class Sensei extends AW3Commander
       super("Sensei", UIUtils.SourceGames.AW3, UIUtils.YC);
       infoPages.add(new InfoPage(
             "Sensei (AWDS)\n"
-          + "\n"
-          + "\n"
-          + "(+10/0 copters/footsoldiers, -10/0 non-air non-foot units)\n"));
+          + "A former paratrooper rumoured to have been quite the CO in his day.\n"
+          + "Strong infantry (+10) and high transport movement. Superior firepower (+50) for copters, but naval units have weaker attacks (-10).\n"));
       infoPages.add(new InfoPage(new CopterCommand(null, null),
-            "Attack copter firepower increases (+25). Infantry units with 9 HP appear in all allied cities, ready to be moved.\n"
-          + "+10 defense.\n"));
+            "Attack copter firepower rises (+20, 180 total). Infantry units with 9 HP appear in all allied cities, ready to be moved.\n"
+          + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(new AirborneAssault(null, null),
-            "Attack copter firepower increases (+25). Mech units with 9 HP appear in all allied cities, ready to be moved.\n"
-          + "+10 defense.\n"));
+            "Attack copter firepower rises (+20, 180 total). Mech units with 9 HP appear in all allied cities, ready to be moved.\n"
+          + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(
             "Hit: Lazy, rainy days\n"
           + "Miss: Busy malls"));
@@ -70,12 +69,11 @@ public class Sensei extends AW3Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAny(UnitModel.HOVER | UnitModel.TROOP) )
-    {
+    if( params.attacker.model.isAny(UnitModel.HOVER) )
+      params.attackPower += 50;
+    if( params.attacker.model.isAny(UnitModel.TROOP) )
       params.attackPower += 10;
-      return;
-    }
-    if( params.attacker.model.isNone(UnitModel.AIR_HIGH | UnitModel.AIR_LOW) )
+    if( params.attacker.model.isSeaUnit() )
       params.attackPower -= 10;
   }
   @Override
@@ -94,7 +92,7 @@ public class Sensei extends AW3Commander
     SenseiPower(Sensei commander, String name, int cost, CostBasis basis, UnitModel deployable)
     {
       super(commander, name, cost, basis);
-      copterMod = new UnitTypeFilter(new UnitDamageModifier(25));
+      copterMod = new UnitTypeFilter(new UnitDamageModifier(20));
       copterMod.oneOf = UnitModel.HOVER;
       this.deployable = deployable;
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;

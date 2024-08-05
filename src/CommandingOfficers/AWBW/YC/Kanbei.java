@@ -32,17 +32,15 @@ public class Kanbei extends AWBWCommander
       super("Kanbei", UIUtils.SourceGames.AWBW, UIUtils.YC);
       infoPages.add(new InfoPage(
             "Kanbei (AWBW)\n"
-          + "\n"
-          + "(+30/30 stats for 1.2x prices)\n"));
+          + "Units cost +20% more to build, but gain +30% attack and defense.\n"));
       infoPages.add(new InfoPage(new MoraleBoost(null, null),
-            "\n"
+            "All units' attack is increased to +40%.\n"
+          + "+10 attack and defense.\n"
           + "(+20/10 stats, total 150/140)\n"));
       infoPages.add(new InfoPage(new SamuraiSpirit(null, null),
-            "\n"
+            "All units' attack is increased to +40% and defense to +50%. Counterattacks do 1.5x more damage.\n"
+          + "+10 attack and defense.\n"
           + "(+20/30 stats, total 150/160; +65 attack on counters)\n"));
-      infoPages.add(new InfoPage(
-            "Hit: Sonja\n"
-          + "Miss: Computers"));
       infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override

@@ -30,16 +30,13 @@ public class Sonja extends AWBWCommander
       super("Sonja", UIUtils.SourceGames.AWBW, UIUtils.YC);
       infoPages.add(new InfoPage(
             "Sonja (AWBW)\n"
-          + "\n"
-          + "\n"
-          + "(+1 vision, 10 bad luck, 1.5x counter damage)\n"));
+          + "Units gain +1 vision in Fog of War, and counterattacks do 1.5x more damage. Luck is reduced to -9% to +9%.\n"));
       infoPages.add(new InfoPage(new EnhancedVision(null, null),
-            "\n"
-          + "+10 defense.\n"));
+            "All units gain +1 vision, and can see into forests and reefs.\n"
+          + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(new CounterBreak(null, null),
-            "\n"
-          + "(Counterattacks happen before the attacker's attack)\n"
-          + "+10 defense.\n"));
+            "All units gain +1 vision, and can see into forests and reefs. A unit being attacked will attack first (even if it would be destroyed by the attack).\n"
+          + "+10 attack and defense.\n"));
       infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override
@@ -69,7 +66,8 @@ public class Sonja extends AWBWCommander
     params.luckRolledBad += 10;
     if( params.isCounter )
     {
-      params.attackPower += 50;
+      params.attackerDamageMultiplier *= 150;
+      params.attackerDamageMultiplier /= 100;
     }
   }
 
