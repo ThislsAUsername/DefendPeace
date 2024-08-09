@@ -154,7 +154,7 @@ public class FightClub
       for( int gameIndex = 0; gameIndex < params.numGames; ++gameIndex )
       {
         GameScenario scenario = new GameScenario(mi.getValidUnitModelSchemes()[0],
-            GameScenario.DEFAULT_INCOME, GameScenario.DEFAULT_STARTING_FUNDS, FogMode.OFF_DOR, TagMode.OFF);
+            GameScenario.DEFAULT_INCOME, GameScenario.DEFAULT_STARTING_FUNDS, GameScenario.DEFAULT_UNIT_CAP, FogMode.OFF_DOR, TagMode.OFF);
 
         int numCos = mi.getNumCos();
 

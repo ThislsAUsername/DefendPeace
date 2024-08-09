@@ -13,20 +13,17 @@ public class GameScenario implements Serializable
   private static final long serialVersionUID = 1L;
   public final static int DEFAULT_INCOME = 1000;
   public final static int DEFAULT_STARTING_FUNDS = 0;
+  public final static int DEFAULT_UNIT_CAP = 50;
 
   public final GameRules rules;
 
   public GameScenario()
   {
-    this(DEFAULT_INCOME, DEFAULT_STARTING_FUNDS);
+    this(new AWBWUnits(), DEFAULT_INCOME, DEFAULT_STARTING_FUNDS, DEFAULT_UNIT_CAP, FogMode.OFF_DOR, TagMode.OFF);
   }
-  public GameScenario(int income, int startFunds)
+  public GameScenario(UnitModelScheme scheme, int income, int startFunds, int units, FogMode fog, TagMode tags)
   {
-    rules = new GameRules(new AWBWUnits(), income, startFunds, FogMode.OFF_DOR, TagMode.OFF);
-  }
-  public GameScenario(UnitModelScheme scheme, int income, int startFunds, FogMode fog, TagMode tags)
-  {
-    rules = new GameRules(scheme, income, startFunds, fog, tags);
+    rules = new GameRules(scheme, income, startFunds, units, fog, tags);
   }
 
   public GameEventQueue initTurn(GameMap map)
@@ -71,14 +68,16 @@ public class GameScenario implements Serializable
     private static final long serialVersionUID = 1L;
     public final int incomePerCity;
     public final int startingFunds;
+    public final int unitCap;
     public final UnitModelScheme unitModelScheme;
     public final TagMode tagMode;
     public FogMode fogMode;
 
-    public GameRules(UnitModelScheme ums, int income, int startFunds, FogMode fog, TagMode tags)
+    public GameRules(UnitModelScheme ums, int income, int startFunds, int units, FogMode fog, TagMode tags)
     {
       incomePerCity = income;
       startingFunds = startFunds;
+      unitCap = units;
       unitModelScheme = ums;
       tagMode = tags;
       fogMode = fog;
