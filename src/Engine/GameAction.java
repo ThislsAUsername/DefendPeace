@@ -153,10 +153,7 @@ public abstract class GameAction
         isValid &= site.getOwner() == who;
         isValid &= who.getShoppingList(site).contains(what);
         isValid &= (who.army.money >= who.getBuyCost(what, where));
-        int armyCount = 0;
-        for( Commander co : who.army.cos )
-          armyCount += co.units.size();
-        isValid &= who.gameRules.unitCap > armyCount;
+        isValid &= who.army.canBuildUnits();
       }
 
       if( isValid )

@@ -50,14 +50,10 @@ public abstract class UnitProduceLifecycle
     @Override
     public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
-      int armyCount = 0;
-      for( Commander co : actor.CO.army.cos )
-        armyCount += co.units.size();
-
       XYCoord moveLocation = movePath.getEndCoord();
       if( moveLocation.equals(actor.x, actor.y) && actor.hasCargoSpace(typeToBuild.role)
           && actor.CO.army.money >= actor.CO.getCost(typeToBuild)
-          && actor.CO.gameRules.unitCap > armyCount
+          && actor.CO.army.canBuildUnits()
           && actor.hasMaterials() )
       {
         return new GameActionSet(new UnitProduceAction(this, actor), false);
@@ -171,19 +167,14 @@ public abstract class UnitProduceLifecycle
     @Override
     public void performEvent(MapMaster gameMap)
     {
-      if( null != myNewUnit )
-      {
-        myCommander.army.money -= cost;
-        if( builder.model.needsMaterials )
-          builder.materials -= 1;
-        myCommander.units.add(myNewUnit);
-        builder.heldUnits.add(myNewUnit);
-        builder.isTurnOver = true;
-      }
-      else
-      {
-        System.out.println("Warning! Attempting to build unit with insufficient funds.");
-      }
+      if( null == myNewUnit || !myCommander.army.canBuildUnits() )
+        return;
+      myCommander.army.money -= cost;
+      if( builder.model.needsMaterials )
+        builder.materials -= 1;
+      myCommander.units.add(myNewUnit);
+      builder.heldUnits.add(myNewUnit);
+      builder.isTurnOver = true;
     }
 
     @Override
