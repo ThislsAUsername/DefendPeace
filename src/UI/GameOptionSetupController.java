@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 import Engine.ConfigUtils;
+import Engine.GameScenario;
 import Engine.IController;
 import Engine.OptionSelector;
 import Terrain.Environment.Weathers;
@@ -18,8 +19,9 @@ public class GameOptionSetupController implements IController
   public final int GAME_OPTIONS_CONFIG_KEY = -1; // Player indices start at 0, so -1 should be safe.
 
   private GameOption<FogMode> fowOption = new GameOption<FogMode>("Fog of War", FogMode.values(), 0);
-  private GameOption<Integer> startingFundsOption = new GameOptionInt("Starting Funds", 0, 50000, 1000, 0);
-  private GameOption<Integer> incomeOption = new GameOptionInt("Income", 0, 20000, 250, 1000);
+  private GameOption<Integer> startingFundsOption = new GameOptionInt("Starting Funds", 0, 50000, 1000, GameScenario.DEFAULT_STARTING_FUNDS);
+  private GameOption<Integer> incomeOption = new GameOptionInt("Income", 0, 20000, 250, GameScenario.DEFAULT_INCOME);
+  private GameOption<Integer> unitCapOption = new GameOptionInt("Unit Cap", 0, 1000, 1, GameScenario.DEFAULT_UNIT_CAP);
   private GameOption<Weathers> weatherOption = new GameOption<Weathers>("Weather", Weathers.values(), 0);
   private GameOption<UnitModelScheme> unitSchemeOption;
   private GameOption<TagMode> tagsOption = new GameOption<TagMode>("Tag Mode", TagMode.values(), 0);
@@ -49,7 +51,7 @@ public class GameOptionSetupController implements IController
     for (int i = 0; !unitSchemeOption.getSelectedObject().schemeValid && i < unitSchemeOption.size(); ++i )
       unitSchemeOption.setSelectedOption(i);
 
-    gameOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, tagsOption, securityOption};
+    gameOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, unitCapOption, tagsOption, securityOption};
     optionSelector = new OptionSelector( gameOptions.length );
 
     // Read in the last settings we used on this map, if available
@@ -130,6 +132,7 @@ public class GameOptionSetupController implements IController
         gameBuilder.fogMode       = fowOption.getSelectedObject();
         gameBuilder.startingFunds = startingFundsOption.getSelectedObject();
         gameBuilder.incomePerCity = incomeOption.getSelectedObject();
+        gameBuilder.unitCap       = unitCapOption.getSelectedObject();
         gameBuilder.defaultWeather = (Weathers)weatherOption.getSelectedObject();
         gameBuilder.unitModelScheme = unitSchemeOption.getSelectedObject();
         gameBuilder.tagMode = (TagMode)tagsOption.getSelectedObject();
