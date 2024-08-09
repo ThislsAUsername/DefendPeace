@@ -31,9 +31,14 @@ public abstract class UnitProduceLifecycle
     @Override
     public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
+      int armyCount = 0;
+      for( Commander co : actor.CO.army.cos )
+        armyCount += co.units.size();
+
       XYCoord moveLocation = movePath.getEndCoord();
       if( moveLocation.equals(actor.x, actor.y) && actor.hasCargoSpace(typeToBuild.role)
           && actor.CO.army.money >= actor.CO.getCost(typeToBuild)
+          && actor.CO.gameRules.unitCap > armyCount
           && actor.hasMaterials() )
       {
         return new GameActionSet(new UnitProduceAction(this, actor), false);
