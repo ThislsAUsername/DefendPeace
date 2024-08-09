@@ -178,6 +178,21 @@ public class Unit extends UnitState implements UnitModList
 
     return actionSet;
   }
+  public ArrayList<GameActionSet> getGUIActions(GameMap map, GamePath movePath)
+  {
+    boolean ignoreResident = false;
+    UnitContext uc = new UnitContext(map, this);
+
+    ArrayList<GameActionSet> actionSet = new ArrayList<GameActionSet>();
+    for( UnitActionFactory at : uc.calculateActionTypes() )
+    {
+      GameActionSet actions = at.getGUIActions(map, movePath, this, ignoreResident);
+      if( null != actions )
+        actionSet.add(actions);
+    }
+
+    return actionSet;
+  }
 
   public boolean hasActionType(UnitActionFactory UnitActionType)
   {

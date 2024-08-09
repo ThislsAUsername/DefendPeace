@@ -11,6 +11,7 @@ public class GameActionSet
   private OptionSelector selector;
   private boolean isTargetRequired;
   public boolean useFreeSelect = false;
+  public boolean isInvalidChoice = false;
 
   public GameActionSet(GameAction action, boolean requireTarget)
   {
