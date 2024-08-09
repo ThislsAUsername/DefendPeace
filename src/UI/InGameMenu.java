@@ -28,7 +28,7 @@ public class InGameMenu<T>
       return "" + item;
     }
   }
-  private ArrayList<MenuOption<T>> menuOptions;
+  private ArrayList<MenuOption<? extends T>> menuOptions;
 
   private OptionSelector optionSelector;
 
@@ -61,6 +61,14 @@ public class InGameMenu<T>
     optionSelector = selector;
     wasReset = true;
   }
+  public InGameMenu(Collection<MenuOption<T>> options, OptionSelector selector, boolean garbage) // extra param to differentiate this overload
+  {
+    if (options.size() != selector.size())
+      throw new IllegalArgumentException("Number of options doesn't match the size of the OptionSelector");
+    menuOptions = new ArrayList<>(options);
+    optionSelector = selector;
+    wasReset = true;
+  }
 
   /**
    * Set the selection back to the first option.
@@ -74,10 +82,11 @@ public class InGameMenu<T>
    * Re-initializes this object with the new set of options.
    * @param newOptions
    */
-  public void resetOptions(Collection<MenuOption<T>> newOptions)
+  public void resetOptions(Collection<MenuOption<? extends T>> newOptions)
   {
     menuOptions.clear();
-    menuOptions.addAll(newOptions);
+    for( MenuOption<? extends T> opt : newOptions )
+      menuOptions.add(opt);
     optionSelector.reset( menuOptions.size() );
     wasReset = true;
   }
@@ -86,10 +95,10 @@ public class InGameMenu<T>
    * Re-initializes this object with the new set of options.
    * @param newOptions
    */
-  public void resetOptions(MenuOption<T>[] newOptions)
+  public void resetOptions(MenuOption<? extends T>[] newOptions)
   {
     menuOptions.clear();
-    for( MenuOption<T> t : newOptions )
+    for( MenuOption<? extends T> t : newOptions )
     {
       menuOptions.add(t);
     }
@@ -164,7 +173,7 @@ public class InGameMenu<T>
   /**
    * @return The object currently highlighted by the menu cursor.
    */
-  public MenuOption<T> getSelectedOption()
+  public MenuOption<? extends T> getSelectedOption()
   {
     return menuOptions.get( optionSelector.getSelectionNormalized() );
   }
@@ -172,7 +181,7 @@ public class InGameMenu<T>
   /**
    * @return The object at the specified index.
    */
-  public MenuOption<T> getOption( int index )
+  public MenuOption<? extends T> getOption( int index )
   {
     if( menuOptions.size() > index && index >= 0 )
     {
@@ -202,7 +211,7 @@ public class InGameMenu<T>
   public ArrayList<MenuOption<? extends Object>> getAllOptions()
   {
     ArrayList<MenuOption<? extends Object>> out = new ArrayList<>();
-    for (MenuOption<T> option : menuOptions)
+    for (MenuOption<? extends T> option : menuOptions)
     {
       out.add(option);
     }

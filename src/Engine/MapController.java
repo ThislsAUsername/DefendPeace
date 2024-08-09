@@ -411,7 +411,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
             myGame.setCursorLocation(coord);
           }
         }
-        currentMenu = new InGameMenu<>(myGameInputHandler.getMenuOptions(), myGameInputOptionSelector);
+        currentMenu = myGameInputHandler.getMenu();
         break;
       case ACTION_READY:
         if( null != myGameInputHandler.getReadyAction() )
