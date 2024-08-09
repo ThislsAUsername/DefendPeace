@@ -43,12 +43,12 @@ public class InGameMenu<T>
 
   public InGameMenu(T[] options)
   {
-    this(new ArrayList<T>(Arrays.asList(options)));
+    this(Arrays.asList(options));
   }
 
   public InGameMenu(T[] options, OptionSelector selector)
   {
-    this(new ArrayList<T>(Arrays.asList(options)), selector);
+    this(Arrays.asList(options), selector);
   }
 
   public InGameMenu(Collection<T> options, OptionSelector selector)
