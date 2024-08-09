@@ -68,38 +68,37 @@ public class CreateUnitEvent implements GameEvent
   @Override
   public void performEvent(MapMaster gameMap)
   {
-    if( null != myNewUnit )
-    {
-      myCommander.units.add(myNewUnit);
-      if( myFudgeRadius < 1 || myBoots )
-        gameMap.addNewUnit(myNewUnit, myBuildCoords.x, myBuildCoords.y, myBoots);
-      else
-      {
-        boolean success = false;
-        UnitContext uc = new UnitContext(gameMap, myNewUnit);
-        uc.calculateMoveType();
-        // Check concentric rings outwards, to spawn as close to the original spot as possible
-        for( int radius = 0; !success && radius <= myFudgeRadius; ++radius )
-          for( XYCoord xyc : Utils.findLocationsInRange(gameMap, myBuildCoords, radius, radius) )
-          {
-            Unit resident = gameMap.getResident(xyc);
-            if( resident == null && uc.moveType.canStandOn(gameMap.getEnvironment(xyc)) )
-            {
-              gameMap.addNewUnit(myNewUnit, xyc.x, xyc.y, false);
-              success = true;
-              break;
-            }
-          }
-        if( !success )
-          System.out.println("Warning: Failed to find a place to spawn " + myNewUnit
-                            + " within " + myFudgeRadius + " tiles of " + myBuildCoords);
-      }
-      myCommander.army.myView.revealFog(myNewUnit);
-    }
+    int armyCount = 0;
+    for( Commander co : myCommander.army.cos )
+      armyCount += co.units.size();
+    if( null == myNewUnit || myCommander.gameRules.unitCap <= armyCount )
+      return;
+
+    myCommander.units.add(myNewUnit);
+    if( myFudgeRadius < 1 || myBoots )
+      gameMap.addNewUnit(myNewUnit, myBuildCoords.x, myBuildCoords.y, myBoots);
     else
     {
-      System.out.println("Warning! Attempting to build unit with insufficient funds.");
+      boolean success = false;
+      UnitContext uc = new UnitContext(gameMap, myNewUnit);
+      uc.calculateMoveType();
+      // Check concentric rings outwards, to spawn as close to the original spot as possible
+      for( int radius = 0; !success && radius <= myFudgeRadius; ++radius )
+        for( XYCoord xyc : Utils.findLocationsInRange(gameMap, myBuildCoords, radius, radius) )
+        {
+          Unit resident = gameMap.getResident(xyc);
+          if( resident == null && uc.moveType.canStandOn(gameMap.getEnvironment(xyc)) )
+          {
+            gameMap.addNewUnit(myNewUnit, xyc.x, xyc.y, false);
+            success = true;
+            break;
+          }
+        }
+      if( !success )
+        System.out.println("Warning: Failed to find a place to spawn " + myNewUnit
+                          + " within " + myFudgeRadius + " tiles of " + myBuildCoords);
     }
+    myCommander.army.myView.revealFog(myNewUnit);
   }
 
   @Override
