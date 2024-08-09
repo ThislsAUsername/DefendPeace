@@ -2,6 +2,7 @@ package Terrain;
 
 import java.io.Serializable;
 
+import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.GamePath;
 import Engine.XYCoord;
@@ -22,38 +23,29 @@ public abstract class GameMap implements Serializable, IEnvironsProvider
   
   /** Returns true if (x,y) lies within the GameMap, false else. */
   public abstract boolean isLocationValid(XYCoord coords);
-
-  /** Returns true if (x,y) lies within the GameMap, false else. */
   public abstract boolean isLocationValid(int x, int y);
 
   /** Returns the Environment of the specified tile, or null if that location does not exist. */
   public abstract Environment getEnvironment(XYCoord coord);
-
-  /** Returns the Environment of the specified tile, or null if that location does not exist. */
   public abstract Environment getEnvironment(int w, int h);
 
   /** Returns the Unit in the specified tile. */
   public abstract Unit getResident(XYCoord coord);
-
-  /** Returns the Unit in the specified tile. */
   public abstract Unit getResident(int w, int h);
+
+  public abstract Commander getOwner(XYCoord coord);
+  public abstract Commander getOwner(int w, int h);
 
   /** Returns the MapLocation at the specified location, or null if that MapLocation does not exist. */
   public abstract MapLocation getLocation(XYCoord location);
-
-  /** Returns the MapLocation at the specified location, or null if that MapLocation does not exist. */
   public abstract MapLocation getLocation(int w, int h);
 
   /** Returns true if no unit is at the specified x and y coordinate, false else */
   public abstract boolean isLocationEmpty(XYCoord coords);
-
-  /** Returns true if no unit is at the specified x and y coordinate, false else */
   public abstract boolean isLocationEmpty(int x, int y);
 
   /** Returns true if no unit (excluding 'unit') is in the specified MapLocation. */
   public abstract boolean isLocationEmpty(Unit unit, XYCoord coords);
-
-  /** Returns true if no unit (excluding 'unit') is in the specified MapLocation. */
   public abstract boolean isLocationEmpty(Unit unit, int x, int y);
 
   /** Returns true if the location lies outside the GameMap. */
