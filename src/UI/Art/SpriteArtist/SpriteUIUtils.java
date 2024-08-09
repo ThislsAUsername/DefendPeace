@@ -3,11 +3,13 @@ package UI.Art.SpriteArtist;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import CommandingOfficers.CommanderInfo;
+import UI.InGameMenu.MenuOption;
 
 
 
@@ -16,6 +18,8 @@ public class SpriteUIUtils
   public static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   public static final Color MENUBGCOLOR = new Color(234, 204, 154);
   public static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
+  public static final Color MENUDISABLECOLOR = new Color(100, 100, 100);
+  public static final int DIAGONAL_MIX_WIDTH = 42;
 
 
   public static BufferedImage makeTextFrame(String item, int hBuffer, int vBuffer)
@@ -24,21 +28,19 @@ public class SpriteUIUtils
   }
   public static BufferedImage makeTextFrame(Color bg, Color frame, int hBuffer, int vBuffer)
   {
-    return makeTextMenu(bg, frame, bg, new ArrayList<String>(), 0, hBuffer, vBuffer);
+    return makeTextMenu(bg, frame, bg, new ArrayList<>(), 0, hBuffer, vBuffer);
   }
-  public static BufferedImage makeTextFrame(Color bg, Color frame, String item, int hBuffer,
-      int vBuffer)
+  public static BufferedImage makeTextFrame(Color bg, Color frame, String item, int hBuffer, int vBuffer)
   {
-    ArrayList<String> items = new ArrayList<String>();
-    items.add(item);
+    ArrayList<MenuOption<? extends Object>> items = new ArrayList<>();
+    items.add(new MenuOption<>(item));
     return makeTextMenu(bg, frame, bg, items, 0, hBuffer, vBuffer);
   }
-  public static BufferedImage makeTextMenu(ArrayList<String> items, int selection, int hBuffer, int vBuffer)
+  public static BufferedImage makeTextMenu(ArrayList<MenuOption<? extends Object>> items, int selection, int hBuffer, int vBuffer)
   {
     return makeTextMenu(MENUBGCOLOR, MENUFRAMECOLOR, MENUHIGHLIGHTCOLOR, items, selection, hBuffer, vBuffer);
   }
-  public static BufferedImage makeTextMenu(Color bg, Color frame, Color focus, ArrayList<String> items, int selection,
-      int hBuffer, int vBuffer)
+  public static BufferedImage makeTextMenu(Color bg, Color frame, Color focus, ArrayList<MenuOption<? extends Object>> items, int selection, int hBuffer, int vBuffer)
   {
     // Find the dimensions of the menu we are drawing.
     int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
@@ -57,16 +59,40 @@ public class SpriteUIUtils
     // Draw the nice box for our text.
     drawMenuFrame(g, bg, frame, 0, 0, menuWidth, menuHeight, vBuffer);
 
-    // Draw the highlight for the currently-selected option.
-    // selY = upper menu-frame buffer, plus (letter height, plus 1px-buffer, times number of options).
-    int selY = vBuffer + (menuTextHeight + 1) * selection;
-    g.setColor(focus);
-    g.fillRect(0, selY, menuWidth, menuTextHeight);
+    // Draw highlights for disabled/currently-selected options.
+    for (int i = 0; i < items.size(); ++i)
+    {
+      boolean enabled = items.get(i).enabled;
+      if( enabled && selection != i )
+        continue;
+      // selY = upper menu-frame buffer, plus (letter height, plus 1px-buffer, times number of options).
+      int selY = vBuffer + (menuTextHeight + 1) * i;
+      g.setColor(enabled ? focus : MENUDISABLECOLOR);
+      g.fillRect(0, selY, menuWidth, menuTextHeight);
+
+      if( !enabled && selection == i ) // If we need both highlights, mix them diagonally
+      {
+        int[] xPoints = {0, menuTextHeight, menuTextHeight+DIAGONAL_MIX_WIDTH, DIAGONAL_MIX_WIDTH};
+        int[] yPoints = {selY+menuTextHeight, selY, selY, selY+menuTextHeight};
+        Polygon drawPoly = new Polygon(xPoints, yPoints, xPoints.length); // Shimmer shape to draw.
+
+        int currentDrawPoint = i * DIAGONAL_MIX_WIDTH;
+        drawPoly.translate(currentDrawPoint, selY);
+
+        g.setColor(focus);
+        for(; currentDrawPoint < menuWidth; currentDrawPoint += DIAGONAL_MIX_WIDTH)
+        {
+          // Draw the current shimmering band, then translate the polygon for the next.
+          g.fillPolygon(drawPoly);
+          drawPoly.translate(DIAGONAL_MIX_WIDTH, 0);
+        }
+      }
+    }
 
     // Draw the actual menu text.
     for( int txtY = vBuffer, i = 0; i < items.size(); ++i, txtY += menuTextHeight + 1 )
     {
-      SpriteUIUtils.drawTextSmallCaps(g, items.get(i), hBuffer, txtY);
+      SpriteUIUtils.drawTextSmallCaps(g, items.get(i).toString(), hBuffer, txtY);
     }
 
     return menuImage;
@@ -202,19 +228,19 @@ public class SpriteUIUtils
     }
   }
 
-  public static int getMenuTextWidthPx(ArrayList<String> menuOptions, int charWidthPx)
+  public static int getMenuTextWidthPx(ArrayList<MenuOption<? extends Object>> menuOptions, int charWidthPx)
   {
     int maxWidth = 0;
     for( int i = 0; i < menuOptions.size(); ++i )
     {
-      int optw = menuOptions.get(i).length() * charWidthPx;
+      int optw = menuOptions.get(i).toString().length() * charWidthPx;
       maxWidth = (optw > maxWidth) ? optw : maxWidth;
     }
 
     return maxWidth;
   }
 
-  public static int getMenuTextHeightPx(ArrayList<String> menuOptions, int charHeightPx)
+  public static int getMenuTextHeightPx(ArrayList<? extends Object> menuOptions, int charHeightPx)
   {
     // Height of the letters plus 1 (for buffer between menu options), times the number of entries,
     // minus 1 because there is no buffer after the last entry.
