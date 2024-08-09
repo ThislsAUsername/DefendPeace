@@ -155,6 +155,13 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
         output.addAll(co.units);
     return output;
   }
+  public boolean canBuildUnits()
+  {
+    int armyCount = 0;
+    for( Commander co : cos )
+      armyCount += co.units.size();
+    return gameRules.unitCap > armyCount;
+  }
   public boolean canBuyOn(MapLocation loc)
   {
     // TODO: maybe calculate whether we have enough money to buy something at this industry

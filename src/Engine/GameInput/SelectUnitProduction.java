@@ -91,12 +91,7 @@ class SelectUnitProduction extends GameInputState<Engine.GameInput.SelectUnitPro
     ArrayList<UnitBuildOption> menuOptions = new ArrayList<>();
     int maxNameLength = 0;
     int maxPriceLength = 0;
-    int armyCount = 0;
-    boolean disableAll = false;
-    for( Commander coi : co.army.cos )
-      armyCount += coi.units.size();
-    if( co.gameRules.unitCap <= armyCount )
-      disableAll = true;
+    boolean disableAll = !co.army.canBuildUnits();
 
     // Start by getting just the unit names.
     for(UnitModel model : models)

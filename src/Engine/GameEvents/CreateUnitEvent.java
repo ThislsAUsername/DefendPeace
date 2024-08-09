@@ -68,10 +68,7 @@ public class CreateUnitEvent implements GameEvent
   @Override
   public void performEvent(MapMaster gameMap)
   {
-    int armyCount = 0;
-    for( Commander co : myCommander.army.cos )
-      armyCount += co.units.size();
-    if( null == myNewUnit || myCommander.gameRules.unitCap <= armyCount )
+    if( null == myNewUnit || !myCommander.army.canBuildUnits() )
       return;
 
     myCommander.units.add(myNewUnit);
