@@ -153,6 +153,7 @@ public abstract class GameAction
         isValid &= site.getOwner() == who;
         isValid &= who.getShoppingList(site).contains(what);
         isValid &= (who.army.money >= who.getBuyCost(what, where));
+        isValid &= who.army.canBuildUnits();
       }
 
       if( isValid )

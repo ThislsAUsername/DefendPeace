@@ -14,7 +14,21 @@ import Engine.OptionSelector;
  */
 public class InGameMenu<T>
 {
-  private ArrayList<T> menuOptions;
+  public static class MenuOption<T>
+  {
+    public final T item;
+    public boolean enabled = true;
+    public MenuOption(T arg)
+    {
+      item = arg;
+    }
+    @Override
+    public String toString()
+    {
+      return "" + item;
+    }
+  }
+  private ArrayList<MenuOption<? extends T>> menuOptions;
 
   private OptionSelector optionSelector;
 
@@ -29,20 +43,29 @@ public class InGameMenu<T>
 
   public InGameMenu(T[] options)
   {
-    this(new ArrayList<T>(Arrays.asList(options)));
+    this(Arrays.asList(options));
   }
 
   public InGameMenu(T[] options, OptionSelector selector)
   {
-    this(new ArrayList<T>(Arrays.asList(options)), selector);
+    this(Arrays.asList(options), selector);
   }
 
   public InGameMenu(Collection<T> options, OptionSelector selector)
   {
     if (options.size() != selector.size())
       throw new IllegalArgumentException("Number of options doesn't match the size of the OptionSelector");
-    menuOptions = new ArrayList<T>();
-    menuOptions.addAll(options);
+    menuOptions = new ArrayList<>();
+    for( T opt : options )
+      menuOptions.add(new MenuOption<T>(opt));
+    optionSelector = selector;
+    wasReset = true;
+  }
+  public InGameMenu(Collection<MenuOption<T>> options, OptionSelector selector, boolean garbage) // extra param to differentiate this overload
+  {
+    if (options.size() != selector.size())
+      throw new IllegalArgumentException("Number of options doesn't match the size of the OptionSelector");
+    menuOptions = new ArrayList<>(options);
     optionSelector = selector;
     wasReset = true;
   }
@@ -59,10 +82,11 @@ public class InGameMenu<T>
    * Re-initializes this object with the new set of options.
    * @param newOptions
    */
-  public void resetOptions(Collection<T> newOptions)
+  public void resetOptions(Collection<MenuOption<? extends T>> newOptions)
   {
     menuOptions.clear();
-    menuOptions.addAll(newOptions);
+    for( MenuOption<? extends T> opt : newOptions )
+      menuOptions.add(opt);
     optionSelector.reset( menuOptions.size() );
     wasReset = true;
   }
@@ -71,10 +95,10 @@ public class InGameMenu<T>
    * Re-initializes this object with the new set of options.
    * @param newOptions
    */
-  public void resetOptions(T[] newOptions)
+  public void resetOptions(MenuOption<? extends T>[] newOptions)
   {
     menuOptions.clear();
-    for( T t : newOptions )
+    for( MenuOption<? extends T> t : newOptions )
     {
       menuOptions.add(t);
     }
@@ -86,7 +110,7 @@ public class InGameMenu<T>
    * Re-initializes this object with the new set of options.
    * @param newOptions
    */
-  public void resetOptions(ArrayList<T> newOptions)
+  public void resetOptions(ArrayList<MenuOption<T>> newOptions)
   {
     menuOptions.clear();
     menuOptions.addAll(newOptions);
@@ -149,7 +173,7 @@ public class InGameMenu<T>
   /**
    * @return The object currently highlighted by the menu cursor.
    */
-  public T getSelectedOption()
+  public MenuOption<? extends T> getSelectedOption()
   {
     return menuOptions.get( optionSelector.getSelectionNormalized() );
   }
@@ -157,7 +181,7 @@ public class InGameMenu<T>
   /**
    * @return The object at the specified index.
    */
-  public T getOption( int index )
+  public MenuOption<? extends T> getOption( int index )
   {
     if( menuOptions.size() > index && index >= 0 )
     {
@@ -184,12 +208,12 @@ public class InGameMenu<T>
   /**
    * Returns string representations of all menu options.
    */
-  public ArrayList<String> getAllOptions()
+  public ArrayList<MenuOption<? extends Object>> getAllOptions()
   {
-    ArrayList<String> out = new ArrayList<String>();
-    for (T option : menuOptions)
+    ArrayList<MenuOption<? extends Object>> out = new ArrayList<>();
+    for (MenuOption<? extends T> option : menuOptions)
     {
-      out.add(option.toString());
+      out.add(option);
     }
     return out;
   }

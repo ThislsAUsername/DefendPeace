@@ -3,7 +3,6 @@ package UI.Art.SpriteArtist;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 
 import Engine.GameInstance;
 import UI.InGameMenu;
@@ -13,8 +12,6 @@ public class MenuArtist
 {
   private GameInstance myGame;
   private MapView myView;
-  private InGameMenu<? extends Object> myCurrentMenu;
-  private ArrayList<String> myCurrentMenuStrings;
 
   private int menuHBuffer; // Amount of visible menu to left and right of options;
   private int menuVBuffer; // Amount of visible menu above and below menu options;
@@ -22,8 +19,6 @@ public class MenuArtist
   public MenuArtist(GameInstance game, SpriteMapView view)
   {
     myGame = game;
-    myCurrentMenu = null;
-    myCurrentMenuStrings = new ArrayList<String>();
 
     myView = view;
 
@@ -40,16 +35,8 @@ public class MenuArtist
     InGameMenu<? extends Object> drawMenu = myView.getCurrentGameMenu();
     if( drawMenu != null )
     {
-      // Check if we need to build the menu options again.
-      if( drawMenu.wasReset() || myCurrentMenu != drawMenu )
-      {
-        myCurrentMenu = drawMenu;
-        myCurrentMenuStrings.clear();
-        getMenuStrings(myCurrentMenu, myCurrentMenuStrings);
-      }
-
       BufferedImage menu = SpriteUIUtils.makeTextMenu(SpriteUIUtils.MENUBGCOLOR, SpriteUIUtils.MENUFRAMECOLOR, SpriteUIUtils.MENUHIGHLIGHTCOLOR,
-          myCurrentMenuStrings, myCurrentMenu.getSelectionNumber(), menuHBuffer, menuVBuffer);
+          drawMenu.getAllOptions(), drawMenu.getSelectionNumber(), menuHBuffer, menuVBuffer);
       int menuWidth = menu.getWidth();
       int menuHeight = menu.getHeight();
 
@@ -71,20 +58,6 @@ public class MenuArtist
       drawY -= Math.max(0, drawY + menuHeight - myGame.gameMap.mapHeight * viewTileSize); // bottom
 
       g.drawImage(menu, drawX, drawY, menuWidth, menuHeight, null);
-    }
-  }
-
-  /**
-   * Populate 'out' with the string versions of the options available through 'menu'.
-   * @param menu
-   * @param out
-   */
-  private static void getMenuStrings(InGameMenu<? extends Object> menu, ArrayList<String> out)
-  {
-    for( int i = 0; i < menu.getNumOptions(); ++i )
-    {
-      String str = menu.getOptionString(i);
-      out.add(str);
     }
   }
 }

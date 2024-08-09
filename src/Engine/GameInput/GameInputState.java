@@ -13,6 +13,7 @@ import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameInput.GameInputHandler.InputType;
 import Terrain.GameMap;
+import UI.InGameMenu;
 import Units.Unit;
 
 /************************************************************
@@ -45,6 +46,10 @@ abstract class GameInputState<T>
   public OptionSet getOptions()
   {
     return myOptions;
+  }
+  public InGameMenu<? extends Object> getMenu()
+  {
+    return new InGameMenu<>(getOptions().getMenuOptions(), getOptionSelector());
   }
 
   protected OptionSelector buildSelector()

@@ -186,7 +186,7 @@ public class MainUIController implements IController
     {
       case SELECT:
         // Grab the selected option.
-        SubMenu chosenOption = optionsMenu.getSelectedOption();
+        SubMenu chosenOption = optionsMenu.getSelectedOption().item;
         optionsMenu = null; // We are done with this until next time.
 
         if( optionsSubMenus.contains(chosenOption) )
@@ -211,7 +211,7 @@ public class MainUIController implements IController
     {
       case SELECT:
         // Grab the current option and roll it back to within the valid range, then evaluate.
-        SaveInfo chosenOption = saveMenu.getSelectedOption();
+        SaveInfo chosenOption = saveMenu.getSelectedOption().item;
 
         // We've already successfully read the save file, so let's assume the user isn't messing with us
         GameInstance oldGame = SerializationUtils.loadSave(chosenOption.filePath);

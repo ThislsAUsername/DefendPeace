@@ -37,6 +37,33 @@ public abstract class BattleLifecycle
   {
     private static final long serialVersionUID = 1L;
 
+    // Provide an invalid FIRE option on selecting an action when:
+    // Weapon could attack, but nothing's in range
+    // Weapon is out of ammo
+    @Override
+    public GameActionSet getGUIActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    {
+      GameActionSet realActions = getPossibleActions(map, movePath, actor, ignoreResident);
+      if( null == realActions )
+      {
+        boolean moved = !movePath.getEndCoord().equals(actor.x, actor.y);
+        boolean insertFake = false;
+        for( WeaponModel wpn : actor.model.weapons )
+        {
+          if( wpn.loaded(actor) && wpn.rangeMax() == 1 )
+            continue;
+          insertFake |= ( !moved || wpn.canFireAfterMoving() );
+        } // ~Weapon loop
+        if( insertFake )
+        {
+          GameActionSet fakeAction = new GameActionSet(new BattleAction(map, actor, movePath, new XYCoord(actor)), true);
+          fakeAction.isInvalidChoice = true;
+          return fakeAction;
+        }
+      }
+      return realActions;
+    }
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
