@@ -18,8 +18,9 @@ public class SpriteUIUtils
   public static final Color MENUFRAMECOLOR = new Color(169, 118, 65);
   public static final Color MENUBGCOLOR = new Color(234, 204, 154);
   public static final Color MENUHIGHLIGHTCOLOR = new Color(246, 234, 210);
-  public static final Color MENUDISABLECOLOR = new Color(100, 100, 100);
-  public static final int DIAGONAL_MIX_WIDTH = 42;
+  public static final Color MENUDISABLECOLOR = new Color(170, 170, 170);
+  public static final int DIAGONAL_MIX_WIDTH = 7;
+  public static final int DIAGONAL_MIX_SPACE = 10;
 
 
   public static BufferedImage makeTextFrame(String item, int hBuffer, int vBuffer)
@@ -76,15 +77,15 @@ public class SpriteUIUtils
         int[] yPoints = {selY+menuTextHeight, selY, selY, selY+menuTextHeight};
         Polygon drawPoly = new Polygon(xPoints, yPoints, xPoints.length); // Shimmer shape to draw.
 
-        int currentDrawPoint = i * DIAGONAL_MIX_WIDTH;
-        drawPoly.translate(currentDrawPoint, selY);
+        int currentDrawPoint = 0;
+        drawPoly.translate(currentDrawPoint, 0);
 
         g.setColor(focus);
-        for(; currentDrawPoint < menuWidth; currentDrawPoint += DIAGONAL_MIX_WIDTH)
+        for(; currentDrawPoint < menuWidth; currentDrawPoint += DIAGONAL_MIX_SPACE)
         {
           // Draw the current shimmering band, then translate the polygon for the next.
           g.fillPolygon(drawPoly);
-          drawPoly.translate(DIAGONAL_MIX_WIDTH, 0);
+          drawPoly.translate(DIAGONAL_MIX_SPACE, 0);
         }
       }
     }
