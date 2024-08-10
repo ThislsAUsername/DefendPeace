@@ -256,37 +256,27 @@ public class Utils
     Collections.sort(mapLocations, mdc);
   }
 
-  /**
-   * Compare XYCoords based on how much time it would take myUnit to reach them on the given map.
-   * <p>Coords closer to the input coord will be "less than" XYCoords that are farther away.
-   */
-  public static class TravelDistanceComparator implements Comparator<XYCoord>
+  public static class TravelDistanceCacher
   {
-    final Unit myUnit;
+    public final Unit myUnit;
     // Either the start or the end of our prospective journey, based on reverse
     // Normally the start.
-    final XYCoord fixedEndpoint;
-    final boolean reverse;
-    GameMap myMap;
-    HashMap<XYCoord, Integer> distCache;
+    public final XYCoord fixedEndpoint;
+    public final boolean reverse;
+    protected GameMap myMap;
+    protected HashMap<XYCoord, Integer> distCache;
 
-    public TravelDistanceComparator(Unit unit, XYCoord coord, GameMap map)
+    public TravelDistanceCacher(Unit unit, XYCoord coord, GameMap map)
     {
       this(unit, coord, map, false);
     }
-    public TravelDistanceComparator(Unit unit, XYCoord coord, GameMap map, boolean reverseTravel)
+    public TravelDistanceCacher(Unit unit, XYCoord coord, GameMap map, boolean reverseTravel)
     {
       myUnit = unit;
       fixedEndpoint = coord;
       myMap = map;
       distCache = new HashMap<>();
       reverse = reverseTravel;
-    }
-
-    @Override
-    public int compare(XYCoord xy1, XYCoord xy2)
-    {
-      return getCachedDistance(xy1) - getCachedDistance(xy2);
     }
     /**
      * @return The distance from the unit (assumed static) to the coordinate
@@ -313,6 +303,27 @@ public class Utils
         distance = path.getMoveCost(myUnit, myMap);
       distCache.put(xyc, distance);
       return distance;
+    }
+  }
+  /**
+   * Compare XYCoords based on how much time it would take myUnit to reach them on the given map.
+   * <p>Coords closer to the input coord will be "less than" XYCoords that are farther away.
+   */
+  public static class TravelDistanceComparator extends TravelDistanceCacher implements Comparator<XYCoord>
+  {
+    public TravelDistanceComparator(Unit unit, XYCoord coord, GameMap map)
+    {
+      super(unit, coord, map, false);
+    }
+    public TravelDistanceComparator(Unit unit, XYCoord coord, GameMap map, boolean reverseTravel)
+    {
+      super(unit, coord, map, reverseTravel);
+    }
+
+    @Override
+    public int compare(XYCoord xy1, XYCoord xy2)
+    {
+      return getCachedDistance(xy1) - getCachedDistance(xy2);
     }
   }
 

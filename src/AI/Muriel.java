@@ -568,7 +568,7 @@ public class Muriel implements AIController
         XYCoord coord = nonAlliedProperties.get(i);
 
         ArrayList<GameAction> possibleMoves = unitActionsByType.get(UnitActionFactory.WAIT);
-        AIUtils.DistanceFromLocationComparator dflc = new AIUtils.DistanceFromLocationComparator(coord);
+        AIUtils.DistanceFromLocationComparator dflc = new AIUtils.DistanceFromLocationComparator(unit, coord, gameMap);
         Collections.sort(possibleMoves, dflc);
 
         for( GameAction ga : possibleMoves )
@@ -639,7 +639,7 @@ public class Muriel implements AIController
 
         // Sort the possible move actions by distance from the target.
         ArrayList<GameAction> possibleMoves = unitActionsByType.get(UnitActionFactory.WAIT);
-        AIUtils.DistanceFromLocationComparator dflc = new AIUtils.DistanceFromLocationComparator(coord);
+        AIUtils.DistanceFromLocationComparator dflc = new AIUtils.DistanceFromLocationComparator(unit, coord, gameMap);
         Collections.sort(possibleMoves, dflc);
 
         for( GameAction ga : possibleMoves )

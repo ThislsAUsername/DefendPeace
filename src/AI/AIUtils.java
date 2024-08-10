@@ -16,6 +16,7 @@ import Engine.GamePath;
 import Engine.PathCalcParams;
 import Engine.UnitActionFactory;
 import Engine.Utils;
+import Engine.Utils.TravelDistanceCacher;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
@@ -313,13 +314,11 @@ public class AIUtils
    * Compares GameActions based on their `getMoveLocation()`'s distance from the provided `destination`.
    * GameActions closer to `destination` will be sorted to be first.
    */
-  public static class DistanceFromLocationComparator implements Comparator<GameAction>
+  public static class DistanceFromLocationComparator extends TravelDistanceCacher implements Comparator<GameAction>
   {
-    XYCoord target;
-
-    public DistanceFromLocationComparator(XYCoord destination)
+    public DistanceFromLocationComparator(Unit unit, XYCoord coord, GameMap map)
     {
-      target = destination;
+      super(unit, coord, map, false);
     }
 
     @Override
@@ -327,8 +326,8 @@ public class AIUtils
     {
       XYCoord o1c = o1.getMoveLocation();
       XYCoord o2c = o2.getMoveLocation();
-      int o1Dist = (null == o1c) ? Integer.MAX_VALUE : o1c.getDistance(target);
-      int o2Dist = (null == o2c) ? Integer.MAX_VALUE : o2c.getDistance(target);
+      int o1Dist = (null == o1c) ? Integer.MAX_VALUE : getCachedDistance(o1c);
+      int o2Dist = (null == o2c) ? Integer.MAX_VALUE : getCachedDistance(o2c);
       int diff = o1Dist - o2Dist;
       return diff;
     }
