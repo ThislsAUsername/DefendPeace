@@ -38,7 +38,7 @@ public class TurnInitAnimation extends GameAnimation
 
   public TurnInitAnimation(Army cmdr, int turnNum, boolean hideMap, boolean requireButton, Collection<String> message)
   {
-    super(false);
+    super(null, false);
     commander = cmdr;
     turn = turnNum;
     opaque = hideMap;

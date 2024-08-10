@@ -3,6 +3,7 @@ package UI.Art.Animation;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import Engine.XYCoord;
 import UI.Art.SpriteArtist.UnitSpriteSet;
 import Units.Unit;
 
@@ -15,7 +16,7 @@ public class NobunagaBattleAnimation extends BaseUnitActionAnimation
 
   public NobunagaBattleAnimation(int tileSize, Unit actor, int fromX, int fromY, int toX, int toY)
   {
-    super(tileSize, actor, null);
+    super(tileSize, actor, new XYCoord(toX, toY));
     attackerX = fromX;
     attackerY = fromY;
     defenderX = toX;

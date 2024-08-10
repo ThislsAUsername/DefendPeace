@@ -2,20 +2,24 @@ package UI.Art.Animation;
 
 import java.awt.Graphics;
 import java.util.ArrayList;
+
+import Engine.XYCoord;
 import Units.Unit;
 
 public abstract class GameAnimation
 {
+  public final XYCoord focus;
   boolean isMapAnimation;
   boolean isMapVisible;
 
-  public GameAnimation(boolean animateOnMap)
+  public GameAnimation(XYCoord focus, boolean animateOnMap)
   {
-    this(animateOnMap, true);
+    this(focus, animateOnMap, true);
   }
 
-  public GameAnimation(boolean animateOnMap, boolean showMap)
+  public GameAnimation(XYCoord focus, boolean animateOnMap, boolean showMap)
   {
+    this.focus = focus;
     isMapAnimation = animateOnMap;
     isMapVisible = showMap;
   }
