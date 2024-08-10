@@ -326,7 +326,7 @@ public class Utils
   /**
    * Sort coordinates by how long the input unit would take to get to them from "start"
    */
-  public static void sortLocationsByTravelTime(XYCoord start, Unit unit, ArrayList<XYCoord> mapLocations, GameMap map)
+  public static void sortLocationsByTravelTime(XYCoord start, Unit unit, ArrayList<? extends XYCoord> mapLocations, GameMap map)
   {
     TravelDistanceComparator tdc = new TravelDistanceComparator(unit, start, map);
     Collections.sort(mapLocations, tdc);
@@ -334,7 +334,7 @@ public class Utils
   /**
    * Sort coordinates by how long the input unit would take to get from them to "end"
    */
-  public static void sortLocationsByTravelTimeToCoord(Unit unit, ArrayList<XYCoord> mapLocations, GameMap map, XYCoord end)
+  public static void sortLocationsByTravelTimeToCoord(Unit unit, ArrayList<? extends XYCoord> mapLocations, GameMap map, XYCoord end)
   {
     boolean reverseTravel = true;
     TravelDistanceComparator tdc = new TravelDistanceComparator(unit, end, map, reverseTravel);

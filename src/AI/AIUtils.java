@@ -220,7 +220,7 @@ public class AIUtils
       if( null != excludeDestinations) validMoves.removeAll(excludeDestinations);
       if( !validMoves.isEmpty() )
       {
-        Utils.sortLocationsByDistance(path.getEndCoord(), validMoves); // Sort moves based on intermediate destination.
+        Utils.sortLocationsByTravelTime(path.getEndCoord(), unit, validMoves, gameMap); // Sort moves based on intermediate destination.
         move = new WaitLifecycle.WaitAction(unit, validMoves.get(0).getMyPath()); // Move to best option.
       }
     }
