@@ -336,7 +336,7 @@ public abstract class RuinedCommander extends DeployableCommander
   {
     private static final long serialVersionUID = 1L;
     public static final int COST = 6;
-    RuinedCommander COcast;
+    protected RuinedCommander COcast;
 
     protected RuinedAbility(RuinedCommander commander, String name)
     {
