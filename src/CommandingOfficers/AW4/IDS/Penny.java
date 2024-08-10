@@ -33,7 +33,9 @@ public class Penny extends RuinedCommander
           "Base Zone: 3\n"
         + "Units are unaffected by weather. This applies even when not in the CO Zone.\n"));
       infoPages.add(new InfoPage(new Stormfront(null),
-          "Randomly changes the weather to Sleet (-1 move), Smoke (Fog of War), or Sirocco (-30 attack). The weather lasts for 3 days.\n"));
+          "Randomly changes the weather to Sleet (-1 move), Smoke (Fog of War), or Sirocco (-30 attack). The weather lasts for 3 days.\n"
+        + "Won't roll the weather active on the COU's tile.\n"
+        + "If Sleet or Sirocco is rolled, disables temporary fog.\n"));
       infoPages.add(DeployableCommander.COU_MECHANICS_BLURB);
       infoPages.add(RuinedCommander.DOR_MECHANICS_BLURB);
     }
@@ -95,6 +97,7 @@ public class Penny extends RuinedCommander
 
       Weathers chosen = candidates.get(rand);
       GlobalWeatherEvent weather = new GlobalWeatherEvent(chosen, 3);
+      weather.canCancelFog = true;
 
       GameEventQueue events = super.getEvents(map);
       events.add(weather);
