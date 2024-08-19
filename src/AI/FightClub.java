@@ -11,7 +11,7 @@ import java.util.List;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.DefendPeace.CyanOcean.Patch;
+import CommandingOfficers.CommanderLibrary.NotACO;
 import Engine.Army;
 import Engine.GameAction;
 import Engine.GameAction.EndTurnAction;
@@ -45,9 +45,9 @@ public class FightClub
     // How many bouts per map?
     int numGamesPerSet = 3;
     // Select CO(s).
-    List<CommanderInfo> COs = Arrays.asList(Patch.getInfo(), Patch.getInfo());
+    List<CommanderInfo> COs = Arrays.asList(NotACO.getInfo(), NotACO.getInfo());
     // Select AI(s).
-    List<AIMaker> AIs = Arrays.asList(Muriel.info, JakeMan.info);
+    List<AIMaker> AIs = Arrays.asList(JakeMan.oldSchoolCool, JakeMan.info);
 
     // Run a set of games on each map.
     for( int setNum = 0; setNum < maps.size(); ++setNum )
@@ -338,7 +338,7 @@ public class FightClub
         stopwatches.put(game.activeArmy, stopwatches.get(game.activeArmy) + thinkTimeNanos);
 
         // Map should-ish be covered in units by turncount == map area
-        if(game.getCurrentTurn() > game.gameMap.mapWidth * game.gameMap.mapHeight)
+        if(game.getCurrentTurn() > Math.max(game.gameMap.mapWidth, game.gameMap.mapHeight))
         {
           if(game.armies[0].getUnits().size()/2 > game.armies[1].getUnits().size() )
           {
