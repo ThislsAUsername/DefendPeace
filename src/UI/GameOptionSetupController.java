@@ -63,14 +63,15 @@ public class GameOptionSetupController implements IController
 
     if( initialPicksMap.containsKey(GAME_OPTIONS_CONFIG_KEY) )
     {
+      GameOption<?>[] chronologicalOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, tagsOption, securityOption, unitCapOption};
       String fullConfig = initialPicksMap.get(GAME_OPTIONS_CONFIG_KEY);
-      String[] s = fullConfig.split("\\s+"); // Split (string integers)
-      int si = 0; // Split Index
-      while (s[si].isEmpty()) ++si; // Skip any sneaky empty splits
+      String[] configInts = fullConfig.split("\\s+"); // Split (string integers)
+      int configIndex = 0; // Split Index
+      while (configInts[configIndex].isEmpty()) ++configIndex; // Skip empty splits at the start
 
-      for( int i = 0; i < gameOptions.length; ++i )
-        if( s.length > si )
-          gameOptions[i].setSelectedOption(Integer.valueOf(s[si++]));
+      for( int i = 0; i < chronologicalOptions.length; ++i )
+        if( configInts.length > configIndex )
+          chronologicalOptions[i].setSelectedOption(Integer.valueOf(configInts[configIndex++]));
     }
     else
     {
