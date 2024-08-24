@@ -16,7 +16,7 @@ import Units.UnitModel;
 /**
  * Tests Power of Money variants because I make poor life choices
  */
-public class TestDumbMath extends TestCase
+public class TestColinMath extends TestCase
 {
   private Commander colinBW, colin2, colin3, olaf;
   private MapMaster map;
