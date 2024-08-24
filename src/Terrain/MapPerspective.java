@@ -89,6 +89,21 @@ public class MapPerspective extends GameMap
     return getLocation(w, h).getResident();
   }
 
+  @Override
+  public Commander getOwner(XYCoord coord)
+  {
+    return getOwner(coord.x, coord.y);
+  }
+  @Override
+  public Commander getOwner(int w, int h)
+  {
+    if( !isLocationValid(w, h) )
+    {
+      return null;
+    }
+    return getLocation(w, h).getOwner();
+  }
+
   /** Returns the MapLocation at the specified location, or null if that MapLocation does not exist. */
   @Override
   public MapLocation getLocation(XYCoord location)

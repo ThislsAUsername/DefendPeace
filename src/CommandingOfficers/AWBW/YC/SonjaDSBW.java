@@ -8,6 +8,7 @@ import CommandingOfficers.AWBW.AWBWCommander;
 import CommandingOfficers.DefendPeace.misc.Venge;
 import Engine.GameScenario;
 import Engine.Combat.CombatContext;
+import Engine.Combat.StrikeParams;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitModifierWithDefaults;
 import Engine.UnitMods.VisionModifier;
@@ -82,6 +83,11 @@ public class SonjaDSBW extends AWBWCommander
   public void modifyVision(UnitContext uc)
   {
     uc.visionRange += 1;
+  }
+  @Override
+  public void modifyUnitAttack(StrikeParams params)
+  {
+    params.luckRolledBad += 5;
   }
 
   public static class TerrainReductionModifier implements UnitModifierWithDefaults
