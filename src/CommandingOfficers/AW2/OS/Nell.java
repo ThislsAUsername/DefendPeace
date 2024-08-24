@@ -29,7 +29,7 @@ public class Nell extends AW2Commander
       infoPages.add(new InfoPage(
             "Nell (AW2)\n"
           + "A competent Orange Star CO. Attended military school with Grit and Max.\n"
-          + "Sometimes strikes with more force than expected. She’ll be the first to tell you she was born lucky.\n"
+          + "Sometimes strikes with more force than expected. She'll be the first to tell you she was born lucky.\n"
           + "(+10 max luck)\n"));
       infoPages.add(new InfoPage(
             "Lucky Star (3):\n"

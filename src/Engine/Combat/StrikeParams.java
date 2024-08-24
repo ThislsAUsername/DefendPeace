@@ -146,7 +146,7 @@ public class StrikeParams
     int luckDamage = getLuck();
     if( aw1Luck && isCounter ) // AW1 cannot counterattack with luck.
       luckDamage = 0;
-    final int rawDamage = baseDamage * attackPower * attackerDamageMultiplier / 100 / 100;
+    final int rawDamage = (baseDamage * attackPower / 100) * attackerDamageMultiplier / 100;
     int hpScalingDamage = rawDamage;
     if( !aw1Luck ) // AW1 luck isn't scaled with HP.
       hpScalingDamage += luckDamage;

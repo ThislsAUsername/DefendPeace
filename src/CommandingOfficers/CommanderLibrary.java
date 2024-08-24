@@ -75,6 +75,8 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW2.OS.Sami.getInfo() );
     commanderList.add( CommandingOfficers.AW2.OS.Nell.getInfo() );
     commanderList.add( CommandingOfficers.AW2.OS.Hachi.getInfo() );
+    commanderList.add( CommandingOfficers.AW2.BM.Colin.getInfo() );
+    commanderList.add( CommandingOfficers.AW2.BM.Grit.getInfo() );
     commanderList.add( CommandingOfficers.AW2.BM.Olaf.getInfo() );
     commanderList.add( CommandingOfficers.AW2.GE.Drake.getInfo() );
     commanderList.add( CommandingOfficers.AW2.BH.Lash.getInfo() );
@@ -86,6 +88,9 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW3.OS.Sami.getInfo() );
     commanderList.add( CommandingOfficers.AW3.OS.Nell.getInfo() );
     commanderList.add( CommandingOfficers.AW3.OS.Hachi.getInfo() );
+    commanderList.add( CommandingOfficers.AW3.BM.Colin.getInfo() );
+    commanderList.add( CommandingOfficers.AW3.BM.Sasha.getInfo() );
+    commanderList.add( CommandingOfficers.AW3.BM.Grit.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BM.Olaf.getInfo() );
     commanderList.add( CommandingOfficers.AW3.GE.Drake.getInfo() );
     commanderList.add( CommandingOfficers.AW3.GE.Javier.getInfo() );
@@ -99,6 +104,10 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.OS.Sami.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Nell.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Hachi.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.BM.Colin.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.BM.Sasha.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.BM.Grit.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.BM.Olaf.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.GE.Javier.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.YC.SonjaDSBW.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Lash.getInfo() );

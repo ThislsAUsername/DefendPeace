@@ -61,7 +61,7 @@ public class Max extends AW2Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new MaxPower(this, cb, "Max Force", 3, 1, 20));
     addCommanderAbility(new MaxPower(this, cb, "Max Blast", 6, 2, 40));
   }

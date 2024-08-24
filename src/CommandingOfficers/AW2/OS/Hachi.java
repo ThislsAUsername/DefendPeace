@@ -32,7 +32,7 @@ public class Hachi extends AW2Commander
       super("Hachi", UIUtils.SourceGames.AW2, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Hachi (AW2)\n"
-          + "Rumoured to be Orange Star's former chief, he’s closing up shop to hit the battlefield.\n"
+          + "Rumoured to be Orange Star's former chief, he's closing up shop to hit the battlefield.\n"
           + "Uses secret trade routes to get lower deployment costs (90%) for all units.\n"));
       infoPages.add(new InfoPage(new Barter(null, new CostBasis(CHARGERATIO_FUNDS)),
             "Speaks with such authority that he obtains even lower (50%) deployment costs.\n"
@@ -56,7 +56,7 @@ public class Hachi extends AW2Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new Barter(this, cb));
     addCommanderAbility(new MerchantUnion(this, cb));
   }

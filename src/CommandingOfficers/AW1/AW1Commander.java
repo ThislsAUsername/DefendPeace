@@ -30,6 +30,11 @@ public abstract class AW1Commander extends Commander
     aw1Combat = true;
   }
 
+  public CommanderAbility.CostBasis getGameBasis()
+  {
+    return new CommanderAbility.CostBasis(AW1_STAR_VALUE);
+  }
+
   // Charge based on funds damage taken + 1/4 dealt
   @Override
   public int calculateCombatCharge(UnitDelta minion, UnitDelta enemy, boolean isCounter)

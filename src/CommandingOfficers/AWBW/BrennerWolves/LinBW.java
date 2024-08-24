@@ -55,7 +55,7 @@ public class LinBW extends COUableCommander
     canDeployMask = UnitModel.LAND;
     resetCOUsEveryTurn = true; // Deploy anywhere every turn
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new LinPower(this, "Scout",        2, cb, 1, 0, 0));
     addCommanderAbility(new LinPower(this, "Night Vision", 5, cb, 2, POWER, DEFENSE));
   }

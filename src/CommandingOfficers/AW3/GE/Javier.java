@@ -65,7 +65,7 @@ public class Javier extends AW3Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_AW3);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(TowerShield(this, cb));
     addCommanderAbility(TowerOfPower(this, cb));
   }

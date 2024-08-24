@@ -35,7 +35,7 @@ public class Drake extends AW2Commander
       infoPages.add(new InfoPage(
             "Drake (AW2)\n"
           + "A bighearted former pirate, he often calms the waters between Jess and Eagle.\n"
-          + "Naval units move 1 space more than other armies' do, and their defenses are higher (+10). Movement isn’t affected by rain.\n"
+          + "Naval units move 1 space more than other armies' do, and their defenses are higher (+10). Movement isn't affected by rain.\n"
           + "(-30 attack for air)\n"));
       infoPages.add(new InfoPage(new Tsunami(null, new CommanderAbility.CostBasis(CHARGERATIO_FUNDS)),
             "Causes a tidal wave that does 1 HP to all enemy units and reduces their fuel by half.\n"
@@ -59,7 +59,7 @@ public class Drake extends AW2Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility.CostBasis cb = new CommanderAbility.CostBasis(CHARGERATIO_FUNDS);
+    CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new Tsunami(this, cb));
     addCommanderAbility(new Typhoon(this, cb));
   }
