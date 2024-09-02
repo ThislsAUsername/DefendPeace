@@ -980,6 +980,8 @@ public class WallyAI extends ModularAI
       ArrayList<ActionPlan> actionSeq = ai.planValueActions(ec, unit);
       if( null == actionSeq )
         return;
+      // ai.log(String.format("Planning actionSeq:\n%s", actionSeq));
+      // ai.log(String.format("Postrequisites:\n%s", ec.postrequisites));
       for( ActionPlan plan : actionSeq )
       {
         ai.updatePlan(plan);
@@ -1281,7 +1283,7 @@ public class WallyAI extends ModularAI
       return maxEvictionDepth - evictionStack.size();
     }
     /** Find the tiles a unit on startTile shouldn't go, based on any planned actions that need that tile to be open. */
-    public ArrayList<XYCoord> calcPostReqBans()
+    public ArrayList<XYCoord> calcPostReqMoveBans()
     {
       var bannedTiles = new ArrayList<XYCoord>();
 
@@ -1321,7 +1323,7 @@ public class WallyAI extends ModularAI
     if( ec.evictionStack.contains(unit) )
       return null;
     GameMap gameMap = ec.map;
-    var bannedTiles = ec.calcPostReqBans();
+    var bannedTiles = ec.calcPostReqMoveBans();
     XYCoord startTile = new XYCoord(unit);
     final boolean mustMove = bannedTiles.contains(startTile);
     ActionPlan myOldPlan = plansByUnit.get(unit);
@@ -1411,7 +1413,8 @@ public class WallyAI extends ModularAI
         } // ~if resident
 
       GamePath movePath = xyc.getMyPath();
-      if( preReqConflictExists(ec.map, unit, movePath, ec.postrequisites) )
+      HashSet<ActionPlan> foundPrereqs = new HashSet<>();
+      if( preReqConflictExists(ec.map, unit, movePath, ec.postrequisites, foundPrereqs) )
         continue;
 
       int bonusPoints = 0;
@@ -1432,9 +1435,19 @@ public class WallyAI extends ModularAI
         {
           for( GameAction attack : actionSet.getGameActions() )
           {
-            final AttackValue results;
-
             XYCoord targetXYC = attack.getTargetLocation();
+            boolean targetPrereqConflict = false;
+            for( var prereqPlan : foundPrereqs )
+              if( targetXYC.equals(prereqPlan.action.getMoveLocation()) )
+              {
+                // We are shooting a tile that was used to clear a tile we moved into/through; that's a prereq conflict.
+                targetPrereqConflict = true;
+                break;
+              }
+            if( targetPrereqConflict )
+              continue;
+
+            final AttackValue results;
             Unit targetUnit   = ec.map.getResident(targetXYC);
             if( null != targetUnit )
               results = new AttackValue(this, actor, new UnitContext(targetUnit), predMap, shouldYeet);
@@ -2295,18 +2308,18 @@ public class WallyAI extends ModularAI
     if( initialPostreq.isAttack )
     {
       XYCoord target = initialPostreq.action.getTargetLocation();
-      enqueuePostReqPlans(mapPlan, mapPlan[target.x][target.y].toAchieve, postrequisites);
+      ActionPlan actionIntoClearedTile = mapPlan[target.x][target.y].toAchieve;
+      if( !postrequisites.contains(actionIntoClearedTile) )
+        enqueuePostReqPlans(mapPlan, actionIntoClearedTile, postrequisites);
+      else
+        System.out.println(String.format("Warning: postrequisite cycle found between:\n%s\n%s", initialPostreq, actionIntoClearedTile));
     }
   }
 
   /**
    * Finds all prerequisites of the input movetile/action, and returns true if any are in the provided postrequisite list
+   * <p>Note: postrequisites may contain the root plan (see above in enqueuePostReqPlans), so don't check if the postreqs contain the root.
    */
-  private boolean preReqConflictExists(GameMap map, Unit unit, GamePath path, Collection<ActionPlan> postrequisites)
-  {
-    // Note: postrequisites will contain the root plan (see above), so don't check for that.
-    return preReqConflictExists(map, unit, path, postrequisites, new HashSet<>());
-  }
   private boolean preReqConflictExists(GameMap map, Unit unit, GamePath path, Collection<ActionPlan> postrequisites, HashSet<ActionPlan> foundPrereqs)
   {
     if( foundPrereqs.size() > 42 )
@@ -2333,7 +2346,7 @@ public class WallyAI extends ModularAI
       var dest = node.GetCoordinates();
       // I need this unit to help clear the tile I'm moving into - that's a prerequisite
       // Note: I can't move into a tile that I'd help clear by shooting it, so don't worry about that possibility
-      for( var prereq : mapPlan[dest.x][dest.y].damageInstances.keySet() )
+      for( ActionPlan prereq : mapPlan[dest.x][dest.y].damageInstances.keySet() )
       {
         if( postrequisites.contains(prereq) )
           return true;
