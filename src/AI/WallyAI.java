@@ -1586,6 +1586,12 @@ public class WallyAI extends ModularAI
       {
         evictionFailure |= ( ec.evictionStack.contains(ev) );
         evictionFailure |= ( ev.isTurnOver && ev.CO.army == myArmy );
+        if( !evictionFailure )
+        {
+          PathCalcParams pcp = new PathCalcParams(ev, predMap);
+          pcp.includeOccupiedSpaces = false;
+          evictionFailure |= (pcp.findAllPaths().size() < 2); // Can't move anywhere that isn't already occupied
+        }
       }
       if( evictionFailure )
         continue;
