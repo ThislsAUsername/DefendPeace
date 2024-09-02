@@ -2082,34 +2082,29 @@ public class WallyAI extends ModularAI
     // Our default mode of power projection is siege units, so build those (prioritizing unit count) if there's cash and nothing to counter
     var wantedTypes = myArmy.cos[0].getAllModels(UnitModel.SIEGE);
     for( boolean doUpgrades : new boolean[] { false, true } )
-      for( MapLocation loc : CPI.availableProperties )
+      for( UnitModel um : wantedTypes )
       {
-        Commander buyer = loc.getOwner();
-        var sl = buyer.getShoppingList(loc);
-        for( UnitModel um : wantedTypes )
+        var options = getBuildOptionsFor(gameMap, CPI, um, null);
+        for( CombatBuildDeets opt : options )
         {
-          if( !sl.contains(um) )
-            continue;
-          final XYCoord coord = loc.getCoordinates();
-          final int cost = buyer.getBuyCost(um, coord);
+          final XYCoord coord = opt.loc.getCoordinates();
 
-          int marginalCost = cost;
+          int marginalCost = opt.price;
           if( builds.containsKey(coord) )
           {
             UnitModel currentBuild = builds.get(coord);
-            if( !capperTypes.contains(currentBuild) && !wantedTypes.contains(currentBuild) )
+            boolean replaceable = capperTypes.contains(currentBuild) || (wantedTypes.contains(currentBuild) && doUpgrades);
+            if( !replaceable )
               break; // If it's not a standard build, don't override
             if( um.costBase < currentBuild.costBase )
               break; // If it's a standard build that's more expensive, it's a counter unit
-            marginalCost -= buyer.getBuyCost(currentBuild, coord);
+            marginalCost -= opt.mfc.co.getBuyCost(currentBuild, coord);
           }
 
           if( marginalCost <= budget )
           {
             builds.put(coord, um);
             budget -= marginalCost;
-            if( !doUpgrades )
-              break; // For the first loop, only pick the least expensive standard build.
           }
         }
       }
