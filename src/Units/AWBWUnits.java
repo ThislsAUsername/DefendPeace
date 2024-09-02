@@ -366,7 +366,7 @@ public class AWBWUnits extends UnitModelScheme
   public AWBWUnitModel PiperunnerModel()
   {
     var b = AWBWUnitModel.builder();
-    b.role(UnitModel.SIEGE | UnitModel.TANK | UnitModel.LAND);
+    b.role(UnitModel.SIEGE | UnitModel.SURFACE_TO_AIR | UnitModel.TANK | UnitModel.LAND);
     
     b.costBase(20000);
     b.abilityPowerValue(20);
@@ -416,7 +416,7 @@ public class AWBWUnits extends UnitModelScheme
   public AWBWUnitModel MobileSAMModel()
   {
     var b = AWBWUnitModel.builder();
-    b.role(UnitModel.SIEGE | UnitModel.SURFACE_TO_AIR | UnitModel.TANK | UnitModel.LAND);
+    b.role(UnitModel.SURFACE_TO_AIR | UnitModel.TANK | UnitModel.LAND);
     
     b.costBase(12000);
     b.abilityPowerValue(14);
@@ -709,7 +709,7 @@ public class AWBWUnits extends UnitModelScheme
   public AWBWUnitModel CarrierModel()
   {
     var b = AWBWUnitModel.builder();
-    b.role(UnitModel.SIEGE | UnitModel.SURFACE_TO_AIR | UnitModel.TRANSPORT | UnitModel.SHIP | UnitModel.SEA);
+    b.role(UnitModel.SURFACE_TO_AIR | UnitModel.TRANSPORT | UnitModel.SHIP | UnitModel.SEA);
     
     b.costBase(30000);
     b.abilityPowerValue(22);

@@ -51,7 +51,7 @@ public class UnitModel implements Serializable, ITargetable, UnitModList
   public static final long MECH            = 1 << 16; // Footsoldier equipped against hardened targets
   public static final long RECON           = 1 << 17; // Scout
   public static final long ASSAULT         = 1 << 18; // Fast unit that can deal with hardened ground targets
-  public static final long SIEGE           = 1 << 19; // Typically has range, but is primarily effective when stationary
+  public static final long SIEGE           = 1 << 19; // Cracks hardened ground targets; typically has range, but is primarily effective when stationary
   public static final long SURFACE_TO_AIR  = 1 << 20;
   public static final long AIR_TO_SURFACE  = 1 << 21;
   public static final long AIR_TO_AIR      = 1 << 22;
