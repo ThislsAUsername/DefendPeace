@@ -477,7 +477,7 @@ public class JakeMan extends ModularAI
       if( avoidProduction )
         goals.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, goals, !avoidProduction));
     }
-    else if( uc.actionTypes.contains(UnitActionFactory.CAPTURE) )
+    else if( uc.model.isAny(UnitModel.CAPTURE) )
     {
       for( XYCoord xyc : futureCapTargets )
         if( !AIUtils.isCapturing(gameMap, myArmy.cos[0], xyc) )

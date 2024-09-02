@@ -649,7 +649,8 @@ public class WallyAI extends ModularAI
     {
       if( ai.plansByUnit.containsKey(unit) )
         return null;
-      boolean isSiege = unit.model.hasImmobileWeapon();
+      boolean isSiege = unit.model.isAny(UnitModel.SIEGE);
+      isSiege |= unit.model.hasImmobileWeapon();
       if( !isSiege )
         return null;
 
@@ -1124,7 +1125,7 @@ public class WallyAI extends ModularAI
         travelPurpose = TravelPurpose.SUPPLIES;
     }
     int distThreshold = uc.calculateMovePower() * UNIT_CAPTURE_RANGE;
-    if( goals.isEmpty() && uc.actionTypes.contains(UnitActionFactory.CAPTURE) )
+    if( goals.isEmpty() && uc.model.isAny(UnitModel.CAPTURE) )
     {
       for( XYCoord xyc : futureCapTargets )
       {
