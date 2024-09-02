@@ -47,6 +47,7 @@ public class UnitModel implements Serializable, ITargetable, UnitModList
   public static final long SEA             = 1 << 11;
   public static final long SUBSURFACE      = 1 << 12;
   // Role; Unit sets are expected to have at least one of each
+  public static final long CAPTURE         = 1 << 15; // Unit that can give you ownership of property
   public static final long MECH            = 1 << 16; // Footsoldier equipped against hardened targets
   public static final long RECON           = 1 << 17; // Scout
   public static final long ASSAULT         = 1 << 18; // Fast unit that can deal with hardened ground targets
@@ -113,6 +114,9 @@ public class UnitModel implements Serializable, ITargetable, UnitModList
       this.role |= DIRECT;
     if( isIndirect )
       this.role |= INDIRECT;
+
+    if( baseActions.contains(UnitActionFactory.CAPTURE) )
+      this.role |= CAPTURE;
 
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
