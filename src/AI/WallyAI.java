@@ -1853,44 +1853,70 @@ public class WallyAI extends ModularAI
 
   public static class CombatBuildDeets
   {
-    public CombatBuildDeets(MapLocation loc, ArrayList<XYCoord> targets, ModelForCO mfc)
+    public CombatBuildDeets(WallyAI ai, MapLocation loc, ArrayList<XYCoord> targets, ModelForCO mfc, ModelForCO targetType)
     {
       this.loc = loc;
       this.targets = targets;
       this.mfc = mfc;
-      price = mfc.co.getBuyCost(mfc.um, loc.getCoordinates());
+      enemyToCounter = targetType;
+      XYCoord coord = loc.getCoordinates();
+      price = mfc.co.getBuyCost(mfc.um, coord);
+
+      UnitContext uc = new UnitContext(mfc.co, mfc.um);
+      uc.setCoord(coord);
+      double effectiveness = 1;
+      double costRatio     = 1;
+      if( null != enemyToCounter )
+      {
+        double enemyPrice = enemyToCounter.co.getCost(enemyToCounter.um);
+        effectiveness = ai.findEffectiveness(mfc, enemyToCounter);
+        costRatio = enemyPrice / price;
+      }
+      int minDist          = targets.get(0).getDistance(coord);
+      int turnAdjustment   = (mfc.um.isAny(UnitModel.SIEGE))? 2 : 1;
+      int minTurns         = minDist / uc.calculateMovePower() + turnAdjustment;
+      double turnRatio     = 10.0 / minTurns;
+      score = (int) (1000 * effectiveness * costRatio * turnRatio);
     }
     MapLocation loc;
     ArrayList<XYCoord> targets;
-    ModelForCO mfc;
-    int price;
+    ModelForCO mfc, enemyToCounter;
+    int price, score;
+    @Override
+    public String toString()
+    {
+      return String.format("(%s at %s)", mfc, loc.getCoordinates());
+    }
+  }
+  private static class CombatBuldDeetsComparator implements Comparator<CombatBuildDeets>
+  {
+    @Override
+    public int compare(CombatBuildDeets build1, CombatBuildDeets build2)
+    {
+      int diff = build2.score - build1.score;
+      return diff;
+    }
   }
 
   /**
    * Returns all acceptable places to build the unit type
    */
-  public ArrayList<CombatBuildDeets> getBuildOptionsFor(GameMap gameMap, CommanderProductionInfo CPI, UnitModel model, UnitModel target)
+  public ArrayList<CombatBuildDeets> getBuildOptionsFor(GameMap gameMap, CommanderProductionInfo CPI, UnitModel model, ModelForCO target)
   {
     ArrayList<CombatBuildDeets> candidates = new ArrayList<>();
-    Set<TerrainType> desiredTerrains = CPI.modelToTerrainMap.get(model);
-    if( null == desiredTerrains || desiredTerrains.size() < 1 )
-      return candidates;
 
-    for( MapLocation loc : CPI.availableProperties )
+    for( MapLocation loc : CPI.getAllFacilitiesFor(model) )
     {
-      if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
-      {
-        final ModelForCO mfc = new ModelForCO(loc.getOwner(), model);
+      final ModelForCO mfc = new ModelForCO(loc.getOwner(), model);
 
-        int threat = fundsThreatAt(gameMap, threatMap, mfc, loc.getCoordinates(), null);
-        int threatThreshold = (BUILD_SCARE_PERCENT * mfc.co.getBuyCost(mfc.um, loc.getCoordinates())) / 100;
-        if( threatThreshold < threat )
-          continue;
-        // If we can get to a target...
-        ArrayList<XYCoord> potentialVictims = findCombatUnitDestinations(predMap, allThreats, loc.getCoordinates(), mfc, target);
-        if( 0 < potentialVictims.size() )
-          candidates.add(new CombatBuildDeets(loc, potentialVictims, mfc));
-      }
+      int threat = fundsThreatAt(gameMap, threatMap, mfc, loc.getCoordinates(), null);
+      int threatThreshold = (BUILD_SCARE_PERCENT * mfc.co.getBuyCost(mfc.um, loc.getCoordinates())) / 100;
+      if( threatThreshold < threat )
+        continue;
+      // If we can get to a target...
+      ArrayList<XYCoord> potentialVictims = findCombatUnitDestinations(predMap, allThreats, loc.getCoordinates(), mfc, (null == target)? null : target.um);
+      if( 0 < potentialVictims.size() )
+        candidates.add(new CombatBuildDeets(this, loc, potentialVictims, mfc, target));
     }
 
     return candidates;
@@ -2020,13 +2046,10 @@ public class WallyAI extends ModularAI
 
       // Get our possible options for countermeasures.
       int costBuffer = 0;
-      ArrayList<CombatBuildDeets> availableBuilds = new ArrayList<>();
-      for( ModelForCO currentCounter : CPI.availableUnitModels )
+      Queue<CombatBuildDeets> availableBuilds = new PriorityQueue<>(new CombatBuldDeetsComparator());
+      for( var currentCounter : CPI.modelToTerrainMap.keySet() )
       {
-        double effectiveness = findEffectiveness(currentCounter, enemyToCounter);
-        if( !(effectiveness > 0) )
-          continue;
-        var options = getBuildOptionsFor(gameMap, CPI, currentCounter.um, enemyToCounter.um);
+        var options = getBuildOptionsFor(gameMap, CPI, currentCounter, enemyToCounter);
         for( CombatBuildDeets opt : options )
         {
           XYCoord coord = opt.loc.getCoordinates();
@@ -2040,10 +2063,10 @@ public class WallyAI extends ModularAI
 
       double idealEffect = 0;
       CombatBuildDeets idealCounter = null;
-      XYCoord idealCoord = null;
-      int idealCost = 9001;
       for( CombatBuildDeets counterDeets : availableBuilds )
       {
+        if( counterDeets.score < 1 )
+          break;
         XYCoord coord = counterDeets.loc.getCoordinates();
         costBuffer = capperPrices.getOrDefault(coord, 0);
         Commander buyer = gameMap.getLocation(coord).getOwner();
@@ -2078,17 +2101,16 @@ public class WallyAI extends ModularAI
         if(effectiveness >= idealEffect)
         {
           idealEffect = effectiveness;
-          idealCoord = coord;
           idealCounter = counterDeets;
-          idealCost = buyCost;
         }
       } // ~for( availableUnitModels )
 
       if( null == idealCounter )
         continue;
-      log(String.format("      buying %s at %s", idealCounter, idealCoord));
+      log(String.format("      buying %s", idealCounter));
+      XYCoord idealCoord = idealCounter.loc.getCoordinates();
       builds.put(idealCoord, idealCounter.mfc.um);
-      budget -= idealCost - costBuffer;
+      budget -= idealCounter.price - costBuffer;
       CPI.removeBuildLocation(gameMap.getLocation(idealCoord));
 
       int counterHPCountered    = (int) (enemyHP - idealEffect * 10);
@@ -2105,7 +2127,8 @@ public class WallyAI extends ModularAI
     for( boolean doUpgrades : new boolean[] { false, true } )
       for( UnitModel um : wantedTypes )
       {
-        var options = getBuildOptionsFor(gameMap, CPI, um, null);
+        var options = new PriorityQueue<CombatBuildDeets>(new CombatBuldDeetsComparator());
+        options.addAll(getBuildOptionsFor(gameMap, CPI, um, null));
         for( CombatBuildDeets opt : options )
         {
           final XYCoord coord = opt.loc.getCoordinates();
