@@ -1959,13 +1959,14 @@ public class WallyAI extends ModularAI
         for( Unit u : unitLists.get(co) )
         {
           // Count how many of each model of enemy units are in play.
-          if( enemyUnitHP.containsKey(new ModelForCO(u)) )
+          ModelForCO key = new ModelForCO(u);
+          if( enemyUnitHP.containsKey(key) )
           {
-            enemyUnitHP.put(new ModelForCO(u), enemyUnitHP.get(new ModelForCO(u)) + (u.getHP() / 10));
+            enemyUnitHP.put(key, enemyUnitHP.get(key) + u.getHP());
           }
           else
           {
-            enemyUnitHP.put(new ModelForCO(u), u.getHP());
+            enemyUnitHP.put(key, u.getHP());
           }
         }
       }
@@ -1976,13 +1977,14 @@ public class WallyAI extends ModularAI
     for( Unit u : myArmy.getUnits() )
     {
       // Count how many of each model of enemy units are in play.
-      if( myUnitHP.containsKey(new ModelForCO(u)) )
+      ModelForCO key = new ModelForCO(u);
+      if( myUnitHP.containsKey(key) )
       {
-        myUnitHP.put(new ModelForCO(u), myUnitHP.get(new ModelForCO(u)) + (u.getHP() / 10));
+        myUnitHP.put(key, myUnitHP.get(key) + u.getHP());
       }
       else
       {
-        myUnitHP.put(new ModelForCO(u), u.getHP());
+        myUnitHP.put(key, u.getHP());
       }
     }
 
