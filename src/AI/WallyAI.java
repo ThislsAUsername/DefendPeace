@@ -100,6 +100,7 @@ public class WallyAI extends ModularAI
   private static final double TERRAIN_FUNDS_WEIGHT = 2.5; // Multiplier for per-city income for adding value to units threatening to cap
   private static final double TERRAIN_INDUSTRY_WEIGHT = 20000; // Funds amount added to units threatening to cap an industry
   private static final double TERRAIN_HQ_WEIGHT = 42000; //                  "                                      HQ
+  private static final double TERRAIN_TOWER_WEIGHT = 15000; //               "                                      tower
 
   private static final CalcType CALC = CalcType.PESSIMISTIC;
 
@@ -1850,6 +1851,9 @@ public class WallyAI extends ModularAI
     if( TerrainType.HEADQUARTERS == terrain
         || TerrainType.LAB == terrain )
       value += TERRAIN_HQ_WEIGHT;
+    if( TerrainType.DOR_TOWER == terrain
+        || TerrainType.DS_TOWER == terrain )
+      value += TERRAIN_TOWER_WEIGHT;
     return value;
   }
 
