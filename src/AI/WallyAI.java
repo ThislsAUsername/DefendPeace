@@ -91,8 +91,10 @@ public class WallyAI extends ModularAI
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
   private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges
 
+  private static final double COUNTER_EFFICIENCY_FACTOR = 0.6; // Factor of how well we assume enemy units are countered by existing units
   private static final double BANK_EFFICIENCY_FACTOR = 1.7; // Minimum effectiveness multiplier to consider banking for a better counter
   private static final double MAX_BANK_FUNDS_FACTOR = 2.5; // Maximum to bank compared to a counter you can actually buy
+  private static final int    MAX_UNITS_PER_CAP_UNIT = 10; // Max acceptable number of units per capture unit
 
   private static final double COMPLETE_CAPTURE_WEIGHT = 4; // Roughly corresponds to the number of turns of prop value we expect to lose by not finishing a capture.
   private static final double TERRAIN_FUNDS_WEIGHT = 2.5; // Multiplier for per-city income for adding value to units threatening to cap
@@ -2019,6 +2021,9 @@ public class WallyAI extends ModularAI
       for( ModelForCO counter : myUnitHP.keySet() ) // Subtract how well we think we counter each enemy from their HP counts
       {
         double counterPower = findEffectiveness(counter, threat);
+        if( counterPower < 0.1 )
+          continue;
+        counterPower *= COUNTER_EFFICIENCY_FACTOR;
         enemyUnitHP.put( threat, (int) (enemyUnitHP.get(threat) - counterPower * myUnitHP.get(counter)) );
       }
     }
@@ -2122,7 +2127,18 @@ public class WallyAI extends ModularAI
       }
     } // ~while( !enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
 
-    // Our default mode of power projection is siege units, so build those (prioritizing unit count) if there's cash and nothing to counter
+    int capHP = 0, allHP = 0;
+    for( ModelForCO mfc : myUnitHP.keySet() )
+    {
+      allHP += myUnitHP.get(mfc);
+      if( mfc.um.isAny(UnitModel.CAPTURE) )
+        capHP += myUnitHP.get(mfc);
+    }
+    boolean captureDensityGood = false;
+    if( capHP > 0 )
+      captureDensityGood = (allHP / capHP) <= MAX_UNITS_PER_CAP_UNIT;
+
+    // We want to specialize in sieges, build units for that if there's cash and nothing to counter
     var wantedTypes = myArmy.cos[0].getAllModels(UnitModel.SIEGE);
     for( boolean doUpgrades : new boolean[] { false, true } )
       for( UnitModel um : wantedTypes )
@@ -2137,7 +2153,9 @@ public class WallyAI extends ModularAI
           if( builds.containsKey(coord) )
           {
             UnitModel currentBuild = builds.get(coord);
-            boolean replaceable = capperTypes.contains(currentBuild) || (wantedTypes.contains(currentBuild) && doUpgrades);
+            boolean replaceable = false;
+            replaceable |= captureDensityGood && capperTypes.contains(currentBuild);
+            replaceable |= doUpgrades && wantedTypes.contains(currentBuild);
             if( !replaceable )
               break; // If it's not a standard build, don't override
             if( um.costBase < currentBuild.costBase )
