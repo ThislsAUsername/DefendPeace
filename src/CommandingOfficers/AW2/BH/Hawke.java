@@ -92,7 +92,7 @@ public class Hawke extends AW2Commander
         for( int x = 0; x < map.mapWidth; x++ )
         {
           Unit resi = map.getResident(x, y);
-          if( resi != null)
+          if( resi != null )
           {
             if( myCommander.army == resi.CO.army )
               friends.add(resi);
