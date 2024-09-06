@@ -22,6 +22,7 @@ import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.MassHealEvent;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitDefenseModifier;
 import Engine.UnitMods.UnitModifier;
@@ -172,10 +173,11 @@ public class Tech extends Commander
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    public GameEventQueue getEvents(MapMaster map)
     {
       ArrayList<UnitModel> typesToOverCharge = getMechanicalModels(myCommander);
       ArrayList<Unit> overCharged = new ArrayList<Unit>();
+      ArrayList<Unit> patients    = new ArrayList<>();
       // Overcharge
       for(Unit u: myCommander.army.getUnits())
       {
@@ -185,10 +187,18 @@ public class Tech extends Commander
           if( u.getHealth() <= UnitModel.MAXIMUM_HEALTH
               && u.getHealth() + healAmount > UnitModel.MAXIMUM_HEALTH )
             overCharged.add(u);
-          u.alterHealth(healAmount, true);
+          patients.add(u);
         }
       }
+
       unitsOverCharged.put(myCommander, overCharged);
+      var heal = new MassHealEvent(null, patients, healAmount * 10);
+      heal.canOverheal = true;
+
+      GameEventQueue events = new GameEventQueue();
+      events.add(heal);
+
+      return events;
     }
 
     @Override
