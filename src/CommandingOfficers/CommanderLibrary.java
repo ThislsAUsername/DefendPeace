@@ -105,6 +105,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW3.YC.Sensei.getInfo() );
     commanderList.add( CommandingOfficers.AW3.YC.Kanbei.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.Flak.getInfo() );
+    commanderList.add( CommandingOfficers.AW3.BH.Jugger.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.Adder.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.Lash.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.Hawke.getInfo() );
@@ -127,6 +128,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.YC.Kanbei.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.YC.SonjaDSBW.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Flak.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.BH.Jugger.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Adder.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Lash.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Hawke.getInfo() );
