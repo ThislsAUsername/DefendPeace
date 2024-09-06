@@ -72,7 +72,7 @@ public class Sensei extends AW2Commander
   {
     if( params.attacker.model.isAny(UnitModel.HOVER | UnitModel.TROOP) )
       params.attackPower += 50;
-    if( params.attacker.model.isNone(UnitModel.AIR_HIGH | UnitModel.AIR_LOW) )
+    if( params.attacker.model.isNone(UnitModel.AIR) )
       params.attackPower -= 10;
   }
   @Override
