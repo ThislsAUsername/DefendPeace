@@ -108,6 +108,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW3.BH.Jugger.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.Adder.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.Koal.getInfo() );
+    commanderList.add( CommandingOfficers.AW3.BH.Kindle.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.Lash.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.Hawke.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.VonBolt.getInfo() );
@@ -132,6 +133,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.BH.Jugger.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Adder.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Koal.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.BH.Kindle.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Lash.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Hawke.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Sturm.getInfo() );
