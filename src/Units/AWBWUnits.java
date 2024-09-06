@@ -442,7 +442,7 @@ public class AWBWUnits extends UnitModelScheme
   public AWBWUnitModel TCopterModel()
   {
     var b = AWBWUnitModel.builder();
-    b.role(UnitModel.TRANSPORT | UnitModel.HOVER | UnitModel.AIR_LOW);
+    b.role(UnitModel.TRANSPORT | UnitModel.HOVER | UnitModel.AIR);
     
     b.costBase(5000);
     b.abilityPowerValue(10);
@@ -466,7 +466,7 @@ public class AWBWUnits extends UnitModelScheme
   public AWBWUnitModel BCopterModel()
   {
     var b = AWBWUnitModel.builder();
-    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.HOVER | UnitModel.AIR_LOW);
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.HOVER | UnitModel.AIR);
     
     b.costBase(9000);
     b.abilityPowerValue(12);
@@ -490,7 +490,7 @@ public class AWBWUnits extends UnitModelScheme
   public AWBWUnitModel BomberModel()
   {
     var b = AWBWUnitModel.builder();
-    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR);
     
     b.costBase(22000);
     b.abilityPowerValue(18);
@@ -514,7 +514,7 @@ public class AWBWUnits extends UnitModelScheme
   public AWBWUnitModel FighterModel()
   {
     var b = AWBWUnitModel.builder();
-    b.role(UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR);
     
     b.costBase(20000);
     b.abilityPowerValue(18);
@@ -538,7 +538,7 @@ public class AWBWUnits extends UnitModelScheme
   public AWBWUnitModel StealthModel()
   {
     var b = AWBWUnitModel.builder();
-    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR);
     
     b.costBase(24000);
     b.abilityPowerValue(20);
@@ -575,7 +575,7 @@ public class AWBWUnits extends UnitModelScheme
   public AWBWUnitModel BBombModel()
   {
     var b = AWBWUnitModel.builder();
-    b.role(UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.JET | UnitModel.AIR);
     
     b.costBase(25000);
     b.abilityPowerValue(6);
@@ -727,7 +727,7 @@ public class AWBWUnits extends UnitModelScheme
     b.name("Carrier");
     b.type(AWBWUnitEnum.CARRIER);
     b.baseCargoCapacity(2);
-    b.carryableMask(UnitModel.AIR_LOW | UnitModel.AIR_HIGH);
+    b.carryableMask(UnitModel.AIR);
 
     /** Carriers supply their cargo at the beginning of every turn. Make it so. */
     b.supplyCargo(true);
@@ -756,7 +756,7 @@ public class AWBWUnits extends UnitModelScheme
     b.name("Cruiser");
     b.type(AWBWUnitEnum.CRUISER);
     b.baseCargoCapacity(2);
-    b.carryableMask(UnitModel.AIR_LOW);
+    b.carryableMask(UnitModel.AIR);
 
     /** Cruisers supply their cargo at the beginning of every turn. Make it so. */
     b.supplyCargo(true);

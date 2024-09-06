@@ -1110,7 +1110,7 @@ public class JakeMan extends ModularAI
     tank     = allTanks.get(0);
     mdTank   = allTanks.get(1);
     antiAir  = myArmy.cos[0].getUnitModel(UnitModel.SURFACE_TO_AIR);
-    copter   = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT | UnitModel.AIR_LOW, false);
+    copter   = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT | UnitModel.AIR, false);
 
     counterBuildSetup();
 

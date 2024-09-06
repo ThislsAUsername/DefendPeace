@@ -216,7 +216,7 @@ public class KaijuWarsKaiju
   public static class HellTurkey extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = HOVER | AIR_LOW;
+    private static final long ROLE = HOVER | AIR;
     public HellTurkeyLand turkeyLand;
     public HellTurkeyEgg turkeyEgg;
     // Transitions to the land turkey are handled by KaijuStateTracker and the Kaiju crush action
@@ -475,7 +475,7 @@ public class KaijuWarsKaiju
   public static class UFO extends KaijuUnitModel
   {
     private static final long serialVersionUID = 1L;
-    private static final long ROLE = JET | AIR_HIGH;
+    private static final long ROLE = JET | AIR;
 
     /** Disable my move boost and EMP AoE if I have them and there's a Radar in range */
     @Override
