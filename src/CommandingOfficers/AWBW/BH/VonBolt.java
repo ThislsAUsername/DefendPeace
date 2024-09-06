@@ -87,7 +87,6 @@ public class VonBolt extends AWBWCommander
 
       target.power = POWER;
       target.inflictStun = true;
-      target.selfHarm    = false;
       GameEvent event = target.getDamage(map, myCommander);
       events.add(event);
 
@@ -97,7 +96,6 @@ public class VonBolt extends AWBWCommander
     {
       AWBWValueFinders.CostValueFinder finder = new AWBWValueFinders.CostValueFinder();
       finder.maxDamage = POWER;
-      finder.selfHarm  = false;
       MeteorParams zap = MeteorParams.planMeteor(map, myCommander, 2, finder);
       if( zap.target == null )
         zap.target = new XYCoord(0, 0);
