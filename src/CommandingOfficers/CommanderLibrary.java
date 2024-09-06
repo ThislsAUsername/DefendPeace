@@ -116,6 +116,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.BM.Sasha.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BM.Grit.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BM.Olaf.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.GE.Drake.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.GE.Eagle.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.GE.Javier.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.YC.Sonja.getInfo() );
