@@ -85,6 +85,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW2.BH.Flak.getInfo() );
     commanderList.add( CommandingOfficers.AW2.BH.Adder.getInfo() );
     commanderList.add( CommandingOfficers.AW2.BH.Lash.getInfo() );
+    commanderList.add( CommandingOfficers.AW2.BH.Hawke.getInfo() );
     commanderList.add( CommandingOfficers.AW2.BH.Sturm.getInfo() );
     commanderList.add( CommandingOfficers.AW3.OS.Andy.getInfo() );
     commanderList.add( CommandingOfficers.AW3.OS.Jake.getInfo() );
@@ -106,6 +107,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AW3.BH.Flak.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.Adder.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.Lash.getInfo() );
+    commanderList.add( CommandingOfficers.AW3.BH.Hawke.getInfo() );
     commanderList.add( CommandingOfficers.AW3.BH.VonBolt.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Andy.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Jake.getInfo() );
@@ -127,6 +129,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.BH.Flak.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Adder.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Lash.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.BH.Hawke.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Sturm.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.VonBolt.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BrennerWolves.LinBW.getInfo() );
