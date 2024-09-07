@@ -156,7 +156,7 @@ public class FightClub
         GameScenario scenario = new GameScenario(mi.getValidUnitModelSchemes()[0],
             GameScenario.DEFAULT_INCOME, GameScenario.DEFAULT_STARTING_FUNDS, FogMode.OFF_DOR, TagMode.OFF);
 
-        int numCos = mi.getNumCos();
+        int numCos = mi.getNumPlayers();
 
         // Create all of the combatants.
         HashMap<Integer, ContestantInfo> teamMapping = new HashMap<Integer, ContestantInfo>(); // TODO: This currently doesn't work for team games. 

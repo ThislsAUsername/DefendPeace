@@ -97,7 +97,7 @@ public class MiniMapArtist
         COSpriteSpec unitSpec = null;
         boolean unitFlip = false, unitBuff = false;
 
-        for( int co = 0; co < mapInfo.COProperties.length; ++co )
+        for( int co = 0; co < mapInfo.playerProps.length; ++co )
         {
           // Figure out unit details, if any
           if( anyUnits && mapInfo.mapUnits.get(co).containsKey(coord) )
@@ -108,9 +108,9 @@ public class MiniMapArtist
           }
 
           // Figure out team color, if any
-          for( int i = 0; i < mapInfo.COProperties[co].length; ++i )
+          for( int i = 0; i < mapInfo.playerProps[co].length; ++i )
           {
-            if( coord.equals(mapInfo.COProperties[co][i]) )
+            if( coord.equals(mapInfo.playerProps[co][i]) )
             {
               spec = getNthSpriteSpec(factions, teamColors, co);
               break;
