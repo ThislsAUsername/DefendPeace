@@ -35,7 +35,7 @@ public class MapMaster extends GameMap
     }
 
     // Print a warning if the number of Commanders we have does not match the number the map expects.
-    if( propertyOwners.length != mapInfo.COProperties.length )
+    if( propertyOwners.length != mapInfo.playerProps.length )
     {
       System.out.println("Warning! Wrong number of COs specified for map " + mapInfo.mapName);
       initOK = false;
@@ -48,14 +48,14 @@ public class MapMaster extends GameMap
     }
 
     // Assign properties according to MapInfo's direction.
-    for( int co = 0; co < mapInfo.COProperties.length && co < propertyOwners.length; ++co )
+    for( int co = 0; co < mapInfo.playerProps.length && co < propertyOwners.length; ++co )
     {
       boolean hasHQ = false, hasLab = false, hasProperty = false;
       // Loop through all locations assigned to this CO by mapInfo.
-      for( int i = 0; i < mapInfo.COProperties[co].length; ++i )
+      for( int i = 0; i < mapInfo.playerProps[co].length; ++i )
       {
         // If the location can be owned, make the assignment.
-        XYCoord coord = mapInfo.COProperties[co][i];
+        XYCoord coord = mapInfo.playerProps[co][i];
         int x = coord.x;
         int y = coord.y;
         MapLocation location = map[x][y];

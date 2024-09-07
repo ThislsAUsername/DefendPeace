@@ -54,7 +54,7 @@ public class PlayerSetupTeamArtist
     myG.drawImage(arrowheads.getFrame(1), arrowheadPx*2 + TeamPanel.PANEL_WIDTH, playerZoneYCenter - arrowheadPx/2, null);
 
     // Draw the team panels.
-    int numCOs = mapInfo.getNumCos();
+    int numCOs = mapInfo.getNumPlayers();
     int highlightedPlayer = control.getHighlightedPlayer();
 
     // Calculate the vertical space each player panel will consume.
@@ -95,13 +95,13 @@ public class PlayerSetupTeamArtist
     int maxMiniMapWidth = myWidth - playerZoneWidth - 4; // Subtract 4 so we have room to draw a frame.
     int maxMiniMapHeight = myHeight - 4;
 
-    Faction[] teamFactions = new Faction[mapInfo.getNumCos()];
-    for( int i = 0; i < mapInfo.getNumCos(); ++i )
+    Faction[] teamFactions = new Faction[mapInfo.getNumPlayers()];
+    for( int i = 0; i < mapInfo.getNumPlayers(); ++i )
     {
       teamFactions[i] = control.getPlayerInfo(i).getCurrentFaction();
     }
-    Color[] teamColors = new Color[mapInfo.getNumCos()];
-    for( int i = 0; i < mapInfo.getNumCos(); ++i )
+    Color[] teamColors = new Color[mapInfo.getNumPlayers()];
+    for( int i = 0; i < mapInfo.getNumPlayers(); ++i )
     {
       teamColors[i] = control.getPlayerInfo(i).getCurrentColor();
     }
@@ -210,7 +210,7 @@ public class PlayerSetupTeamArtist
     g.setColor(Color.WHITE);
     ArrayList<XYCoord> ownedCoords = new ArrayList<>();
 
-    for( XYCoord coord : mapInfo.COProperties[faction] )
+    for( XYCoord coord : mapInfo.playerProps[faction] )
       ownedCoords.add(coord);
     ownedCoords.addAll(mapInfo.mapUnits.get(faction).keySet());
 

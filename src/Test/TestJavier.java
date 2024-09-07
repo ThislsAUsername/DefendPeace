@@ -28,7 +28,7 @@ public class TestJavier extends TestCase
   private void setupTest(MapInfo mapInfo)
   {
     GameScenario scn = new GameScenario();
-    Army[] armies = new Army[mapInfo.getNumCos()];
+    Army[] armies = new Army[mapInfo.getNumPlayers()];
     for( int i = 0; i < armies.length; ++i )
       armies[i] = new Army(scn, CommandingOfficers.AW3.GE.Javier.getInfo().create(scn.rules));
 
