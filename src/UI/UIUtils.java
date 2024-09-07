@@ -86,6 +86,7 @@ public class UIUtils
       mapUnitColorPalettes.put(CYAN, new ColorPalette(cyanMapUnitColors));
       mapUnitColorPalettes.put(ORANGE, new ColorPalette(orangeMapUnitColors));
       mapUnitColorPalettes.put(VIOLET, new ColorPalette(purpleMapUnitColors));
+      mapUnitColorPalettes.put(Color.LIGHT_GRAY, new ColorPalette(defaultMapColors));
 
       // Throw some color names in there for the defaults
       // toString() is not user-friendly
