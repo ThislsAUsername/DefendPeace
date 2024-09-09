@@ -144,6 +144,8 @@ public class MapTileDetailsArtist
       unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.FUEL.getIcon(), unit.fuel));
     if( unit.ammo >= 0 )
       unitAttrs.add(new AttributeArtist(SpriteLibrary.MapIcons.AMMO.getIcon(), unit.ammo));
+    if( unit.model.maxMaterials > 0 )
+      unitAttrs.add(new AttributeArtist(SpriteLibrary.getMaterialIcon(unit.CO.myColor), unit.materials));
     if( unit.getCaptureProgress() > 0 && null != coord )
       unitAttrs.add(new AttributeArtist(SpriteLibrary.getCaptureIcon(unit.CO.myColor),
           map.getEnvironment(coord).terrainType.getCaptureThreshold()-unit.getCaptureProgress()));

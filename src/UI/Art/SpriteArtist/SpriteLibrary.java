@@ -50,9 +50,7 @@ public class SpriteLibrary
   private static Map<Color,Map<Character,BufferedImage>> mapUnitTextSprites = null;
 
   // Unit icons for various activities.
-  private static HashMap<Color, BufferedImage> mapUnitCargoIcons = new HashMap<Color, BufferedImage>();
-  private static HashMap<Color, BufferedImage> mapUnitCaptureIcons = new HashMap<Color, BufferedImage>();
-  private static HashMap<Color, BufferedImage> mapUnitHideIcons = new HashMap<Color, BufferedImage>();
+  private static HashMap<String, HashMap<Color, BufferedImage>> mapUnitColorIcons = new HashMap<>();
 
   // Letters for writing in menus.
   private static PixelFont fontStandard;
@@ -432,11 +430,15 @@ public class SpriteLibrary
     }
   }
 
-  private static BufferedImage getColoredSprite(HashMap<Color, BufferedImage> map, String filename, Color color)
+  private static BufferedImage getColoredSprite(String iconName, Color color)
   {
+    if( !mapUnitColorIcons.containsKey(iconName) )
+      mapUnitColorIcons.put(iconName, new HashMap<>());
+
+    HashMap<Color, BufferedImage> map = mapUnitColorIcons.get(iconName);
     if( !map.containsKey(color) )
     {
-      BufferedImage icon = SpriteLibrary.loadSpriteSheetFile(filename);
+      BufferedImage icon = SpriteLibrary.loadSpriteSheetFile(Engine.Driver.JAR_DIR + "res/unit/icon/" + iconName.toLowerCase() + ".png");
       BufferedImage bi = SpriteLibrary.createTransparentSprite(icon.getWidth(), icon.getHeight());
       Graphics g = bi.getGraphics();
       g.setColor(color);
@@ -449,17 +451,22 @@ public class SpriteLibrary
 
   public static BufferedImage getCargoIcon(Color color)
   {
-    return getColoredSprite( mapUnitCargoIcons, Engine.Driver.JAR_DIR + "res/unit/icon/cargo.png", color);
+    return getColoredSprite("cargo", color);
   }
 
   public static BufferedImage getCaptureIcon(Color color)
   {
-    return getColoredSprite( mapUnitCaptureIcons, Engine.Driver.JAR_DIR + "res/unit/icon/capture.png", color);
+    return getColoredSprite("capture", color);
   }
 
   public static BufferedImage getHideIcon(Color color)
   {
-    return getColoredSprite( mapUnitHideIcons, Engine.Driver.JAR_DIR + "res/unit/icon/hide.png", color);
+    return getColoredSprite("hide", color);
+  }
+
+  public static BufferedImage getMaterialIcon(Color color)
+  {
+    return getColoredSprite("material", color);
   }
 
   ///////////////////////////////////////////////////////////////////
