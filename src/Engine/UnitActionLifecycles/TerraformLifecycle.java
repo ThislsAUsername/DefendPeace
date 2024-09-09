@@ -37,7 +37,7 @@ public abstract class TerraformLifecycle
       if( ignoreResident || map.isLocationEmpty(actor, moveLocation) )
       {
         if( startType == map.getLocation(moveLocation).getEnvironment().terrainType
-            && actor.materials > 0 )
+            && actor.hasMaterials() )
         {
           return new GameActionSet(new TerraformAction(actor, movePath, this), false);
         }
@@ -74,7 +74,7 @@ public abstract class TerraformLifecycle
 
       if( terraformEvents.size() < 1 ) // Fail out if invalid
         return terraformEvents;
-      if( actor.materials < 1 ) // Fail out if we don't have materials
+      if( !actor.hasMaterials() ) // Fail out if we don't have materials
         return terraformEvents;
 
       GameEvent moveEvent = terraformEvents.peek();
@@ -122,7 +122,8 @@ public abstract class TerraformLifecycle
       // Only attempt to do the action if it is valid to do so.
       if( unit.capture(gameMap) )
       {
-        unit.materials -= 1;
+        if( unit.model.needsMaterials )
+          unit.materials -= 1;
         super.performEvent(gameMap);
       }
     }
