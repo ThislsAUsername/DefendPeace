@@ -9,6 +9,7 @@ import Engine.OptionSelector;
 import Engine.XYCoord;
 import Engine.GameInput.GameInputState.StateData;
 import Terrain.GameMap;
+import UI.InGameMenu;
 import Units.Unit;
 
 /************************************************************
@@ -146,6 +147,10 @@ public class GameInputHandler
   public Object[] getMenuOptions()
   {
     return peekCurrentState().getOptions().getMenuOptions();
+  }
+  public InGameMenu<? extends Object> getMenu()
+  {
+    return peekCurrentState().getMenu();
   }
 
   /** @return The currently-recommended input mode. */

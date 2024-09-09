@@ -28,12 +28,32 @@ public abstract class UnitProduceLifecycle
       typeToBuild = type;
     }
 
+    // Provide an invalid option if it has materials
+    @Override
+    public GameActionSet getGUIActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+    {
+      GameActionSet realActions = getPossibleActions(map, movePath, actor, ignoreResident);
+      if( null == realActions )
+      {
+        XYCoord moveLocation = movePath.getEndCoord();
+        if( moveLocation.equals(actor.x, actor.y)
+            && actor.hasMaterials() )
+        {
+          GameActionSet gas = new GameActionSet(new UnitProduceAction(this, actor), false);
+          gas.isInvalidChoice = true;
+          return gas;
+        }
+      }
+      return realActions;
+    }
+
     @Override
     public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
     {
       XYCoord moveLocation = movePath.getEndCoord();
       if( moveLocation.equals(actor.x, actor.y) && actor.hasCargoSpace(typeToBuild.role)
           && actor.CO.army.money >= actor.CO.getCost(typeToBuild)
+          && actor.CO.army.canBuildUnits()
           && actor.hasMaterials() )
       {
         return new GameActionSet(new UnitProduceAction(this, actor), false);
@@ -147,19 +167,14 @@ public abstract class UnitProduceLifecycle
     @Override
     public void performEvent(MapMaster gameMap)
     {
-      if( null != myNewUnit )
-      {
-        myCommander.army.money -= cost;
-        if( builder.model.needsMaterials )
-          builder.materials -= 1;
-        myCommander.units.add(myNewUnit);
-        builder.heldUnits.add(myNewUnit);
-        builder.isTurnOver = true;
-      }
-      else
-      {
-        System.out.println("Warning! Attempting to build unit with insufficient funds.");
-      }
+      if( null == myNewUnit || !myCommander.army.canBuildUnits() )
+        return;
+      myCommander.army.money -= cost;
+      if( builder.model.needsMaterials )
+        builder.materials -= 1;
+      myCommander.units.add(myNewUnit);
+      builder.heldUnits.add(myNewUnit);
+      builder.isTurnOver = true;
     }
 
     @Override

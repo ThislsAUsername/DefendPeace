@@ -46,10 +46,8 @@ public class DiagonalBlindsBG
     // Build the polygon we will use to draw the lighter bands in the background.
     int[] xPoints = {0, dimensions.height, dimensions.height+shimmerThickness, shimmerThickness};
     int[] yPoints = {dimensions.height, 0, 0, dimensions.height};
-    Polygon shimmerPoly = new Polygon(xPoints, yPoints, xPoints.length); // Shimmer shape to draw.
+    Polygon drawPoly = new Polygon(xPoints, yPoints, xPoints.length); // Shimmer shape to draw.
 
-    // Make a copy of the base polygon and translate it to the first draw point.
-    Polygon drawPoly = new Polygon(shimmerPoly.xpoints, shimmerPoly.ypoints, shimmerPoly.npoints);
     int currentDrawPoint = (int)shimmerBasePoint; // Get the basis point to the nearest pixel.
     drawPoly.translate(currentDrawPoint, 0);
 

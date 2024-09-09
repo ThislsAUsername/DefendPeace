@@ -19,6 +19,10 @@ public abstract class UnitActionFactory implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
+  public GameActionSet getGUIActions(GameMap map, GamePath movePath, Unit actor, boolean ignoreResident)
+  {
+    return getPossibleActions(map, movePath, actor, ignoreResident);
+  }
   public GameActionSet getPossibleActions(GameMap map, GamePath movePath, Unit actor)
   {
     return getPossibleActions(map, movePath, actor, false);

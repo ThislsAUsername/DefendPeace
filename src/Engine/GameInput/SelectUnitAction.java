@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import Engine.GameActionSet;
 import Engine.UnitActionFactory;
 import Engine.Combat.DamagePopup;
+import UI.InGameMenu;
+import UI.InGameMenu.MenuOption;
 
 /************************************************************
  * State to allow selecting an action for a unit.           *
  ************************************************************/
-class SelectUnitAction extends GameInputState<GameActionSet>
+class SelectUnitAction extends GameInputState<MenuOption<GameActionSet>>
 {
   // Don't provide a default value, or it will override the value
   // set by the call to initOptions() in the super-constructor.
@@ -24,23 +26,42 @@ class SelectUnitAction extends GameInputState<GameActionSet>
   protected OptionSet initOptions()
   {
     // Get the set of actions this unit could perform from the target location.
-    myUnitActions = myStateData.unitActor.getPossibleActions(myStateData.gameMap, myStateData.path);
+    myUnitActions = myStateData.unitActor.getGUIActions(myStateData.gameMap, myStateData.path);
 
-    return new OptionSet(myUnitActions.toArray());
+    ArrayList<MenuOption<GameActionSet>> opts = new ArrayList<>();
+    for(GameActionSet gas : myUnitActions)
+    {
+      MenuOption<GameActionSet> mo = new MenuOption<>(gas);
+      mo.enabled = !gas.isInvalidChoice;
+      opts.add(mo);
+    }
+
+    return new OptionSet(opts.toArray());
+  }
+  @SuppressWarnings("unchecked")
+  @Override
+  public InGameMenu<? extends Object> getMenu()
+  {
+    ArrayList<MenuOption<GameActionSet>> opts = new ArrayList<>();
+    for( Object o : myOptions.getMenuOptions() )
+      opts.add((MenuOption<GameActionSet>)o);
+    return new InGameMenu<GameActionSet>(opts, getOptionSelector(), false);
   }
 
   @Override
-  public void consider(GameActionSet menuOption)
+  public void consider(MenuOption<GameActionSet> menuOption)
   {
     myStateData.damagePopups = new ArrayList<DamagePopup>();
     // If there's a preview and no targeting step, we have to preview now
-    if( !menuOption.isTargetRequired() )
-      myStateData.damagePopups = menuOption.getSelected().getDamagePopups(myStateData.gameMap);
+    if( !menuOption.item.isTargetRequired() )
+      myStateData.damagePopups = menuOption.item.getSelected().getDamagePopups(myStateData.gameMap);
   }
   @Override
-  public GameInputState<?> select(GameActionSet menuOption)
+  public GameInputState<?> select(MenuOption<GameActionSet> menuOption)
   {
     GameInputState<?> next = this;
+    if( !menuOption.enabled )
+      return next;
 
     // Find the set in myUnitActions. We iterate because it
     // 1) allows us to avoid a cast, and
@@ -50,7 +71,7 @@ class SelectUnitAction extends GameInputState<GameActionSet>
     {
       for( GameActionSet set : myUnitActions )
       {
-        if( set == menuOption )
+        if( set == menuOption.item )
         {
           chosenSet = set;
           break;
