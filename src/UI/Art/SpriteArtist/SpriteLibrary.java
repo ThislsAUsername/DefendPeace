@@ -417,7 +417,7 @@ public class SpriteLibrary
 
   public static enum MapIcons
   {
-    STUN, HEART, SHIELD, ENERGY, FUNDS, FUEL, AMMO;
+    STUN, HEART, SHIELD, ENERGY, FUNDS, FUEL, AMMO, MATERIAL;
 
     private BufferedImage myIcon = null;
     public BufferedImage getIcon()
@@ -462,11 +462,6 @@ public class SpriteLibrary
   public static BufferedImage getHideIcon(Color color)
   {
     return getColoredSprite("hide", color);
-  }
-
-  public static BufferedImage getMaterialIcon(Color color)
-  {
-    return getColoredSprite("material", color);
   }
 
   ///////////////////////////////////////////////////////////////////
