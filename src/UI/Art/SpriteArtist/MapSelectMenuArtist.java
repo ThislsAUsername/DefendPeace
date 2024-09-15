@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import Terrain.MapInfo;
-import Terrain.MapLibrary;
+import Terrain.MapInfo.MapNode;
 import Terrain.TerrainType;
 import UI.MapSelectController;
 
@@ -67,7 +67,7 @@ public class MapSelectMenuArtist
     int selectedOptionYOffset = menuTextYStart + highlightedOption * (menuOptionHeight);
 
     // Get the list of selectable maps (possibly specifying a filter (#players, etc).
-    ArrayList<MapInfo> mapInfos = MapLibrary.getMapList();
+    ArrayList<MapNode> mapInfos = gameSetup.currentNode.children;
     int verticalShift = 0; // How many map names we skip drawing "off the top"
     int displayableCount = drawableHeight / menuOptionHeight; // how many maps we can cram on the screen
     while (selectedOptionYOffset > drawableHeight/2 && // Loop until either the cursor's bumped up to the center of the screen...
@@ -96,7 +96,7 @@ public class MapSelectMenuArtist
       // Draw visible map names in the list.
       if (mapInfos.size() > i + verticalShift)
       {
-        String str = mapInfos.get(i + verticalShift).mapName;
+        String str = mapInfos.get(i + verticalShift).name;
         while(font.getWidth(str) > nameSectionDrawWidth - drawX)
         {
           str = str.substring(0, str.length()-1);
@@ -127,7 +127,10 @@ public class MapSelectMenuArtist
     menuGraphics.fillRect(nameSectionDrawWidth, maxMiniMapHeight, drawableWidth-nameSectionDrawWidth, 1);
 
     // Draw the mini-map representation of the highlighted map.
-    selectedMapInfo = mapInfos.get(highlightedOption);
+    MapNode selNode = mapInfos.get(highlightedOption);
+    while (null == selNode.result)
+      selNode = selNode.children.get(0);
+    selectedMapInfo = selNode.result;
     BufferedImage miniMap = MiniMapArtist.getMapImage(selectedMapInfo, drawScale*maxMiniMapWidth, drawScale*maxMiniMapHeight);
 
     // Figure out how large to draw the minimap. We want to make it as large as possible, but still

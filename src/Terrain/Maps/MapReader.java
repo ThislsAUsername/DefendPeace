@@ -73,9 +73,12 @@ public class MapReader extends IMapBuilder
           return nodeA.name.compareTo(nodeB.name);
         });
 
-        // If this directory node has only directory children, get rid of it and prepend its name to the children's names
-        if( parent.parent != null &&
-            parent.children.stream().allMatch((node) -> node.result == null) )
+        // If this directory node has only one child or directory children, get rid of it and prepend its name to the children's names
+        if( parent.parent != null && (
+              parent.children.size() == 1 ||
+              parent.children.stream().allMatch((node) -> node.result == null)
+            )
+          )
         {
           ArrayList<MapNode> ppc = parent.parent.children;
           int index = ppc.indexOf(parent);

@@ -40,11 +40,12 @@ public class MapLibrary
     availableMaps.add(FiringRange.getMapInfo());
     availableMaps.add(SpannIsland.getMapInfo());
     availableMaps.add(CageMatch.getMapInfo());
-    MapNode builtins = new MapNode(null, availableMaps.get(0).dirPath, null);
-    for( var map : availableMaps )
-      builtins.children.add(new MapNode(builtins, map.mapName, map));
 
     rootMap = MapReader.readMapData();
+
+    MapNode builtins = new MapNode(rootMap, availableMaps.get(0).dirPath, null);
+    for( var map : availableMaps )
+      builtins.children.add(new MapNode(builtins, map.mapName, map));
     rootMap.children.add(0, builtins);
 
     // Iterate over the nodes to get a master list of maps, as well.
