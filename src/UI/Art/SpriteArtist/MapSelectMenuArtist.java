@@ -54,15 +54,34 @@ public class MapSelectMenuArtist
 
     // Draw the frame for the list of maps, with the highlight for the current option.
     int frameBorderHeight = 3;
+    int menuTextYStart = frameBorderHeight;
     int nameSectionDrawWidth = drawableWidth / 3;
     menuGraphics.setColor(MENUFRAMECOLOR);
     menuGraphics.fillRect(nameSectionDrawWidth, 0, 1, drawableHeight); // sidebar
     menuGraphics.fillRect(0,0,nameSectionDrawWidth,frameBorderHeight); // top bar
-    menuGraphics.fillRect(0, drawableHeight-frameBorderHeight, nameSectionDrawWidth, 3); // bottom bar
+    menuGraphics.fillRect(0, drawableHeight-frameBorderHeight, nameSectionDrawWidth, frameBorderHeight); // bottom bar
+
+    // Draw the current node's path at the top, in its own little box, if applicable
+    String uri = gameSetup.currentNode.uri();
+    if( !uri.isEmpty() )
+    {
+      int uriHeightPlusBorder = font.getHeight()+frameBorderHeight;
+      menuGraphics.fillRect(0, uriHeightPlusBorder, nameSectionDrawWidth, frameBorderHeight); // top bar
+      int drawX = 2; // Offset from the edge of the window slightly.
+      int drawY = (menuTextYStart + 1);
+      while (font.getWidth(uri) > nameSectionDrawWidth - drawX)
+      {
+        uri = uri.substring(0, uri.length() - 1);
+      }
+
+      menuGraphics.setColor(Color.BLACK);
+      SpriteUIUtils.drawText(menuGraphics, uri, drawX, drawY);
+
+      menuTextYStart += uriHeightPlusBorder;
+    }
 
     // Draw the highlight for the selected option.
     menuGraphics.setColor(MENUHIGHLIGHTCOLOR);
-    int menuTextYStart = frameBorderHeight;
     int menuOptionHeight = font.getHeight();
     int selectedOptionYOffset = menuTextYStart + highlightedOption * (menuOptionHeight);
 
@@ -133,8 +152,7 @@ public class MapSelectMenuArtist
     selectedMapInfo = selNode.result;
     BufferedImage miniMap = MiniMapArtist.getMapImage(selectedMapInfo, drawScale*maxMiniMapWidth, drawScale*maxMiniMapHeight);
 
-    // Figure out how large to draw the minimap. We want to make it as large as possible, but still
-    //   fit inside the available space (with a minimum scale factor of 1).
+    // Figure out how large to draw the minimap. We want to make it as large as possible, but still fit inside the available space.
     int mmWScale = drawScale*maxMiniMapWidth / miniMap.getWidth();
     int mmHScale = drawScale*maxMiniMapHeight / miniMap.getHeight();
     int mmScale = (mmWScale > mmHScale)? mmHScale : mmWScale;
