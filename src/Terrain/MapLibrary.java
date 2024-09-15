@@ -1,12 +1,15 @@
 package Terrain;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 
+import Terrain.MapInfo.MapNode;
 import Terrain.Maps.CageMatch;
 import Terrain.Maps.FiringRange;
 import Terrain.Maps.MapReader;
 import Terrain.Maps.SpannIsland;
 import Terrain.Maps.TestRange;
+import lombok.var;
 
 public class MapLibrary
 {
@@ -28,9 +31,18 @@ public class MapLibrary
     availableMaps.add(FiringRange.getMapInfo());
     availableMaps.add(SpannIsland.getMapInfo());
     availableMaps.add(CageMatch.getMapInfo());
-    availableMaps.addAll(MapReader.readMapData());
+    var nodes = new ArrayDeque<MapNode>();
+    nodes.add(MapReader.readMapData());
+    while (!nodes.isEmpty())
+    {
+      MapNode n = nodes.poll();
+      if( null == n.result )
+        nodes.addAll(n.children);
+      else
+        availableMaps.add(n.result);
+    }
   }
-  
+
   public static MapInfo getByName(String mapName)
   {
     ArrayList<MapInfo> maps = getMapList();

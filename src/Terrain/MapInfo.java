@@ -12,9 +12,23 @@ import Units.KaijuWarsUnits;
 import Units.UnitModel;
 import Units.UnitModelScheme;
 import Units.UnitModelScheme.GameReadyModels;
+import lombok.AllArgsConstructor;
 
 public class MapInfo implements IEnvironsProvider
 {
+  /**
+   * Serves as a "nav mesh" to organize the maps.
+   */
+  @AllArgsConstructor
+  public static class MapNode
+  {
+    public MapNode parent;
+    public String  uri; // relative path from res/map
+    public String  name;
+    // Populate only one of result or children
+    public MapInfo result;
+    public final ArrayList<MapNode> children = new ArrayList<>();
+  }
   public final String dirPath;
   public final String mapName;
   public final TerrainType[][] terrain;

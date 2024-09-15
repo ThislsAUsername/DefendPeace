@@ -2,6 +2,7 @@ package Terrain.Maps;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.TreeMap;
 
 import Engine.XYCoord;
 import Terrain.MapInfo;
+import Terrain.MapInfo.MapNode;
 import Terrain.TerrainType;
 import lombok.var;
 
@@ -20,31 +22,74 @@ public class MapReader extends IMapBuilder
   /**
    * Tells the MapReader to read in the maps.
    */
-  public static ArrayList<MapInfo> readMapData()
+  public static MapNode readMapData()
   {
-    ArrayList<MapInfo> importMaps = new ArrayList<MapInfo>();
+    MapNode root = new MapNode(null, "", "", null);
 
     // This try{} is to safeguard us from exceptions if the res/map folder doesn't exist.
     // If it fails, we don't need to do anything in the catch{} since we just won't have anything in our list.
     try
     {
-      var pathStack = new ArrayDeque<String>();
-      pathStack.add(Engine.Driver.JAR_DIR + "res/map");
-      while (!pathStack.isEmpty())
+      var nodes = new ArrayDeque<MapNode>();
+      nodes.add(root);
+      while (!nodes.isEmpty())
       {
-        final File folder = new File(pathStack.poll());
+        MapNode parent = nodes.poll();
+        final File folder = Paths.get(Engine.Driver.JAR_DIR, "res/map", parent.uri).toFile();
 
         for( final File fileEntry : folder.listFiles() )
         {
+          String name = fileEntry.getName();
+          String relURI = Paths.get(parent.uri, name).toString();
           if( fileEntry.isDirectory() )
           {
-            pathStack.add(fileEntry.getPath());
+            MapNode dirNode = new MapNode(parent, relURI, name, null);
+            nodes.add(dirNode);
+            parent.children.add(dirNode);
             continue;
           }
           // We just don't want to try to interpret the python script as a map. That'd be weird.
-          if( !fileEntry.getName().endsWith(".map") )
+          if( !name.endsWith(".map") )
             continue;
-          importMaps.add(readSingleMap(fileEntry.getAbsolutePath()));
+          MapInfo readMap = readSingleMap(fileEntry.getAbsolutePath());
+          if( null != readMap )
+            parent.children.add(new MapNode(parent, relURI, name, readMap));
+        }
+
+        // If this directory node has no viable children, get rid of it
+        if( parent.parent != null &&
+            parent.children.isEmpty() )
+        {
+          ArrayList<MapNode> ppc = parent.parent.children;
+          ppc.remove(parent);
+          continue;
+        }
+
+        // List children alphabetically, directories first
+        parent.children.sort((nodeA, nodeB) -> {
+          boolean isMapA = (null != nodeA.result);
+          boolean isMapB = (null != nodeB.result);
+          if( isMapA ^ isMapB ) // One of them is a directory
+            return (isMapA) ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+          return nodeA.name.compareTo(nodeB.name);
+        });
+
+        // If this directory node has only directory children, get rid of it and prepend its name to the children's names
+        if( parent.parent != null &&
+            parent.children.stream().allMatch((node) -> node.result == null) )
+        {
+          ArrayList<MapNode> ppc = parent.parent.children;
+          int index = ppc.indexOf(parent);
+          ppc.remove(parent);
+          // Give my children to my parent, in my spot, in order.
+          for( var child : parent.children )
+          {
+            child.parent = parent.parent;
+            child.name   = Paths.get(parent.name, child.name).toString();
+            ppc.add(index, child);
+            ++index;
+          }
+          continue;
         }
       }
     }
@@ -52,8 +97,7 @@ public class MapReader extends IMapBuilder
     {
       System.out.println("WARNING: res/map directory does not exist.");
     }
-    importMaps.sort( (mapA, mapB) -> mapA.mapName.compareTo(mapB.mapName) );
-    return importMaps;
+    return root;
   }
 
   public static MapInfo readSingleMap(final String filePath)
