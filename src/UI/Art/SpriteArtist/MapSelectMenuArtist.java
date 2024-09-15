@@ -88,7 +88,7 @@ public class MapSelectMenuArtist
     // Get the list of selectable maps (possibly specifying a filter (#players, etc).
     ArrayList<MapNode> mapInfos = gameSetup.currentNode.children;
     int verticalShift = 0; // How many map names we skip drawing "off the top"
-    int displayableCount = drawableHeight / menuOptionHeight; // how many maps we can cram on the screen
+    int displayableCount = (drawableHeight - menuTextYStart) / menuOptionHeight; // how many maps we can cram on the screen
     while (selectedOptionYOffset > drawableHeight/2 && // Loop until either the cursor's bumped up to the center of the screen...
         displayableCount+verticalShift < mapInfos.size()) //  or we'll already show the last map 
     {
