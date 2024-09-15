@@ -24,7 +24,7 @@ public class MapReader extends IMapBuilder
    */
   public static MapNode readMapData()
   {
-    MapNode root = new MapNode(null, "", "", null);
+    MapNode root = new MapNode(null, "", null);
 
     // This try{} is to safeguard us from exceptions if the res/map folder doesn't exist.
     // If it fails, we don't need to do anything in the catch{} since we just won't have anything in our list.
@@ -35,15 +35,14 @@ public class MapReader extends IMapBuilder
       while (!nodes.isEmpty())
       {
         MapNode parent = nodes.poll();
-        final File folder = Paths.get(Engine.Driver.JAR_DIR, "res/map", parent.uri).toFile();
+        final File folder = Paths.get(Engine.Driver.JAR_DIR, "res/map", parent.uri()).toFile();
 
         for( final File fileEntry : folder.listFiles() )
         {
           String name = fileEntry.getName();
-          String relURI = Paths.get(parent.uri, name).toString();
           if( fileEntry.isDirectory() )
           {
-            MapNode dirNode = new MapNode(parent, relURI, name, null);
+            MapNode dirNode = new MapNode(parent, name, null);
             nodes.add(dirNode);
             parent.children.add(dirNode);
             continue;
@@ -53,7 +52,7 @@ public class MapReader extends IMapBuilder
             continue;
           MapInfo readMap = readSingleMap(fileEntry.getAbsolutePath());
           if( null != readMap )
-            parent.children.add(new MapNode(parent, relURI, name, readMap));
+            parent.children.add(new MapNode(parent, readMap.mapName, readMap));
         }
 
         // If this directory node has no viable children, get rid of it

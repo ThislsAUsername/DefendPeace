@@ -14,14 +14,23 @@ import lombok.var;
 public class MapLibrary
 {
   private static ArrayList<MapInfo> availableMaps;
+  private static MapNode rootMap;
   
   public static ArrayList<MapInfo> getMapList()
   {
-    if(null == availableMaps)
+    if( null == availableMaps )
     {
       loadMapInfos();
     }
     return availableMaps;
+  }
+  public static MapNode getMapGraph()
+  {
+    if( null == rootMap )
+    {
+      loadMapInfos();
+    }
+    return rootMap;
   }
   
   private static void loadMapInfos()
@@ -31,8 +40,16 @@ public class MapLibrary
     availableMaps.add(FiringRange.getMapInfo());
     availableMaps.add(SpannIsland.getMapInfo());
     availableMaps.add(CageMatch.getMapInfo());
+    MapNode builtins = new MapNode(null, availableMaps.get(0).dirPath, null);
+    for( var map : availableMaps )
+      builtins.children.add(new MapNode(builtins, map.mapName, map));
+
+    rootMap = MapReader.readMapData();
+    rootMap.children.add(0, builtins);
+
+    // Iterate over the nodes to get a master list of maps, as well.
     var nodes = new ArrayDeque<MapNode>();
-    nodes.add(MapReader.readMapData());
+    nodes.add(rootMap);
     while (!nodes.isEmpty())
     {
       MapNode n = nodes.poll();
