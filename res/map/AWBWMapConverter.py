@@ -343,6 +343,20 @@ def indexToTerrainCode(x):
 		193: '15LB',
 		194: '15SP',
 		195: '  TT',#Teletiles
+		196: '16AP',#AA
+		197: '16FC',
+		198: '16CT',
+		199: '16TW',
+		200: '16HQ',
+		201: '16LB',
+		202: '16SP',
+		203: '17AP',#NE
+		204: '17FC',
+		205: '17CT',
+		206: '17TW',
+		207: '17HQ',
+		208: '17LB',
+		209: '17SP',
 	}.get(x, '  XX')    # '  XX' is default if x not found
 
 
