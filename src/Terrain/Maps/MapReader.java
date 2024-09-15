@@ -2,6 +2,7 @@ package Terrain.Maps;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.TreeMap;
 import Engine.XYCoord;
 import Terrain.MapInfo;
 import Terrain.TerrainType;
+import lombok.var;
 
 public class MapReader extends IMapBuilder
 {
@@ -26,13 +28,19 @@ public class MapReader extends IMapBuilder
     // If it fails, we don't need to do anything in the catch{} since we just won't have anything in our list.
     try
     {
-      final File folder = new File(Engine.Driver.JAR_DIR + "res/map");
-
-      for( final File fileEntry : folder.listFiles() )
+      var pathStack = new ArrayDeque<String>();
+      pathStack.add(Engine.Driver.JAR_DIR + "res/map");
+      while (!pathStack.isEmpty())
       {
-        // we aren't checking subdirectories, yet
-        if( !fileEntry.isDirectory() )
+        final File folder = new File(pathStack.poll());
+
+        for( final File fileEntry : folder.listFiles() )
         {
+          if( fileEntry.isDirectory() )
+          {
+            pathStack.add(fileEntry.getPath());
+            continue;
+          }
           // We just don't want to try to interpret the python script as a map. That'd be weird.
           if( !fileEntry.getName().endsWith(".map") )
             continue;
@@ -53,6 +61,9 @@ public class MapReader extends IMapBuilder
     try
     {
       File fileEntry = new File(filePath);
+      // Grab the directory name, relative to the parent
+      String dirPath = fileEntry.getParent();
+      dirPath = dirPath.replaceAll(".*res/map/?", "");
       // We get the filename, and make it look nice for our map list.
       String mapName = fileEntry.getName();
       // underscores->spaces makes it pretty
@@ -169,7 +180,7 @@ public class MapReader extends IMapBuilder
       }
 
       // Finally, we make our map's container to put in importMaps.
-      MapInfo info = new MapInfo(mapName, terrainArrayArray.toArray(new TerrainType[0][0]),
+      MapInfo info = new MapInfo(dirPath, mapName, terrainArrayArray.toArray(new TerrainType[0][0]),
           propertyArrayArray.toArray(new XYCoord[0][0]), units);
 
       scanner.close();

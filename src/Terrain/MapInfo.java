@@ -15,6 +15,7 @@ import Units.UnitModelScheme.GameReadyModels;
 
 public class MapInfo implements IEnvironsProvider
 {
+  public final String dirPath;
   public final String mapName;
   public final TerrainType[][] terrain;
   // Array of coordinates for properties owned by each player; the first index is the CO, the second is an arbitrary ordering
@@ -23,11 +24,12 @@ public class MapInfo implements IEnvironsProvider
 
   public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props)
   {
-    this(name, tiles, props, new ArrayList<Map<XYCoord,String>>());
+    this("built-in", name, tiles, props, new ArrayList<Map<XYCoord,String>>());
   }
 
-  public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props, ArrayList<Map<XYCoord,String>> units)
+  public MapInfo(String dir, String name, TerrainType[][] tiles, XYCoord[][] props, ArrayList<Map<XYCoord,String>> units)
   {
+    dirPath = dir;
     mapName = name;
     terrain = tiles;
     COProperties = props;
