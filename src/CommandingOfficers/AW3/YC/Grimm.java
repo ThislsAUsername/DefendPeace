@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import CommandingOfficers.*;
 import CommandingOfficers.AW3.AW3Commander;
-import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
