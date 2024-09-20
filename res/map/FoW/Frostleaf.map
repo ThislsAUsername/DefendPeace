@@ -1,0 +1,26 @@
+  SE  SE  SE  PI  AP  GR  GR  GR  CT  RD  BK  RD  RV  RV  RD  CT  RD  RV 7FC  RV  BR  RV
+  SH  SH  SH  PI  PI  PI  GR  RD  RD  RD  FR  RD  CT  BR  RD  FR  RD  BR  BR  BR  RD  FC
+  SH  FR  SH  RD  GR  RD  CT  RD  FR  GR  MT  GR  GR  RV  BR  RV  RV  RV  RV  RV  BR  RV
+  SH  SH  SH  BK  GR  FR  GR  RD  RD  CT  GR  RV  RV  RV  RD  BR  AP  RD  RV 7FC  BR  RD
+  GR  GR  GR  GR  SH  SH  GR  GR  RD  GR  RD  BR  CT  RV  RV  RV  RV  BR  RV  RV  RV  SP
+  RD  CT  GR  FR  SH  SH  GR  TW  RD  FR  RD  RV  FR  RD  BR  RD  FR  RD  CT  BR  SH  SH
+  RD  RD  RD  GR  CT  GR  GR  GR  GR  GR  CT  RV  RV  BR  RV  BR  RV  RV  RV  RV  SE  SE
+  GR  GR  BK  GR  GR  FR  RD  GR  RD  GR  RD  RD  BR  CT  RV  RD  RD  BR  RD  RD  SE  SE
+  CT  FR  RD  RD  GR  GR  CT  GR  RD  GR  RD  FR  RV  BR  RV  FR  CT  RV  RV  BR  SE  SE
+  SH  GR  GR  CT  GR  GR  RD  RD  FR  GR  GR  GR  FR  RD  RD  GR  RD  GR  GR  CT  SH  SE
+  SH  MT  GR  GR  GR  FR  GR  GR  GR  BK  SH  SH  GR  GR  CT  GR  GR 7HQ  GR  FR  GR  SE
+  SE  GR  FR  GR 2HQ  GR  GR  CT  GR  GR  SH  SH  BK  GR  GR  GR  FR  GR  GR  GR  MT  SH
+  SE  SH  CT  GR  GR  RD  GR  RD  RD  FR  GR  GR  GR  FR  RD  RD  GR  GR  CT  GR  GR  SH
+  SE  SE  BR  RV  RV  CT  FR  RV  BR  RV  FR  RD  GR  RD  GR  CT  GR  GR  RD  RD  FR  CT
+  SE  SE  RD  RD  BR  RD  RD  RV  CT  BR  RD  RD  GR  RD  GR  RD  FR  GR  GR  BK  GR  GR
+  SE  SE  RV  RV  RV  RV  BR  RV  BR  RV  RV  CT  GR  GR  GR  GR  GR  CT  GR  RD  RD  RD
+  SH  SH  BR  CT  RD  FR  RD  BR  RD  FR  RV  RD  FR  RD  TW  GR  SH  SH  FR  GR  CT  RD
+  SP  RV  RV  RV  BR  RV  RV  RV  RV  CT  BR  RD  GR  RD  GR  GR  SH  SH  GR  GR  GR  GR
+  RD  BR 2FC  RV  RD  AP  BR  RD  RV  RV  RV  GR  CT  RD  RD  GR  FR  GR  BK  SH  SH  SH
+  RV  BR  RV  RV  RV  RV  RV  BR  RV  GR  GR  MT  GR  FR  RD  CT  RD  GR  RD  SH  FR  SH
+  FC  RD  BR  BR  BR  RD  FR  RD  BR  CT  RD  FR  RD  RD  RD  GR  PI  PI  PI  SH  SH  SH
+  RV  BR  RV 2FC  RV  RD  CT  RD  RV  RV  RD  BK  RD  CT  GR  GR  GR  AP  PI  SE  SE  SE
+team, unit type, x, y (author: Sami-YXL)
+2, bboat, 0, 15
+7, infantry, 19, 3
+7, bboat, 21, 6

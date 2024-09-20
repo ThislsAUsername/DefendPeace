@@ -75,11 +75,13 @@ public class GameOptionSetupController implements IController
     }
     else
     {
-      final int incomeIndexDefault = 3; // 250 = 0, increment 250
+      final int incomeIndexDefault = 4; // 0 = 0, increment 250
       final int incomeIndexHF = incomeIndexDefault + 4;
-      if( gameBuilder.mapInfo.mapName.startsWith("HF") )
+      if( gameBuilder.mapInfo.dirPath.contains("HF") ||
+          gameBuilder.mapInfo.mapName.startsWith("HF") )
         incomeOption.setSelectedOption(incomeIndexHF);
-      if( gameBuilder.mapInfo.mapName.startsWith("FoW") )
+      if( gameBuilder.mapInfo.dirPath.contains("FoW") ||
+          gameBuilder.mapInfo.mapName.startsWith("FoW") )
         fowOption.setSelectedOption(1);
     }
   }

@@ -1,0 +1,29 @@
+  SE  SE  SE  SE  SE  SE  SH  GR  CT  GR  PI  PI  SH  SH  PI  PI  FR  FR  CT  SH  SE  SE  RF  SE
+  RF  SE  SE  SH  MT  GR  FR  FR  GR  PI  PI  SH  SE  SE  SH  PI  GR  FR  FR  FR  GR  SH  SE  SE
+  SE  SE  GR  GR  MT  CT  MT  GR  GR  PI  SH  SE  AP  SH  SH  GR  GR  BK  FR  BK  MT  MT  SH  SE
+  SE  SH  RD  FC  RD  MT  FR  GR  FC  GR  SE  SE  SE  SE  SH  PI  FC  GR  GR  RD  MT  FR  SH  SE
+  SE  GR  RD  GR  RD  RD  RD  MT  GR  PI  PI  SH  SE  SH  PI  PI  GR  RD  CT  RD  GR  GR  GR  SE
+  SE  RD  RD  GR  FR  MT  TW  MT  FR  FR  PI  PI  SH  PI  PI  GR  GR  RD  GR  GR  MT  CT  FR  GR
+  GR  RD  CT  FR  FR  MT  MT  GR  GR  GR  MT  PI  ME  PI  GR  FR  CT  RD10LB  FR  GR  MT  FR  GR
+  FR  RD  RD  RD  FR  FR  FR  GR  RD  CT  RD  GR  CT  FR  GR  GR  FR  RD  MT  GR  BK  GR  GR  FR
+  FR  GR  GR  RD  GR  FR  GR  GR  RD  GR  RD  GR  RD  GR  RD  MT  GR  RD  CT  RD  RD  GR  MT  GR
+  CT  RD  RD  RD  GR  CT  GR  GR  RD  RD  GR  FR  FR  GR  RD  RD  GR  GR  CT  GR  RD  RD  RD  CT
+  GR  MT  GR  RD  RD  CT  RD  GR  MT  RD  GR  RD  GR  RD  GR  RD  GR  GR  FR  GR  RD  GR  GR  FR
+  FR  GR  GR  BK  GR  MT  RD  FR  GR  GR  FR  CT  GR  RD  CT  RD  GR  FR  FR  FR  RD  RD  RD  FR
+  GR  FR  MT  GR  FR 8LB  RD  CT  FR  GR  PI  ME  PI  MT  GR  GR  GR  MT  MT  FR  FR  CT  RD  GR
+  GR  FR  CT  MT  GR  GR  RD  GR  GR  PI  PI  SH  PI  PI  FR  FR  MT  TW  MT  FR  GR  RD  RD  SE
+  SE  GR  GR  GR  RD  CT  RD  GR  PI  PI  SH  SE  SH  PI  PI  GR  MT  RD  RD  RD  GR  RD  GR  SE
+  SE  SH  FR  MT  RD  GR  GR  FC  PI  SH  SE  SE  SE  SE  GR  FC  GR  FR  MT  RD  FC  RD  SH  SE
+  SE  SH  MT  MT  BK  FR  BK  GR  GR  SH  SH  AP  SE  SH  PI  GR  GR  MT  CT  MT  GR  GR  SE  SE
+  SE  SE  SH  GR  FR  FR  FR  GR  PI  SH  SE  SE  SH  PI  PI  GR  FR  FR  GR  MT  SH  SE  SE  RF
+  SE  RF  SE  SE  SH  CT  FR  FR  PI  PI  SH  SH  PI  PI  GR  CT  GR  SH  SE  SE  SE  SE  SE  SE
+8, INFANTRY, 8, 16
+8, INFANTRY, 18, 17
+8, BBOAT, 15, 14
+8, LANDER, 11, 18
+8, ANTI-AIR, 12, 5
+10, INFANTRY, 5, 3
+10, INFANTRY, 15, 2
+10, BBOAT, 8, 4
+10, LANDER, 12, 0
+10, ANTI-AIR, 11, 13

@@ -1,0 +1,23 @@
+ 1FC  PI  CT 0FC  RD  RD  RD  BR  CT  FR  SH  SH  GR  BK  CT  GR  GR  FR  TW
+  PI  PI  GR  RD  RD  MT  FR  GR  GR  GR  SE  SH  GR  GR  GR  GR  RV  SH  GR
+  GR  FR  SH  SE  SE  RD  RD  CT  MT  GR  FR  RD  RD  CT  RD  GR  SH  SH  GR
+  GR  SE  SE  SE  SH  RD  RD  FR  GR  GR  RD  RD  GR  GR  RD  RD  CT  RD  FR
+  AP  SH  RV 0FC  FR  MT  GR  GR  GR  GR  RD  CT  GR  FR  GR  GR  GR  BR  GR
+  PI  ME  PI  RD  PI  PI  GR  GR  CT  GR  GR  SH  SH  GR  GR  BK  GR  BR  CT
+  GR  RD  RD  RD  PI  CT  GR  RD  RD  RD  BK  SE  SH  CT  GR  FR  RD  RD  GR
+  GR  BR  CT  FR  GR  RD  RD  RD  BK  RD  BR  RD  GR  GR  RD  RD  RD 1LB  GR
+  RD  RD  SE  SE  RD  RD  SE  GR  GR  GR  FR  RD  RD  GR  BR  CT  SH  SH  GR
+  SP  SH  SH  SE  RD  FR  RD  CT  GR  GR  GR  CT  RD  FR  RD  SE  SH  SH  SP
+  GR  SH  SH  CT  BR  GR  RD  RD  FR  GR  GR  GR  SE  RD  RD  SE  SE  RD  RD
+  GR 0LB  RD  RD  RD  GR  GR  RD  BR  RD  BK  RD  RD  RD  GR  FR  CT  BR  GR
+  GR  RD  RD  FR  GR  CT  SH  SE  BK  RD  RD  RD  GR  CT  PI  RD  RD  RD  GR
+  CT  BR  GR  BK  GR  GR  SH  SH  GR  GR  CT  GR  GR  PI  PI  RD  PI  ME  PI
+  GR  BR  GR  GR  GR  FR  GR  CT  RD  GR  GR  GR  GR  MT  FR 1FC  RV  SH  AP
+  FR  RD  CT  RD  RD  GR  GR  RD  RD  GR  GR  FR  RD  RD  SH  SE  SE  SE  GR
+  GR  SH  SH  GR  RD  CT  RD  RD  FR  GR  MT  CT  RD  RD  SE  SE  SH  FR  GR
+  GR  SH  RV  GR  GR  GR  GR  SH  SE  GR  GR  GR  FR  MT  RD  RD  GR  PI  PI
+  TW  FR  GR  GR  CT  BK  GR  SH  SH  FR  CT  BR  RD  RD  RD 1FC  CT  PI 0FC
+team, unit type, x, y (author: Sandbagger)
+0, bboat, 1, 11
+1, infantry, 15, 14
+1, bboat, 17, 7

@@ -1,0 +1,23 @@
+  SE  SE  SH  SH  SP  SH  SH  GR  AP  MT  SH  SE  SH  SH  SE  MT  GR  CT  GR  RD 8FC  RD
+  SP  GR  MT  RD  RD  FR  SE  TW  FR  SH  SH  SH  GR  SP  GR  GR  FR  GR  MT  RD  FR  RD
+  SH  FR  RD  RD  BK  GR  SH  SH  SH  SE  GR  MT  MT  FR  GR  SH  SH  MT  GR  RD  GR  RD
+  SE  SH  CT  FR  GR  GR  GR  SH  SH  SH  FR  GR  GR  MT  CT  SH  SH  GR  MT  RD  CT  RD
+  SE  FR  FR  GR  GR  MT  GR  FR  GR  GR  FC  SH  SH  GR  MT  FR  GR  MT  FR  GR  GR  MT
+  MT  RD  RD  RD  GR  GR  FR  MT  CT  GR  GR  SE  SE  SE  GR  GR  GR  FR  GR  GR  FR  GR
+  GR  CT  GR  RD  FR  CT  FR  PI  MT13HQ  RV  SE  SE  SE13FC  GR  CT  GR  MT  RD  CT  RD
+  RD  RD  CT  RD  GR  FR  GR  PI  MT  PI  RV  MT  PI  CT  GR  GR  GR  BK  FR  RD  FR  RD
+  RD  MT  RD  RD  GR  GR  MT  PI  PI  PI  RV  RV  PI  PI  PI  MT  GR  GR  RD  RD  MT  RD
+  RD  FR  RD  FR  BK  GR  GR  GR  CT  PI  MT  RV  PI  MT  PI  GR  FR  GR  RD  CT  RD  RD
+  RD  CT  RD  MT  GR  CT  GR 8FC  SE  SE  SE  RV 8HQ  MT  PI  FR  CT  FR  RD  GR  CT  GR
+  GR  FR  GR  GR  FR  GR  GR  GR  SE  SE  SE  GR  GR  CT  MT  FR  GR  GR  RD  RD  RD  MT
+  MT  GR  GR  FR  MT  GR  FR  MT  GR  SH  SH  FC  GR  GR  FR  GR  MT  GR  GR  FR  FR  SE
+  RD  CT  RD  MT  GR  SH  SH  CT  MT  GR  GR  FR  SH  SH  SH  GR  GR  GR  FR  CT  SH  SE
+  RD  GR  RD  GR  MT  SH  SH  GR  FR  MT  MT  GR  SE  SH  SH  SH  GR  BK  RD  RD  FR  SH
+  RD  FR  RD  MT  GR  FR  GR  GR  SP  GR  SH  SH  SH  FR  TW  SE  FR  RD  RD  MT  GR  SP
+  RD13FC  RD  GR  CT  GR  MT  SE  SH  SH  SE  SH  MT  AP  GR  SH  SH  SP  SH  SH  SE  SE
+team, unit type, x, y
+13, INFANTRY, 14, 6
+13, CRUISER, 12, 6
+13, BBOAT, 14, 5
+8, CRUISER, 9, 10
+8, BBOAT, 7, 11

@@ -2,12 +2,15 @@ package UI;
 
 import Engine.IController;
 import Engine.OptionSelector;
+import Terrain.MapInfo.MapNode;
 import Terrain.MapLibrary;
 import UI.InputHandler.InputAction;
 
 public class MapSelectController implements IController
 {
-  private OptionSelector optionSelector = new OptionSelector( MapLibrary.getMapList().size() );
+  public MapNode currentNode = MapLibrary.getMapGraph();
+  private OptionSelector optionSelector = new OptionSelector( optCount() );
+
   private GameOptionSetupController gameOptionsMenu;
 
   private boolean isInSubmenu = false;
@@ -15,6 +18,10 @@ public class MapSelectController implements IController
   public int getSelectedOption()
   {
     return optionSelector.getSelectionNormalized();
+  }
+  public int optCount()
+  {
+    return currentNode.children.size();
   }
 
   public boolean inSubmenu()
@@ -65,14 +72,28 @@ public class MapSelectController implements IController
     switch(action)
     {
       case SELECT:
+        MapNode pick = currentNode.children.get(optionSelector.getSelectionNormalized());
+        if( pick.result == null )
+        {
+          currentNode = pick;
+          optionSelector.reset(optCount());
+          break;
+        }
         // Create the GameBuilder with the selected map, and transition to the CO select screen.
         // If we go forward/back a few times, the old copies of these get replaced and garbage-collected.
-        GameBuilder gameBuilder = new GameBuilder( MapLibrary.getMapList().get( optionSelector.getSelectionNormalized() ) );
+        GameBuilder gameBuilder = new GameBuilder( pick.result );
         gameOptionsMenu = new GameOptionSetupController( gameBuilder );
         isInSubmenu = true;
         break;
       case BACK:
-        exitMenu = true;
+        if( currentNode.parent == null )
+        {
+          exitMenu = true;
+          break;
+        }
+        int myIndex = currentNode.parent.children.indexOf(currentNode);
+        currentNode = currentNode.parent;
+        optionSelector.reset(optCount(), myIndex);
         break;
       case DOWN:
       case UP:

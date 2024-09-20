@@ -1,0 +1,26 @@
+  GR  AP  FR  RD  RD  GR  GR  CT  RD  RD  FR  CT  RV  RV  FC  FR  RV
+  GR  GR  GR  GR  FR  CT  GR  GR  RD 5FC  GR  GR  FR  RV  RV  BR  RV
+  FR  GR  RV  SH  SH  RV  GR  FR  RV  SH  RV  GR  GR  BK  BR  CT  GR
+  CT  GR  BR  CT  GR  RV  ME  PI  RV  MT  RV  GR 5FC  FR  RV  RD  GR
+  RV  BR  RV  RD  RD  RD  GR  GR  CT  RV  RV  FR  GR  RD  RV  RD  FR
+  GR 5HQ  GR  GR  GR  CT  GR  SH  FR  RV  CT  RV  RV  RV  RV  GR  CT
+  FR  GR  CT  BK  FR  RD  GR  SH  SH  RV  ME  RV  GR  RD  GR  GR  GR
+  GR  GR  RD  RD  RD  RD  GR  GR  SH  GR  RD  FR  GR  CT  GR  FR  GR
+  CT  GR  RD  RD  GR  GR  GR  FR  GR  GR  CT  GR  SH  GR  GR  TW  GR
+  FR  GR  MT  GR  CT  SH  GR  CT  RD  GR  GR  SH  SH  GR  BK  GR  GR
+  GR  GR  BK  GR  SH  SH  GR  GR  RD  CT  GR  SH  CT  GR  MT  GR  FR
+  GR  TW  GR  GR  SH  GR  CT  GR  GR  FR  GR  GR  GR  RD  RD  GR  CT
+  GR  FR  GR  CT  GR  FR  RD  GR  SH  GR  GR  RD  RD  RD  RD  GR  GR
+  GR  GR  GR  RD  GR  RV  ME  RV  SH  SH  GR  RD  FR  BK  CT  GR  FR
+  CT  GR  RV  RV  RV  RV  CT  RV  FR  SH  GR  CT  GR  GR  GR 6HQ  GR
+  FR  RD  RV  RD  GR  FR  RV  RV  CT  GR  GR  RD  RD  RD  RV  BR  RV
+  GR  RD  RV  FR 6FC  GR  RV  MT  RV  PI  ME  RV  GR  CT  BR  GR  CT
+  GR  CT  BR  BK  GR  GR  RV  SH  RV  FR  GR  RV  SH  SH  RV  GR  FR
+  RV  BR  RV  RV  FR  GR  GR 6FC  RD  GR  GR  CT  FR  GR  GR  GR  GR
+  RV  FR  FC  RV  RV  CT  FR  RD  RD  CT  GR  GR  RD  RD  FR  AP  GR
+team, unit type, x, y (author: bohwalker)
+5, bboat, 1, 5
+6, infantry, 4, 16
+5, tank, 6, 14
+6, tank, 10, 5
+6, bboat, 15, 14
