@@ -1,6 +1,5 @@
 package Terrain;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,8 +27,8 @@ public class MapInfo implements IEnvironsProvider
     // Populate only one of result or children
     public MapInfo result;
     public final ArrayList<MapNode> children = new ArrayList<>();
-    /** @return relative path from res/map */
-    public String uri() { return (null == parent)? name : Paths.get(parent.uri(), name).toString(); }
+    /** @return relative path from res/map, with no leading slashes */
+    public String uri() { return (null == parent)? name : ((parent.name.isEmpty())? name : parent.uri() +"/"+ name); }
   }
   public final String dirPath;
   public final String mapName;

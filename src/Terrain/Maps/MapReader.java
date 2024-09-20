@@ -2,7 +2,6 @@ package Terrain.Maps;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +34,7 @@ public class MapReader extends IMapBuilder
       while (!nodes.isEmpty())
       {
         MapNode parent = nodes.poll();
-        final File folder = Paths.get(Engine.Driver.JAR_DIR, "res/map", parent.uri()).toFile();
+        final File folder = new File(Engine.Driver.JAR_DIR + "res/map/" + parent.uri());
 
         for( final File fileEntry : folder.listFiles() )
         {
@@ -50,7 +49,7 @@ public class MapReader extends IMapBuilder
           // We just don't want to try to interpret the python script as a map. That'd be weird.
           if( !name.endsWith(".map") )
             continue;
-          MapInfo readMap = readSingleMap(fileEntry.getAbsolutePath());
+          MapInfo readMap = readSingleMap(parent.uri(), fileEntry.getAbsolutePath());
           if( null != readMap )
             parent.children.add(new MapNode(parent, readMap.mapName, readMap));
         }
@@ -87,7 +86,7 @@ public class MapReader extends IMapBuilder
           for( var child : parent.children )
           {
             child.parent = parent.parent;
-            child.name   = Paths.get(parent.name, child.name).toString();
+            child.name   = parent.name +"/"+ child.name;
             ppc.add(index, child);
             ++index;
           }
@@ -98,24 +97,29 @@ public class MapReader extends IMapBuilder
     catch (NullPointerException e)
     {
       System.out.println("WARNING: res/map directory does not exist.");
+      e.printStackTrace(System.out);
     }
     return root;
   }
 
   public static MapInfo readSingleMap(final String filePath)
   {
+    File fileEntry = new File(filePath);
+    // Grab the directory name, relative to the parent
+    String dirPath = fileEntry.getParent();
+    dirPath = dirPath.replaceAll(".*res/map/?", "");
+    return readSingleMap(dirPath, filePath);
+  }
+  public static MapInfo readSingleMap(final String dirPath, final String filePath)
+  {
     try
     {
       File fileEntry = new File(filePath);
-      // Grab the directory name, relative to the parent
-      String dirPath = fileEntry.getParent();
-      dirPath = dirPath.replaceAll(".*res/map/?", "");
       // We get the filename, and make it look nice for our map list.
       String mapName = fileEntry.getName();
       // underscores->spaces makes it pretty
       mapName = mapName.replaceAll("_", " ");
       mapName = mapName.replaceAll("\\.map", "");
-      System.out.println("INFO: Parsing map: " + mapName);
 
       // We need a list of who starts owning what properties. This is that list.
       // Each arraylist contains coordinates, and which list it is denotes who owns that property.
@@ -220,7 +224,8 @@ public class MapReader extends IMapBuilder
           }
           catch (Exception e)
           {
-            System.out.println("Caught exception while parsing units: " + e.getMessage());
+            System.out.println("Caught exception while parsing units from "+filePath);
+            e.printStackTrace(System.out);
           }
         }
       }
@@ -236,6 +241,7 @@ public class MapReader extends IMapBuilder
     catch (FileNotFoundException e)
     {
       System.out.println("WARNING: Could not find map file " + filePath);
+      e.printStackTrace(System.out);
     }
     return null;
   }
