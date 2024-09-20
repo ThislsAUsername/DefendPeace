@@ -1,0 +1,19 @@
+  AP  RV  RV  SH  CT  PI  PI  GR  RD  RD  RD12FC  GR  CT  RD  GR  SH  SE  SH  TW
+  RV  SH  GR  BR  GR  ME  CT  RD  RD  MT  SH  RV  SH  FR  RD  RD  CT  SH  SE  SH
+  RV  PI  CT  RV  GR  ME  MT  GR12HQ  SH  SE  SH  SE  SH  GR  RD  FR  GR  SH  SH
+12FC  BR  FR  RD  GR  RV  RV  SH  FR  SH  SH  SP  SH  RV  RV  SH  SH  RV  SH  CT
+  GR  RV  GR  RD  GR  GR  CT  RV  RD  SH  RV  BR  SE  SH  GR  CT  FR  GR  GR  FR
+  GR  SH  RV  BR  RV  RV  RD  BR  RD  FR  SH  BR  SH  SH  RV  GR  GR  MT  GR  GR
+  MT  FR  GR  RD  CT  GR  BR  SH  FR  SH  SH  RD  FR  CT  BR  RD  RD  GR  FR  GR
+  GR  CT  GR  RD  FR  SH  BR  SH  CT  RV  RV  CT  SH  BR  SH  FR  RD  GR  CT  GR
+  GR  FR  GR  RD  RD  BR  CT  FR  RD  SH  SH  FR  SH  BR  GR  CT  RD  GR  FR  MT
+  GR  GR  MT  GR  GR  RV  SH  SH  BR  SH  FR  RD  BR  RD  RV  RV  BR  RV  SH  GR
+  FR  GR  GR  FR  CT  GR  SH  SE  BR  RV  SH  RD  RV  CT  GR  GR  RD  GR  RV  GR
+  CT  SH  RV  SH  SH  RV  RV  SH  SP  SH  SH  FR  SH  RV  RV  GR  RD  FR  BR13FC
+  SH  SH  GR  FR  RD  GR  SH  SE  SH  SE  SH13HQ  GR  MT  ME  GR  RV  CT  PI  RV
+  SH  SE  SH  CT  RD  RD  FR  SH  RV  SH  MT  RD  RD  CT  ME  GR  BR  GR  SH  RV
+  TW  SH  SE  SH  GR  RD  CT  GR13FC  RD  RD  RD  GR  PI  PI  CT  SH  RV  RV  AP
+team, unit type, x, y
+12, LANDER, 8, 2
+13, LANDER, 11, 12
+13, INFANTRY, 8, 14

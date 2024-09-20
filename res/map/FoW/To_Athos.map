@@ -1,0 +1,26 @@
+  RD  CT  RD  GR  PI  PI  PI  PI  CT  SH  SH  SH  SH  SP  SH  SE  SE  SE  SE  SE
+  CT  PI  ME  PI  PI  GR  AP  ME  SE  SE  PI  PI  ME  PI  PI  GR  SH  AP  FR  SH
+  RD  PI  CT  GR  MT  GR  GR  PI  AP  SH  PI 6FC  RD  GR  FR  SH  SE  SH  SE  SH
+  PI  PI  RD  FR  PI  ME  PI  PI  SE  SE  PI  GR  GR  MT  GR  CT  SH  SH  GR  CT
+  PI 6FC  RD  RD  RD  RD  PI  GR  CT  SH  SE  SE  FR  RD  RD  GR  FR  GR  RD  RD
+  ME  GR  GR  BK  FR  CT  GR  FR  GR  GR  SH  SH  GR  CT  RD  RD  GR  CT  RD  FR
+  PI  GR  FR  GR  GR  RD  RD  RD  RD  SP  SE  SE  TW  GR  FR  RD  GR  RD  GR  GR
+  SH  SE  GR  CT  GR  GR  RD 6HQ  GR  MT  SH  SE  GR  GR  GR  GR  GR  FR  GR  CT
+  SH  SH  GR  GR  FR  RD  RD  GR  FR  GR  SH  SH  FR  SH  SE  GR  CT  GR  RD  RD
+  FR  CT  GR  MT  RD  CT  GR  GR  GR  BK  GR  CT  GR  SH  SH  RD  GR  RD  RD  GR
+  GR  RD  RD  GR  RD  SH  SH  GR  CT  GR  BK  GR  GR  GR  CT  RD  MT  GR  CT  FR
+  RD  RD  GR  CT  GR  SE  SH  FR  SH  SH  GR  FR  GR  RD  RD  FR  GR  GR  SH  SH
+  CT  GR  FR  GR  GR  GR  GR  GR  SE  SH  MT  GR 2HQ  RD  GR  GR  CT  GR  SE  SH
+  GR  GR  RD  GR  RD  FR  GR  TW  SE  SE  SP  RD  RD  RD  RD  GR  GR  FR  GR  PI
+  FR  RD  CT  GR  RD  RD  CT  GR  SH  SH  GR  GR  FR  GR  CT  FR  BK  GR  GR  ME
+  RD  RD  GR  FR  GR  RD  RD  FR  SE  SE  SH  CT  GR  PI  RD  RD  RD  RD 2FC  PI
+  CT  GR  SH  SH  CT  GR  MT  GR  GR  PI  SE  SE  PI  PI  ME  PI  FR  RD  PI  PI
+  SH  SE  SH  SE  SH  FR  GR  RD 2FC  PI  SH  AP  PI  GR  GR  MT  GR  CT  PI  RD
+  SH  FR  AP  SH  GR  PI  PI  ME  PI  PI  SE  SE  ME  AP  GR  PI  PI  ME  PI  CT
+  SE  SE  SE  SE  SE  SH  SP  SH  SH  SH  SH  CT  PI  PI  PI  PI  GR  RD  CT  RD
+team, unit type, x, y (author: Sami-YingXiangLi)
+6, infantry, 1, 4
+2, recon, 3, 0
+6, bboat, 7, 7
+2, bboat, 12, 12
+6, recon, 16, 19

@@ -1,0 +1,23 @@
+  BK  BK  MT  GR  FR  GR  BK  SH  SE  SH  PI  PI  SH 8AP  SH  PI  PI  SE  SE  SH  MT  GR
+  MT  FR  RD  RD  CT  RD  FR  GR  SH  SE  SE  GR  SH  SE  SH  PI  SE  SE  SH  CT  FR  FR
+  MT  RD  CT  SH  MT  RD  RD 8FC  GR  SH  SE  PI  SH  SE  SH  ME  SE  SH  GR  FR  GR  BK
+  GR  RD  MT  SH  GR  GR  GR  GR  GR  CT  FR  PI  PI  ME  PI  PI  FR  GR 8FC  GR  GR  GR
+  RD  RD  GR 8LB  GR  CT  FR  GR  GR  GR  GR  FR  CT  GR  GR  FR  BK  GR  RD  GR  GR  FC
+  RD  FR  SH  GR  GR  RD  GR  MT  FR  RD  GR  RD  RD  GR  CT  GR  GR  GR  RD  GR  FR  GR
+  CT  GR  GR  GR  RD  RD  GR  GR  CT  BR  SH  RV  RV  GR  FR  GR  GR  CT  RD  FR  GR  FR
+  GR  GR  RD  CT  RD  GR  TW  RD  RD  RD  GR  GR  SH  RV  GR  GR  GR  BK  RD  RD  FR  GR
+  FR  GR  RD  GR  MT  GR  FR  RD  GR  GR  GR  CT  FR  SH  GR  CT  GR  FR  MT  RD  GR  GR
+  GR  CT  GR  SH  SH  GR  GR  RD  BR  GR  GR  GR  GR  BR  RD  GR  GR  SH  SH  GR  CT  GR
+  GR  GR  RD  MT  FR  GR  CT  GR  SH  FR  CT  GR  GR  GR  RD  FR  GR  MT  GR  RD  GR  FR
+  GR  FR  RD  RD  BK  GR  GR  GR  RV  SH  GR  GR  RD  RD  RD  TW  GR  RD  CT  RD  GR  GR
+  FR  GR  FR  RD  CT  GR  GR  FR  GR  RV  RV  SH  BR  CT  GR  GR  RD  RD  GR  GR  GR  CT
+  GR  FR  GR  RD  GR  GR  GR  CT  GR  RD  RD  GR  RD  FR  MT  GR  RD  GR  GR  SH  FR  RD
+  FC  GR  GR  RD  GR  BK  FR  GR  GR  CT  FR  GR  GR  GR  GR  FR  CT  GR 6LB  GR  RD  RD
+  GR  GR  GR 6FC  GR  FR  PI  PI  ME  PI  PI  FR  CT  GR  GR  GR  GR  GR  SH  MT  RD  GR
+  BK  GR  FR  GR  SH  SE  ME  SH  SE  SH  PI  SE  SH  GR 6FC  RD  RD  MT  SH  CT  RD  MT
+  FR  FR  CT  SH  SE  SE  PI  SH  SE  SH  GR  SE  SE  SH  GR  FR  RD  CT  RD  RD  FR  MT
+  GR  MT  SH  SE  SE  PI  PI  SH 6AP  SH  PI  PI  SH  SE  SH  BK  GR  FR  GR  MT  BK  BK
+team, unit type, x, y (author: bohwalker)
+8, missiles, 7, 16
+6, missiles, 14, 2
+8, infantry, 18, 3
