@@ -28,7 +28,7 @@ public class GameOptionSetupController implements IController
   private GameOption<Boolean> securityOption = new GameOptionBool("Protect Turns?", false);
 
   // Get a list of all GameOptions.
-  public GameOption<?>[] gameOptions;
+  public GameOption<?>[] gameOptions, saveOrderOptions;
   // The options last used on this map, if any
   HashMap<Integer, String> initialPicksMap;
 
@@ -52,6 +52,7 @@ public class GameOptionSetupController implements IController
       unitSchemeOption.setSelectedOption(i);
 
     gameOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, unitCapOption, tagsOption, securityOption};
+    saveOrderOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, tagsOption, securityOption, unitCapOption};
     optionSelector = new OptionSelector( gameOptions.length );
 
     // Read in the last settings we used on this map, if available
@@ -63,15 +64,14 @@ public class GameOptionSetupController implements IController
 
     if( initialPicksMap.containsKey(GAME_OPTIONS_CONFIG_KEY) )
     {
-      GameOption<?>[] chronologicalOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, tagsOption, securityOption, unitCapOption};
       String fullConfig = initialPicksMap.get(GAME_OPTIONS_CONFIG_KEY);
       String[] configInts = fullConfig.split("\\s+"); // Split (string integers)
       int configIndex = 0; // Split Index
       while (configInts[configIndex].isEmpty()) ++configIndex; // Skip empty splits at the start
 
-      for( int i = 0; i < chronologicalOptions.length; ++i )
+      for( int i = 0; i < saveOrderOptions.length; ++i )
         if( configInts.length > configIndex )
-          chronologicalOptions[i].setSelectedOption(Integer.valueOf(configInts[configIndex++]));
+          saveOrderOptions[i].setSelectedOption(Integer.valueOf(configInts[configIndex++]));
     }
     else
     {
@@ -124,12 +124,12 @@ public class GameOptionSetupController implements IController
       case SELECT:
         // Shove our selections into the initialPicksMap so they'll be persisted
         StringBuilder fullConfig = new StringBuilder();
-        for( int i = 0; i < gameOptions.length; ++i )
-          fullConfig.append(" " + gameOptions[i].getSelectionNormalized());
+        for( int i = 0; i < saveOrderOptions.length; ++i )
+          fullConfig.append(" " + saveOrderOptions[i].getSelectionNormalized());
         initialPicksMap.put(GAME_OPTIONS_CONFIG_KEY, fullConfig.toString());
 
         // Set the selected options and transition to the player setup screen.
-        for( GameOption<?> go : gameOptions ) go.storeCurrentValue();
+        for( GameOption<?> go : saveOrderOptions ) go.storeCurrentValue();
         gameBuilder.fogMode       = fowOption.getSelectedObject();
         gameBuilder.startingFunds = startingFundsOption.getSelectedObject();
         gameBuilder.incomePerCity = incomeOption.getSelectedObject();
