@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.*;
-import Engine.GamePath.PathNode;
 import Engine.Utils.SearchNode;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
@@ -133,7 +132,7 @@ public class WallyAI extends ModularAI
       this.action = action;
       this.actor  = uc;
       this.path   = uc.path;
-      startPos    = uc.path.getWaypoint(0).GetCoordinates();
+      startPos    = uc.path.getWaypoint(0);
       score       = pScore;
     }
     @Override
@@ -542,12 +541,12 @@ public class WallyAI extends ModularAI
       if( null != movePath )
       {
         MoveType fff = actor.calculateMoveType();
-        ArrayList<PathNode> waypoints = movePath.getWaypoints();
+        ArrayList<XYCoord> waypoints = movePath.getWaypoints();
         // We iterate from 1 because the first waypoint is the unit's initial position.
         for( int i = 1; i < waypoints.size(); i++)
         {
-          XYCoord from = waypoints.get(i-1).GetCoordinates();
-          XYCoord to   = waypoints.get( i ).GetCoordinates();
+          XYCoord from = waypoints.get(i-1);
+          XYCoord to   = waypoints.get( i );
           int cost = fff.getTransitionCost(map, from, to, actor.CO.army, false);
           if( cost > actor.movePower )
             if( !vacatedTiles.contains(to) )
@@ -2394,9 +2393,8 @@ public class WallyAI extends ModularAI
       }
     }
 
-    for( PathNode node : path.getWaypoints() )
+    for( XYCoord dest : path.getWaypoints() )
     {
-      var dest = node.GetCoordinates();
       // I need this unit to help clear the tile I'm moving into - that's a prerequisite
       // Note: I can't move into a tile that I'd help clear by shooting it, so don't worry about that possibility
       for( ActionPlan prereq : mapPlan[dest.x][dest.y].damageInstances.keySet() )
