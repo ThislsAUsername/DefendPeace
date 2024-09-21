@@ -43,17 +43,19 @@ public class Qis extends Commander
           "What is known is that Qis has become incredibly adept at using the ever-present snow to his advantage."));
       infoPages.add(new InfoPage(
           "Passive:\r\n" +
-          "Non-naval vehicles move slowly on watery terrain and get -1 movement when starting in rain\n" +
+          "Non-naval vehicles lose 1 movement when starting in rain or smoke (DoR/DS rain).\n" +
           "All units have perfect movement in snow.\n" +
           "The path each unit takes on your turn is coated with snow until your next turn."));
       infoPages.add(new InfoPage(
           GroovinMovin.NAME+" ("+GroovinMovin.COST+"):\n" +
           "+"+GroovinMovin.BUFF+" move for all units\n" +
-          "Snow trails left this turn last +1 turn for each space moved so far"));
+          "Snow trails left this turn last +1 turn for each space moved so far" +
+          "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(
           TrailOfChill.NAME+" ("+TrailOfChill.COST+"):\n" +
           "+"+TrailOfChill.BUFF+" move for all units\n" +
-          "All snow on the map will last "+TrailOfChill.DURATION+" turns"));
+          "All snow on the map will last "+TrailOfChill.DURATION+" turns" +
+          "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(
           "Hit: Deserts, Desserts\n" +
           "Miss: Showing up first"));
@@ -90,23 +92,6 @@ public class Qis extends Commander
       if( MoveType.IMPASSABLE > moveCost && moveCost > 1 )
         uc.moveType.setMoveCost(Weathers.SNOW, terrain, 1);
     }
-
-    if( uc.model.isSeaUnit() || uc.model.isTroop() )
-      return;
-
-    // Qis's vehicles hate being wet.
-    for( Weathers weather : Weathers.values() )
-    {
-      if( weather == Weathers.SNOW )
-        continue; // Snow is handled elsewhere
-
-      // Watery terrain costs +1 move
-      for( TerrainType terrain : TerrainType.TerrainTypeList )
-      {
-        if( terrain.isWater() || terrain == TerrainType.RIVER )
-          uc.moveType.setMoveCost(weather, terrain, uc.moveType.getMoveCost(weather, terrain) + 1);
-      }
-    }
   }
 
   @Override
@@ -118,7 +103,9 @@ public class Qis extends Commander
       return;
 
     // Qis's vehicles hate being wet.
-    if( uc.map.getEnvironment(uc.coord).weatherType == Weathers.RAIN )
+    Weathers weatherType = uc.map.getEnvironment(uc.coord).weatherType;
+    if( weatherType == Weathers.RAIN ||
+        weatherType == Weathers.SMOKE )
       uc.movePower -= 1;
   }
 
@@ -202,7 +189,7 @@ public class Qis extends Commander
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Trail of Chill";
     private static final int COST = 5;
-    private static final int BUFF = 2;
+    private static final int BUFF = 3;
     private static final int DURATION = 3;
 
     TrailOfChill(Qis commander, CostBasis basis)
