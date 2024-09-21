@@ -43,6 +43,8 @@ public class CommanderLibrary
     commanderList.add( Ave.getInfo() );
     commanderList.add( Qis.getInfo() );
     commanderList.add( Tech.getInfo() );
+    commanderList.add( CommandingOfficers.DefendPeace.BM.Colin.getInfo() );
+    commanderList.add( CommandingOfficers.DefendPeace.YC.Kanbei.getInfo() );
     commanderList.add( CommandingOfficers.AW4.BrennerWolves.Will.getInfo() );
     commanderList.add( CommandingOfficers.AW4.BrennerWolves.Lin.getInfo() );
     commanderList.add( CommandingOfficers.AW4.BrennerWolves.Isabella.getInfo() );
