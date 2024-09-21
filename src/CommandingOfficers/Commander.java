@@ -196,7 +196,7 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
         : new ArrayList<UnitModel>();
   }
 
-  private UnitContext getCostContext(UnitModel um, XYCoord coord)
+  protected UnitContext getCostContext(UnitModel um, XYCoord coord)
   {
     UnitContext uc = new UnitContext(this, um);
     uc.coord = coord;
