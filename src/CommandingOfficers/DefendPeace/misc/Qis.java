@@ -6,7 +6,6 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import Engine.GamePath;
-import Engine.GamePath.PathNode;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
@@ -140,9 +139,8 @@ public class Qis extends Commander
     // Drop snow all along the path
     ArrayList<MapChangeEvent.EnvironmentAssignment> snowTiles = new ArrayList<MapChangeEvent.EnvironmentAssignment>();
     int duration = snowTrailTurns;
-    for( PathNode node : path.getWaypoints() )
+    for( XYCoord coord : path.getWaypoints() )
     {
-      XYCoord coord = node.GetCoordinates();
       Environment env = Environment.getTile(army.myView.getEnvironment(coord).terrainType, Weathers.SNOW);
       snowTiles.add(new MapChangeEvent.EnvironmentAssignment(coord, env, duration));
       if( snowTrailShouldScale )

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
 import Engine.GamePath;
-import Engine.GamePath.PathNode;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventListener;
@@ -102,9 +101,9 @@ public class MapArtist
     for( int i = 0; i < path.getWaypoints().size(); ++i )
     {
       // Figure out which line segment type to draw.
-      PathNode lastp = null;
-      PathNode thisp = path.getWaypoints().get(i);
-      PathNode nextp = null;
+      XYCoord lastp = null;
+      XYCoord thisp = path.getWaypoints().get(i);
+      XYCoord nextp = null;
       if( i > 0 )
       {
         lastp = path.getWaypoints().get(i - 1);
@@ -131,7 +130,7 @@ public class MapArtist
    * Returns a short value representing the direction from 'before' to 'after'
    * NOTE: It is assumed that 'before' and 'after' will be cardinally oriented; no diagonals.
    */
-  private short getMovePathDirection(PathNode before, PathNode after)
+  private short getMovePathDirection(XYCoord before, XYCoord after)
   {
     short NORTH = 0x1;
     short EAST = 0x2;
