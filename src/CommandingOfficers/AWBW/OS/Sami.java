@@ -38,7 +38,6 @@ public class Sami extends AWBWCommander
           + "Other direct units lose -10% attack. Transports gain +1 movement.\n"));
       infoPages.add(new InfoPage(new DoubleTime(null, new CostBasis(CHARGERATIO_FUNDS)),
             "Footsoldiers gain +1 movement and their attack is increased to +50% (160/110 total, +10 from AW2).\n"
-          + "Their attack strength increases (+20, total 150) as well.\n"
           + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(new VictoryMarch(null, new CostBasis(CHARGERATIO_FUNDS)),
             "Footsoldiers gain +2 movement and their attack is increased to +70% (180/110 total).\n"
