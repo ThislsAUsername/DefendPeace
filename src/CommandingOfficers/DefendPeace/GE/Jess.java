@@ -1,6 +1,7 @@
 package CommandingOfficers.DefendPeace.GE;
 
 import java.util.ArrayList;
+
 import CommandingOfficers.*;
 import CommandingOfficers.CommanderAbility.CostBasis;
 import CommandingOfficers.AWBW.AWBWCommander;
@@ -40,12 +41,12 @@ public class Jess extends AWBWCommander
           "Jess (nyoom)\n"
         + "AWBW Jess, but with lightning vehicles and AWBW rules.\n"
         + "+10 land vehicle attack. Other units -10 attack.\n"
-        + "Non-infantry cost 2x, but get passive Lightning Strike."));
+        + "Land vehicles cost +70%, but get passive Lightning Strike."));
       infoPages.add(new InfoPage(TurboCharge(null, null),
-          "Movement range of (land) vehicles increases by 1 space. Firepower increases (+20), and fuel and ammo supplies are also replenished.\n"
+          "Land vehicles +1 move, +20 attack. Fuel and ammo supplies are replenished.\n"
         + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(Overdrive(null, null),
-          "Increase in the attack strength of vehicular (land) units (+40) and 2-space increase in movement range. Also restores fuel and ammo supplies.\n"
+          "Land vehicles +2 move, +40 attack. Fuel and ammo supplies are replenished.\n"
         + "+10 attack and defense.\n"));
       infoPages.add(AWBW_MECHANICS_BLURB);
     }
@@ -81,12 +82,13 @@ public class Jess extends AWBWCommander
     else
       params.attackPower -= 10;
   }
-  private ArrayList<Unit> dudesToReactivate = new ArrayList<Unit>();
+  private ArrayList<Unit> dudesToReactivate = new ArrayList<>();
   @Override
   protected void onTurnInit(MapMaster map, GameEventQueue events)
   {
+    dudesToReactivate.clear();
     for( Unit u : units )
-      if( u.model.isNone(UnitModel.TROOP) )
+      if( u.model.isAll(UnitModel.TANK) )
         if( u.isTurnOver )
           u.isTurnOver = false;
         else
@@ -104,8 +106,8 @@ public class Jess extends AWBWCommander
   public int getBuyCost(UnitModel um, XYCoord coord)
   {
     UnitContext uc = getCostContext(um, coord);
-    if( uc.model.isNone(UnitModel.TROOP) )
-      uc.costRatio += 100;
+    if( uc.model.isAll(UnitModel.TANK) )
+      uc.costRatio += 70;
     return uc.getCostTotal();
   }
   public GameEventQueue receiveMoveEvent(Unit unit, GamePath unitPath)
