@@ -106,7 +106,7 @@ public class Patch extends Commander
     }
 
     @Override
-    public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location)
+    public GameEventQueue receiveCaptureEvent(Unit unit, Commander prevOwner, MapLocation location)
     {
       if( unit.CO == myCommander && location.getOwner() == myCommander && location.isProfitable() )
       {
