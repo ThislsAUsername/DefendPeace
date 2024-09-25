@@ -76,7 +76,7 @@ public interface GameEventListener extends Serializable
   default public GameEventQueue receiveBattleEvent(BattleSummary summary){ return null; };
   default public GameEventQueue receiveDemolitionEvent(Unit actor, XYCoord tile){ return null; };
   default public GameEventQueue receiveCreateUnitEvent(Unit unit){ return null; };
-  default public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location){ return null; };
+  default public GameEventQueue receiveCaptureEvent(Unit unit, Commander prevOwner, MapLocation location){ return null; };
   default public GameEventQueue receiveCommanderDefeatEvent(ArmyDefeatEvent event){ return null; };
   default public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){ return null; };
   default public GameEventQueue receiveMoveEvent(Unit unit, GamePath unitPath){ return null; };
@@ -109,7 +109,7 @@ public interface GameEventListener extends Serializable
     default public GameEventQueue receiveBattleEvent(BattleSummary summary){InvalidateCache(); return null; };
     default public GameEventQueue receiveDemolitionEvent(Unit actor, XYCoord tile){InvalidateCache(); return null; };
     default public GameEventQueue receiveCreateUnitEvent(Unit unit){InvalidateCache(); return null; };
-    default public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location){InvalidateCache(); return null; };
+    default public GameEventQueue receiveCaptureEvent(Unit unit, Commander prevOwner, MapLocation location){InvalidateCache(); return null; };
     default public GameEventQueue receiveCommanderDefeatEvent(ArmyDefeatEvent event){InvalidateCache(); return null; };
     default public GameEventQueue receiveLoadEvent(LoadLifecycle.LoadEvent event){InvalidateCache(); return null; };
     default public GameEventQueue receiveMoveEvent(Unit unit, GamePath unitPath){InvalidateCache(); return null; };

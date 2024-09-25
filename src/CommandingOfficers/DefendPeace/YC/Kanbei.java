@@ -75,7 +75,7 @@ public class Kanbei extends AWBWCommander
   private int firstBuildStunCount = STARTING_STUN_COUNT; // Stagger the first stun on each prop to make earlygame a little less punishing?
   private HashMap<XYCoord, Integer> stunCounters = new HashMap<>();
   @Override // Stop tracking/marking properties we don't own anymore
-  public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location){ stunCounters.remove(location.getCoordinates()); return null; };
+  public GameEventQueue receiveCaptureEvent(Unit unit, Commander prevOwner, MapLocation location){ stunCounters.remove(location.getCoordinates()); return null; };
   @Override
   public GameEventQueue receiveCreateUnitEvent(Unit unit)
   {
