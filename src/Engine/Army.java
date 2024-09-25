@@ -21,6 +21,7 @@ import CommandingOfficers.CommanderAbility;
 import Engine.Combat.BattleSummary;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
+import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
 import Engine.UnitMods.UnitModList;
 import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
@@ -238,6 +239,12 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
   public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer healthBeforeDeath)
   {
     threatsToOverlay.remove(victim);
+    return null;
+  }
+  @Override
+  public GameEventQueue receiveUnitJoinEvent(JoinEvent join)
+  {
+    threatsToOverlay.remove(join.unitDonor);
     return null;
   }
   // Draw markings on units we're threat-overlaying
