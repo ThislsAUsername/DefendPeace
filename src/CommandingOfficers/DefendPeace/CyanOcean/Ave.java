@@ -779,7 +779,7 @@ public class Ave extends Commander
       Ave = cmdr;
     }
     @Override
-    public GameEventQueue receiveCaptureEvent(Unit unit, MapLocation location)
+    public GameEventQueue receiveCaptureEvent(Unit unit, Commander prevOwner, MapLocation location)
     {
       GameEventQueue returnEvents = new GameEventQueue();
 
