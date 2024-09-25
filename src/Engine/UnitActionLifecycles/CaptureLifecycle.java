@@ -168,11 +168,13 @@ public abstract class CaptureLifecycle
   private MapLocation location = null;
   final int captureAmount;
   final int priorCaptureAmount;
+  Commander prevOwner;
 
   public CaptureEvent( Unit u, MapLocation loc )
   {
     unit = u;
     location = loc;
+    prevOwner = loc.getOwner();
     XYCoord unitXY = new XYCoord(u.x, u.y);
     if( null != location && location.isCaptureable() && unit.CO.isEnemy(location.getOwner()) )
     {
@@ -197,7 +199,7 @@ public abstract class CaptureLifecycle
   @Override
   public GameEventQueue sendToListener(GameEventListener listener)
   {
-    return listener.receiveCaptureEvent( unit, location );
+    return listener.receiveCaptureEvent( unit, prevOwner, location );
   }
 
   public boolean willCapture()
