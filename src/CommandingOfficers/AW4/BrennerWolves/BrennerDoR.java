@@ -5,9 +5,11 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.DeployableCommander;
 import CommandingOfficers.AW4.RuinedCommander;
 import Engine.GameScenario;
+import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.MassHealEvent;
 import Terrain.MapMaster;
 import UI.UIUtils;
-import Units.*;
+import lombok.var;
 
 public class BrennerDoR extends RuinedCommander
 {
@@ -63,13 +65,14 @@ public class BrennerDoR extends RuinedCommander
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    public GameEventQueue getEvents(MapMaster map)
     {
-      for( Unit u : myCommander.army.getUnits() )
-      {
-        u.alterHealth(30);
-      }
-      super.perform(gameMap);
+      var heal = new MassHealEvent(null, myCommander.army.getUnits(), 30);
+
+      GameEventQueue events = new GameEventQueue();
+      events.add(heal);
+
+      return events;
     }
   }
 

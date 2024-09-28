@@ -132,7 +132,9 @@ public class StrikeParams
     this.baseDamage = other.baseDamage;
     this.attackerHealth = other.attackerHealth;
     this.attackPower = other.attackPower;
+    this.luckBase   = other.luckBase;
     this.luckRolled = other.luckRolled;
+    this.luckRolledBad = other.luckRolledBad;
     this.isCounter = other.isCounter;
     aw1Luck = attacker.CO.aw1Combat;
     this.attackerDamageMultiplier = other.attackerDamageMultiplier;

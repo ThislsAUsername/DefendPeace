@@ -11,6 +11,7 @@ public class HealUnitEvent implements GameEvent
 {
   private Unit unit;
   public final int repairPowerHealth;
+  private int healAmount = 0;
   public final Army payer;
   public final boolean canOverheal;
 
@@ -35,30 +36,37 @@ public class HealUnitEvent implements GameEvent
   @Override
   public GameEventQueue sendToListener(GameEventListener listener)
   {
-    // TODO: Consider making all repairs/healing go through this event before making a listen event for this
-    return null;
+    return listener.receiveHealEvent(payer, unit, repairPowerHealth, healAmount);
   }
 
   @Override
   public void performEvent(MapMaster gameMap)
   {
+    healAmount = healAtCost(payer, unit, repairPowerHealth, unit.CO.roundUpRepairs, canOverheal);
+  }
+
+  /**
+   * @return The (visible) health increase
+   */
+  public static int healAtCost(Army payer, Unit unit, int healHealth, boolean roundUp, boolean canOverheal)
+  {
     if (null == payer)
     {
-      unit.alterHealth(repairPowerHealth, unit.CO.roundUpRepairs, canOverheal);
-      return;
+      return unit.alterHealth(healHealth, roundUp, canOverheal);
     }
 
     int costPerHP = unit.getRepairCost() / 10;
 
-    int actualRepair = repairPowerHealth;
+    int actualRepair = healHealth;
     if( costPerHP > 0 )
     {
       int affordableHealth = (payer.money / costPerHP) * 10;
-      actualRepair = Math.min(repairPowerHealth, affordableHealth);
+      actualRepair = Math.min(healHealth, affordableHealth);
     }
 
-    int deltaHealth = unit.alterHealth(actualRepair, unit.CO.roundUpRepairs, canOverheal);
+    int deltaHealth = unit.alterHealth(actualRepair, roundUp, canOverheal);
     payer.money -= (deltaHealth / 10) * costPerHP;
+    return deltaHealth;
   }
 
   @Override

@@ -6,12 +6,14 @@ import CommandingOfficers.*;
 import CommandingOfficers.CommanderAbility.CostBasis;
 import CommandingOfficers.AW2.AW2Commander;
 import Engine.GameScenario;
+import Engine.GameEvents.GameEventQueue;
+import Engine.GameEvents.MassHealEvent;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitMovementModifier;
 import UI.UIUtils;
 import Terrain.MapMaster;
-import Units.Unit;
+import lombok.var;
 
 public class Andy extends AW2Commander
 {
@@ -74,13 +76,15 @@ public class Andy extends AW2Commander
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    public GameEventQueue getEvents(MapMaster map)
     {
-      for( Unit u : myCommander.army.getUnits() )
-      {
-        u.alterHealth(HEAL*10);
-      }
-      super.perform(gameMap);
+      var heal = new MassHealEvent(null, myCommander.army.getUnits(), HEAL*10);
+      heal.roundUp = myCommander.roundUpRepairs;
+
+      GameEventQueue events = new GameEventQueue();
+      events.add(heal);
+
+      return events;
     }
   }
 
@@ -110,13 +114,15 @@ public class Andy extends AW2Commander
     }
 
     @Override
-    protected void perform(MapMaster gameMap)
+    public GameEventQueue getEvents(MapMaster map)
     {
-      for( Unit u : myCommander.army.getUnits() )
-      {
-        u.alterHealth(HEAL*10);
-      }
-      super.perform(gameMap);
+      var heal = new MassHealEvent(null, myCommander.army.getUnits(), HEAL*10);
+      heal.roundUp = myCommander.roundUpRepairs;
+
+      GameEventQueue events = new GameEventQueue();
+      events.add(heal);
+
+      return events;
     }
   }
 

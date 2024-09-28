@@ -92,6 +92,7 @@ public interface GameEventListener extends Serializable
   default public GameEventQueue receiveWeatherChangeEvent(Weathers weather, int duration){ return null; };
   default public GameEventQueue receiveMapChangeEvent(MapChangeEvent event){ return null; };
   default public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHealth){ return null; };
+  default public GameEventQueue receiveHealEvent(Army payer, Unit unit, int healPower, int healResult){ return null; };
   default public GameEventQueue receiveModifyFundsEvent(Army beneficiary, int fundsDelta){ return null; };
   default public GameEventQueue receiveCommanderAbilityEvent(CommanderAbility ability){ return null; };
   default public GameEventQueue receiveCommanderAbilityRevertEvent(CommanderAbility ability){ return null; };
@@ -124,6 +125,7 @@ public interface GameEventListener extends Serializable
     default public GameEventQueue receiveWeatherChangeEvent(Weathers weather, int duration){InvalidateCache(); return null; };
     default public GameEventQueue receiveMapChangeEvent(MapChangeEvent event){InvalidateCache(); return null; };
     default public GameEventQueue receiveMassDamageEvent(Commander attacker, Map<Unit, Integer> lostHealth){ InvalidateCache(); return null; };
+    default public GameEventQueue receiveHealEvent(Army payer, Unit unit, int healPower, int healResult){ InvalidateCache(); return null; };
     default public GameEventQueue receiveModifyFundsEvent(Army beneficiary, int fundsDelta){ InvalidateCache(); return null; };
     default public GameEventQueue receiveCommanderAbilityEvent(CommanderAbility ability){ InvalidateCache(); return null; };
     default public GameEventQueue receiveCommanderAbilityRevertEvent(CommanderAbility ability){ InvalidateCache(); return null; };
