@@ -3,24 +3,27 @@ package CommandingOfficers.DefendPeace.OS;
 import java.util.ArrayList;
 
 import CommandingOfficers.*;
+import CommandingOfficers.AW1.OS.Sami.PerfectMoveModifier;
 import CommandingOfficers.AWBW.AWBWCommander;
-import Engine.Army;
-import Engine.GamePath;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.StrikeParams;
+import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventQueue;
-import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
-import Engine.UnitMods.InstaCapModifier;
+import Engine.GameEvents.MassDamageEvent;
 import Engine.UnitMods.UnitDamageModifier;
+import Engine.UnitMods.UnitDefenseModifier;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitMovementModifier;
 import Engine.UnitMods.UnitTypeFilter;
+import Terrain.MapLocation;
 import Terrain.MapMaster;
+import Terrain.TerrainType;
 import UI.UIUtils;
 import Units.Unit;
 import Units.UnitContext;
 import Units.UnitModel;
+import lombok.var;
 
 public class Sami extends AWBWCommander
 {
@@ -36,21 +39,17 @@ public class Sami extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sami", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.OS, "ZAP");
+      super("Sami", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.OS, "VM");
       infoPages.add(new InfoPage(
-            "Sami (nyoom)\n"
-          + "AW2 Sami, but with lightning mechs and AWBW rules.\n"
-          + "Footsoldiers +30 attack, 1.5x capture rate.\n"
-          + "Mechs cost 2x, but get passive Lightning Strike.\n"
+            "Sami (victory)\n"
+          + "AW1 Sami, but with instant captures and AWBW rules.\n"
+          + "Footsoldiers +20/10 stats.\n"
+          + "20x capture rate, lose 5 HP on capture.\n"
+          + "Cities do not give income when \n"
           + "Unarmed transports +1 move. -10/0 direct vehicle combat.\n"));
       infoPages.add(new InfoPage(new DoubleTime(null, null),
-            "Infantry and mech units receive a movement bonus of 1 space.\n"
-          + "Their attack strength increases (+20, total 150) as well.\n"
-          + "+10 attack and defense.\n"));
-      infoPages.add(new InfoPage(new VictoryMarch(null, null),
-            "Increases all foot soldiers' movement range by 2 spaces.\n"
-          + "They can capture in one turn even if they're not at full HP.\n"
-          + "(Footsoldier +50 attack, total 180)\n"
+            "Increases movement range (+1) for infantry and mech units. Their movement cost on all terrains is reduced to 1.\n"
+          + "Footsoldiers +20/10 stats.\n"
           + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(
             "Hit: Chocolate\n"
@@ -70,7 +69,6 @@ public class Sami extends AWBWCommander
 
     CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new DoubleTime(this, cb));
-    addCommanderAbility(new VictoryMarch(this, cb));
   }
 
   @Override
@@ -79,12 +77,18 @@ public class Sami extends AWBWCommander
     if( params.battleRange < 2 && params.attacker.model.isNone(UnitModel.TROOP) )
       params.attackPower -= 10;
     if( params.attacker.model.isAny(UnitModel.TROOP) )
-      params.attackPower += 30;
+      params.attackPower += 20;
+  }
+  @Override
+  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  {
+    if( params.defender.model.isAny(UnitModel.TROOP) )
+      params.defenseSubtraction += 10;
   }
   @Override
   public void modifyCapturePower(UnitContext uc)
   {
-    uc.capturePower += 50;
+    uc.capturePower += 1900;
   }
   @Override
   public void modifyMovePower(UnitContext uc)
@@ -93,51 +97,36 @@ public class Sami extends AWBWCommander
       uc.movePower += 1;
   }
 
-  private ArrayList<Unit> dudesToReactivate = new ArrayList<Unit>();
   @Override
-  protected void onTurnInit(MapMaster map, GameEventQueue events)
+  public GameEventQueue receiveCaptureEvent(Unit unit, Commander prevOwner, MapLocation location)
   {
-    for( Unit u : units )
-      if( u.model.isAny(UnitModel.MECH) )
-        if( u.isTurnOver )
-          u.isTurnOver = false;
-        else
-          dudesToReactivate.add(u);
-  }
-  // Mark units I will double-move
-  @Override
-  public char getUnitMarking(Unit unit, Army activeArmy)
-  {
-    if( dudesToReactivate.contains(unit) )
-      return 'S';
-    return super.getUnitMarking(unit, activeArmy);
+    GameEventQueue returnEvents = new GameEventQueue();
+    if( unit.CO == this )
+    {
+      var victim = new ArrayList<Unit>();
+      victim.add(unit);
+      returnEvents.add(new MassDamageEvent(this, victim, 50, false));
+    }
+    return returnEvents;
   }
   @Override
-  public int getBuyCost(UnitModel um, XYCoord coord)
+  public int getIncomePerTurn()
   {
-    UnitContext uc = getCostContext(um, coord);
-    if( uc.model.isAny(UnitModel.MECH) )
-      uc.costRatio += 100;
-    return uc.getCostTotal();
-  }
-  public GameEventQueue receiveMoveEvent(Unit unit, GamePath unitPath)
-  {
-    if( !dudesToReactivate.contains(unit) )
-      return null;
-
-    dudesToReactivate.remove(unit);
-    unit.isTurnOver = false;
-    return null;
-  }
-  @Override
-  public GameEventQueue receiveUnitJoinEvent(JoinEvent join)
-  {
-    if( !join.unitDonor.isTurnOver ) // We gave this dude his turn back after moving
-      join.unitRecipient.isTurnOver = false;
-    if( dudesToReactivate.contains(join.unitRecipient) )
-      join.unitRecipient.isTurnOver = false;
-
-    return null;
+    int count = 0;
+    for( XYCoord coord : ownedProperties )
+    {
+      // Re-check ownership just because.
+      MapLocation loc = army.myView.getLocation(coord);
+      boolean canProfit = loc.isProfitable();
+      canProfit &= loc.getOwner() == this;
+      if( canProfit )
+      {
+        boolean occupiedAndCity = null != loc.getResident() && TerrainType.CITY == loc.getEnvironment().terrainType;
+        if( !occupiedAndCity )
+          ++count;
+      }
+    }
+    return count * (gameRules.incomePerCity + incomeAdjustment);
   }
 
   private static class DoubleTime extends AWBWAbility
@@ -145,52 +134,29 @@ public class Sami extends AWBWCommander
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Double Time";
     private static final int COST = 3;
-    UnitTypeFilter moveMod, footAtkMod;
+    UnitTypeFilter moveMod, moveTypeMod, footAtkMod, footDefMod;
 
     DoubleTime(Sami commander, CostBasis basis)
     {
       super(commander, NAME, COST, basis);
       moveMod = new UnitTypeFilter(new UnitMovementModifier(1));
       moveMod.oneOf = UnitModel.TROOP;
+      moveTypeMod = new UnitTypeFilter(new PerfectMoveModifier());
+      moveTypeMod.oneOf = UnitModel.TROOP;
 
       footAtkMod = new UnitTypeFilter(new UnitDamageModifier(20));
       footAtkMod.oneOf = UnitModel.TROOP;
+      footDefMod = new UnitTypeFilter(new UnitDefenseModifier(10));
+      footDefMod.oneOf = UnitModel.TROOP;
     }
 
     @Override
     protected void enqueueMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
       modList.add(moveMod);
+      modList.add(moveTypeMod);
       modList.add(footAtkMod);
-    }
-  }
-
-  private static class VictoryMarch extends AWBWAbility
-  {
-    private static final long serialVersionUID = 1L;
-    private static final String NAME = "Victory March";
-    private static final int COST = 8;
-    UnitTypeFilter moveMod, footAtkMod, capMod;
-
-    VictoryMarch(Sami commander, CostBasis basis)
-    {
-      super(commander, NAME, COST, basis);
-      moveMod = new UnitTypeFilter(new UnitMovementModifier(2));
-      moveMod.oneOf = UnitModel.TROOP;
-
-      footAtkMod = new UnitTypeFilter(new UnitDamageModifier(50));
-      footAtkMod.oneOf = UnitModel.TROOP;
-
-      capMod = new UnitTypeFilter(new InstaCapModifier());
-      capMod.oneOf = UnitModel.TROOP;
-    }
-
-    @Override
-    protected void enqueueMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
-    {
-      modList.add(moveMod);
-      modList.add(footAtkMod);
-      modList.add(capMod);
+      modList.add(footDefMod);
     }
   }
 }
