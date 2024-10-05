@@ -30,7 +30,7 @@ public class AirDropAnimation extends BaseUnitActionAnimation
 
   public AirDropAnimation(int tileSize, Unit unit, XYCoord start, XYCoord end)
   {
-    super(tileSize, unit, null);
+    super(tileSize, unit, end);
 
     dropOrigin = start;
     dropDestination = end;

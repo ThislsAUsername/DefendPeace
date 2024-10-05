@@ -15,7 +15,6 @@ public class ResupplyAnimation extends BaseUnitActionAnimation
   private boolean isCancelled = false;
   private long startTime = 0;
   private String SUPPLYTEXT = "SUPPLY";
-  private XYCoord mapLocation = null;
   private int signWidth = 0;
   private int signHeight = 0;
 
@@ -24,10 +23,9 @@ public class ResupplyAnimation extends BaseUnitActionAnimation
     this(tileSize, supplier, new XYCoord(mapX, mapY));
   }
 
-  public ResupplyAnimation(int tileSize, Unit supplier, XYCoord mapLocation)
+  public ResupplyAnimation(int tileSize, Unit supplier, XYCoord actorCoord)
   {
-    super(tileSize, supplier, null);
-    this.mapLocation = mapLocation;
+    super(tileSize, supplier, actorCoord);
     int menuTextWidth = SpriteLibrary.getLettersSmallCaps().getFrame(0).getWidth();
     int menuTextHeight = SpriteLibrary.getLettersSmallCaps().getFrame(0).getHeight();
 
@@ -45,7 +43,7 @@ public class ResupplyAnimation extends BaseUnitActionAnimation
   @Override
   public boolean animate(Graphics g)
   {
-    if( isCancelled || mapLocation.x < 0 || mapLocation.y < 0 )
+    if( isCancelled || actorCoord.x < 0 || actorCoord.y < 0 )
     {
       return true;
     }
@@ -68,8 +66,8 @@ public class ResupplyAnimation extends BaseUnitActionAnimation
     final long signGone = 600;
 
     int tileSize = SpriteLibrary.baseSpriteSize;
-    int tileCenterX = (mapLocation.x * tileSize) + (tileSize / 2);
-    int tileCenterY = (mapLocation.y * tileSize) + (tileSize / 2);
+    int tileCenterX = (actorCoord.x * tileSize) + (tileSize / 2);
+    int tileCenterY = (actorCoord.y * tileSize) + (tileSize / 2);
 
     // Show the menu expanding from nothing, then disappearing
     BufferedImage menu = SpriteLibrary.createTransparentSprite(tileSize, tileSize);

@@ -21,7 +21,7 @@ public class GameEndAnimation extends GameAnimation
 
   public GameEndAnimation(Army[] armies)
   {
-    super(false);
+    super(null, false);
 
     // Figure out how far apart to draw each panel.
     int numArmies = armies.length;

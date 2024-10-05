@@ -20,7 +20,7 @@ public class BaseUnitActionAnimation extends GameAnimation
 
   public BaseUnitActionAnimation(int tileSize, Unit actor, XYCoord actorCoord)
   {
-    super(true);
+    super(actorCoord, true);
     update(tileSize, actor, actorCoord);
   }
   public BaseUnitActionAnimation update(int tileSize, Unit actor, XYCoord actorCoord)

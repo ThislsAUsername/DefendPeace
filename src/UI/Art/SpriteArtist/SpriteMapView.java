@@ -145,9 +145,6 @@ public class SpriteMapView extends MapView
     currentAnimation = toAnimate.getEventAnimation(this);
     if( null == currentAnimation )
       currentAnimation = new NoAnimation();
-
-    if( toAnimate.getEndPoint() != null )
-      myGame.setCursorLocation(toAnimate.getEndPoint());
   }
 
   @Override
@@ -378,6 +375,12 @@ public class SpriteMapView extends MapView
     GameMap gameMap = getDrawableMap(myGame);
     int curX = myGame.getCursorX();
     int curY = myGame.getCursorY();
+
+    if( null != currentAnimation && currentAnimation.focus != null )
+    {
+      curX = currentAnimation.focus.x;
+      curY = currentAnimation.focus.y;
+    }
 
     // Maintain a 2-space buffer between the cursor and the edge of the visible map, when possible.
     int buffer = 2; // Note the cursor takes up one space, so we will have to add 1 when checking the right/bottom border.

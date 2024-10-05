@@ -19,7 +19,7 @@ public class MoveAnimation extends BaseUnitActionAnimation
 
   public MoveAnimation(int tileSize, GameMap map, Unit actor, GamePath path)
   {
-    super(tileSize, actor, null);
+    super(tileSize, actor, path.getEndCoord());
     this.path = path;
 
     final UnitContext uc = new UnitContext(map, actor);

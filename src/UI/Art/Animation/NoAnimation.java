@@ -7,7 +7,7 @@ public class NoAnimation extends GameAnimation
 
   public NoAnimation()
   {
-    super(true);
+    super(null, true);
   }
 
   @Override
