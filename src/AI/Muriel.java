@@ -412,7 +412,7 @@ public class Muriel implements AIController
     {
       ArrayList<XYCoord> stations = AIUtils.findRepairDepots(unit);
       XYCoord unitCoords = new XYCoord(unit.x, unit.y);
-      Utils.sortLocationsByDistance(unitCoords, stations);
+      Utils.sortLocationsByTravelTime(unitCoords, unit, stations, gameMap);
       for( XYCoord coord : stations )
       {
         MapLocation station = gameMap.getLocation(coord);
@@ -562,13 +562,13 @@ public class Muriel implements AIController
     {
       log(String.format("Seeking capture target for %s", unit.toStringWithLocation()));
       XYCoord unitCoords = new XYCoord(unit.x, unit.y);
-      Utils.sortLocationsByDistance(unitCoords, nonAlliedProperties);
+      Utils.sortLocationsByTravelTime(unitCoords, unit, nonAlliedProperties, gameMap);
       for(int i = 0; i < nonAlliedProperties.size(); ++i)
       {
         XYCoord coord = nonAlliedProperties.get(i);
 
         ArrayList<GameAction> possibleMoves = unitActionsByType.get(UnitActionFactory.WAIT);
-        AIUtils.DistanceFromLocationComparator dflc = new AIUtils.DistanceFromLocationComparator(coord);
+        AIUtils.DistanceFromLocationComparator dflc = new AIUtils.DistanceFromLocationComparator(unit, coord, gameMap);
         Collections.sort(possibleMoves, dflc);
 
         for( GameAction ga : possibleMoves )
@@ -600,7 +600,7 @@ public class Muriel implements AIController
     {
       log(String.format("Seeking attack target for %s", unit.toStringWithLocation()));
       ArrayList<XYCoord> enemyLocations = AIUtils.findEnemyUnits(myArmy, gameMap); // Get enemy locations.
-      Utils.sortLocationsByDistance(new XYCoord(unit.x, unit.y), enemyLocations); // Sort them by accessibility.
+      Utils.sortLocationsByTravelTime(new XYCoord(unit), unit, enemyLocations, gameMap); // Sort them by accessibility.
 
       for(int i = 0; i < enemyLocations.size(); ++i)
       {
@@ -639,7 +639,7 @@ public class Muriel implements AIController
 
         // Sort the possible move actions by distance from the target.
         ArrayList<GameAction> possibleMoves = unitActionsByType.get(UnitActionFactory.WAIT);
-        AIUtils.DistanceFromLocationComparator dflc = new AIUtils.DistanceFromLocationComparator(coord);
+        AIUtils.DistanceFromLocationComparator dflc = new AIUtils.DistanceFromLocationComparator(unit, coord, gameMap);
         Collections.sort(possibleMoves, dflc);
 
         for( GameAction ga : possibleMoves )
