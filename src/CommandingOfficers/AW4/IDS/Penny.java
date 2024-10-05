@@ -1,17 +1,19 @@
 package CommandingOfficers.AW4.IDS;
 
+import java.util.ArrayList;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.DeployableCommander;
 import CommandingOfficers.AW4.RuinedCommander;
 import Engine.GameScenario;
-import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.GlobalWeatherEvent;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import UI.UIUtils;
+import Units.Unit;
 import Units.UnitContext;
 
 public class Penny extends RuinedCommander
@@ -31,7 +33,9 @@ public class Penny extends RuinedCommander
           "Base Zone: 3\n"
         + "Units are unaffected by weather. This applies even when not in the CO Zone.\n"));
       infoPages.add(new InfoPage(new Stormfront(null),
-          "Randomly changes the weather to Sleet (-1 move), Smoke (Fog of War), or Sirocco (-30 attack). The weather lasts for 3 days.\n"));
+          "Randomly changes the weather to Sleet (-1 move), Smoke (Fog of War), or Sirocco (-30 attack). The weather lasts for 3 days.\n"
+        + "Won't roll the weather active on the COU's tile.\n"
+        + "If Sleet or Sirocco is rolled, disables temporary fog.\n"));
       infoPages.add(DeployableCommander.COU_MECHANICS_BLURB);
       infoPages.add(RuinedCommander.DOR_MECHANICS_BLURB);
     }
@@ -83,11 +87,17 @@ public class Penny extends RuinedCommander
     @Override
     public GameEventQueue getEvents(MapMaster map)
     {
-      Weathers[] candidates = { Weathers.SLEET, Weathers.SMOKE, Weathers.SIROCCO };
-      int rand = map.game.getRN(candidates.length);
+      ArrayList<Weathers> candidates = new ArrayList<>();
+      candidates.add(Weathers.SLEET);
+      candidates.add(Weathers.SMOKE);
+      candidates.add(Weathers.SIROCCO);
+      for( Unit u : COcast.COUs ) // Don't roll the same weather that's currently active
+        candidates.remove(map.getEnvironment(u.x, u.y).weatherType);
+      int rand = map.game.getRN(candidates.size());
 
-      Weathers chosen = candidates[rand];
-      GameEvent weather = new GlobalWeatherEvent(chosen, 3);
+      Weathers chosen = candidates.get(rand);
+      GlobalWeatherEvent weather = new GlobalWeatherEvent(chosen, 3);
+      weather.canCancelFog = true;
 
       GameEventQueue events = super.getEvents(map);
       events.add(weather);
