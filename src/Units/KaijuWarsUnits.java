@@ -341,7 +341,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   {
     var b = baseBuilder();
     // Mech because they're relatively slow and relatively strong
-    b.role(UnitModel.MECH | UnitModel.SURFACE_TO_AIR | UnitModel.TANK | UnitModel.LAND);
+    b.role(UnitModel.MECH | UnitModel.SIEGE | UnitModel.SURFACE_TO_AIR | UnitModel.TANK | UnitModel.LAND);
 
     b.baseMovePower(2);
 

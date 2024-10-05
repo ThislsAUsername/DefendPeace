@@ -423,7 +423,7 @@ public class DoRUnits extends UnitModelScheme
   public DoRUnitModel MobileSAMModel()
   {
     var b = DoRUnitModel.builder();
-    b.role(UnitModel.SIEGE | UnitModel.SURFACE_TO_AIR | UnitModel.TANK | UnitModel.LAND);
+    b.role(UnitModel.SURFACE_TO_AIR | UnitModel.TANK | UnitModel.LAND);
     
     b.costBase(12000);
     b.abilityPowerValue(14);
