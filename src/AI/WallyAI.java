@@ -91,13 +91,16 @@ public class WallyAI extends ModularAI
   private static final double TERRAIN_PENALTY_WEIGHT = 3; // Exponent for how crippling we think high move costs are
   private static final double MIN_SIEGE_RANGE_WEIGHT = 0.8; // Exponent for how much to penalize siege weapon ranges for their min ranges
 
+  private static final double COUNTER_EFFICIENCY_FACTOR = 0.6; // Factor of how well we assume enemy units are countered by existing units
   private static final double BANK_EFFICIENCY_FACTOR = 1.7; // Minimum effectiveness multiplier to consider banking for a better counter
   private static final double MAX_BANK_FUNDS_FACTOR = 2.5; // Maximum to bank compared to a counter you can actually buy
+  private static final int    MAX_UNITS_PER_CAP_UNIT = 10; // Max acceptable number of units per capture unit
 
   private static final double COMPLETE_CAPTURE_WEIGHT = 4; // Roughly corresponds to the number of turns of prop value we expect to lose by not finishing a capture.
   private static final double TERRAIN_FUNDS_WEIGHT = 2.5; // Multiplier for per-city income for adding value to units threatening to cap
   private static final double TERRAIN_INDUSTRY_WEIGHT = 20000; // Funds amount added to units threatening to cap an industry
   private static final double TERRAIN_HQ_WEIGHT = 42000; //                  "                                      HQ
+  private static final double TERRAIN_TOWER_WEIGHT = 15000; //               "                                      tower
 
   private static final CalcType CALC = CalcType.PESSIMISTIC;
 
@@ -649,7 +652,8 @@ public class WallyAI extends ModularAI
     {
       if( ai.plansByUnit.containsKey(unit) )
         return null;
-      boolean isSiege = unit.model.hasImmobileWeapon();
+      boolean isSiege = unit.model.isAny(UnitModel.SIEGE);
+      isSiege |= unit.model.hasImmobileWeapon();
       if( !isSiege )
         return null;
 
@@ -979,6 +983,8 @@ public class WallyAI extends ModularAI
       ArrayList<ActionPlan> actionSeq = ai.planValueActions(ec, unit);
       if( null == actionSeq )
         return;
+      // ai.log(String.format("Planning actionSeq:\n%s", actionSeq));
+      // ai.log(String.format("Postrequisites:\n%s", ec.postrequisites));
       for( ActionPlan plan : actionSeq )
       {
         ai.updatePlan(plan);
@@ -1124,7 +1130,7 @@ public class WallyAI extends ModularAI
         travelPurpose = TravelPurpose.SUPPLIES;
     }
     int distThreshold = uc.calculateMovePower() * UNIT_CAPTURE_RANGE;
-    if( goals.isEmpty() && uc.actionTypes.contains(UnitActionFactory.CAPTURE) )
+    if( goals.isEmpty() && uc.model.isAny(UnitModel.CAPTURE) )
     {
       for( XYCoord xyc : futureCapTargets )
       {
@@ -1160,9 +1166,9 @@ public class WallyAI extends ModularAI
 
   private ArrayList<XYCoord> findCombatUnitDestinations(GameMap gameMap, ArrayList<Unit> allThreats, Unit unit)
   {
-    return findCombatUnitDestinations(gameMap, allThreats, new XYCoord(unit), new ModelForCO(unit));
+    return findCombatUnitDestinations(gameMap, allThreats, new XYCoord(unit), new ModelForCO(unit), null);
   }
-  private ArrayList<XYCoord> findCombatUnitDestinations(GameMap gameMap, ArrayList<Unit> allThreats, XYCoord start, ModelForCO um)
+  private ArrayList<XYCoord> findCombatUnitDestinations(GameMap gameMap, ArrayList<Unit> allThreats, XYCoord start, ModelForCO um, UnitModel targetType)
   {
     ArrayList<XYCoord> goals = new ArrayList<>();
     Map<XYCoord, Integer> valueMap = new HashMap<>();
@@ -1177,6 +1183,8 @@ public class WallyAI extends ModularAI
         continue; // We don't care about shooting dead people
 
       UnitModel model = target.model;
+      if( null != targetType && model != targetType )
+        continue;
       final ModelForCO modelKey = new ModelForCO(target);
       int range = 1;
       for( ; range < 5; range++ )
@@ -1278,7 +1286,7 @@ public class WallyAI extends ModularAI
       return maxEvictionDepth - evictionStack.size();
     }
     /** Find the tiles a unit on startTile shouldn't go, based on any planned actions that need that tile to be open. */
-    public ArrayList<XYCoord> calcPostReqBans()
+    public ArrayList<XYCoord> calcPostReqMoveBans()
     {
       var bannedTiles = new ArrayList<XYCoord>();
 
@@ -1318,7 +1326,7 @@ public class WallyAI extends ModularAI
     if( ec.evictionStack.contains(unit) )
       return null;
     GameMap gameMap = ec.map;
-    var bannedTiles = ec.calcPostReqBans();
+    var bannedTiles = ec.calcPostReqMoveBans();
     XYCoord startTile = new XYCoord(unit);
     final boolean mustMove = bannedTiles.contains(startTile);
     ActionPlan myOldPlan = plansByUnit.get(unit);
@@ -1408,7 +1416,8 @@ public class WallyAI extends ModularAI
         } // ~if resident
 
       GamePath movePath = xyc.getMyPath();
-      if( preReqConflictExists(ec.map, unit, movePath, ec.postrequisites) )
+      HashSet<ActionPlan> foundPrereqs = new HashSet<>();
+      if( preReqConflictExists(ec.map, unit, movePath, ec.postrequisites, foundPrereqs) )
         continue;
 
       int bonusPoints = 0;
@@ -1429,9 +1438,19 @@ public class WallyAI extends ModularAI
         {
           for( GameAction attack : actionSet.getGameActions() )
           {
-            final AttackValue results;
-
             XYCoord targetXYC = attack.getTargetLocation();
+            boolean targetPrereqConflict = false;
+            for( var prereqPlan : foundPrereqs )
+              if( targetXYC.equals(prereqPlan.action.getMoveLocation()) )
+              {
+                // We are shooting a tile that was used to clear a tile we moved into/through; that's a prereq conflict.
+                targetPrereqConflict = true;
+                break;
+              }
+            if( targetPrereqConflict )
+              continue;
+
+            final AttackValue results;
             Unit targetUnit   = ec.map.getResident(targetXYC);
             if( null != targetUnit )
               results = new AttackValue(this, actor, new UnitContext(targetUnit), predMap, shouldYeet);
@@ -1570,6 +1589,12 @@ public class WallyAI extends ModularAI
       {
         evictionFailure |= ( ec.evictionStack.contains(ev) );
         evictionFailure |= ( ev.isTurnOver && ev.CO.army == myArmy );
+        if( !evictionFailure )
+        {
+          PathCalcParams pcp = new PathCalcParams(ev, predMap);
+          pcp.includeOccupiedSpaces = false;
+          evictionFailure |= (pcp.findAllPaths().size() < 2); // Can't move anywhere that isn't already occupied
+        }
       }
       if( evictionFailure )
         continue;
@@ -1826,67 +1851,81 @@ public class WallyAI extends ModularAI
     if( TerrainType.HEADQUARTERS == terrain
         || TerrainType.LAB == terrain )
       value += TERRAIN_HQ_WEIGHT;
+    if( TerrainType.DOR_TOWER == terrain
+        || TerrainType.DS_TOWER == terrain )
+      value += TERRAIN_TOWER_WEIGHT;
     return value;
   }
 
-  /**
-   * Returns the center mass of a given unit type, weighted by HP
-   * NOTE: Will violate fog knowledge
-   */
-  private static XYCoord findAverageDeployLocation(GameMap gameMap, Army co, UnitModel model)
+  public static class CombatBuildDeets
   {
-    // init with the center of the map
-    int totalX = gameMap.mapWidth / 2;
-    int totalY = gameMap.mapHeight / 2;
-    int totalPoints = 1;
-    for( Unit unit : co.getUnits() )
+    public CombatBuildDeets(WallyAI ai, MapLocation loc, ArrayList<XYCoord> targets, ModelForCO mfc, ModelForCO targetType)
     {
-      if( unit.model == model )
-      {
-        totalX += unit.x * unit.getHealth();
-        totalY += unit.y * unit.getHealth();
-        totalPoints += unit.getHealth();
-      }
-    }
+      this.loc = loc;
+      this.targets = targets;
+      this.mfc = mfc;
+      enemyToCounter = targetType;
+      XYCoord coord = loc.getCoordinates();
+      price = mfc.co.getBuyCost(mfc.um, coord);
 
-    return new XYCoord(totalX / totalPoints, totalY / totalPoints);
+      UnitContext uc = new UnitContext(mfc.co, mfc.um);
+      uc.setCoord(coord);
+      double effectiveness = 1;
+      double costRatio     = 1;
+      if( null != enemyToCounter )
+      {
+        double enemyPrice = enemyToCounter.co.getCost(enemyToCounter.um);
+        effectiveness = ai.findEffectiveness(mfc, enemyToCounter);
+        costRatio = enemyPrice / price;
+      }
+      int minDist          = targets.get(0).getDistance(coord);
+      int turnAdjustment   = (mfc.um.isAny(UnitModel.SIEGE))? 2 : 1;
+      int minTurns         = minDist / uc.calculateMovePower() + turnAdjustment;
+      double turnRatio     = 10.0 / minTurns;
+      score = (int) (1000 * effectiveness * costRatio * turnRatio);
+    }
+    MapLocation loc;
+    ArrayList<XYCoord> targets;
+    ModelForCO mfc, enemyToCounter;
+    int price, score;
+    @Override
+    public String toString()
+    {
+      return String.format("(%s at %s)", mfc, loc.getCoordinates());
+    }
+  }
+  private static class CombatBuldDeetsComparator implements Comparator<CombatBuildDeets>
+  {
+    @Override
+    public int compare(CombatBuildDeets build1, CombatBuildDeets build2)
+    {
+      int diff = build2.score - build1.score;
+      return diff;
+    }
   }
 
-
   /**
-   * Returns the ideal place to build a unit type or null if it's impossible
-   * Kinda-sorta copied from AIUtils
+   * Returns all acceptable places to build the unit type
    */
-  public XYCoord getLocationToBuild(GameMap gameMap, CommanderProductionInfo CPI, UnitModel model)
+  public ArrayList<CombatBuildDeets> getBuildOptionsFor(GameMap gameMap, CommanderProductionInfo CPI, UnitModel model, ModelForCO target)
   {
-    Set<TerrainType> desiredTerrains = CPI.modelToTerrainMap.get(model);
-    if( null == desiredTerrains || desiredTerrains.size() < 1 )
-      return null;
+    ArrayList<CombatBuildDeets> candidates = new ArrayList<>();
 
-    ArrayList<XYCoord> candidates = new ArrayList<XYCoord>();
-    for( MapLocation loc : CPI.availableProperties )
+    for( MapLocation loc : CPI.getAllFacilitiesFor(model) )
     {
-      if( desiredTerrains.contains(loc.getEnvironment().terrainType) )
-      {
-        final ModelForCO mfc = new ModelForCO(loc.getOwner(), model);
+      final ModelForCO mfc = new ModelForCO(loc.getOwner(), model);
 
-        int threat = fundsThreatAt(gameMap, threatMap, mfc, loc.getCoordinates(), null);
-        int threatThreshold = (BUILD_SCARE_PERCENT * mfc.co.getBuyCost(mfc.um, loc.getCoordinates())) / 100;
-        if( threatThreshold < threat )
-          continue;
-        // If we can get to a target...
-        if( 0 < findCombatUnitDestinations(predMap, allThreats, loc.getCoordinates(), mfc)
-            .size() )
-          candidates.add(loc.getCoordinates());
-      }
+      int threat = fundsThreatAt(gameMap, threatMap, mfc, loc.getCoordinates(), null);
+      int threatThreshold = (BUILD_SCARE_PERCENT * mfc.co.getBuyCost(mfc.um, loc.getCoordinates())) / 100;
+      if( threatThreshold < threat )
+        continue;
+      // If we can get to a target...
+      ArrayList<XYCoord> potentialVictims = findCombatUnitDestinations(predMap, allThreats, loc.getCoordinates(), mfc, (null == target)? null : target.um);
+      if( 0 < potentialVictims.size() )
+        candidates.add(new CombatBuildDeets(this, loc, potentialVictims, mfc, target));
     }
-    if( candidates.isEmpty() )
-      return null;
 
-    // Sort locations by how close they are to "center mass" of that unit type, then reverse since we want to distribute our forces
-    Utils.sortLocationsByDistance(findAverageDeployLocation(myArmy.myView, myArmy, model), candidates);
-    Collections.reverse(candidates);
-    return candidates.get(0);
+    return candidates;
   }
 
   private Map<XYCoord, UnitModel> queueUnitProduction(GameMap gameMap)
@@ -1917,23 +1956,30 @@ public class WallyAI extends ModularAI
 
     log("Evaluating Production needs");
     int budget = myArmy.money;
-    var infPrices = new HashMap<XYCoord, Integer>();
-    final UnitModel infModel  = myArmy.cos[0].getUnitModel(UnitModel.TROOP);
-    final UnitModel tankModel = myArmy.cos[0].getUnitModel(UnitModel.ASSAULT);
+    var capperPrices = new HashMap<XYCoord, Integer>();
+    var capperTypes = myArmy.cos[0].getAllModels(UnitModel.CAPTURE);
 
     // Set up inf builds on all my props
-    var infFacilities = CPI.getAllFacilitiesFor(infModel);
-    for( var infLoc : infFacilities )
+    for( var ct : capperTypes )
     {
-      XYCoord infCoord = infLoc.getCoordinates();
-      Commander infBuyer = infLoc.getOwner();
-      int cost = infBuyer.getBuyCost(infModel, infCoord);
-      if( cost > budget )
-        return builds;
-      builds.put(infCoord, infModel);
-      budget -= cost;
-      infPrices.put(infCoord, cost);
+      var capFacilities = CPI.getAllFacilitiesFor(ct);
+      for( var ctLoc : capFacilities )
+      {
+        XYCoord ctxyc = ctLoc.getCoordinates();
+        if( builds.containsKey(ctxyc) )
+          continue; // only build the cheapest thing
+        Commander buyer = ctLoc.getOwner();
+        int cost = buyer.getBuyCost(ct, ctxyc);
+        if( cost > budget )
+          return builds;
+        builds.put(ctxyc, ct);
+        budget -= cost;
+        capperPrices.put(ctxyc, cost);
+      }
     }
+    // Purge any "extra" unit types we didn't actually build for captures
+    capperTypes.clear();
+    capperTypes.addAll(builds.values());
 
     // Get a count of enemy forces.
     Map<Commander, ArrayList<Unit>> unitLists = AIUtils.getEnemyUnitsByCommander(myArmy, predMap);
@@ -1945,13 +1991,14 @@ public class WallyAI extends ModularAI
         for( Unit u : unitLists.get(co) )
         {
           // Count how many of each model of enemy units are in play.
-          if( enemyUnitHP.containsKey(new ModelForCO(u)) )
+          ModelForCO key = new ModelForCO(u);
+          if( enemyUnitHP.containsKey(key) )
           {
-            enemyUnitHP.put(new ModelForCO(u), enemyUnitHP.get(new ModelForCO(u)) + (u.getHP() / 10));
+            enemyUnitHP.put(key, enemyUnitHP.get(key) + u.getHP());
           }
           else
           {
-            enemyUnitHP.put(new ModelForCO(u), u.getHP());
+            enemyUnitHP.put(key, u.getHP());
           }
         }
       }
@@ -1962,13 +2009,14 @@ public class WallyAI extends ModularAI
     for( Unit u : myArmy.getUnits() )
     {
       // Count how many of each model of enemy units are in play.
-      if( myUnitHP.containsKey(new ModelForCO(u)) )
+      ModelForCO key = new ModelForCO(u);
+      if( myUnitHP.containsKey(key) )
       {
-        myUnitHP.put(new ModelForCO(u), myUnitHP.get(new ModelForCO(u)) + (u.getHP() / 10));
+        myUnitHP.put(key, myUnitHP.get(key) + u.getHP());
       }
       else
       {
-        myUnitHP.put(new ModelForCO(u), u.getHP());
+        myUnitHP.put(key, u.getHP());
       }
     }
 
@@ -1977,6 +2025,9 @@ public class WallyAI extends ModularAI
       for( ModelForCO counter : myUnitHP.keySet() ) // Subtract how well we think we counter each enemy from their HP counts
       {
         double counterPower = findEffectiveness(counter, threat);
+        if( counterPower < 0.1 )
+          continue;
+        counterPower *= COUNTER_EFFICIENCY_FACTOR;
         enemyUnitHP.put( threat, (int) (enemyUnitHP.get(threat) - counterPower * myUnitHP.get(counter)) );
       }
     }
@@ -1998,61 +2049,51 @@ public class WallyAI extends ModularAI
       Entry<ModelForCO, Integer> enemyEntry = enemyModels.poll();
       ModelForCO enemyToCounter = enemyEntry.getKey();
       int enemyHP = enemyUnitHP.get(enemyToCounter);
-      if( enemyHP < 0 ) // Just try to counter tanks if the enemy doesn't have anything "interesting"
-      {
-        enemyToCounter = new ModelForCO(enemyToCounter.co, tankModel);
-        enemyHP        = 42;
-      }
+      if( enemyHP < 0 )
+        break; // Nothing to counter; stop counterbuilding
       log(String.format("Need a counter for %s HP of %s (have %s)", enemyHP, enemyToCounter, budget));
 
       // Get our possible options for countermeasures.
       int costBuffer = 0;
-      ArrayList<ModelForCO> availableUnitModels = new ArrayList<>();
-      for( ModelForCO currentCounter : CPI.availableUnitModels )
+      Queue<CombatBuildDeets> availableBuilds = new PriorityQueue<>(new CombatBuldDeetsComparator());
+      for( var currentCounter : CPI.modelToTerrainMap.keySet() )
       {
-        // I only want combat units, since I don't understand transports
-        if( currentCounter.um.weapons.isEmpty() )
-          continue;
-        // Filter stuff I can't afford; this breaks if we have localized discounts, but those don't exist (yet)
-        XYCoord coord = getLocationToBuild(gameMap, CPI, currentCounter.um);
-        if( null == coord )
-          continue;
-        Commander buyer = gameMap.getLocation(coord).getOwner();
-        costBuffer = infPrices.getOrDefault(coord, 0);
-        final int buyCost = buyer.getBuyCost(currentCounter.um, coord);
-        if( buyCost > (budget + costBuffer) )
-          continue;
-        availableUnitModels.add(currentCounter);
+        var options = getBuildOptionsFor(gameMap, CPI, currentCounter, enemyToCounter);
+        for( CombatBuildDeets opt : options )
+        {
+          XYCoord coord = opt.loc.getCoordinates();
+          costBuffer = capperPrices.getOrDefault(coord, 0);
+          // Filter stuff I can't afford
+          if( opt.price > (budget + costBuffer) )
+            continue;
+          availableBuilds.add(opt);
+        }
       }
 
       double idealEffect = 0;
-      ModelForCO idealCounter = null;
-      XYCoord idealCoord = null;
-      int idealCost = 9001;
-      for( ModelForCO currentCounter : availableUnitModels )
+      CombatBuildDeets idealCounter = null;
+      for( CombatBuildDeets counterDeets : availableBuilds )
       {
-        XYCoord coord = getLocationToBuild(gameMap, CPI, currentCounter.um);
-        if( null == coord )
-          continue;
-        costBuffer = infPrices.getOrDefault(coord, 0);
+        if( counterDeets.score < 1 )
+          break;
+        XYCoord coord = counterDeets.loc.getCoordinates();
+        costBuffer = capperPrices.getOrDefault(coord, 0);
         Commander buyer = gameMap.getLocation(coord).getOwner();
-        double effectiveness = findEffectiveness(currentCounter, enemyToCounter);
-        if( !(effectiveness > 0) )
-          continue;
 
-        final int buyCost = buyer.getBuyCost(currentCounter.um, coord);
+        final int buyCost = counterDeets.price;
+        double effectiveness = findEffectiveness(counterDeets.mfc, enemyToCounter);
         double scaledEfficiency = BANK_EFFICIENCY_FACTOR * effectiveness / buyCost;
 
         if( buyCost > (budget + costBuffer) )
           continue;
 
         log(String.format("    buy %s for %s with effectiveness %s%%? (%s + %s remaining)",
-                              currentCounter, buyCost, (int)(100*effectiveness), budget, costBuffer));
+                              counterDeets.mfc, buyCost, (int)(100*effectiveness), budget, costBuffer));
 
         boolean bankInstead = false;
-        for( ModelForCO otherCounter : availableUnitModels )
+        for( ModelForCO otherCounter : CPI.availableUnitModels )
         {
-          final int otherCost = buyer.getBuyCost(otherCounter.um, coord);
+          final int otherCost = buyer.getCost(otherCounter.um); // Generic cost calc since we've not decided where to buy
           if( MAX_BANK_FUNDS_FACTOR * buyCost < otherCost )
             continue;
           double otherEffectiveness = findEffectiveness(otherCounter, enemyToCounter);
@@ -2069,17 +2110,16 @@ public class WallyAI extends ModularAI
         if(effectiveness >= idealEffect)
         {
           idealEffect = effectiveness;
-          idealCoord = coord;
-          idealCounter = currentCounter;
-          idealCost = buyCost;
+          idealCounter = counterDeets;
         }
       } // ~for( availableUnitModels )
 
       if( null == idealCounter )
         continue;
-      log(String.format("      buying %s at %s", idealCounter, idealCoord));
-      builds.put(idealCoord, idealCounter.um);
-      budget -= idealCost - costBuffer;
+      log(String.format("      buying %s", idealCounter));
+      XYCoord idealCoord = idealCounter.loc.getCoordinates();
+      builds.put(idealCoord, idealCounter.mfc.um);
+      budget -= idealCounter.price - costBuffer;
       CPI.removeBuildLocation(gameMap.getLocation(idealCoord));
 
       int counterHPCountered    = (int) (enemyHP - idealEffect * 10);
@@ -2091,6 +2131,49 @@ public class WallyAI extends ModularAI
       }
     } // ~while( !enemyModels.isEmpty() && !CPI.availableUnitModels.isEmpty())
 
+    int capHP = 0, allHP = 0;
+    for( ModelForCO mfc : myUnitHP.keySet() )
+    {
+      allHP += myUnitHP.get(mfc);
+      if( mfc.um.isAny(UnitModel.CAPTURE) )
+        capHP += myUnitHP.get(mfc);
+    }
+    boolean captureDensityGood = false;
+    if( capHP > 0 )
+      captureDensityGood = (allHP / capHP) <= MAX_UNITS_PER_CAP_UNIT;
+
+    // We want to specialize in sieges, build units for that if there's cash and nothing to counter
+    var wantedTypes = myArmy.cos[0].getAllModels(UnitModel.SIEGE);
+    for( boolean doUpgrades : new boolean[] { false, true } )
+      for( UnitModel um : wantedTypes )
+      {
+        var options = new PriorityQueue<CombatBuildDeets>(new CombatBuldDeetsComparator());
+        options.addAll(getBuildOptionsFor(gameMap, CPI, um, null));
+        for( CombatBuildDeets opt : options )
+        {
+          final XYCoord coord = opt.loc.getCoordinates();
+
+          int marginalCost = opt.price;
+          if( builds.containsKey(coord) )
+          {
+            UnitModel currentBuild = builds.get(coord);
+            boolean replaceable = false;
+            replaceable |= captureDensityGood && capperTypes.contains(currentBuild);
+            replaceable |= doUpgrades && wantedTypes.contains(currentBuild);
+            if( !replaceable )
+              break; // If it's not a standard build, don't override
+            if( um.costBase < currentBuild.costBase )
+              break; // If it's a standard build that's more expensive, it's a counter unit
+            marginalCost -= opt.mfc.co.getBuyCost(currentBuild, coord);
+          }
+
+          if( marginalCost <= budget )
+          {
+            builds.put(coord, um);
+            budget -= marginalCost;
+          }
+        }
+      }
     return builds;
   }
 
@@ -2278,18 +2361,18 @@ public class WallyAI extends ModularAI
     if( initialPostreq.isAttack )
     {
       XYCoord target = initialPostreq.action.getTargetLocation();
-      enqueuePostReqPlans(mapPlan, mapPlan[target.x][target.y].toAchieve, postrequisites);
+      ActionPlan actionIntoClearedTile = mapPlan[target.x][target.y].toAchieve;
+      if( !postrequisites.contains(actionIntoClearedTile) )
+        enqueuePostReqPlans(mapPlan, actionIntoClearedTile, postrequisites);
+      else
+        System.out.println(String.format("Warning: postrequisite cycle found between:\n%s\n%s", initialPostreq, actionIntoClearedTile));
     }
   }
 
   /**
    * Finds all prerequisites of the input movetile/action, and returns true if any are in the provided postrequisite list
+   * <p>Note: postrequisites may contain the root plan (see above in enqueuePostReqPlans), so don't check if the postreqs contain the root.
    */
-  private boolean preReqConflictExists(GameMap map, Unit unit, GamePath path, Collection<ActionPlan> postrequisites)
-  {
-    // Note: postrequisites will contain the root plan (see above), so don't check for that.
-    return preReqConflictExists(map, unit, path, postrequisites, new HashSet<>());
-  }
   private boolean preReqConflictExists(GameMap map, Unit unit, GamePath path, Collection<ActionPlan> postrequisites, HashSet<ActionPlan> foundPrereqs)
   {
     if( foundPrereqs.size() > 42 )
@@ -2316,7 +2399,7 @@ public class WallyAI extends ModularAI
       var dest = node.GetCoordinates();
       // I need this unit to help clear the tile I'm moving into - that's a prerequisite
       // Note: I can't move into a tile that I'd help clear by shooting it, so don't worry about that possibility
-      for( var prereq : mapPlan[dest.x][dest.y].damageInstances.keySet() )
+      for( ActionPlan prereq : mapPlan[dest.x][dest.y].damageInstances.keySet() )
       {
         if( postrequisites.contains(prereq) )
           return true;
