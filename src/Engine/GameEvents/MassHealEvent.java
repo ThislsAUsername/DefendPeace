@@ -18,7 +18,7 @@ import lombok.var;
  */
 public class MassHealEvent implements GameEvent
 {
-  // Records how much health each victim lost; doubles as our victim storage area
+  // Records how much health each beneficiary gained; doubles as our beneficiary storage area
   private Map<Unit, Integer> healResult = new LinkedHashMap<>();
   public final int repairPowerHealth;
   public boolean roundUp = true, canOverheal = false;

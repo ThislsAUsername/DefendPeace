@@ -80,7 +80,12 @@ public abstract class CommanderAbility implements Serializable
   public void deInitForGame(GameInstance game)
   {}
 
-  /** in funds... normally */
+  /**
+   * ...in whatever unit of measurement the basis uses.<p>
+   * AW1-2 and BW use (CO-modifiable) funds value. That's also our default.<p>
+   * DoR uses HP.<p>
+   * DS uses UnitModel.abilityPowerValue.
+   */
   public int getCost()
   {
     return costBasis.calcCost(baseStars);
@@ -92,9 +97,9 @@ public abstract class CommanderAbility implements Serializable
     return myName;
   }
 
-  /** Final method to do some bookkeeping, and then call
-   * perform() do do the actual work. This allows us to
-   * manage global Ability side-effects in one place. */
+  /** Method to do some bookkeeping, and then call perform() to execute instant effects
+   * that don't have an associated event.<p>
+   * It's final to allow us to manage global Ability side-effects in one place. */
   public final void activate(MapMaster gameMap)
   {
     if( myCommander.getAbilityPower() < getCost() )
@@ -129,7 +134,7 @@ public abstract class CommanderAbility implements Serializable
     revert(gameMap);
   }
 
-  /** Subclasses will override this method to enact any ability effects that don't go in an event or a UnitModifier.
+  /** Subclasses can override this method to enact any ability effects that don't go in an event or a UnitModifier.
    * <p>Note: getEvents() will be called before perform()*/
   // Defaults to nothing since most powers don't need to directly affect game state
   protected void perform(MapMaster gameMap)
