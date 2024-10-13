@@ -42,10 +42,9 @@ public class UnitModel implements Serializable, ITargetable, UnitModList
   public static final long SHIP            = 1 <<  4;
   // Domain
   public static final long LAND            = 1 <<  8;
-  public static final long AIR_LOW         = 1 <<  9;
-  public static final long AIR_HIGH        = 1 << 10;
-  public static final long SEA             = 1 << 11;
-  public static final long SUBSURFACE      = 1 << 12;
+  public static final long AIR             = 1 <<  9;
+  public static final long SEA             = 1 << 10;
+  public static final long SUBSURFACE      = 1 << 11;
   // Role; Unit sets are expected to have at least one of each
   public static final long CAPTURE         = 1 << 15; // Unit that can give you ownership of property
   public static final long MECH            = 1 << 16; // Footsoldier equipped against hardened targets
@@ -120,9 +119,9 @@ public class UnitModel implements Serializable, ITargetable, UnitModList
 
     for( TerrainType terrain : TerrainType.TerrainTypeList )
     {
-      if( (isAny(AIR_LOW | AIR_HIGH) && terrain.healsAir())  ||
-          (isAny(LAND)               && terrain.healsLand()) ||
-          (isAny(SEA)                && terrain.healsSea())  )
+      if( (isAny(AIR)  && terrain.healsAir())  ||
+          (isAny(LAND) && terrain.healsLand()) ||
+          (isAny(SEA)  && terrain.healsSea())  )
         healableHabs.add(terrain);
     }
   }
@@ -282,7 +281,7 @@ public class UnitModel implements Serializable, ITargetable, UnitModList
 
   public boolean isAirUnit()
   {
-    return isAny(AIR_LOW | AIR_HIGH);
+    return isAny(AIR);
   }
 
   public boolean isLandUnit()

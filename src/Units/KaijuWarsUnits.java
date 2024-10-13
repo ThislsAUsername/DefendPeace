@@ -438,7 +438,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public KaijuWarsUnitModel Fighter()
   {
     var b = baseBuilder();
-    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR);
 
     b.baseMovePower(4);
 
@@ -457,7 +457,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public KaijuWarsUnitModel Bomber()
   {
     var b = baseBuilder();
-    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR);
 
     b.baseMovePower(3);
 
@@ -475,7 +475,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public KaijuWarsUnitModel Helicopter()
   {
     var b = baseBuilder();
-    b.role(UnitModel.HOVER | UnitModel.AIR_LOW);
+    b.role(UnitModel.HOVER | UnitModel.AIR);
 
     b.baseMovePower(2);
 
@@ -492,7 +492,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public KaijuWarsUnitModel Bushplane()
   {
     var b = baseBuilder();
-    b.role(UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.JET | UnitModel.AIR);
 
     b.baseMovePower(4);
 
@@ -533,7 +533,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public KaijuWarsUnitModel BigBoy()
   {
     var b = baseBuilder();
-    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR);
 
     b.baseMovePower(3);
     b.costBase(PREP_COST * 3);
@@ -552,7 +552,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public KaijuWarsUnitModel SkyCarrier()
   {
     var b = baseBuilder();
-    b.role(UnitModel.HOVER | UnitModel.AIR_HIGH | UnitModel.TRANSPORT);
+    b.role(UnitModel.HOVER | UnitModel.AIR | UnitModel.TRANSPORT);
 
     b.baseMovePower(3);
     b.costBase(PREP_COST * 7); // Consider reducing this since this version is nerfed
@@ -562,7 +562,7 @@ public class KaijuWarsUnits extends UnitModelScheme
 
     b.name("Sky Carrier");
     b.baseCargoCapacity(4);
-    b.carryableMask(UnitModel.AIR_LOW | UnitModel.AIR_HIGH);
+    b.carryableMask(UnitModel.AIR);
       // Let's allow stacking carriers, because why not?
     b.carryableExclusionMask(UnitModel.TRANSPORT);
 
@@ -580,7 +580,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public KaijuWarsUnitModel Kaputnik()
   {
     var b = baseBuilder();
-    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR);
 
     b.baseMovePower(8);
     b.costBase(PREP_COST * 5);
@@ -620,7 +620,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public KaijuWarsUnitModel SuperZ2(UnitModel rezTo)
   {
     var b = baseBuilder();
-    b.role(UnitModel.ASSAULT | UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.TANK | UnitModel.HOVER | UnitModel.AIR_LOW);
+    b.role(UnitModel.ASSAULT | UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.TANK | UnitModel.HOVER | UnitModel.AIR);
 
     b.baseMovePower(3);
     b.costBase(PREP_COST * 4);
@@ -650,7 +650,7 @@ public class KaijuWarsUnits extends UnitModelScheme
   public KaijuWarsUnitModel GuncrossWing(UnitModel rezTo)
   {
     var b = baseBuilder();
-    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR);
 
     b.baseMovePower(5);
     b.costBase(PREP_COST * 5);

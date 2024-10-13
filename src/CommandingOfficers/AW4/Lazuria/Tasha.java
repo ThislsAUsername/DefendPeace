@@ -49,7 +49,7 @@ public class Tasha extends RuinedCommander
   public Tasha(GameScenario.GameRules rules)
   {
     super(RADIUS, POWER, DEFENSE, coInfo, rules);
-    this.boostMaskAny = UnitModel.AIR_HIGH | UnitModel.AIR_LOW;
+    this.boostMaskAny = UnitModel.AIR;
 
     addCommanderAbility(new SonicBoom(this));
   }

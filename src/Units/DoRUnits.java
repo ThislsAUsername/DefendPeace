@@ -479,7 +479,7 @@ public class DoRUnits extends UnitModelScheme
   public DoRUnitModel FighterModel()
   {
     var b = DoRUnitModel.builder();
-    b.role(UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR);
     
     b.costBase(20000);
     b.abilityPowerValue(18);
@@ -503,7 +503,7 @@ public class DoRUnits extends UnitModelScheme
   public DoRUnitModel BomberModel()
   {
     var b = DoRUnitModel.builder();
-    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR);
     
     b.costBase(20000);
     b.abilityPowerValue(18);
@@ -527,7 +527,7 @@ public class DoRUnits extends UnitModelScheme
   public DoRUnitModel SeaplaneModel()
   {
     var b = DoRUnitModel.builder();
-    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.AIR_TO_AIR | UnitModel.ASSAULT | UnitModel.JET | UnitModel.AIR);
     
     b.costBase(15000);
     b.abilityPowerValue(14);
@@ -551,7 +551,7 @@ public class DoRUnits extends UnitModelScheme
   public DoRUnitModel DusterModel()
   {
     var b = DoRUnitModel.builder();
-    b.role(UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR_HIGH);
+    b.role(UnitModel.AIR_TO_AIR | UnitModel.JET | UnitModel.AIR);
     
     b.costBase(13000);
     b.abilityPowerValue(14);
@@ -575,7 +575,7 @@ public class DoRUnits extends UnitModelScheme
   public DoRUnitModel BCopterModel()
   {
     var b = DoRUnitModel.builder();
-    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.HOVER | UnitModel.AIR_LOW);
+    b.role(UnitModel.AIR_TO_SURFACE | UnitModel.ASSAULT | UnitModel.HOVER | UnitModel.AIR);
     
     b.costBase(9000);
     b.abilityPowerValue(12);
@@ -599,7 +599,7 @@ public class DoRUnits extends UnitModelScheme
   public DoRUnitModel TCopterModel()
   {
     var b = DoRUnitModel.builder();
-    b.role(UnitModel.TRANSPORT | UnitModel.HOVER | UnitModel.AIR_LOW);
+    b.role(UnitModel.TRANSPORT | UnitModel.HOVER | UnitModel.AIR);
     
     b.costBase(5000);
     b.abilityPowerValue(10);
@@ -672,7 +672,7 @@ public class DoRUnits extends UnitModelScheme
     b.name("Cruiser");
     b.type(DoRUnitEnum.CRUISER);
     b.baseCargoCapacity(2);
-    b.carryableMask(UnitModel.AIR_LOW);
+    b.carryableMask(UnitModel.AIR);
 
       /** Cruisers supply their cargo at the beginning of every turn. Make it so. */
     b.supplyCargo(true);
@@ -737,7 +737,7 @@ public class DoRUnits extends UnitModelScheme
     b.type(DoRUnitEnum.CARRIER);
     b.maxMaterials(4);
     b.baseCargoCapacity(2);
-    b.carryableMask(UnitModel.AIR_LOW | UnitModel.AIR_HIGH);
+    b.carryableMask(UnitModel.AIR);
     /** DoR Carriers repair and supply their cargo at the beginning of every turn. Make it so. */
     b.repairCargo(true);
     b.supplyCargo(true);
