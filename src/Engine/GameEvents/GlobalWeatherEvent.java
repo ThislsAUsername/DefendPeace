@@ -15,6 +15,7 @@ public class GlobalWeatherEvent implements GameEvent
 {
   private Weathers weather;
   private int duration;
+  public boolean canCancelFog = false; // If temporary fog is active and the weather doesn't create fog, cancel it.
 
   /** Changes the whole map to the given weather. */
   public GlobalWeatherEvent(Weathers newWeather)
@@ -52,6 +53,12 @@ public class GlobalWeatherEvent implements GameEvent
         loc.setForecast(weather, (map.game.armies.length * duration) - 1);
       }
     }
+    for( Army a : map.game.armies )
+      a.myView.revealFog(); // In case this removed some vision penalties.
+
+    if( map.game.rules.fogMode.fogDefaultsOn )
+      return;
+    // Beyond here is logic that turns on/off global fog in non-fog games.
     if( weather.startsFog )
     {
       map.game.setFog(duration);
@@ -61,6 +68,12 @@ public class GlobalWeatherEvent implements GameEvent
           continue; // This is probably technically laxer than it should be (allows allies to watch your turn with full vision in DoR fog), but like... it seems more fun to see things than not.
         a.myView.resetFog();
       }
+    }
+    else if( canCancelFog )
+    {
+      map.game.setFog(-1); // 0 would make it active for this turn.
+      for( Army a : map.game.armies )
+        a.myView.resetFog();
     }
   }
 
