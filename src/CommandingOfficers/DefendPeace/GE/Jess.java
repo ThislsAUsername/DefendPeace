@@ -44,10 +44,10 @@ public class Jess extends AWBWCommander
         + "Land vehicles cost +70%, but get passive Lightning Strike."));
       infoPages.add(new InfoPage(TurboCharge(null, null),
           "Land vehicles +1 move, +20 attack. Fuel and ammo supplies are replenished.\n"
-        + "+10 attack and defense.\n"));
+        + "+10 attack and defense. Also restores materials.\n"));
       infoPages.add(new InfoPage(Overdrive(null, null),
           "Land vehicles +2 move, +40 attack. Fuel and ammo supplies are replenished.\n"
-        + "+10 attack and defense.\n"));
+        + "+10 attack and defense. Also restores materials.\n"));
       infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override
@@ -153,11 +153,14 @@ public class Jess extends AWBWCommander
     }
 
     @Override
-    protected void perform(MapMaster map)
+    protected void perform(MapMaster gameMap)
     {
-      super.perform(map);
-      for( Unit u : myCommander.army.getUnits() )
-        u.resupply();
+      super.perform(gameMap);
+      for( Unit unit : myCommander.army.getUnits() )
+      {
+        unit.resupply();
+        unit.materials = unit.model.maxMaterials;
+      }
     }
   }
 }
