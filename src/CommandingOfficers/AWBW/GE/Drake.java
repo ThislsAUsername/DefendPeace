@@ -34,7 +34,7 @@ public class Drake extends AWBWCommander
       super("Drake", UIUtils.SourceGames.AWBW, UIUtils.GE);
       infoPages.add(new InfoPage(
             "Drake (AWBW)\n"
-          + "aval units gain +1 movement and +10 defense. Air units lose -30% attack. Unaffected by rain (except vision), and has a higher chance of Rain in random weather.\n"));
+          + "Naval units gain +1 movement and +10 defense. Air units lose -30% attack. Unaffected by rain (except vision), and has a higher chance of Rain in random weather.\n"));
       infoPages.add(new InfoPage(new Tsunami(null, null),
             "All enemy units lose 1 HP (to a minimum of 0.1 HP) and half their fuel.\n"
           + "+10 attack and defense.\n"));
