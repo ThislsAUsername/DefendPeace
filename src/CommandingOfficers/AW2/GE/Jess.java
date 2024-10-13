@@ -36,10 +36,10 @@ public class Jess extends AW2Commander
         + "Vehicular (land) units have superior attack power (+10). Infantry, air and naval units are comparatively weak (-10)."));
       infoPages.add(new InfoPage(TurboCharge(null, null),
           "Movement range of (land) vehicles increases by 1 space. Firepower increases (+20), and fuel and ammo supplies are also replenished.\n"
-        + "+10 defense.\n"));
+        + "+10 defense. Also restores materials.\n"));
       infoPages.add(new InfoPage(Overdrive(null, null),
           "Increase in the attack strength of vehicular (land) units (+40) and 2-space increase in movement range. Also restores fuel and ammo supplies.\n"
-        + "+10 defense.\n"));
+        + "+10 defense. Also restores materials.\n"));
       infoPages.add(new InfoPage(
             "Hit: Dandelions\n"
           + "Miss: Unfit COs"));
@@ -101,11 +101,14 @@ public class Jess extends AW2Commander
     }
 
     @Override
-    protected void perform(MapMaster map)
+    protected void perform(MapMaster gameMap)
     {
-      super.perform(map);
-      for( Unit u : myCommander.army.getUnits() )
-        u.resupply();
+      super.perform(gameMap);
+      for( Unit unit : myCommander.army.getUnits() )
+      {
+        unit.resupply();
+        unit.materials = unit.model.maxMaterials;
+      }
     }
   }
 }

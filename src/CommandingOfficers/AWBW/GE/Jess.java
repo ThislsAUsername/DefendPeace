@@ -35,10 +35,10 @@ public class Jess extends AWBWCommander
         + "(Land) Vehicles gain +10% attack, but all other units (including footsoldiers) lose -10% attack.\n"));
       infoPages.add(new InfoPage(TurboCharge(null, null),
           "(Land) Vehicles gain +1 movement and their attack is increased to +20%. All units resupply fuel and ammo.\n"
-        + "+10 attack and defense.\n"));
+        + "+10 attack and defense. Also restores materials.\n"));
       infoPages.add(new InfoPage(Overdrive(null, null),
           "(Land) Vehicles gain +2 movement and their attack is increased to +40%. All units resupply fuel and ammo.\n"
-        + "+10 attack and defense.\n"));
+        + "+10 attack and defense. Also restores materials.\n"));
       infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override
@@ -97,11 +97,14 @@ public class Jess extends AWBWCommander
     }
 
     @Override
-    protected void perform(MapMaster map)
+    protected void perform(MapMaster gameMap)
     {
-      super.perform(map);
-      for( Unit u : myCommander.army.getUnits() )
-        u.resupply();
+      super.perform(gameMap);
+      for( Unit unit : myCommander.army.getUnits() )
+      {
+        unit.resupply();
+        unit.materials = unit.model.maxMaterials;
+      }
     }
   }
 }
