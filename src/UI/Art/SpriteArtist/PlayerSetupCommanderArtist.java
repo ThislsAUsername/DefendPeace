@@ -337,15 +337,24 @@ public class PlayerSetupCommanderArtist
 
   private static class OuterCategoryPanel
   {
+    COSpriteSpec spriteSpec;
     public Color border, fill;
     public String canonName;
     ArrayList<InnerCategoryPanel> panels;
 
-    public OuterCategoryPanel(Color[] palette, String canonName)
+    public OuterCategoryPanel(COSpriteSpec outerSpec)
     {
-      border = palette[3];
-      fill = palette[5];
-      this.canonName = canonName;
+      spriteSpec = outerSpec;
+      Color[] outerPalette = UIUtils.defaultMapColors;
+      canonName = (!sortByGameThenFaction)? " " : "MISC"; // Faction name is handled by the inner title
+      if( Color.LIGHT_GRAY != outerSpec.color )
+      {
+        outerPalette = UIUtils.getMapUnitColors(outerSpec.color).paletteColors;
+        if( sortByGameThenFaction ) // Our outer category is games, so just pull the hardcoded faction name
+          canonName = outerSpec.faction.name;
+      }
+      border = outerPalette[3];
+      fill = outerPalette[5];
       panels = new ArrayList<>();
     }
   }
@@ -402,13 +411,22 @@ public class PlayerSetupCommanderArtist
     private BufferedImage myImage;
     private int minMMPR;
 
-    public InnerCategoryPanel(ArrayList<Integer> cmdrs, Color[] palette, String canonName)
+    public InnerCategoryPanel(ArrayList<Integer> cmdrs, COSpriteSpec spriteSpec, String postColon)
     {
       this.cmdrs = cmdrs;
       minMMPR = cmdrs.size();
+      Color[] palette = UIUtils.defaultMapColors;
+
+      palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
+      canonName = "MISC";
+      if( Color.LIGHT_GRAY != spriteSpec.color )
+      {
+        canonName = UIUtils.getCanonicalFactionName(spriteSpec);
+        if( null != postColon )
+          canonName += ": " + postColon;
+      }
       border = palette[3];
       fill = palette[5];
-      this.canonName = canonName;
     }
 
     public BufferedImage update(ArrayList<CommanderInfo> infos, int drawWidth, int mmpr)
@@ -558,15 +576,7 @@ public class PlayerSetupCommanderArtist
     for( int outerIndex = 0; outerIndex < outerMax; ++outerIndex )
     {
       COSpriteSpec outerSpec = outerBinColorSpec.get(outerIndex);
-      Color[] outerPalette = UIUtils.defaultMapColors;
-      String outerName = (!sortByGameThenFaction)? " " : "MISC"; // Faction name is handled by the inner title
-      if( Color.LIGHT_GRAY != outerSpec.color )
-      {
-        outerPalette = UIUtils.getMapUnitColors(outerSpec.color).paletteColors;
-        if( sortByGameThenFaction ) // Our outer category is games, so just pull the hardcoded faction name
-          outerName = outerSpec.faction.name;
-      }
-      OuterCategoryPanel outerCategory = new OuterCategoryPanel(outerPalette, outerName);
+      OuterCategoryPanel outerCategory = new OuterCategoryPanel(outerSpec);
 
       for( int innerIndex = 0; innerIndex < innerMax; ++innerIndex )
       {
@@ -574,26 +584,15 @@ public class PlayerSetupCommanderArtist
           continue;
 
         ArrayList<Integer> innerBin = new ArrayList<>(allCmdrLists[outerIndex][innerIndex]);
-        final COSpriteSpec spriteSpec = binColorSpec.get(innerIndex);
-        Color[] palette = UIUtils.defaultMapColors;
-        String canonName = "MISC";
-        if( Color.LIGHT_GRAY != spriteSpec.color )
+        COSpriteSpec spriteSpec = binColorSpec.get(innerIndex);
+        String postColon = null;
+        if( !sortByGameThenFaction )
         {
-          if( sortByGameThenFaction )
-          {
-            palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
-            canonName = UIUtils.getCanonicalFactionName(spriteSpec);
-          }
-          else // Our inner category is games, so steal stuff from the outer category
-          {
-            palette   = outerPalette;
-            String factionName = "MISC";
-            if( Color.LIGHT_GRAY != outerSpec.color )
-              factionName = UIUtils.getCanonicalFactionName(outerSpec);
-            canonName = factionName + ": " + spriteSpec.faction.name;
-          }
+          // Our outer category (factions) is too long to fit on the sidebar, so include both game and faction in the inner bin's header
+          postColon  = spriteSpec.faction.name;
+          spriteSpec = outerSpec; // Faction is the outer spec, so also use it to draw the inner bins
         }
-        InnerCategoryPanel icp = new InnerCategoryPanel(innerBin, palette, canonName);
+        InnerCategoryPanel icp = new InnerCategoryPanel(innerBin, spriteSpec, postColon);
         outerCategory.panels.add(icp);
       }
       if( outerCategory.panels.size() > 0 )
@@ -626,6 +625,42 @@ public class PlayerSetupCommanderArtist
     rightGlueColumn = cmdrInBinSel;
 
     cmdrInBinSelector = new OptionSelector(innerSelBin.size(), cmdrInBinSel);
+  }
+
+  // Note: Steals heavily from initBins()
+  public static void selectCommander(final int selectedCO)
+  {
+    final CommanderInfo selectedInfo = myControl.cmdrInfos.get(selectedCO);
+    int outerSel;
+    if( sortByGameThenFaction )
+    {
+      outerSel = selectedInfo.game.ordinal();
+    }
+    else
+    {
+      outerSel = 0;
+      for( ; outerSel < cmdrBins.size(); ++outerSel )
+        if( selectedInfo.baseFaction.equals(cmdrBins.get(outerSel).spriteSpec) )
+          break;
+    }
+    int selectedBinSize = cmdrBins.get(outerSel).panels.size();
+    int innerSel = 0;
+    ArrayList<Integer> innerSelBin = null;
+    int cmdrInBinSel = -1;
+    for( ; innerSel < selectedBinSize; ++innerSel )
+    {
+      innerSelBin = cmdrBins.get(outerSel).panels.get(innerSel).cmdrs;
+      cmdrInBinSel = innerSelBin.indexOf(selectedCO);
+      if( -1 != cmdrInBinSel )
+        break;
+    }
+
+    outerCategorySelector.setSelectedOption(outerSel);
+    innerCategorySelector.reset(selectedBinSize, innerSel);
+
+    rightGlueColumn = cmdrInBinSel;
+
+    cmdrInBinSelector.reset(innerSelBin.size(), cmdrInBinSel);
   }
 
   public static boolean handleInput(InputAction action)
@@ -665,6 +700,12 @@ public class PlayerSetupCommanderArtist
       case RIGHT:
       {
         tagIndexSelector.handleInput(action);
+        final int postInputSel = tagIndexSelector.getSelectionNormalized();
+        if( postInputSel + 2 < tagIndexSelector.size() ) // Don't move the cursor if we moved to "new CO" or "done"
+        {
+          int selectedCO = tagCmdrList.get(postInputSel);
+          selectCommander(selectedCO);
+        }
       }
       break;
       case BACK:

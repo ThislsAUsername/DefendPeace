@@ -18,7 +18,7 @@ public class MapInfo implements IEnvironsProvider
   public final String mapName;
   public final TerrainType[][] terrain;
   // Array of coordinates for properties owned by each player; the first index is the CO, the second is an arbitrary ordering
-  public final XYCoord[][] COProperties;
+  public final XYCoord[][] playerProps;
   public final ArrayList<Map<XYCoord,String>> mapUnits;
 
   public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props)
@@ -30,7 +30,7 @@ public class MapInfo implements IEnvironsProvider
   {
     mapName = name;
     terrain = tiles;
-    COProperties = props;
+    playerProps = props;
     mapUnits = units;
   }
 
@@ -44,9 +44,9 @@ public class MapInfo implements IEnvironsProvider
     return terrain[0].length;
   }
 
-  public int getNumCos()
+  public int getNumPlayers()
   {
-    return COProperties.length;
+    return playerProps.length;
   }
 
   /**

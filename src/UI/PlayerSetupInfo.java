@@ -105,9 +105,9 @@ public class PlayerSetupInfo
     deets.faction = thisPlayer % factionList.length;
     coList.add(deets);
     flipUnits = false;
-    for( int i = 0; i < mi.COProperties[thisPlayer].length; ++i )
+    for( int i = 0; i < mi.playerProps[thisPlayer].length; ++i )
     {
-      XYCoord coord = mi.COProperties[thisPlayer][i];
+      XYCoord coord = mi.playerProps[thisPlayer][i];
       final TerrainType terrainType = mi.terrain[coord.x][coord.y];
       if( terrainType == TerrainType.HEADQUARTERS
           || terrainType == TerrainType.LAB)

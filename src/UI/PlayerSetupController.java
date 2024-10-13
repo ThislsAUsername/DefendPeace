@@ -46,27 +46,34 @@ public class PlayerSetupController implements IController
     this.changesMade = changesMade;
 
     // Set up our row/col selectors.
-    int numCos = gameBuilder.mapInfo.getNumCos();
-    playerSelector = new OptionSelector(numCos);
+    int numPlayers = gameBuilder.mapInfo.getNumPlayers();
+    playerSelector = new OptionSelector(numPlayers);
     categorySelector = new OptionSelector(SelectionCategories.values().length);
     categorySelector.setSelectedOption(SelectionCategories.START.ordinal()); // Best case is that no changes are needed.
 
     // Create objects to keep track of the selected options for each player.
-    coSelectors = new PlayerSetupInfo[numCos];
+    coSelectors = new PlayerSetupInfo[numPlayers];
 
-    final boolean flySolo = !builder.tagMode.supportsMultiCmdrSelect;
     // Start by making default CO/color selections.
-    for(int co = 0; co < numCos; ++co)
+    for( int player = 0; player < numPlayers; ++player )
     {
       // Set up our option selection framework
-      coSelectors[co] = new PlayerSetupInfo( co, gameBuilder.mapInfo,
+      coSelectors[player] = new PlayerSetupInfo( player, gameBuilder.mapInfo,
                                CommanderLibrary.getCommanderList(),
                                UIUtils.getCOColors(), UIUtils.getFactions(),
                                AILibrary.getAIList(),
-                               initialPicksMap.get(co) );
+                               initialPicksMap.get(player) );
+    }
+    enforceFlySolo();
+  }
 
-      // Enforce single-CO play if necessary
-      final ArrayList<CODeets> coList = coSelectors[co].coList;
+  public void enforceFlySolo()
+  {
+    boolean flySolo = !gameBuilder.tagMode.supportsMultiCmdrSelect;
+    int numPlayers  = gameBuilder.mapInfo.getNumPlayers();
+    for( int player = 0; player < numPlayers; ++player )
+    {
+      final ArrayList<CODeets> coList = coSelectors[player].coList;
       if( flySolo && coList.size() > 1 )
       {
         CODeets lonely = coList.get(0);
