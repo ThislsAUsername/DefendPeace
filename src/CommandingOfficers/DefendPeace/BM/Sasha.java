@@ -1,7 +1,5 @@
 package CommandingOfficers.DefendPeace.BM;
 
-import java.util.ArrayList;
-
 import CommandingOfficers.*;
 import CommandingOfficers.AWBW.AWBWCommander;
 import Engine.Army;
@@ -13,7 +11,6 @@ import Engine.StateTrackers.DamageDealtToIncomeConverter;
 import UI.UIUtils;
 import Units.Unit;
 import Units.UnitContext;
-import lombok.var;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
 
@@ -35,7 +32,7 @@ public class Sasha extends AWBWCommander
       infoPages.add(new InfoPage(
             "Sasha (CAP)\n"
           + "Receives +100 funds per property that grants funds and she owns. (Note: labs, comtowers, and 0 Funds games do not get additional income).\n"
-          + "0.9x capture speed, but get income every time you take the capture action.\n"));
+          + "0.9x capture speed, but get half the property's income every time you take the capture action.\n"));
       infoPages.add(new InfoPage(new MarketCrash(null, null),
             "Reduces enemy power bar(s) by (10 * Funds / 5000)% of their maximum power bar.\n"
           + "+10 attack and defense.\n"));
@@ -73,10 +70,8 @@ public class Sasha extends AWBWCommander
     GameEventQueue returnEvents = new GameEventQueue();
     if( unit.CO == this && location.isProfitable() )
     {
-      var victim = new ArrayList<Unit>();
-      victim.add(unit);
       int onePropFunds = gameRules.incomePerCity + incomeAdjustment;
-      returnEvents.add(new ModifyFundsEvent(army, onePropFunds));
+      returnEvents.add(new ModifyFundsEvent(army, onePropFunds/2));
     }
     return returnEvents;
   }
