@@ -1,0 +1,31 @@
+  FR  SH  SE  FR  MT  MT  FR  SE  SE  SH  SH  AP  GR  GR  GR  RD  CT  SH  SH  SE  SE  SE  SH  MT
+  SH  SH  SE  SE  FR  FR  SH  SE  SE  RV  RV  PI  ME  PI  MT  FR  MT  RV  GR  BR  CT  SE  SE  PI
+  SH  SP  SH  SE  SE  SE  SE  SE  SH  SP  SH  SH  SH  BK  MT  RD  FC  RV 5FC  FR  SH  RF  SE  AP
+  SH  SH  FR  SH  SE  SE  SE  SE  SH  BR 5FC  RD  SH  SH  SH  SH  GR  SE  SE  SH  FR  SH  SE  SH
+  FR  SH  GR  GR  SH  SE  SE  SE  RF  SE  SH  RD  GR  GR  MT  SH  SH  SE  SE  SE  FR  SP  RD  SE
+  SH  SH  CT  GR  GR  SE  SE  SR  SE  SE  RV  RV  RV  RV  RV  GR  SH  SH  SE  SE  SH  SH  RD  BR
+  SH  TW  GR  GR  RD  RD  RF  SE  SE  SE  RD  RD  GR  GR  CT  FR  GR  RV  GR  RD  MT  SE  SH  SE
+  SH  SH  GR  GR  CT  GR  SE  SE  RD  GR  RD  GR  RD  GR  RD  RV  MT  RV  GR 5HQ  GR  GR  SH  SH
+  CT  SH  GR  GR  RD  GR  SH  FR  CT  GR  GR  BK  RD  GR  FR  GR  GR  GR  GR  GR  GR  CT  GR  SH
+  MT  SH  CT  GR  GR  GR  GR  GR  GR  GR  GR  GR  GR  GR  GR  GR  GR  CT  GR  GR  RD  GR  FR  SH
+  SH  SH  GR  RD  BK  GR  FR  GR  RD  RD  CT  GR  GR  CT  RD  RD  GR  FR  GR  BK  RD  GR  SH  SH
+  SH  FR  GR  RD  GR  GR  CT  GR  GR  GR  GR  GR  GR  GR  GR  GR  GR  GR  GR  GR  GR  CT  SH  MT
+  SH  GR  CT  GR  GR  GR  GR  GR  GR  FR  GR  RD  BK  GR  GR  CT  FR  SH  GR  RD  GR  GR  SH  CT
+  SH  SH  GR  GR10HQ  GR  RV  MT  RV  RD  GR  RD  GR  RD  GR  RD  SE  SE  GR  CT  GR  GR  SH  SH
+  SE  SH  SE  MT  RD  GR  RV  GR  FR  CT  GR  GR  RD  RD  SE  SE  SE  RF  RD  RD  GR  GR  TW  SH
+  BR  RD  SH  SH  SE  SE  SH  SH  GR  RV  RV  RV  RV  RV  SE  SE  SR  SE  SE  GR  GR  CT  SH  SH
+  SE  RD  SP  FR  SE  SE  SE  SH  SH  MT  GR  GR  RD  SH  SE  RF  SE  SE  SE  SH  GR  GR  SH  FR
+  SH  SE  SH  FR  SH  SE  SE  GR  SH  SH  SH  SH  RD10FC  BR  SH  SE  SE  SE  SE  SH  FR  SH  SH
+  AP  SE  RF  SH  FR10FC  RV  FC  RD  MT  BK  SH  SH  SH  SP  SH  SE  SE  SE  SE  SE  SH  SP  SH
+  PI  SE  SE  CT  BR  GR  RV  MT  FR  MT  PI  ME  PI  RV  RV  SE  SE  SH  FR  FR  SE  SE  SH  SH
+  MT  SH  SE  SE  SE  SH  SH  CT  RD  GR  GR  GR  AP  SH  SH  SE  SE  FR  MT  MT  FR  SE  SH  FR
+team, unit type, x, y (author: Kantbei)
+5, infantry, 0, 20
+5, lander, 3, 2
+10, bboat, 4, 13
+10, infantry, 5, 0
+10, infantry, 5, 18
+5, infantry, 18, 20
+5, bboat, 19, 7
+10, lander, 20, 18
+10, infantry, 23, 0

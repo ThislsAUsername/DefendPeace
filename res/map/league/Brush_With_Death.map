@@ -1,0 +1,29 @@
+  RF  SE  SE  SE  SE  SH  GR  CT  GR  GR  FR  CT  RD  GR  GR  GR  GR  FR  SH  SE  SE  SE  SE  RF  SE
+  SE  SE  SH  SH  SE  SE  SH  GR  MT  GR 6FC  GR  RD  GR  GR  RD  RD  GR  MT  SH  SH  SH  SE  SE  SE
+  SE  SH  GR  TW  GR  SH  SE  SE  FR  GR  RD  GR  RD  BK  FR  CT  CT  GR  GR  FR  GR  MT  SH  SH  SE
+  SE  FR11FC  PI  MT  GR  SE  SE  SE  GR  RD  RD  CT  MT  GR  RD  RD  GR  FR  FR  GR  GR  GR  FR  SH
+  SE  SP  PI  PI  GR  CT  PI  PI  ME  PI  FR  GR  GR  GR  GR  GR  GR  GR  CT  GR  FR  CT  GR  MT  MT
+  SE  GR  PI  FR  FR  PI  PI  SH  SE  PI  PI  PI  GR  CT  FR  RV  SH  SH  SH  RV  GR  GR  FR  GR  MT
+  SE  SH  PI  ME  PI  PI  SH  SE  SE  SE  GR  ME  GR  FR  GR  SH  GR11HQ  GR  RV  RV  RD  GR  RD  GR
+  SE  SE  SE  CT  GR  SH  SE  RF  SE  SH  AP  PI  PI  RV  BR  RV  FR  RD  RD  RD  RD  RD  GR  RD  CT
+  SH  SE  SE  SE  SE  SE  SE  SE  SE  FR  RD  PI  PI  GR  CT  GR  GR  CT  GR  FR  RV  GR  FC  RD  MT
+  GR  SH  SE  RF  SE  SE  SE  SH  GR  GR  RD  CT  PI  PI  PI  GR  MT  RD  RD  RD  RD  RD  GR  RD  FR
+  TW  GR  SH  SE  SE  SH  SH  GR 6FC  RD  RD  FR  RV  RV  RV  FR  GR  GR  BK  GR  RV  RD  RD  RD  FR
+  FR  RD  RD  RD  RV  GR  BK  GR  GR  FR  RV  RV  RV  FR  RD  RD11FC  GR  SH  SH  SE  SE  SH  GR  TW
+  FR  RD  GR  RD  RD  RD  RD  RD  MT  GR  PI  PI  PI  CT  RD  GR  GR  SH  SE  SE  SE  RF  SE  SH  GR
+  MT  RD  FC  GR  RV  FR  GR  CT  GR  GR  CT  GR  PI  PI  RD  FR  SE  SE  SE  SE  SE  SE  SE  SE  SH
+  CT  RD  GR  RD  RD  RD  RD  RD  FR  RV  BR  RV  PI  PI  AP  SH  SE  RF  SE  SH  GR  CT  SE  SE  SE
+  GR  RD  GR  RD  RV  RV  GR 6HQ  GR  SH  GR  FR  GR  ME  GR  SE  SE  SE  SH  PI  PI  ME  PI  SH  SE
+  MT  GR  FR  GR  GR  RV  SH  SH  SH  RV  FR  CT  GR  PI  PI  PI  SE  SH  PI  PI  FR  FR  PI  GR  SE
+  MT  MT  GR  CT  FR  GR  CT  GR  GR  GR  GR  GR  GR  GR  FR  PI  ME  PI  PI  CT  GR  PI  PI  SP  SE
+  SH  FR  GR  GR  GR  FR  FR  GR  RD  RD  GR  MT  CT  RD  RD  GR  SE  SE  SE  GR  MT  PI 6FC  FR  SE
+  SE  SH  SH  MT  GR  FR  GR  GR  CT  CT  FR  BK  RD  GR  RD  GR  FR  SE  SE  SH  GR  TW  GR  SH  SE
+  SE  SE  SE  SH  SH  SH  MT  GR  RD  RD  GR  GR  RD  GR11FC  GR  MT  GR  SH  SE  SE  SH  SH  SE  SE
+  SE  RF  SE  SE  SE  SE  SH  FR  GR  GR  GR  GR  RD  CT  FR  GR  GR  CT  GR  SH  SE  SE  SE  SE  RF
+team, unit type, x, y (author: Walker Boh)
+11, infantry, 3, 2
+11, missiles, 6, 6
+6, infantry, 8, 10
+11, infantry, 14, 20
+11, infantry, 16, 11
+6, missiles, 18, 15

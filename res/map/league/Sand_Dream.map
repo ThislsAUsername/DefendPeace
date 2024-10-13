@@ -1,0 +1,27 @@
+  MT  RV  RV  RV  RV  RV  MT  GR  BR  AP  FR  RV  SH  SH  GR  MT  MT  RV  CT  RV  RV
+  RV  RV  RD  RD  CT  RD  FR  FR  RV  RV  GR  RV  SH  SH  FR  CT  GR  RV  BR  RV  GR
+  RV  RD  RD  MT  GR  RD  RD13FC  GR  RV  RV  RV13FC  GR  GR  GR  GR  GR  FR  GR  MT
+  CT  RD  MT  GR  FR  GR  SH  SH  SH  SH  SP  GR  RD  RD  MT  GR  GR  FC  RD  GR  FR
+  MT  GR  FR  TW  GR  SH  SH  MT  GR  SH  SH  GR  FR  RD  RD  MT  MT  GR  RD  GR  CT
+  GR  FR  GR  FR  SH  SH  MT  MT  GR  CT  SH  SH  GR  FR  RD  CT  GR  MT  RD  GR  GR
+  GR  GR  FR  PI  SH  MT  GR  FR  MT  GR  MT  SH13HQ  GR  MT  RD  RD  RD  RD  MT  GR
+  FR  CT  GR  RV  SH  SH  CT  GR  FR  GR  SH  SH  GR  MT  GR  FR  GR  GR  GR  FR  FR
+  GR  RD  GR  PI  GR  SH  SH  GR  MT  SH  SH  CT  GR  MT  GR  PI  MT  FR  GR  CT  GR
+  GR  RD  RD  GR  GR  GR  SH  SH  SH  SH  RV  RD  RD  RD  GR  RV  GR  GR  RD  RD  GR
+  BR  RV  BR  CT  GR  PI  GR  CT  GR  FR  RD  FR  GR  CT  GR  PI  GR  CT  BR  RV  BR
+  GR  RD  RD  GR  GR  RV  GR  RD  RD  RD  RV  SH  SH  SH  SH  GR  GR  GR  RD  RD  GR
+  GR  CT  GR  FR  MT  PI  GR  MT  GR  CT  SH  SH  MT  GR  SH  SH  GR  PI  GR  RD  GR
+  FR  FR  GR  GR  GR  FR  GR  MT  GR  SH  SH  GR  FR  GR  CT  SH  SH  RV  GR  CT  FR
+  GR  MT  RD  RD  RD  RD  MT  GR11HQ  SH  MT  GR  MT  FR  GR  MT  SH  PI  FR  GR  GR
+  GR  GR  RD  MT  GR  CT  RD  FR  GR  SH  SH  CT  GR  MT  MT  SH  SH  FR  GR  FR  GR
+  CT  GR  RD  GR  MT  MT  RD  RD  FR  GR  SH  SH  GR  MT  SH  SH  GR  TW  FR  GR  MT
+  FR  GR  RD  FC  GR  GR  MT  RD  RD  GR  SP  SH  SH  SH  SH  GR  FR  GR  MT  RD  CT
+  MT  GR  FR  GR  GR  GR  GR  GR11FC  RV  RV  RV  GR11FC  RD  RD  GR  MT  RD  RD  RV
+  GR  RV  BR  RV  GR  CT  FR  SH  SH  RV  GR  RV  RV  FR  FR  RD  CT  RD  RD  RV  RV
+  RV  RV  CT  RV  MT  MT  GR  SH  SH  RV  FR  AP  BR  GR  MT  RV  RV  RV  RV  RV  MT
+team, unit type, x, y
+13, INFANTRY, 12, 2
+13, BBOAT, 10, 3
+13, BBOAT, 4, 9
+11, BBOAT, 16, 11
+11, BBOAT, 10, 17

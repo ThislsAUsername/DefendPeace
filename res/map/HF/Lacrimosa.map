@@ -1,0 +1,23 @@
+  TW  MT  MT  FR  FR  BR  RD  RD  CT  MT  MT  GR  RD 2FC  GR  FR  GR  CT  GR  FR  MT  GR  FR  FR  MT 4LB
+  FR  MT  CT  RD  RD  BR  FR  GR  FR  GR  GR 2FC  RD  GR  FR  GR  CT  MT  RD  BR  RD  FR  CT  RD 4FC  MT
+  CT  GR  FR  MT  GR  RV  RV  RV  GR  RD  RD  RD  RD  CT  GR  GR  MT  GR  RD  BR  RD  MT  RD  RD  GR  MT
+  FR  GR  GR  FR  GR  MT  CT  BR  GR  CT  MT  GR  GR  GR  FR  GR  FR  GR  RV  RV  GR  CT  RD  FR  GR  GR
+  MT 4FC  GR  GR  GR  GR  GR  RV  RV  FR  FR  MT  SE  SE  SH  SH  GR  CT  BR  RD  GR  GR  GR  GR  RD  CT
+  MT  FR  GR  RD  CT  MT  FR  GR  SE  SH  BR  SH  SE  SE  SH  SH  SH  SH  SE  CT  FR  GR  SE  BR  BR  RV
+  GR  FR  GR  CT  MT  GR  GR  SH  SH  GR  RD  GR  CT 2LB  GR  GR  SH  SH  SE  SE  SE  GR  GR  FR  RD  MT
+  SH  SE  GR  GR  GR  GR  CT  SH  SH  GR  RD  GR  GR  GR  FR  GR  GR  GR  SE  RF  SE  SH  CT  GR  CT  GR
+  SH  SE  SH  SH  GR  FR  SH  SH  GR  GR  CT  FR  SH  SH  GR  GR  CT  FR  SE  SE  SE  SH  SH  SH  GR  GR
+  GR  GR  SH  SH  SH  SE  SE  SE  FR  CT  GR  GR  SH  SH  FR  CT  GR  GR  SH  SH  FR  GR  SH  SH  SE  SH
+  GR  CT  GR  CT  SH  SE  RF  SE  GR  GR  GR  FR  GR  GR  GR  RD  GR  SH  SH  CT  GR  GR  GR  GR  SE  SH
+  MT  RD  FR  GR  GR  SE  SE  SE  SH  SH  GR  GR 4LB  CT  GR  RD  GR  SH  SH  GR  GR  MT  CT  GR  FR  GR
+  RV  BR  BR  SE  GR  FR  CT  SE  SH  SH  SH  SH  SE  SE  SH  BR  SH  SE  GR  FR  MT  CT  RD  GR  FR  MT
+  CT  RD  GR  GR  GR  GR  RD  BR  CT  GR  SH  SH  SE  SE  MT  FR  FR  RV  RV  GR  GR  GR  GR  GR 2FC  MT
+  GR  GR  FR  RD  CT  GR  RV  RV  GR  FR  GR  FR  GR  GR  GR  MT  CT  GR  BR  CT  MT  GR  FR  GR  GR  FR
+  MT  GR  RD  RD  MT  RD  BR  RD  GR  MT  GR  GR  CT  RD  RD  RD  RD  GR  RV  RV  RV  GR  MT  FR  GR  CT
+  MT 2FC  RD 4CT  FR  RD  BR  RD  MT  CT  GR  FR  GR  RD 4FC  GR  GR  FR  GR  FR  BR  RD  RD  CT  MT  FR
+ 2LB  MT  FR  FR  GR  MT  FR  GR  CT  GR  FR  GR 4FC  RD  GR  MT  MT  CT  RD  RD  BR  FR  FR  MT  MT  TW
+team, unit type, x, y
+4, INFANTRY, 1, 4
+4, INFANTRY, 24, 1
+4, INFANTRY, 13, 16
+2, INFANTRY, 1, 16

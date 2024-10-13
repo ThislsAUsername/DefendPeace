@@ -1,0 +1,31 @@
+  SE  SE  SE  SE  SH  GR  CT  GR  RD  RD  GR  SH  RF  SE  SE  SE  MT  GR  GR  CT  RV  RV  PI
+  SE  SE  SE  SH  SH  GR  GR  GR 0FC  GR  FR  SH  SE  SE  SE  SE  SH  GR  FR  GR  SH  CT  MT
+  SH  SH  FR  SH  CT  SH  GR  GR  RD  GR  MT  GR  SE  SE  RF  SE  SE  SP  SH  SH  SH  RD  GR
+  GR  AP  SH  FR  SH  SH  FR  CT  RD  RD  MT  GR  CT  SH  SE  SE  SE  SE  SH  CT  SH  RD  FR
+  RD  GR  GR  SH  SH  SH  RV  GR  GR  FR  AP  GR  GR  GR  FR  SH  RV  SH  SH  SH  SH  RD  RD
+  RD  MT  FR  GR  SH  SE  SE  SH  GR  GR  RD  RD  RD  BK  SH  SH  CT  SH  SH  FR 3FC  GR  GR
+  RD  RD  RD  CT  GR  SE  RF  SE  SH  SH  SH  SH  FR  SH  SH  SH  SH  GR  FR  GR  GR  GR  FR
+  CT  GR  RD  GR  GR  SE  SE  SE  SE  CT  SH  SH  SH  RV  CT  SH  FR  GR  RD  GR  GR  CT  GR
+  GR  RD 3FC  GR  SH  SE  SE  SE  FR  SH  SH  SH  CT  SE  SE  SE  SH  GR 3HQ  MT  GR  RD  RD
+  GR  RD  FR  MT  SE  RF  SE  SH  RV  SH  SH  SH  SH  SE  SE  RF  SE  SE  SH  SH  FR  RD  GR
+  CT  GR  SH  SE  SE  SE  SE  GR 3FC  RD  RD  GR  SH  SH  SE  SE  SE  SH  SH  SH  RD  RD  CT
+  SH  SH  SH  BK  SE  SH  CT  RD  RD  GR  CT  FR  GR  CT  BR  BR  BR  TW  RD  RD  GR  GR  GR
+  FR  SH  SH  SH  SH  FR  GR  GR  MT  FR  FR  GR  GR  MT  SH  SH  SH  GR  GR  GR  CT  FR  GR
+  GR  FR  CT  GR  GR  GR  SH  SH  SH  MT  GR  GR  FR  FR  MT  GR  GR  FR  SH  SH  SH  SH  FR
+  GR  GR  GR  RD  RD  TW  BR  BR  BR  CT  GR  FR  CT  GR  RD  RD  CT  SH  SE  BK  SH  SH  SH
+  CT  RD  GR  SH  SH  SH  SE  SE  SE  SH  SH  GR  RD  RD 0FC  GR  SE  SE  SE  SE  SH  GR  CT
+  GR  RD  FR  SH  SH  SE  SE  RF  SE  SE  SH  SH  SH  SH  RV  SH  SE  RF  SE  MT  FR  RD  GR
+  RD  RD  GR  MT 0HQ  GR  SH  SE  SE  SE  CT  SH  SH  SH  FR  SE  SE  SE  SH  GR 0FC  RD  GR
+  GR  CT  GR  GR  RD  GR  FR  SH  CT  RV  SH  SH  SH  CT  SE  SE  SE  SE  GR  GR  RD  GR  CT
+  FR  GR  GR  GR  FR  GR  SH  SH  SH  SH  FR  SH  SH  SH  SH  SE  RF  SE  GR  CT  RD  RD  RD
+  GR  GR 0FC  FR  SH  SH  CT  SH  SH  BK  RD  RD  RD  GR  GR  SH  SE  SE  SH  GR  FR  MT  RD
+  RD  RD  SH  SH  SH  SH  RV  SH  FR  GR  GR  GR  AP  FR  GR  GR  RV  SH  SH  SH  GR  GR  RD
+  FR  RD  SH  CT  SH  SE  SE  SE  SE  SH  CT  GR  MT  RD  RD  CT  FR  SH  SH  FR  SH  AP  GR
+  GR  RD  SH  SH  SH  SP  SE  SE  RF  SE  SE  GR  MT  GR  RD  GR  GR  SH  CT  SH  FR  SH  SH
+  MT  CT  SH  GR  FR  GR  SH  SE  SE  SE  SE  SH  FR  GR 3FC  GR  GR  GR  SH  SH  SE  SE  SE
+  PI  RV  RV  CT  GR  GR  MT  SE  SE  SE  RF  SH  GR  RD  RD  GR  CT  GR  SH  SE  SE  SE  SE
+
+0,LANDER,7,13
+3,INFANTRY,20,5
+3,INFANTRY,2,8
+3,LANDER,15,12

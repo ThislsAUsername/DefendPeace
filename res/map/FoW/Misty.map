@@ -1,0 +1,31 @@
+  CT  MT  SH  FR  GR  GR  CT  MT  FR  AP  GR  GR 8FC  FR  SE  SE  SE  SH  TW
+  MT  SH  SH  GR  RD  RD  RD  RD  RD  GR  MT  MT  FR  RD  BR  RD  GR  SE  SE
+  SE  SH  GR  GR  CT  FR  RD  GR  GR  CT  MT  GR  GR  CT  RV  RD  FC  RD  SE
+  SE  SH  CT  GR  RD  GR  RD  CT  GR  GR  MT  FR  RD  RD  RV  RV  RV  BR  SE
+  SH  BK  FR  GR  RD  GR  GR  RD  FR  GR  GR  GR  RD  GR  GR  CT  GR  SH  SE
+  SE  GR  RD  GR  CT  GR  GR  RD  RD  GR 8HQ  RD  CT  GR  FR  RD  SE  SE  AP
+  SE  GR  RD  RD  GR  FR  GR  GR  CT  GR  RD  RD  GR  GR  RD  RD  SH  FR  SH
+  SP  FR  GR  RD  GR  CT  SH  SH  GR  GR  RD  FR  GR  GR  CT  GR  SE  GR  SH
+  SE  SE  CT  RD  FR  SH  SH  SH  GR  FR  GR  CT  GR  FR  GR  GR  SE  SH  GR
+  RF  SE  SE  BR  RV  SH10HQ  SH  CT  GR  GR  GR  SH  SH  GR  CT  SE  SH 8FC
+  SH  SE  SH  FR  GR  SH  SH  SH  GR  BK  GR  SH  SH  SH  GR  FR  SH  SE  SH
+10FC  SH  SE  CT  GR  SH  SH  GR  GR  GR  CT  SH 8HQ  SH  RV  BR  SE  SE  RF
+  GR  SH  SE  GR  GR  FR  GR  CT  GR  FR  GR  SH  SH  SH  FR  RD  CT  SE  SE
+  SH  GR  SE  GR  CT  GR  GR  FR  RD  GR  GR  SH  SH  CT  GR  RD  GR  FR  SP
+  SH  FR  SH  RD  RD  GR  GR  RD  RD  GR  CT  GR  GR  FR  GR  RD  RD  GR  SE
+  AP  SE  SE  RD  FR  GR  CT  RD10HQ  GR  RD  RD  GR  GR  CT  GR  RD  GR  SE
+  SE  SH  GR  CT  GR  GR  RD  GR  GR  GR  FR  RD  GR  GR  RD  GR  FR  BK  SH
+  SE  BR  RV  RV  RV  RD  RD  FR  MT  GR  GR  CT  RD  GR  RD  GR  CT  SH  SE
+  SE  RD  FC  RD  RV  CT  GR  GR  MT  CT  GR  GR  RD  FR  CT  GR  GR  SH  SE
+  SE  SE  GR  RD  BR  RD  FR  MT  MT  GR  RD  RD  RD  RD  RD  GR  SH  SH  MT
+  TW  SH  SE  SE  SE  FR10FC  GR  GR  AP  FR  MT  CT  GR  GR  FR  SH  MT  CT
+team, unit type, x, y (author: unclegubsy)
+8, recon, 1, 20
+10, lander, 2, 15
+10, lander, 6, 9
+10, infantry, 6, 20
+10, bboat, 9, 0
+8, bboat, 9, 20
+8, lander, 12, 11
+10, recon, 17, 0
+8, lander, 18, 1

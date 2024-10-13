@@ -2,6 +2,7 @@ package Terrain.Maps;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,44 +12,105 @@ import java.util.TreeMap;
 
 import Engine.XYCoord;
 import Terrain.MapInfo;
+import Terrain.MapInfo.MapNode;
 import Terrain.TerrainType;
+import lombok.var;
 
 public class MapReader extends IMapBuilder
 {
   /**
    * Tells the MapReader to read in the maps.
    */
-  public static ArrayList<MapInfo> readMapData()
+  public static MapNode readMapData()
   {
-    ArrayList<MapInfo> importMaps = new ArrayList<MapInfo>();
+    MapNode root = new MapNode(null, "", null);
 
     // This try{} is to safeguard us from exceptions if the res/map folder doesn't exist.
     // If it fails, we don't need to do anything in the catch{} since we just won't have anything in our list.
     try
     {
-      final File folder = new File(Engine.Driver.JAR_DIR + "res/map");
-
-      for( final File fileEntry : folder.listFiles() )
+      var nodes = new ArrayDeque<MapNode>();
+      nodes.add(root);
+      while (!nodes.isEmpty())
       {
-        // we aren't checking subdirectories, yet
-        if( !fileEntry.isDirectory() )
+        MapNode parent = nodes.poll();
+        final File folder = new File(Engine.Driver.JAR_DIR + "res/map/" + parent.uri());
+
+        for( final File fileEntry : folder.listFiles() )
         {
-          // We just don't want to try to interpret the python script as a map. That'd be weird.
-          if( !fileEntry.getName().endsWith(".map") )
+          String name = fileEntry.getName();
+          if( fileEntry.isDirectory() )
+          {
+            MapNode dirNode = new MapNode(parent, name, null);
+            nodes.add(dirNode);
+            parent.children.add(dirNode);
             continue;
-          importMaps.add(readSingleMap(fileEntry.getAbsolutePath()));
+          }
+          // We just don't want to try to interpret the python script as a map. That'd be weird.
+          if( !name.endsWith(".map") )
+            continue;
+          MapInfo readMap = readSingleMap(parent.uri(), fileEntry.getAbsolutePath());
+          if( null != readMap )
+            parent.children.add(new MapNode(parent, readMap.mapName, readMap));
+        }
+
+        // If this directory node has no viable children, get rid of it
+        if( parent.parent != null &&
+            parent.children.isEmpty() )
+        {
+          ArrayList<MapNode> ppc = parent.parent.children;
+          ppc.remove(parent);
+          continue;
+        }
+
+        // List children alphabetically, directories first
+        parent.children.sort((nodeA, nodeB) -> {
+          boolean isMapA = (null != nodeA.result);
+          boolean isMapB = (null != nodeB.result);
+          if( isMapA ^ isMapB ) // One of them is a directory
+            return (isMapA) ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+          return nodeA.name.compareTo(nodeB.name);
+        });
+
+        // If this directory node has only one child or directory children, get rid of it and prepend its name to the children's names
+        if( parent.parent != null && (
+              parent.children.size() == 1 ||
+              parent.children.stream().allMatch((node) -> node.result == null)
+            )
+          )
+        {
+          ArrayList<MapNode> ppc = parent.parent.children;
+          int index = ppc.indexOf(parent);
+          ppc.remove(parent);
+          // Give my children to my parent, in my spot, in order.
+          for( var child : parent.children )
+          {
+            child.parent = parent.parent;
+            child.name   = parent.name +"/"+ child.name;
+            ppc.add(index, child);
+            ++index;
+          }
+          continue;
         }
       }
     }
     catch (NullPointerException e)
     {
       System.out.println("WARNING: res/map directory does not exist.");
+      e.printStackTrace(System.out);
     }
-    importMaps.sort( (mapA, mapB) -> mapA.mapName.compareTo(mapB.mapName) );
-    return importMaps;
+    return root;
   }
 
   public static MapInfo readSingleMap(final String filePath)
+  {
+    File fileEntry = new File(filePath);
+    // Grab the directory name, relative to the parent
+    String dirPath = fileEntry.getParent();
+    dirPath = dirPath.replaceAll(".*res/map/?", "");
+    return readSingleMap(dirPath, filePath);
+  }
+  public static MapInfo readSingleMap(final String dirPath, final String filePath)
   {
     try
     {
@@ -58,7 +120,6 @@ public class MapReader extends IMapBuilder
       // underscores->spaces makes it pretty
       mapName = mapName.replaceAll("_", " ");
       mapName = mapName.replaceAll("\\.map", "");
-      System.out.println("INFO: Parsing map: " + mapName);
 
       // We need a list of who starts owning what properties. This is that list.
       // Each arraylist contains coordinates, and which list it is denotes who owns that property.
@@ -163,13 +224,14 @@ public class MapReader extends IMapBuilder
           }
           catch (Exception e)
           {
-            System.out.println("Caught exception while parsing units: " + e.getMessage());
+            System.out.println("Caught exception while parsing units from "+filePath);
+            e.printStackTrace(System.out);
           }
         }
       }
 
       // Finally, we make our map's container to put in importMaps.
-      MapInfo info = new MapInfo(mapName, terrainArrayArray.toArray(new TerrainType[0][0]),
+      MapInfo info = new MapInfo(dirPath, mapName, terrainArrayArray.toArray(new TerrainType[0][0]),
           propertyArrayArray.toArray(new XYCoord[0][0]), units);
 
       scanner.close();
@@ -179,6 +241,7 @@ public class MapReader extends IMapBuilder
     catch (FileNotFoundException e)
     {
       System.out.println("WARNING: Could not find map file " + filePath);
+      e.printStackTrace(System.out);
     }
     return null;
   }

@@ -1,0 +1,25 @@
+  GR  AP  RV  GR  FR  FR  MT  MT  MT  CT  SH  SH  MT  MT  MT  FR  GR  RV  RV  AP
+  FR  RV  RV  RD  RD  RD  CT  MT  FR  GR  GR  FR  GR  MT  GR  GR  FR  CT  RD  RV
+  GR  BR  GR  CT  FR  RD  GR  GR  GR  FR  TW  GR  CT  GR  FR  GR  GR  GR  RD  RV
+  RV  RV  PI  PI  MT  RD  RD  FC  RD  GR  MT  GR  GR  GR  FR  CT  MT  GR  RD  RD
+  GR  CT  FR  PI  MT  MT  GR  GR  RD  MT  MT  MT  GR  FR  GR  MT  MT  BK  GR  RD
+  FR  GR  GR  FR  MT  GR  FR  GR  RD  GR  FR  GR  GR  GR  CT  GR  MT  GR  FC  RD
+  GR  GR  BK  GR  GR  CT  GR  FR  RD 2LB  RD  FR  BK  GR  RD  GR  GR  GR  GR  SH
+  AP  RV  BR  RV  FR  GR  GR  FR  SH  SH  RD  RD  CT  RD  RD  BK  FR  GR  FR  SH
+  BR  RV  FR  RV  GR  FR  SH  SE  SH  SH  SE  SE  SE  BR  RV  GR  GR  FR  GR  CT
+  GR  MT  GR  RV  RV  GR  SH  SE  CT  GR  MT  SE  SE  SP  RV  RV  GR  CT  GR  FR
+  FR  GR  CT  GR  RV  RV  SP  SE  SE  MT  GR  CT  SE  SH  GR  RV  RV  GR  MT  GR
+  CT  GR  FR  GR  GR  RV  BR  SE  SE  SE  SH  SH  SE  SH  FR  GR  RV  FR  RV  BR
+  SH  FR  GR  FR  BK  RD  RD  CT  RD  RD  SH  SH  FR  GR  GR  FR  RV  BR  RV  AP
+  SH  GR  GR  GR  GR  RD  GR  BK  FR  RD 8LB  RD  FR  GR  CT  GR  GR  BK  GR  GR
+  RD  FC  GR  MT  GR  CT  GR  GR  GR  FR  GR  RD  GR  FR  GR  MT  FR  GR  GR  FR
+  RD  GR  BK  MT  MT  GR  FR  GR  MT  MT  MT  RD  GR  GR  MT  MT  PI  FR  CT  GR
+  RD  RD  GR  MT  CT  FR  GR  GR  GR  MT  GR  RD  FC  RD  RD  MT  PI  PI  RV  RV
+  RV  RD  GR  GR  GR  FR  GR  CT  GR  TW  FR  GR  GR  GR  RD  FR  CT  GR  BR  GR
+  RV  RD  CT  FR  GR  GR  MT  GR  FR  GR  GR  FR  MT  CT  RD  RD  RD  RV  RV  FR
+  AP  RV  RV  GR  FR  MT  MT  MT  SH  SH  CT  MT  MT  MT  FR  FR  GR  RV  AP  GR
+team, unit type, x, y
+2, INFANTRY, 4, 4
+2, INFANTRY, 0, 14
+8, INFANTRY, 19, 5
+8, INFANTRY, 15, 16

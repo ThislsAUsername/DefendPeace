@@ -1,0 +1,25 @@
+  AP  RD 3FC  SE  SE  SE  SE  SE  RF  SE  SE  SE  SH  SP  SE  SE  SE  RF  SE
+  RD  FC  SH  SE  SE  SP  GR  FR  RD  CT  RD  MT  GR  FR  SH  SH  CT  SE  SE
+ 3FC  SH  FR  SH  SH  GR  MT  RD  RD  GR  RD  GR  CT  RD  RD  RD  RD  SE  RF
+  SE  RF  SE  RV  GR  FR  GR  CT  GR  BK  RD  GR  GR  RD  GR  FR  RD  SH  SE
+  SE  SE  SE  RV  RV  RV  RV  RD  GR  MT  CT  GR  FR  RD  CT  GR  RD  CT  SE
+  SE  SE  SH  BK  RV 3HQ  RV  RD  FR  RD  RD  GR  GR  GR  GR  GR  GR  SH  RF
+  RV  SP  RV  BR  RV  BR  RV  RD  CT  RD  GR  GR  CT  RD  FR  RD  TW  SH  SE
+  RV  BR  RV  RD  RD  RD  GR  FR  GR  GR  GR  FR  GR  RD  RD  RD  GR  SH  SE
+  RD  RD  CT  RD  GR  RD  GR  GR  SH  SH  SH  GR  GR  GR  GR  MT  GR  FR  SH
+  CT  GR  GR  FR  GR  CT  FR  GR  SH  LB  SH  GR  FR  CT  GR  FR  GR  GR  CT
+  SH  FR  GR  MT  GR  GR  GR  GR  SH  SH  SH  GR  GR  RD  GR  RD  CT  RD  RD
+  SE  SH  GR  RD  RD  RD  GR  FR  GR  GR  GR  FR  GR  RD  RD  RD  RV  BR  RV
+  SE  SH  TW  RD  FR  RD  CT  GR  GR  RD  CT  RD  RV  BR  RV  BR  RV  SP  RV
+  RF  SH  GR  GR  GR  GR  GR  GR  RD  RD  FR  RD  RV 7HQ  RV  BK  SH  SE  SE
+  SE  CT  RD  GR  CT  RD  FR  GR  CT  MT  GR  RD  RV  RV  RV  RV  SE  SE  SE
+  SE  SH  RD  FR  GR  RD  GR  GR  RD  BK  GR  CT  GR  FR  GR  RV  SE  RF  SE
+  RF  SE  RD  RD  RD  RD  CT  GR  RD  GR  RD  RD  MT  GR  SH  SH  FR  SH 7FC
+  SE  SE  CT  SH  SH  FR  GR  MT  RD  CT  RD  FR  GR  SP  SE  SE  SH  FC  RD
+  SE  RF  SE  SE  SE  SP  SH  SE  SE  SE  RF  SE  SE  SE  SE  SE 7FC  RD  AP
+team, unit type, x, y (author: wyj_0081)
+3, bboat, 0, 3
+3, lander, 3, 0
+7, lander, 15, 18
+7, infantry, 17, 17
+7, bboat, 18, 15
