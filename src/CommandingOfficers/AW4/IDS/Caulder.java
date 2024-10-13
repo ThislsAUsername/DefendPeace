@@ -1,5 +1,7 @@
 package CommandingOfficers.AW4.IDS;
 
+import java.util.ArrayList;
+
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.DeployableCommander;
@@ -7,10 +9,11 @@ import CommandingOfficers.AW4.RuinedCommander;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.HealUnitEvent;
+import Engine.GameEvents.MassHealEvent;
 import Terrain.MapMaster;
 import UI.UIUtils;
 import Units.*;
+import lombok.var;
 
 public class Caulder extends RuinedCommander
 {
@@ -63,6 +66,7 @@ public class Caulder extends RuinedCommander
     Unit cou = COUs.get(0);
     XYCoord center = new XYCoord(cou);
     final int repairs = D2DREPAIRS*10;
+    var patients = new ArrayList<Unit>();
 
     // Bounding box to limit wasted iterations
     final int minX = Math.max(cou.x - zoneRadius, 0);
@@ -78,11 +82,14 @@ public class Caulder extends RuinedCommander
           continue;
         Unit resi = map.getResident(x, y);
         if( resi != null && this.army == resi.CO.army )
-        {
-          events.add(new HealUnitEvent(resi, repairs, this.army)); // Event handles cost logic
-        }
+          patients.add(resi);
       }
     }
+
+    if( patients.isEmpty() )
+      return;
+    var heal = new MassHealEvent(this.army, patients, repairs); // Event handles cost logic
+    events.add(heal);
   }
 
 }
