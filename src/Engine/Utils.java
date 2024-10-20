@@ -136,12 +136,12 @@ public class Utils
 
     boolean canTravelThroughEnemies = false;
     int movePower = initialFillPower;
-    XYCoord lastCoord = path.getWaypoint(0).GetCoordinates();
+    XYCoord lastCoord = path.getWaypoint(0);
 
     // Index from 1 so we don't count the space the unit is on.
     for( int i = 1; i < path.getPathLength(); ++i )
     {
-      XYCoord newCoord = path.getWaypoint(i).GetCoordinates();
+      XYCoord newCoord = path.getWaypoint(i);
 
       movePower -= fff.getTransitionCost(map, lastCoord, newCoord, team, canTravelThroughEnemies);
       lastCoord = newCoord;
@@ -364,8 +364,8 @@ public class Utils
     final int movePower = uc.calculateMovePower();
     for( int i = 1; i < path.getPathLength(); ++i)
     {
-      XYCoord from = path.getWaypoint(i-1).GetCoordinates();
-      XYCoord to   = path.getWaypoint( i ).GetCoordinates();
+      XYCoord from = path.getWaypoint(i-1);
+      XYCoord to   = path.getWaypoint( i );
       // If there are collisions relevant to the unit, the cost will be IMPASSABLE
       if( movePower < fff.getTransitionCost(map, from, to, unit.CO.army, canTravelThroughEnemies) )
       {

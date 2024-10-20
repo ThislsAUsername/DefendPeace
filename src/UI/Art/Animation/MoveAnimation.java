@@ -32,7 +32,7 @@ public class MoveAnimation extends BaseUnitActionAnimation
     double msSpentTotal = 0;
     for( int i = 0; i < tilesTraveled; ++i)
     {
-      XYCoord destCoord  = path.getWaypoint( i+1 ).GetCoordinates();
+      XYCoord destCoord  = path.getWaypoint( i+1 );
       int moveCost       = mt.getMoveCost(map.getEnvironment(destCoord));
       double msSpent     = msPerCost * moveCost;
       if( 0 == moveCost )
@@ -68,8 +68,8 @@ public class MoveAnimation extends BaseUnitActionAnimation
     final int prevTileIndex = Math.min(currentTile  , path.getPathLength() - 1);
     final int nextTileIndex = Math.min(currentTile+1, path.getPathLength() - 1);
 
-    final XYCoord coord1 = path.getWaypoint( prevTileIndex ).GetCoordinates();
-    final XYCoord coord2 = path.getWaypoint( nextTileIndex ).GetCoordinates();
+    final XYCoord coord1 = path.getWaypoint( prevTileIndex );
+    final XYCoord coord2 = path.getWaypoint( nextTileIndex );
 
     final double diffX = coord2.x - coord1.x;
     final double diffY = coord2.y - coord1.y;

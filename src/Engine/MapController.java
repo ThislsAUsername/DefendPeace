@@ -401,7 +401,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
         GamePath path = myGameInputHandler.myStateData.path;
         if( null != path && path.getPathLength() > 0 )
         {
-          myGame.setCursorLocation(path.getEnd().GetCoordinates());
+          myGame.setCursorLocation(path.getEnd());
         }
         else
         {

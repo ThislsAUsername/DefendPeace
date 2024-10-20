@@ -42,7 +42,7 @@ public class MoveEvent implements GameEvent
   {
     if( unitPath.getPathLength() > 0 ) // Make sure we have a destination.
     {
-      GamePath.PathNode endpoint = unitPath.getEnd();
+      XYCoord endpoint = unitPath.getEnd();
       int fuelBurn = unitPath.getFuelCost(unit, gameMap);
 
       if( null == gameMap.getLocation(endpoint.x, endpoint.y).getResident() ) // Just avoid triggering a warning.

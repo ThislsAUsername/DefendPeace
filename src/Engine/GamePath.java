@@ -16,7 +16,7 @@ import Units.MoveTypes.MoveType;
 public class GamePath
 {
 
-  private ArrayList<PathNode> waypoints;
+  private ArrayList<XYCoord> waypoints;
 
   public GamePath()
   {
@@ -35,18 +35,18 @@ public class GamePath
 
   public void addWaypoint(int x, int y)
   {
-    waypoints.add(new PathNode(x, y));
+    waypoints.add(new XYCoord(x, y));
   }
   public void addWaypoint(int index, int x, int y)
   {
-    waypoints.add(index, new PathNode(x, y));
+    waypoints.add(index, new XYCoord(x, y));
   }
   public void addWaypoint(XYCoord xyc)
   {
     addWaypoint(xyc.x, xyc.y);
   }
 
-  public ArrayList<PathNode> getWaypoints()
+  public ArrayList<XYCoord> getWaypoints()
   {
     return waypoints;
   }
@@ -74,7 +74,7 @@ public class GamePath
   public int getFuelCost(Commander co, UnitModel unit, GameMap map)
   {
     int fuelBurnRate = unit.fuelBurnPerTile;
-    PathNode start = waypoints.get(0);
+    XYCoord start = waypoints.get(0);
     if( map.getEnvironment(start.x, start.y).weatherType == Weathers.CHILL && !co.immuneToCold )
       fuelBurnRate *= 2;
     return getMoveCost(co, unit, map) * fuelBurnRate;
@@ -94,30 +94,30 @@ public class GamePath
     // We iterate from 1 because the first waypoint is the unit's initial position.
     for (int i = 1; i < waypoints.size(); i++)
     {
-      XYCoord from = waypoints.get(i-1).GetCoordinates();
-      XYCoord to   = waypoints.get( i ).GetCoordinates();
+      XYCoord from = waypoints.get(i-1);
+      XYCoord to   = waypoints.get( i );
       cost += fff.getTransitionCost(map, from, to, co.army, true);
     }
     return cost;
   }
 
-  public PathNode getWaypoint(int wpt)
+  public XYCoord getWaypoint(int wpt)
   {
-    PathNode p = null;
+    XYCoord p = null;
     if( waypoints.size() > wpt )
     {
       p = waypoints.get(wpt);
     }
     else
     {
-      System.out.println("WARNING! Attempting to get an invalid PathNode.");
+      System.out.println("WARNING! Attempting to get an invalid XYCoord.");
     }
     return p;
   }
 
-  public PathNode getEnd()
+  public XYCoord getEnd()
   {
-    PathNode p = null;
+    XYCoord p = null;
     if( !waypoints.isEmpty() )
     {
       p = getWaypoint(waypoints.size() - 1);
@@ -128,33 +128,12 @@ public class GamePath
 
   public XYCoord getEndCoord()
   {
-    PathNode p = getEnd();
+    XYCoord p = getEnd();
 
     if( null == p )
       return null;
 
     return new XYCoord(p.x, p.y);
-  }
-
-  public static class PathNode
-  {
-    public int x;
-    public int y;
-
-    public PathNode(int x, int y)
-    {
-      this.x = x;
-      this.y = y;
-    }
-    public XYCoord GetCoordinates()
-    {
-      return new XYCoord(x, y);
-    }
-    @Override
-    public String toString()
-    {
-      return String.format("(%s, %s)", x, y);
-    }
   }
 
   /**
@@ -176,8 +155,8 @@ public class GamePath
     // Snip if we can't actually traverse, iterate starting at the first place we move
     for( int i = 1; i < waypoints.size(); ++i)
     {
-      XYCoord from = waypoints.get(i-1).GetCoordinates();
-      XYCoord to   = waypoints.get( i ).GetCoordinates();
+      XYCoord from = waypoints.get(i-1);
+      XYCoord to   = waypoints.get( i );
       if( unit.getMovePower(map) < fff.getTransitionCost(map, from, to, unit.CO.army, canTravelThroughEnemies) )
       {
         snip(i);
@@ -189,7 +168,7 @@ public class GamePath
     // Don't check zero since we don't want to invalidate the path
     for( int i = waypoints.size()-1; i > 0; --i )
     {
-      XYCoord to = waypoints.get(i).GetCoordinates();
+      XYCoord to = waypoints.get(i);
       if( fff.canStandOn(map, to, unit, includeOccupied) )
         break;
       snip(i);
@@ -205,8 +184,8 @@ public class GamePath
     // Snip if we can't actually traverse, iterate starting at the first place we move
     for( int i = 1; i < waypoints.size(); ++i)
     {
-      XYCoord from = waypoints.get(i-1).GetCoordinates();
-      XYCoord to   = waypoints.get( i ).GetCoordinates();
+      XYCoord from = waypoints.get(i-1);
+      XYCoord to   = waypoints.get( i );
       int tileCost = fff.getTransitionCost(map, from, to, unit.CO.army, canTravelThroughEnemies);
       fuelBudget  -= tileCost * unit.model.fuelBurnPerTile;
       if( 0 > fuelBudget )
@@ -221,7 +200,7 @@ public class GamePath
   public String toString()
   {
     StringBuffer sb = new StringBuffer("[");
-    for( PathNode xyc : waypoints )
+    for( XYCoord xyc : waypoints )
     {
       sb.append(xyc);
       if( xyc != getEnd() ) sb.append(", ");

@@ -99,7 +99,7 @@ class SelectMoveLocation extends GameInputState<XYCoord>
     // If the new point already exists on the path, cut the extraneous points out.
     for( int i = 0; i < myStateData.path.getPathLength(); ++i )
     {
-      if( myStateData.path.getWaypoint(i).GetCoordinates().equals(end) )
+      if( myStateData.path.getWaypoint(i).equals(end) )
       {
         myStateData.path.snip(i);
         break;
@@ -111,7 +111,7 @@ class SelectMoveLocation extends GameInputState<XYCoord>
     Unit actor = myStateData.unitActor;
     XYCoord coord = myStateData.unitCoord;
     boolean canEndOnOccupied = true;
-    if( !myStateData.path.getWaypoint(0).GetCoordinates().equals(coord) || !Utils.isPathValid(actor, myStateData.path, myStateData.gameMap, canEndOnOccupied) )
+    if( !myStateData.path.getWaypoint(0).equals(coord) || !Utils.isPathValid(actor, myStateData.path, myStateData.gameMap, canEndOnOccupied) )
     {
       // The currently-built path is invalid. Try to generate a new one (may still return null).
       PathCalcParams pcp = new PathCalcParams(actor, myStateData.gameMap);
