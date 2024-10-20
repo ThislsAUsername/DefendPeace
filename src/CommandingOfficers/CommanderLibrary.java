@@ -145,7 +145,10 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.BH.Hawke.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.Sturm.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.VonBolt.getInfo() );
-    commanderList.add( CommandingOfficers.AWBW.BrennerWolves.LinBW.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.BW.Will.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.BW.Isabella.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.BW.Lin.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.BW.Brenner.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.IDS.TabithaBW.getInfo() );
   }
 

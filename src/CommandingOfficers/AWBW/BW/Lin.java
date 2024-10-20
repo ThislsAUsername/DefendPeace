@@ -1,4 +1,4 @@
-package CommandingOfficers.AWBW.BrennerWolves;
+package CommandingOfficers.AWBW.BW;
 
 import java.util.ArrayList;
 import CommandingOfficers.Commander;
@@ -15,7 +15,7 @@ import Terrain.MapMaster;
 import UI.UIUtils;
 import Units.UnitModel;
 
-public class LinBW extends COUableCommander
+public class Lin extends COUableCommander
 {
   private static final long serialVersionUID = 1L;
 
@@ -43,13 +43,13 @@ public class LinBW extends COUableCommander
     @Override
     public Commander create(GameScenario.GameRules rules)
     {
-      return new LinBW(rules);
+      return new Lin(rules);
     }
   }
   public static final int POWER   = 20;
   public static final int DEFENSE = 20;
 
-  public LinBW(GameScenario.GameRules rules)
+  public Lin(GameScenario.GameRules rules)
   {
     super(POWER, DEFENSE, coInfo, rules);
     canDeployMask = UnitModel.LAND;
@@ -70,7 +70,7 @@ public class LinBW extends COUableCommander
     private static final long serialVersionUID = 1L;
     final UnitTypeFilter sightMod;
 
-    LinPower(LinBW commander, String name, int cost, CostBasis basis, int sight, int pAtk, int pDef)
+    LinPower(Lin commander, String name, int cost, CostBasis basis, int sight, int pAtk, int pDef)
     {
       super(commander, name, cost, basis, pAtk, pDef);
       sightMod = new UnitTypeFilter(new VisionModifier(sight));
