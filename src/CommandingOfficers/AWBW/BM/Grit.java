@@ -31,18 +31,13 @@ public class Grit extends AWBWCommander
       super("Grit", UIUtils.SourceGames.AWBW, UIUtils.BM);
       infoPages.add(new InfoPage(
             "Grit (AWBW)\n"
-          + "A laid-back style masks his dependability. A peerless marksman. Works well with Olaf.\n"
-          + "Range for ranged units is one space more than other COs. They cause more damage too. Weak in combat with non-infantry direct combat units.\n"
-          + "(+1 indirect range, +20 indirect attack, -20 non-footsoldier direct attack)\n"));
+          + "ndirect units have +1 range and gain +20% attack. Direct units (except footsoldiers) lose 20% attack.\n"));
       infoPages.add(new InfoPage(new SnipeAttack(null, null),
-            "Increases the range of distance weapons by one space. Attack strength of these units also increases (+30, +60 total).\n"
+            "Indirect units gain +1 range and their attack is increased to +40%. (150 total).\n"
           + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(new SuperSnipe(null, null),
-            "Distance weapons can shoot two spaces farther than normal. They also receive a firepower bonus (+30, +60 total).\n"
+            "Indirect units gain +2 range and their attack is increased to +40%. (+20, 150 total).\n"
           + "+10 attack and defense.\n"));
-      infoPages.add(new InfoPage(
-            "Hit: Cats\n"
-          + "Miss: Rats"));
       infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override
@@ -83,7 +78,7 @@ public class Grit extends AWBWCommander
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Snipe Attack";
     private static final int COST = 3;
-    private static final int BUFF = 30;
+    private static final int BUFF = 20;
     UnitModifier statMod, rangeMod;
 
     SnipeAttack(Grit commander, CostBasis basis)
@@ -106,7 +101,7 @@ public class Grit extends AWBWCommander
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Super Snipe";
     private static final int COST = 6;
-    private static final int BUFF = 30;
+    private static final int BUFF = 20;
     UnitModifier statMod, rangeMod;
 
     SuperSnipe(Commander commander, CostBasis basis)
