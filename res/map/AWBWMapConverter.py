@@ -181,7 +181,9 @@ def indexToTerrainCode(x):
 		neoArmy = (neoProp // 7) + 16 # integer division
 		neoProp = neoProp % 7
 		return f'{neoArmy}{neoPropCodes[neoProp]}'
-	return {
+	return tileDict.get(x, '  XX')
+
+tileDict = {
 		-1:  '  TT',#Teletiles
 		1:   '  GR',#plains/grass
 		2:   '  MT',#mountain
@@ -351,7 +353,7 @@ def indexToTerrainCode(x):
 		193: '15LB',
 		194: '15SP',
 		195: '  TT',#Teletiles
-	}.get(x, '  XX')    # '  XX' is default if x not found
+	}
 
 
 
