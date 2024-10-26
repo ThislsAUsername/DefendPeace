@@ -178,35 +178,35 @@ def indexToTerrainCode(x):
 		1:   '  GR',#plains/grass
 		2:   '  MT',#mountain
 		3:   '  FR',#woods/forest
-		4:   '  RV',#rivers
-		5:   '  RV',
-		6:   '  RV',
-		7:   '  RV',
-		8:   '  RV',
-		9:   '  RV',
-		10:  '  RV',
-		11:  '  RV',
-		12:  '  RV',
-		13:  '  RV',
-		14:  '  RV',
-		15:  '  RD',#road
-		16:  '  RD',
-		17:  '  RD',
-		18:  '  RD',
-		19:  '  RD',
-		20:  '  RD',
-		21:  '  RD',
-		22:  '  RD',
-		23:  '  RD',
-		24:  '  RD',
-		25:  '  RD',
-		26:  '  BR',#HBridge
-		27:  '  BR',#VBridge
+		4:   '  RV',#━ #rivers
+		5:   '  RV',#┃
+		6:   '  RV',#╋
+		7:   '  RV',#┏
+		8:   '  RV',#┓
+		9:   '  RV',#┛
+		10:  '  RV',#┗
+		11:  '  RV',#┳
+		12:  '  RV',#┫
+		13:  '  RV',#┻
+		14:  '  RV',#┣
+		15:  '  RD',#━ #road
+		16:  '  RD',#┃
+		17:  '  RD',#╋
+		18:  '  RD',#┏
+		19:  '  RD',#┓
+		20:  '  RD',#┛
+		21:  '  RD',#┗
+		22:  '  RD',#┳
+		23:  '  RD',#┫
+		24:  '  RD',#┻
+		25:  '  RD',#┣
+		26:  '  BR',#━ #HBridge
+		27:  '  BR',#┃ #VBridge
 		28:  '  SE',#sea
-		29:  '  SH',#shoal
-		30:  '  SH',
-		31:  '  SH',
-		32:  '  SH',
+		29:  '  SH',#v #shoal (point towards sea)
+		30:  '  SH',#^
+		31:  '  SH',#<
+		32:  '  SH',#>
 		33:  '  RF',#reef
 		34:  '  CT',#city
 		35:  '  FC',#base/factory
@@ -252,22 +252,22 @@ def indexToTerrainCode(x):
 		98:  ' 7AP',
 		99:  ' 7SP',
 		100: ' 7HQ',
-		101: '  PI',#pipe
-		102: '  PI',
-		103: '  PI',
-		104: '  PI',
-		105: '  PI',
-		106: '  PI',
-		107: '  PI',
-		108: '  PI',
-		109: '  PI',
-		110: '  PI',
+		101: '  PI',#┃ #pipe
+		102: '  PI',#━
+		103: '  PI',#┗
+		104: '  PI',#┏
+		105: '  PI',#┓
+		106: '  PI',#┛
+		107: '  PI',#v # pipe end; points toward more pipe
+		108: '  PI',#<
+		109: '  PI',#^
+		110: '  PI',#>
 		111: '  SR',#silo (SR, for Silo Ready)
 		112: '  BK',#used silo
-		113: '  ME',#HPipe seam
-		114: '  ME',#VPipe seam
-		115: '  GR',#HPipe seam broken
-		116: '  GR',#VPipe seam broken
+		113: '  ME',#━ #HPipe seam
+		114: '  ME',#┃ #VPipe seam
+		115: '  GR',#━ #HPipe seam broken
+		116: '  GR',#┃ #VPipe seam broken
 		117: ' 8AP',#airport
 		118: ' 8FC',#base/factory
 		119: ' 8CT',#city
