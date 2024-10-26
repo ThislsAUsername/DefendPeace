@@ -141,6 +141,8 @@ def countryCodeToPlayerID(x):
 		'pl': 13,
 		'ar': 14,
 		'wn': 15,
+		'aa': 16,
+		'ne': 17,
 	}.get(x, 0)
 
 def unitIDToString(x):
