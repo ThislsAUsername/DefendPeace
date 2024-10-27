@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import CommandingOfficers.*;
 import CommandingOfficers.CommanderAbility.CostBasis;
 import CommandingOfficers.AWBW.AWBWCommander;
-import Engine.Army;
-import Engine.GamePath;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEventQueue;
-import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
+import Engine.StateTrackers.LightningUnitTracker;
+import Engine.StateTrackers.StateTracker;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitMovementModifier;
@@ -73,6 +73,13 @@ public class Jess extends AWBWCommander
     addCommanderAbility(TurboCharge(this, cb));
     addCommanderAbility(Overdrive(this, cb));
   }
+  private LightningUnitTracker zapTracker;
+  @Override
+  public void initForGame(GameInstance game)
+  {
+    super.initForGame(game);
+    zapTracker = StateTracker.instance(game, LightningUnitTracker.class);
+  }
 
   @Override
   public void modifyUnitAttack(StrikeParams params)
@@ -82,25 +89,13 @@ public class Jess extends AWBWCommander
     else
       params.attackPower -= 10;
   }
-  private ArrayList<Unit> dudesToReactivate = new ArrayList<>();
   @Override
   protected void onTurnInit(MapMaster map, GameEventQueue events)
   {
-    dudesToReactivate.clear();
+    zapTracker.resetFor(this);
     for( Unit u : units )
       if( u.model.isAll(UnitModel.TANK) )
-        if( u.isTurnOver )
-          u.isTurnOver = false;
-        else
-          dudesToReactivate.add(u);
-  }
-  // Mark units I will double-move
-  @Override
-  public char getUnitMarking(Unit unit, Army activeArmy)
-  {
-    if( dudesToReactivate.contains(unit) )
-      return 'S';
-    return super.getUnitMarking(unit, activeArmy);
+        zapTracker.giveAction(u);
   }
   @Override
   public int getBuyCost(UnitModel um, XYCoord coord)
@@ -109,25 +104,6 @@ public class Jess extends AWBWCommander
     if( uc.model.isAll(UnitModel.TANK) )
       uc.costRatio += 70;
     return uc.getCostTotal();
-  }
-  public GameEventQueue receiveMoveEvent(Unit unit, GamePath unitPath)
-  {
-    if( !dudesToReactivate.contains(unit) )
-      return null;
-
-    dudesToReactivate.remove(unit);
-    unit.isTurnOver = false;
-    return null;
-  }
-  @Override
-  public GameEventQueue receiveUnitJoinEvent(JoinEvent join)
-  {
-    if( !join.unitDonor.isTurnOver ) // We gave this dude his turn back after moving
-      join.unitRecipient.isTurnOver = false;
-    if( dudesToReactivate.contains(join.unitRecipient) )
-      join.unitRecipient.isTurnOver = false;
-
-    return null;
   }
 
 
