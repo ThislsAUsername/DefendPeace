@@ -67,6 +67,8 @@ public class CountManager<ListKeyType, CountKeyType> implements Serializable
   }
   public void resetCountFor(ListKeyType listKey, CountKeyType countKey)
   {
+    if( !countMap.containsKey(listKey) )
+      return;
     HashMap<CountKeyType, Integer> instanceCounts = getCountFor(listKey);
     instanceCounts.remove(countKey);
   }
