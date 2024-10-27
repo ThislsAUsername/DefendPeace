@@ -39,14 +39,14 @@ public class Jess extends AWBWCommander
       super("Jess", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.GE, "ZAP");
       infoPages.add(new InfoPage(
           "Jess (nyoom)\n"
-        + "AWBW Jess, but with lightning vehicles and AWBW rules.\n"
+        + "AWBW Jess, but with lightning tanks.\n"
         + "+10 land vehicle attack. Other units -10 attack.\n"
         + "Land vehicles cost +70%, but get passive Lightning Strike."));
       infoPages.add(new InfoPage(TurboCharge(null, null),
-          "Land vehicles +1 move, +20 attack. Fuel and ammo supplies are replenished.\n"
+          "Land vehicles +1 move, +10 attack. Fuel and ammo supplies are replenished.\n"
         + "+10 attack and defense. Also restores materials.\n"));
       infoPages.add(new InfoPage(Overdrive(null, null),
-          "Land vehicles +2 move, +40 attack. Fuel and ammo supplies are replenished.\n"
+          "Land vehicles +2 move, +30 attack. Fuel and ammo supplies are replenished.\n"
         + "+10 attack and defense. Also restores materials.\n"));
       infoPages.add(AWBW_MECHANICS_BLURB);
     }
@@ -58,11 +58,11 @@ public class Jess extends AWBWCommander
   }
   private static CommanderAbility TurboCharge(Commander commander, CostBasis cb)
   {
-    return new JessAbility(commander, cb, "Turbo Charge", 3, 1, 20);
+    return new JessAbility(commander, cb, "Turbo Charge", 3, 1, 10);
   }
   private static CommanderAbility Overdrive(Commander commander, CostBasis cb)
   {
-    return new JessAbility(commander, cb, "Overdrive", 6, 2, 40);
+    return new JessAbility(commander, cb, "Overdrive", 6, 2, 30);
   }
 
   public Jess(GameScenario.GameRules rules)
