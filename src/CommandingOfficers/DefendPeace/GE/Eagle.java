@@ -3,9 +3,13 @@ package CommandingOfficers.DefendPeace.GE;
 import java.util.ArrayList;
 import CommandingOfficers.*;
 import CommandingOfficers.AWBW.AWBWCommander;
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
+import Engine.GameEvents.GameEventQueue;
+import Engine.StateTrackers.LightningUnitTracker;
+import Engine.StateTrackers.StateTracker;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitDefenseModifier;
 import Engine.UnitMods.UnitModifier;
@@ -30,15 +34,19 @@ public class Eagle extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Eagle", UIUtils.SourceGames.AWBW, UIUtils.GE);
+      super("Eagle", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.GE, "ZAP");
       infoPages.add(new InfoPage(
-            "Eagle (AWBW)\n"
-          + "Air units gain +15% attack and +10% defense, and consume -2 fuel per day. Naval units lose -30% attack.\n"));
+            "Eagle (nyoom)\n"
+          + "AWBW Eagle, but with lightning air.\n"
+          + "Air units gain +15% attack and +10% defense, and consume -2 fuel per day.\n"
+          + "Air units get passive Lightning Strike.\n"
+          + "Non-air units lose 20 attack.\n"
+          + "Naval units lose an additional 30 attack."));
       infoPages.add(new InfoPage(new LightningDrive(null, null),
             "Air units attack and defense are increased to +20%.\n"
           + "+10 attack and defense\n"));
       infoPages.add(new InfoPage(new LightningStrike(null, null),
-            "Air units attack and defense are increased to +20%. All non-footsoldier units may move and fire again, even if built this turn (use this power after moving!).\n"
+            "Air units attack and defense are increased to +20%. All non-footsoldier units get another action (works before moving, too).\n"
           + "+10 attack and defense\n"));
       infoPages.add(AWBW_MECHANICS_BLURB);
     }
@@ -57,13 +65,32 @@ public class Eagle extends AWBWCommander
     addCommanderAbility(new LightningDrive(this, cb));
     addCommanderAbility(new LightningStrike(this, cb));
   }
+  private LightningUnitTracker zapTracker;
+  @Override
+  public void initForGame(GameInstance game)
+  {
+    super.initForGame(game);
+    zapTracker = StateTracker.instance(game, LightningUnitTracker.class);
+  }
+  @Override
+  protected void onTurnInit(MapMaster map, GameEventQueue events)
+  {
+    zapTracker.resetFor(this);
+    for( Unit u : units )
+      if( u.model.isAll(UnitModel.AIR) )
+        zapTracker.giveAction(u);
+  }
 
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
     if( params.attacker.model.isAirUnit() )
+    {
       params.attackPower += 15;
-    else if( params.attacker.model.isSeaUnit() )
+      return;
+    }
+    params.attackPower -= 20;
+    if( params.attacker.model.isSeaUnit() )
       params.attackPower -= 30;
   }
   @Override
@@ -110,10 +137,12 @@ public class Eagle extends AWBWCommander
     private static final String NAME = "Lightning Strike";
     private static final int COST = 9;
     UnitTypeFilter attMod, defMod;
+    Eagle coCast;
 
     LightningStrike(Eagle commander, CostBasis cb)
     {
       super(commander, NAME, COST, cb);
+      coCast = commander;
       AIFlags = PHASE_TURN_END;
       attMod = new UnitTypeFilter(new UnitDamageModifier(5));
       attMod.allOf = UnitModel.AIR;
@@ -135,7 +164,7 @@ public class Eagle extends AWBWCommander
       for( Unit u : myCommander.army.getUnits() )
       {
         if( u.model.isNone(UnitModel.TROOP) )
-          u.isTurnOver = false;
+          coCast.zapTracker.giveAction(u);
       }
     }
   }
