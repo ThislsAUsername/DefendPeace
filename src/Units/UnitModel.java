@@ -83,18 +83,19 @@ public class UnitModel implements Serializable, ITargetable, UnitModList
   public final int fuelBurnIdle;
   @Builder.Default public final int fuelBurnPerTile = 1;
   @Builder.Default public final int maxMaterials = 0;
-  @Builder.Default public final boolean needsMaterials = true;
+  @Builder.Default public final boolean needsMaterials = true; // Unit has a finite materials count, which is likely 0.
   public final int visionRange;
-  @Builder.Default public final boolean visionPierces = false;
-  @Builder.Default public final boolean hidden = false;
-  public final Set<TerrainType> healableHabs = new HashSet<TerrainType>();
+  @Builder.Default public final boolean visionPierces = false; // Can see into cover terrain in fog of war.
+  @Builder.Default public final boolean hidden = false; // Invisible even outside of fog, in any terrain; usually on on a variant of a unit type that transforms.
+  public final Set<TerrainType> healableHabs = new HashSet<>(); // Terrain that repairs and resupplies this unit.
   @Builder.Default public final ArrayList<WeaponModel> weapons = new ArrayList<WeaponModel>();
-  public final long carryableMask;
-  public final long carryableExclusionMask;
-  @Builder.Default public final Set<TerrainType> unloadExclusionTerrain = new HashSet<TerrainType>();
+  public final long carryableMask; // Unit role that this unit can load.
+  public final long carryableExclusionMask; // Overrides the above
+  // Terrain types that standing on does not enable unloading, e.g. landers can't unload from DoR bridges.
+  @Builder.Default public final Set<TerrainType> unloadExclusionTerrain = new HashSet<>();
 
   @Builder.Default public final boolean supplyCargo = false;
-  @Builder.Default public final boolean repairCargo = false;
+  @Builder.Default public final boolean repairCargo = false; // Auto-repair held units.
 
 
   public void setCalculatedProps()
