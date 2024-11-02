@@ -854,7 +854,7 @@ public class PlayerSetupCommanderArtist
       currentVisualBin = (destBinSize / jump) * jump;
 
     int destColumn = Math.min(destBinSize - 1, currentVisualBin * jumpValue + destShift);
-    destColumn = Math.min(destBinSize - 1, destColumn);
+    destColumn = Math.min(destBinSize - 1, rightGlueColumn);
     cmdrInBinSelector.setSelectedOption(destColumn);
   }
 
