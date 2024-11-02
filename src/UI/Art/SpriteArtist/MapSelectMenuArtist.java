@@ -139,7 +139,7 @@ public class MapSelectMenuArtist
     /////////////// Map Information ///////////////////////
     int buffer = 3;
 
-    int numPlayers = selectedMapInfo.getNumCos(); // Get the number of players the map supports
+    int numPlayers = selectedMapInfo.getNumPlayers(); // Get the number of players the map supports
     StringBuilder sb = new StringBuilder().append(numPlayers).append(" Players"); // Build a string to say that.
     SpriteUIUtils.drawText(menuGraphics, sb.toString(), nameSectionDrawWidth+buffer, maxMiniMapHeight+buffer);
 

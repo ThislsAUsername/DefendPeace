@@ -37,7 +37,7 @@ public class TestColinMath extends TestCase
   {
     MapInfo mapInfo = MapLibrary.getByName("Deep Forest");
     GameScenario scn = new GameScenario();
-    Army[] armies = new Army[mapInfo.getNumCos()];
+    Army[] armies = new Army[mapInfo.getNumPlayers()];
     armies[0] = new Army(scn, CommandingOfficers.AWBW.BM.Olaf.getInfo().create(scn.rules));
     armies[1] = new Army(scn, CommandingOfficers.AWBW.BM.Colin.getInfo().create(scn.rules));
     armies[2] = new Army(scn, CommandingOfficers.AW2.BM.Colin.getInfo().create(scn.rules));

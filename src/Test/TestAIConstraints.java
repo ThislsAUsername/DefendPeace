@@ -17,7 +17,7 @@ public class TestAIConstraints extends TestCase
   private void setupTest(MapInfo mapInfo, AIMaker ai)
   {
     GameScenario scn = new GameScenario();
-    Army[] armies = new Army[mapInfo.getNumCos()];
+    Army[] armies = new Army[mapInfo.getNumPlayers()];
     for( int i = 0; i < armies.length; ++i )
       armies[i] = new Army(scn, CommanderLibrary.NotACO.getInfo().create(scn.rules));
 
