@@ -15,7 +15,6 @@ import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Terrain.MapInfo;
-import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Maps.MapReader;
@@ -33,7 +32,7 @@ public class TestAIBehavior extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest(AIMaker ai)
   {
-    setupTest(MapLibrary.getByName("Firing Range"), ai);
+    setupTest(Terrain.Maps.FiringRange.getMapInfo(), ai);
   }
 
   /** Make two COs and a MapMaster to use with this test case. */

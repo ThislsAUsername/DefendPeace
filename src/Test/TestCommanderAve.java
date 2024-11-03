@@ -18,7 +18,6 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.CaptureLifecycle;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
-import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -38,7 +37,7 @@ public class TestCommanderAve extends TestCase
     Patch = new Patch(scn.rules);
     Army[] cos = { new Army(scn, Ave), new Army(scn, Patch) };
 
-    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, Terrain.Maps.FiringRange.getMapInfo());
 
     game = new GameInstance(cos, testMap);
   }

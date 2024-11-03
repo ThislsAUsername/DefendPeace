@@ -10,7 +10,6 @@ import CommandingOfficers.Modifiers.UnitRemodelModifier;
 import Engine.Army;
 import Engine.GameScenario;
 import Engine.UnitMods.UnitMovementModifier;
-import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -44,7 +43,7 @@ public class TestCOModifier extends TestCase
     patch = new Patch(scn.rules);
     Army[] cos = { new Army(scn, strong), new Army(scn, patch) };
 
-    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, Terrain.Maps.FiringRange.getMapInfo());
   }
 
   private boolean testMovementModifier()
