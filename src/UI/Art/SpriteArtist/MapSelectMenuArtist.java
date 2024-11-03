@@ -134,11 +134,11 @@ public class MapSelectMenuArtist
     int MapInfoPaneDrawHeight = font.getHeight() + (sqSize*2);
 
     // Figure out how large the map can be based on the border divisions.
-    int maxMiniMapWidth = drawableWidth - nameSectionDrawWidth - 1;
+    int maxMiniMapWidth = drawableWidth - nameSectionDrawWidth - 1; // -1 here and +1 over there for the border pixel.
     int maxMiniMapHeight = drawableHeight - MapInfoPaneDrawHeight;
 
     // Find the center of the minimap display.
-    int miniMapCenterX = nameSectionDrawWidth + ((maxMiniMapWidth+1) / 2);
+    int miniMapCenterX = nameSectionDrawWidth + 1 + ((maxMiniMapWidth+1) / 2);
     int miniMapCenterY = maxMiniMapHeight / 2;
 
     // Draw a line to separate the minimap image and the player/property info.
