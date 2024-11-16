@@ -115,7 +115,10 @@ public class MapSelectMenuArtist
       // Draw visible map names in the list.
       if (mapInfos.size() > i + verticalShift)
       {
-        String str = mapInfos.get(i + verticalShift).name;
+        MapNode nameableMap = mapInfos.get(i + verticalShift);
+        String str = nameableMap.name;
+        if( !nameableMap.children.isEmpty() )
+          str += "/";
         while(font.getWidth(str) > nameSectionDrawWidth - drawX)
         {
           str = str.substring(0, str.length()-1);
