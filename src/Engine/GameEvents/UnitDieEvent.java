@@ -47,16 +47,15 @@ public class UnitDieEvent implements GameEvent
     gameMap.removeUnit(unit);
     unit.CO.units.remove(unit);
 
-    // We need to take vision away immediately if your unit dies off-turn (specifically for DoR fog)
+    // We need to take vision away immediately if your unit dies either:
+    // off-turn (especially for DoR fog)
+    // on-turn (for Trilogy fog, but *not* DoR fog)
     Army activeArmy = gameMap.game.activeArmy;
-    if( activeArmy != unit.CO.army )
+    if( activeArmy != unit.CO.army || !activeArmy.gameRules.fogMode.dorMode )
     {
       for( Army army : gameMap.game.armies )
-      {
-        if( army == activeArmy )
-          continue;
-        army.myView.resetFog();
-      }
+        if( army.team == unit.CO.army.team )
+          army.myView.resetFog();
     }
   }
 
