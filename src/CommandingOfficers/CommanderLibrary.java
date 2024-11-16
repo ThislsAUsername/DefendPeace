@@ -149,6 +149,9 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.BW.Isabella.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BW.Lin.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BW.Brenner.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.LA.Gage.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.LA.Tasha.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.LA.Forsythe.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.IDS.TabithaBW.getInfo() );
   }
 
