@@ -45,7 +45,7 @@ public class Sami extends AWBWCommander
           + "AW1 Sami, but with instant captures and AWBW rules.\n"
           + "Footsoldiers +20/10 stats.\n"
           + "20x capture rate, lose 5 HP on capture.\n"
-          + "Cities do not give income when \n"
+          + "Cities do not give income if there is any unit (friendly or not) on them.\n"
           + "Unarmed transports +1 move. -10/0 direct vehicle combat.\n"));
       infoPages.add(new InfoPage(new DoubleTime(null, null),
             "Increases movement range (+1) for infantry and mech units. Their movement cost on all terrains is reduced to 1.\n"
