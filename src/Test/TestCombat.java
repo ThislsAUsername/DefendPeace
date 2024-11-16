@@ -14,6 +14,7 @@ import Engine.GameEvents.ArmyDefeatEvent;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitActionLifecycles.BattleLifecycle;
+import Terrain.MapInfo;
 import Terrain.MapLibrary;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
@@ -32,16 +33,16 @@ public class TestCombat extends TestCase
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
   {
-    setupTest("Firing Range");
+    setupTest(Terrain.Maps.FiringRange.getMapInfo());
   }
-  private void setupTest(String mapName)
+  private void setupTest(MapInfo mapInfo)
   {
     GameScenario scn = new GameScenario();
     testCo1 = new Strong(scn.rules);
     testCo2 = new Patch(scn.rules);
     Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
-    testMap = new MapMaster(cos, MapLibrary.getByName(mapName));
+    testMap = new MapMaster(cos, mapInfo);
     testGame = new GameInstance(cos, testMap);
   }
 
@@ -252,7 +253,7 @@ public class TestCombat extends TestCase
   /** Test killing a meteor. */
   private boolean testDemolition()
   {
-    setupTest("Test Range");
+    setupTest(MapLibrary.getByName("Test Range"));
     Unit ship = addUnit(testMap, testCo1, UnitModel.SIEGE | UnitModel.SEA, 0, 3);
     Unit arty = addUnit(testMap, testCo1, UnitModel.SIEGE,                 1, 3);
     Unit tank = addUnit(testMap, testCo1, UnitModel.ASSAULT,               3, 3);

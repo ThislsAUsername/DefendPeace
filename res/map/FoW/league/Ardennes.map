@@ -1,0 +1,31 @@
+  SE  SE  SE  SH  SP  SH  SE  SE  SE  SE  SE  SE  SH  AP  SE  SE  SH  SP  SE  SE  SE  SE  SE  SE  SE
+  SH  SE  SE  SE  SH  SE  SE  SE  SH  SH  SH  SE  SE  SE  SE  SH  GR  RD  FR  RD  RD  CT  SE  SH  SE
+  AP  SH  SE  SE  SE  SE  SH  FC  GR  MT  BK  GR  SE 1FC  SH  SH  MT  RD  RD  RD  GR  SH  SE  TW  SH
+  SH  SE  SE  SE  SE  SE  FR  GR  MT  GR  GR  CT  SH  SE  SE  FR  GR  GR  RD  GR  FR  SH  SE  SH  SH
+  SE  SE  SH  SH  SH  SH  GR  MT  MT  GR  MT  GR  GR  SH  SE  SH  GR  GR  CT  GR  GR  SH  SH  SH  GR
+  SH 1FC  GR  MT  GR  CT  GR  MT  GR  FR  GR  GR  MT  GR  SH  SH  GR  FR  GR  GR  GR  GR  FR  GR  CT
+  SH  GR  MT  GR  FR  RD  MT  GR  GR  GR  GR  GR  BK  RD  GR  MT  GR  GR  GR  GR  CT  GR  GR  GR  RD
+  SH  FR  GR  BK  RD  RD  GR  MT  GR  CT  GR  FR  GR  RD  BK  GR  GR  CT  GR  GR  RD  RD  RD  RD  RD
+  SH  GR  GR  PI  GR  GR  BK  RD  RD  RD  GR  GR 1HQ  GR  GR  FR  GR  RD  GR  FR  GR  GR  CT  GR  FR
+  GR  CT  PI  PI  CT  GR  GR  GR  FR  RD  RD  RD  RD  GR  GR  GR  GR  RD  GR  GR  GR  GR  GR  GR  GR
+  GR  GR  PI  GR  RD  FR  GR  GR  GR  BK  GR  GR  GR  FR  GR  RD  RD  RD  RD  CT  GR  FR  GR  SH  SH
+  GR  FR  GR  RD  RD  RD  RD  CT  GR  GR  FR  SH  SH  SH  GR  CT  GR  FR  GR  GR  GR  GR  GR  SH  CT
+  SH  SH  GR  CT  GR  GR  GR  GR  GR  GR  GR  SH  LB  SH  GR  GR  GR  GR  GR  GR  GR  CT  GR  SH  SH
+  CT  SH  GR  GR  GR  GR  GR  FR  GR  CT  GR  SH  SH  SH  FR  GR  GR  CT  RD  RD  RD  RD  GR  FR  GR
+  SH  SH  GR  FR  GR  CT  RD  RD  RD  RD  GR  FR  GR  GR  GR  BK  GR  GR  GR  FR  RD  GR  PI  GR  GR
+  GR  GR  GR  GR  GR  GR  GR  RD  GR  GR  GR  GR  RD  RD  RD  RD  FR  GR  GR  GR  CT  PI  PI  CT  GR
+  FR  GR  CT  GR  GR  FR  GR  RD  GR  FR  GR  GR 0HQ  GR  GR  RD  RD  RD  BK  GR  GR  PI  GR  GR  SH
+  RD  RD  RD  RD  RD  GR  GR  CT  GR  GR  BK  RD  GR  FR  GR  CT  GR  MT  GR  RD  RD  BK  GR  FR  SH
+  RD  GR  GR  GR  CT  GR  GR  GR  GR  MT  GR  RD  BK  GR  GR  GR  GR  GR  MT  RD  FR  GR  MT  GR  SH
+  CT  GR  FR  GR  GR  GR  GR  FR  GR  SH  SH  GR  MT  GR  GR  FR  GR  MT  GR  CT  GR  MT  GR 0FC  SH
+  GR  SH  SH  SH  GR  GR  CT  GR  GR  SH  SE  SH  GR  GR  MT  GR  MT  MT  GR  SH  SH  SH  SH  SE  SE
+  SH  SH  SE  SH  FR  GR  RD  GR  GR  FR  SE  SE  SH  CT  GR  GR  MT  GR  FR  SE  SE  SE  SE  SE  SH
+  SH  TW  SE  SH  GR  RD  RD  RD  MT  SH  SH 0FC  SE  GR  BK  MT  GR  FC  SH  SE  SE  SE  SE  SH  AP
+  SE  SH  SE  CT  RD  RD  FR  RD  GR  SH  SE  SE  SE  SE  SH  SH  SH  SE  SE  SE  SH  SE  SE  SE  SH
+  SE  SE  SE  SE  SE  SE  SE  SP  SH  SE  SE  AP  SH  SE  SE  SE  SE  SE  SE  SH  SP  SH  SE  SE  SE
+team, unit type, x, y (author: wyj_0081)
+1, infantry, 1, 5
+1, bboat, 2, 4
+1, bboat, 12, 8
+0, bboat, 12, 16
+0, bboat, 22, 20

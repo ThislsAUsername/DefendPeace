@@ -21,7 +21,6 @@ import Engine.UnitActionLifecycles.LoadLifecycle;
 import Engine.UnitActionLifecycles.ResupplyLifecycle;
 import Engine.UnitActionLifecycles.UnloadLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
-import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Units.Unit;
@@ -42,7 +41,7 @@ public class TestGameEvent extends TestCase
     testCo2 = new Patch(scn.rules);
     Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
-    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, Terrain.Maps.FiringRange.getMapInfo());
     testGame = new GameInstance(cos, testMap);
   }
 

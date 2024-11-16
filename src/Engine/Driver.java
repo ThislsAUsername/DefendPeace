@@ -9,6 +9,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.net.URLDecoder;
 import java.util.Stack;
 
 import javax.swing.JFrame;
@@ -18,10 +19,18 @@ import Test.TestMain;
 import UI.InputHandler;
 import UI.MainUIController;
 import UI.Art.SpriteArtist.SpriteEngine;
+import lombok.SneakyThrows;
 
 public class Driver implements ActionListener, KeyListener
 {
-  public static final String JAR_DIR = ClassLoader.getSystemClassLoader().getResource(".").getPath().replaceAll("bin/$", "");
+  public static final String JAR_DIR = calcJarDir();
+  @SneakyThrows // If we can't find any resources, what are we even fighting for?
+  private static String calcJarDir()
+  {
+    String urlishPath = ClassLoader.getSystemClassLoader().getResource(".").getPath();
+    String realPath = URLDecoder.decode(urlishPath, "utf-8");
+    return realPath.replaceAll("bin/$", "");
+  }
   private static Driver gameDriver;
   private Stack<ControlState> gameStatus = new Stack<ControlState>();
   private GameViewProxy gameView;

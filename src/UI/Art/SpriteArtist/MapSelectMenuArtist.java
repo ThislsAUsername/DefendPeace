@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import Terrain.MapInfo;
-import Terrain.MapLibrary;
+import Terrain.MapInfo.MapNode;
 import Terrain.TerrainType;
 import UI.MapSelectController;
 
@@ -54,22 +54,41 @@ public class MapSelectMenuArtist
 
     // Draw the frame for the list of maps, with the highlight for the current option.
     int frameBorderHeight = 3;
+    int menuTextYStart = frameBorderHeight;
     int nameSectionDrawWidth = drawableWidth / 3;
     menuGraphics.setColor(MENUFRAMECOLOR);
     menuGraphics.fillRect(nameSectionDrawWidth, 0, 1, drawableHeight); // sidebar
     menuGraphics.fillRect(0,0,nameSectionDrawWidth,frameBorderHeight); // top bar
-    menuGraphics.fillRect(0, drawableHeight-frameBorderHeight, nameSectionDrawWidth, 3); // bottom bar
+    menuGraphics.fillRect(0, drawableHeight-frameBorderHeight, nameSectionDrawWidth, frameBorderHeight); // bottom bar
+
+    // Draw the current node's path at the top, in its own little box, if applicable
+    String uri = gameSetup.currentNode.uri();
+    if( !uri.isEmpty() )
+    {
+      int uriHeightPlusBorder = font.getHeight()+frameBorderHeight;
+      menuGraphics.fillRect(0, uriHeightPlusBorder, nameSectionDrawWidth, frameBorderHeight); // top bar
+      int drawX = 2; // Offset from the edge of the window slightly.
+      int drawY = (menuTextYStart + 1);
+      while (font.getWidth(uri) > nameSectionDrawWidth - drawX)
+      {
+        uri = uri.substring(0, uri.length() - 1);
+      }
+
+      menuGraphics.setColor(Color.BLACK);
+      SpriteUIUtils.drawText(menuGraphics, uri, drawX, drawY);
+
+      menuTextYStart += uriHeightPlusBorder;
+    }
 
     // Draw the highlight for the selected option.
     menuGraphics.setColor(MENUHIGHLIGHTCOLOR);
-    int menuTextYStart = frameBorderHeight;
     int menuOptionHeight = font.getHeight();
     int selectedOptionYOffset = menuTextYStart + highlightedOption * (menuOptionHeight);
 
     // Get the list of selectable maps (possibly specifying a filter (#players, etc).
-    ArrayList<MapInfo> mapInfos = MapLibrary.getMapList();
+    ArrayList<MapNode> mapInfos = gameSetup.currentNode.children;
     int verticalShift = 0; // How many map names we skip drawing "off the top"
-    int displayableCount = drawableHeight / menuOptionHeight; // how many maps we can cram on the screen
+    int displayableCount = (drawableHeight - menuTextYStart) / menuOptionHeight; // how many maps we can cram on the screen
     while (selectedOptionYOffset > drawableHeight/2 && // Loop until either the cursor's bumped up to the center of the screen...
         displayableCount+verticalShift < mapInfos.size()) //  or we'll already show the last map 
     {
@@ -96,7 +115,10 @@ public class MapSelectMenuArtist
       // Draw visible map names in the list.
       if (mapInfos.size() > i + verticalShift)
       {
-        String str = mapInfos.get(i + verticalShift).mapName;
+        MapNode nameableMap = mapInfos.get(i + verticalShift);
+        String str = nameableMap.name;
+        if( !nameableMap.children.isEmpty() )
+          str += "/";
         while(font.getWidth(str) > nameSectionDrawWidth - drawX)
         {
           str = str.substring(0, str.length()-1);
@@ -115,11 +137,11 @@ public class MapSelectMenuArtist
     int MapInfoPaneDrawHeight = font.getHeight() + (sqSize*2);
 
     // Figure out how large the map can be based on the border divisions.
-    int maxMiniMapWidth = drawableWidth - nameSectionDrawWidth - 1;
+    int maxMiniMapWidth = drawableWidth - nameSectionDrawWidth - 1; // -1 here and +1 over there for the border pixel.
     int maxMiniMapHeight = drawableHeight - MapInfoPaneDrawHeight;
 
     // Find the center of the minimap display.
-    int miniMapCenterX = nameSectionDrawWidth + ((maxMiniMapWidth+1) / 2);
+    int miniMapCenterX = nameSectionDrawWidth + 1 + ((maxMiniMapWidth+1) / 2);
     int miniMapCenterY = maxMiniMapHeight / 2;
 
     // Draw a line to separate the minimap image and the player/property info.
@@ -127,11 +149,13 @@ public class MapSelectMenuArtist
     menuGraphics.fillRect(nameSectionDrawWidth, maxMiniMapHeight, drawableWidth-nameSectionDrawWidth, 1);
 
     // Draw the mini-map representation of the highlighted map.
-    selectedMapInfo = mapInfos.get(highlightedOption);
+    MapNode selNode = mapInfos.get(highlightedOption);
+    while (null == selNode.result)
+      selNode = selNode.children.get(0);
+    selectedMapInfo = selNode.result;
     BufferedImage miniMap = MiniMapArtist.getMapImage(selectedMapInfo, drawScale*maxMiniMapWidth, drawScale*maxMiniMapHeight);
 
-    // Figure out how large to draw the minimap. We want to make it as large as possible, but still
-    //   fit inside the available space (with a minimum scale factor of 1).
+    // Figure out how large to draw the minimap. We want to make it as large as possible, but still fit inside the available space.
     int mmWScale = drawScale*maxMiniMapWidth / miniMap.getWidth();
     int mmHScale = drawScale*maxMiniMapHeight / miniMap.getHeight();
     int mmScale = (mmWScale > mmHScale)? mmHScale : mmWScale;

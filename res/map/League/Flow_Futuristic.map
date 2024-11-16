@@ -1,0 +1,26 @@
+  SE  SE  SE  SE  SE  SE  GR  CT  GR  BK  FR  GR  RD  AP  RD  RD  MT  RV  RV  FR  SE  RF  SE
+  SE  RF  SE  SH  SH  GR  GR  RD  GR  MT  GR  GR  GR  GR  FR  GR  GR  FR  RV  GR  SH  SE  RF
+  SE  SE  FR  CT  GR  GR  FR  RD  GR  GR  CT  FR  RD  RD  RD  RD  CT  GR  RV  CT  GR  SH  SE
+  RF  SE  MT  GR  GR  RD  RD  RD  RD  RD  SH  SH  SH  SH  SH  SH  SH  GR  RV  RD  RD  RD  SE
+  SE  SH  GR  BK  FR  RD  GR  CT  FR  RD  SH  RV  RV  SE  RV  RV  SE  RV  RV  RD 1FC  RD  GR
+  SE  FR  GR  RD  RD  RD  GR  MT  GR  RD  SH  RV  SH  SH  SH  MT  SH  SH  SP  RD  RD  RD  MT
+  SH  FR  CT  RD  GR  TW  FR  GR  GR  CT  SH  RV  SP  GR  GR  MT  MT  CT  GR  GR  FR  MT  MT
+  FR  GR  FR  RD  MT  GR  GR  GR  BK  GR  SH  SH  GR  MT  FR  GR  MT  MT  GR 1FC  GR  MT  FR
+  BK  FC  GR  RD  FR  GR  CT  GR  FR  RD  CT  GR  FR  GR  GR  CT  FR  MT  MT  GR  MT  GR  GR
+  GR  GR  GR  RD  RD  RD  GR  RD  GR  RD  RD  MT  GR  GR  GR  RD 1HQ  RD  MT  MT  MT  FR  CT
+  CT  FR  MT  MT  MT  RD12HQ  RD  GR  GR  GR  MT  RD  RD  GR  RD  GR  RD  RD  RD  GR  GR  GR
+  GR  GR  MT  GR  MT  MT  FR  CT  GR  GR  FR  GR  CT  RD  FR  GR  CT  GR  FR  RD  GR  FC  BK
+  FR  MT  GR12FC  GR  MT  MT  GR  FR  MT  GR  SH  SH  GR  BK  GR  GR  GR  MT  RD  FR  GR  FR
+  MT  MT  FR  GR  GR  CT  MT  MT  GR  GR  SP  RV  SH  CT  GR  GR  FR  TW  GR  RD  CT  FR  SH
+  MT  RD  RD  RD  SP  SH  SH  MT  SH  SH  SH  RV  SH  RD  GR  MT  GR  RD  RD  RD  GR  FR  SE
+  GR  RD12FC  RD  RV  RV  SE  RV  RV  SE  RV  RV  SH  RD  FR  CT  GR  RD  FR  BK  GR  SH  SE
+  SE  RD  RD  RD  RV  GR  SH  SH  SH  SH  SH  SH  SH  RD  RD  RD  RD  RD  GR  GR  MT  SE  SE
+  SE  SH  GR  CT  RV  GR  CT  RD  RD  RD  RD  FR  CT  GR  GR  RD  FR  GR  GR  CT  FR  SE  RF
+  RF  SE  SH  GR  RV  FR  GR  GR  FR  GR  GR  GR  GR  MT  GR  RD  GR  GR  SH  SH  SE  SE  SE
+  SE  RF  SE  FR  RV  RV  MT  RD  RD  AP  RD  GR  FR  BK  GR  CT  GR  SE  SE  SE  SE  RF  SE
+team, unit type, x, y (author: bohwalker)
+12, infantry, 3, 14
+12, lander, 10, 13
+1, lander, 11, 7
+12, lander, 11, 12
+1, lander, 12, 6

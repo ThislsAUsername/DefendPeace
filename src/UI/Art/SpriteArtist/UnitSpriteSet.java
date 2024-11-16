@@ -65,7 +65,8 @@ public class UnitSpriteSet
     }
     catch (Exception e)
     {
-      System.out.println("WARNING: Exception hit in UnitSpriteSet constructor:" + e);
+      System.out.println("WARNING: Exception hit in UnitSpriteSet constructor:");
+      e.printStackTrace(System.out);
       System.out.println("WARNING:   Attempting to continue.");
     }
 

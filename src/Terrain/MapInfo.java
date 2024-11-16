@@ -12,9 +12,25 @@ import Units.KaijuWarsUnits;
 import Units.UnitModel;
 import Units.UnitModelScheme;
 import Units.UnitModelScheme.GameReadyModels;
+import lombok.AllArgsConstructor;
 
 public class MapInfo implements IEnvironsProvider
 {
+  /**
+   * Serves as a "nav mesh" to organize the maps.
+   */
+  @AllArgsConstructor
+  public static class MapNode
+  {
+    public MapNode parent;
+    public String  name;
+    // Populate only one of result or children
+    public MapInfo result;
+    public final ArrayList<MapNode> children = new ArrayList<>();
+    /** @return relative path from res/map, with no leading slashes */
+    public String uri() { return (null == parent)? name : ((parent.name.isEmpty())? name : parent.uri() +"/"+ name); }
+  }
+  public final String dirPath;
   public final String mapName;
   public final TerrainType[][] terrain;
   // Array of coordinates for properties owned by each player; the first index is the CO, the second is an arbitrary ordering
@@ -23,11 +39,12 @@ public class MapInfo implements IEnvironsProvider
 
   public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props)
   {
-    this(name, tiles, props, new ArrayList<Map<XYCoord,String>>());
+    this("built-in", name, tiles, props, new ArrayList<Map<XYCoord,String>>());
   }
 
-  public MapInfo(String name, TerrainType[][] tiles, XYCoord[][] props, ArrayList<Map<XYCoord,String>> units)
+  public MapInfo(String dir, String name, TerrainType[][] tiles, XYCoord[][] props, ArrayList<Map<XYCoord,String>> units)
   {
+    dirPath = dir;
     mapName = name;
     terrain = tiles;
     playerProps = props;

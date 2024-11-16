@@ -18,7 +18,6 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitActionLifecycles.LoadLifecycle;
-import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -37,7 +36,7 @@ public class TestCommanderBrenner extends TestCase
     Patch = new Patch(scn.rules);
     Army[] cos = { new Army(scn, Brenner), new Army(scn, Patch) };
 
-    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, Terrain.Maps.FiringRange.getMapInfo());
 
     game = new GameInstance(cos, testMap);
   }

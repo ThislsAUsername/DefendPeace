@@ -20,7 +20,6 @@ import Engine.UnitActionLifecycles.DeleteLifecycle;
 import Engine.UnitActionLifecycles.LoadLifecycle;
 import Engine.UnitActionLifecycles.UnloadLifecycle;
 import Engine.UnitActionLifecycles.JoinLifecycle;
-import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -40,7 +39,7 @@ public class TestTransport extends TestCase
     testCo2 = new Patch(scn.rules);
     Army[] cos = { new Army(scn, testCo1), new Army(scn, testCo2) };
 
-    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, Terrain.Maps.FiringRange.getMapInfo());
     testGame = new GameInstance(cos, testMap);
   }
 

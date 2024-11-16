@@ -16,7 +16,6 @@ import Engine.GameEvents.ResupplyEvent;
 import Engine.StateTrackers.DamageDealtToIncomeConverter;
 import Engine.UnitActionLifecycles.BattleLifecycle;
 import Engine.UnitMods.UnitDamageModifier;
-import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -36,7 +35,7 @@ public class TestCombatMods extends TestCase
     venge = new Venge(scn.rules);
     Army[] cos = { new Army(scn, cinder), new Army(scn, venge) };
 
-    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, Terrain.Maps.FiringRange.getMapInfo());
     testGame = new GameInstance(cos, testMap);
   }
 

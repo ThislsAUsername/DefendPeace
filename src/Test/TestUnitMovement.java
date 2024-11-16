@@ -32,7 +32,7 @@ public class TestUnitMovement extends TestCase
 
   private void setupTest()
   {
-    setupTest(MapLibrary.getByName("Firing Range"));
+    setupTest(Terrain.Maps.FiringRange.getMapInfo());
   }
   private void setupTest(MapInfo mapInfo)
   {

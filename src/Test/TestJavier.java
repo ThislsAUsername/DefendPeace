@@ -14,7 +14,6 @@ import Terrain.MapInfo;
 import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
-import Terrain.Maps.MapReader;
 import Units.UnitContext;
 import Units.UnitModel;
 
@@ -152,7 +151,7 @@ public class TestJavier extends TestCase
   private boolean testDSTowerStats()
   {
     // Generate a non-cached version of the map info so we can mess with it
-    MapInfo mapInfo = MapReader.readSingleMap(Engine.Driver.JAR_DIR + "res/map/Deep_Forest.map");
+    MapInfo mapInfo = MapLibrary.getByName("Deep Forest");
     mapInfo.terrain[3][4] = TerrainType.DS_TOWER;
     setupTest(mapInfo);
     boolean testPassed = true;

@@ -1,0 +1,24 @@
+  GR  MT  MT 0FC  GR  CT  FR  GR  GR  GR  RD  RD  MT  MT  CT  CT  GR  GR  GR  GR  GR 0FC  GR  GR  GR  GR  CT
+  MT  CT  GR  GR  FR  FR  SP  FC  GR  FR  CT  RD  GR  MT  MT  RD  RD  RD  GR  CT  GR  MT  FR  MT  AP  MT  GR
+  GR  GR  GR  GR  MT  MT  SE  SH  GR  GR  MT  MT  GR  RD  RD  RD 0HQ  RD  GR  GR  MT  MT  GR  GR  GR  MT  GR
+  RD  RD  MT  MT  MT  SE  SE  SH  GR  MT  MT  GR  GR  RD  AP  RD  RD  RD  SP  SH  SE  GR  MT  GR  RD  RD  RD
+  FR  RD  MT  GR  SE  SE  SH  MT  MT  GR  GR  GR  MT  MT  RD  RD  GR  GR  SE  SE  SH  MT  GR  FR  CT  GR  RD
+  GR  RD  GR  MT  SH  SE  SE  SH  CT  GR  GR  MT  GR  GR  GR  FR  GR  SH  SE  SH  GR  MT  RD  RD  RD  GR  RD
+  CT  RD  RD  MT  SH  SE  SE  SH  GR  GR  GR  CT  GR  RD  RD  RD  RD  SH  SE  SH  MT  TW  RD  FR  GR  GR  CT
+  GR  GR  RD  FR  GR  SH  SE  SH  MT  GR  FR  RD  RD  RD  BK  FR  RD  SH  SE  SE  SH  GR  RD  GR  GR  FR  RD
+  FR  GR  RD  RD  CT  SH  SE  SE  SH  MT  GR  RD  FR  CT  FR  RD  CT  MT  SH  SE  SH  FR  RD  RD  CT  GR  RD
+  RD  GR  CT  RD  RD  FR  SH  SE  SH  MT  CT  RD  FR  CT  FR  RD  GR  MT  SH  SE  SE  SH  CT  RD  RD  GR  FR
+  RD  FR  GR  GR  RD  GR  SH  SE  SE  SH  RD  FR  BK  RD  RD  RD  FR  GR  MT  SH  SE  SH  GR  FR  RD  GR  GR
+  CT  GR  GR  FR  RD  TW  MT  SH  SE  SH  RD  RD  RD  RD  GR  CT  GR  GR  GR  SH  SE  SE  SH  MT  RD  RD  CT
+  RD  GR  RD  RD  RD  MT  GR  SH  SE  SH  GR  FR  GR  GR  GR  MT  GR  GR  CT  SH  SE  SE  SH  MT  GR  RD  GR
+  RD  GR  CT  FR  GR  MT  SH  SE  SE  GR  GR  RD  RD  MT  MT  GR  GR  GR  MT  MT  SH  SE  SE  GR  MT  RD  FR
+  RD  RD  RD  GR  MT  GR  SE  SH  SP  RD  RD  RD  AP  RD  GR  GR  MT  MT  GR  SH  SE  SE  MT  MT  MT  RD  RD
+  GR  MT  GR  GR  GR  MT  MT  GR  GR  RD 1HQ  RD  RD  RD  GR  MT  MT  GR  GR  SH  SE  MT  MT  GR  GR  GR  GR
+  GR  MT  AP  MT  FR  MT  GR  CT  GR  RD  RD  RD  MT  MT  GR  RD  CT  FR  GR  FC  SP  FR  FR  GR  GR  CT  MT
+  CT  GR  GR  GR  GR 1FC  GR  GR  GR  GR  GR  CT  CT  MT  MT  RD  RD  GR  GR  GR  FR  CT  GR 1FC  MT  MT  GR
+team, unit type, x, y (author: Rush_FTK_2020)
+1, lander, 6, 14
+0, lander, 7, 2
+1, lander, 19, 15
+0, lander, 20, 3
+1, infantry, 23, 17

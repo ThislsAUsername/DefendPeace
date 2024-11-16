@@ -12,7 +12,6 @@ import CommandingOfficers.DefendPeace.RoseThorn.Strong;
 import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
-import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
@@ -32,7 +31,7 @@ public class TestSaveLoad extends TestCase
     patch = new Patch(scn.rules);
     Army[] cos = { new Army(scn, strong), new Army(scn, patch) };
 
-    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, Terrain.Maps.FiringRange.getMapInfo());
 
     game = new GameInstance(cos, testMap);
   }

@@ -7,7 +7,6 @@ import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.StateTrackers.DamageDealtToIncomeConverter;
-import Terrain.MapLibrary;
 import Terrain.MapMaster;
 
 public class TestStateTracker extends TestCase
@@ -25,7 +24,7 @@ public class TestStateTracker extends TestCase
     venge = new Venge(scn.rules);
     Army[] cos = { new Army(scn, cinder), new Army(scn, venge) };
 
-    testMap = new MapMaster(cos, MapLibrary.getByName("Firing Range"));
+    testMap = new MapMaster(cos, Terrain.Maps.FiringRange.getMapInfo());
     testGame = new GameInstance(cos, testMap);
   }
 

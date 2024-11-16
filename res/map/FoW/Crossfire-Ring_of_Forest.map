@@ -1,0 +1,34 @@
+  FR  MT  FR  MT  FR  MT  FR  SE  SE  RF  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  MT  FR  MT  FR  MT  FR  FR
+  MT  TW  MT  FR  MT  FR  SE  SE  SE  SE  SE  SH  SH  SH  SH  SH  SH  SE  SE  SE  SE  SE  MT  FR  MT  FR  MT  FR
+  FR  MT  FR  MT  FR  SE  SE  SE  MT  RV  SP  FR  FR  GR  FR  FR  FR  SH  SH  SE  SE  SE  SE  MT  FR  MT  FR  MT
+  MT  FR  MT  FR  SE  SE  MT  MT  MT  RV  RV  GR  FR  FR  GR  GR  FR  FR  GR  SH  SH  SE  SE  SE  MT  FR  MT  FR
+  FR  MT  FR  BR  BR  GR  MT  MT12FC  MT  RV  RV  RV  RV  CT  GR  FR  FR  FR  FR  GR  FR  SH  SE  SE  MT  FR  MT
+  MT  FR  SE  SE  MT  MT  MT  GR  GR  MT  CT  GR  GR  RV  RV  BR  RV  RV  FR  GR  SH  SH  SE  SE  SE  SE  MT  FR
+  FR  SE  SE  AP  MT  MT  RD  RD  GR  GR  GR  FR  GR  GR  GR  GR  FR  GR  GR  MT  SE  SE  SE  SE  SE  SE  SE  MT
+  SE  SE  SE  MT  SH  FR  GR  FC  MT  CT  GR  FR  MT  GR  CT  GR  MT  GR  GR  SH  SE  SE  SH  SH  SH  SE  SE  SE
+  SE  SE  MT  FR  SH  FR  GR  MT  FR  SH  FR  GR  GR  MT  GR  MT  GR  CT  GR  CT  RF  SH  GR  FR  FR  SH  SE  SE
+  SE  SE  MT12FC  SH  GR  FR  GR  SH  RF  MT  FR  CT  GR  FR  GR  GR  RD  GR  GR  SH  GR  FR  FR  FR  SH  SE  SE
+  SE  SE  SH  SH  SH  CT  MT  GR  GR  SH  FR  GR  GR  GR  GR  GR  FR  RD  RD  CT  RD  RD  MT  MT  MT  SH  SE  SE
+  SE  SE  MT  RD  MT  FR  GR  CT  MT  FR  GR  GR  GR  GR  GR  GR  GR  FR  GR  GR  GR  RD  RD  CT  RD  FR  SP  SE
+  RF  SE  FR  RD  MT  GR  GR  MT  TW  GR  GR  GR12HQ  GR  GR  CT  GR  GR  GR  GR  GR  MT  MT  MT  RD  MT  MT  SE
+  SE  SE  FR  FR  MT  GR  MT  GR  GR  FR  GR  GR  GR  MT  GR  GR  GR  GR  FR  GR  GR  GR  GR  GR  CT  FR  MT  SE
+  SE  MT  FR  CT  GR  GR  GR  GR  GR  FR  GR  GR  GR  GR  MT  GR  GR  GR  FR  GR  GR  MT  GR  MT  FR  FR  SE  SE
+  SE  MT  MT  RD  MT  MT  MT  GR  GR  GR  GR  GR  CT  GR  GR 4HQ  GR  GR  GR  TW  MT  GR  GR  MT  RD  FR  SE  RF
+  SE  SP  FR  RD  CT  RD  RD  GR  GR  GR  FR  GR  GR  GR  GR  GR  GR  GR  FR  MT  CT  GR  FR  MT  RD  MT  SE  SE
+  SE  SE  SH  MT  MT  MT  RD  RD  CT  RD  RD  FR  GR  GR  GR  GR  GR  FR  SH  GR  GR  MT  CT  SH  SH  SH  SE  SE
+  SE  SE  SH  FR  FR  FR  GR  SH  GR  GR  RD  GR  GR  FR  GR  CT  FR  MT  RF  SH  GR  FR  GR  SH 4FC  MT  SE  SE
+  SE  SE  SH  FR  FR  GR  SH  RF  CT  GR  CT  GR  MT  GR  MT  GR  GR  FR  SH  FR  MT  GR  FR  SH  FR  MT  SE  SE
+  SE  SE  SE  SH  SH  SH  SE  SE  SH  GR  GR  MT  GR  CT  GR  MT  FR  GR  CT  MT  FC  GR  FR  SH  MT  SE  SE  SE
+  MT  SE  SE  SE  SE  SE  SE  SE  MT  GR  GR  FR  GR  GR  GR  GR  FR  GR  GR  GR  RD  RD  MT  MT  AP  SE  SE  FR
+  FR  MT  SE  SE  SE  SE  SH  SH  GR  FR  RV  RV  BR  RV  RV  GR  GR  CT  MT  GR  GR  MT  MT  MT  SE  SE  FR  MT
+  MT  FR  MT  SE  SE  SH  FR  GR  FR  FR  FR  FR  GR  CT  RV  RV  RV  RV  MT 4FC  MT  MT  GR  BR  BR  FR  MT  FR
+  FR  MT  FR  MT  SE  SE  SE  SH  SH  GR  FR  FR  GR  GR  FR  FR  GR  RV  RV  MT  MT  MT  SE  SE  FR  MT  FR  MT
+  MT  FR  MT  FR  MT  SE  SE  SE  SE  SH  SH  FR  FR  FR  GR  FR  FR  SP  RV  MT  SE  SE  SE  FR  MT  FR  MT  FR
+  FR  MT  FR  MT  FR  MT  SE  SE  SE  SE  SE  SH  SH  SH  SH  SH  SH  SE  SE  SE  SE  SE  FR  MT  FR  MT  TW  MT
+  FR  FR  MT  FR  MT  FR  MT  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  SE  RF  SE  SE  FR  MT  FR  MT  FR  MT  FR
+team, unit type, x, y (author: Blick Winkel)
+12, bboat, 4, 10
+12, infantry, 8, 4
+12, lander, 12, 12
+4, lander, 15, 15
+4, bboat, 23, 17

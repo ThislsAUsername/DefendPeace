@@ -1,0 +1,24 @@
+  SH  GR  CT  GR  FR  RD  RD  RD  FR  RD  CT  RD  RD  GR  RD  RD  RD  SE12FC  SE  SE  SE  SE  AP  SE
+  GR  FR  GR  RD  GR  RD  CT  GR  GR  GR  GR  FR  RD  CT  RD  FR  RD  BR  RD  BR  FR  FC  BR  RD  BR
+  CT  GR  GR  TW  GR  GR  GR  RD  CT  RD  GR  GR  GR  GR  MT  GR  CT  SE  BR  SE  SE  SE  SE  BR  SE
+  RD  BK  RD  SH  SH  FR  GR  GR  GR  FR  GR12HQ  RD  FR  GR  SE  SE  SE  BR  SE  RD  SP  BR  RD  CT
+  RD  GR  CT  SE  SE  GR  GR  CT  GR  GR  GR  FR  RD  RD  CT  SE12FC  BR  RD  BR  RD  SE  SE  BR  SE
+  RD  FR  GR  SE  SE  CT  RD  RD  GR  RD  GR  RD  GR  GR  GR  SE  SE  SE  SP  SE  SE  SE  CT  RD  FR
+  RD  GR  GR  SH  SH  GR  FR  GR  PI  CT  GR  GR  GR  FR  GR  BK  SE  SE  SE  SE  SE  SE  GR  RD  RD
+  GR  CT  GR  SH  SH  GR  CT  GR  ME  CT  GR  CT  GR  GR  LB  RD  BK  SE  SE  SE  RF  SE  GR  GR  CT
+  GR  MT  GR  SH  SH  SE  GR  GR  PI  CT  FR  RD  GR  RD  RD  RD  GR  FR  SE  SE  SE  SE  FR  GR  RD
+  RD  GR  FR  SE  SE  SE  SE  FR  GR  RD  RD  RD  GR  RD  FR  CT  PI  GR  GR  SE  SH  SH  GR  MT  GR
+  CT  GR  GR  SE  RF  SE  SE  SE  BK  RD  LB  GR  GR  CT  GR  CT  ME  GR  CT  GR  SH  SH  GR  CT  GR
+  RD  RD  GR  SE  SE  SE  SE  SE  SE  BK  GR  FR  GR  GR  GR  CT  PI  GR  FR  GR  SH  SH  GR  GR  RD
+  FR  RD  CT  SE  SE  SE  SP  SE  SE  SE  GR  GR  GR  RD  GR  RD  GR  RD  RD  CT  SE  SE  GR  FR  RD
+  SE  BR  SE  SE  RD  BR  RD  BR13FC  SE  CT  RD  RD  FR  GR  GR  GR  CT  GR  GR  SE  SE  CT  GR  RD
+  CT  RD  BR  SP  RD  SE  BR  SE  SE  SE  GR  FR  RD13HQ  GR  FR  GR  GR  GR  FR  SH  SH  RD  BK  RD
+  SE  BR  SE  SE  SE  SE  BR  SE  CT  GR  MT  GR  GR  GR  GR  RD  CT  RD  GR  GR  GR  TW  GR  GR  CT
+  BR  RD  BR  FC  FR  BR  RD  BR  RD  FR  RD  CT  RD  FR  GR  GR  GR  GR  CT  RD  GR  RD  GR  FR  GR
+  SE  AP  SE  SE  SE  SE13FC  SE  RD  RD  RD  GR  RD  RD  CT  RD  FR  RD  RD  RD  FR  GR  CT  GR  SH
+team, unit type, x, y (author: StarFlash251)
+13, lander, 5, 10
+13, infantry, 6, 17
+12, bboat, 11, 3
+13, bboat, 13, 14
+12, lander, 19, 7

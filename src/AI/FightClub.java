@@ -37,9 +37,8 @@ public class FightClub
 
     // Select map(s).
     //List<MapInfo> maps = MapLibrary.getMapList();
-//    List<MapInfo> maps = Arrays.asList(MapLibrary.getByName("Firing Range"), MapLibrary.getByName("Aria of War"));
-    List<MapInfo> maps = Arrays.asList(MapLibrary.getByName("Firing Range"),
-                                       MapLibrary.getByName("Shadows Chase You Endlessly"),
+    List<MapInfo> maps = Arrays.asList(MapLibrary.getByName("AW3 Little Island"),
+                                       MapLibrary.getByName("Shadows chase you endlessly"),
                                        MapLibrary.getByName("Blood on my Hands"),
                                        MapLibrary.getByName("Aria of War"));
     // How many bouts per map?
