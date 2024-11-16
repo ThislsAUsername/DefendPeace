@@ -94,6 +94,7 @@ public class UIUtils
       paletteNames.put(CYAN, "cyan");
       paletteNames.put(ORANGE, "orange");
       paletteNames.put(VIOLET, "violet");
+      paletteNames.put(Color.LIGHT_GRAY, "misc");
 
       // We want to be able to use the normal units, as well as any others
       factions.add(new Faction(DEFAULT_FACTION_NAME,DEFAULT_FACTION_NAME));
