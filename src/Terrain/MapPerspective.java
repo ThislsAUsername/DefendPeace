@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import CommandingOfficers.Commander;
 import Engine.Army;
 import Engine.GamePath;
-import Engine.GamePath.PathNode;
 import Engine.Utils;
 import Engine.XYCoord;
 import Terrain.Environment.Weathers;
@@ -289,9 +288,9 @@ public class MapPerspective extends GameMap
     if( !viewer.isEnemy(scout.CO.army) )
     {
       UnitContext uc = new UnitContext(this, scout);
-      for( PathNode node : movepath.getWaypoints() )
+      for( XYCoord node : movepath.getWaypoints() )
       {
-        uc.setCoord(node.GetCoordinates());
+        uc.setCoord(node);
         uc.calculateVision();
         revealFog(uc, uc.coord);
       }
