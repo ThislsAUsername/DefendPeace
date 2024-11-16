@@ -18,7 +18,6 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.HealUnitEvent;
 import Engine.GameEvents.MapChangeEvent;
 import Engine.GameEvents.MassDamageEvent;
-import Engine.GamePath.PathNode;
 import Engine.StateTrackers.StateTracker;
 import Engine.UnitActionLifecycles.TransformLifecycle;
 import Terrain.Environment;
@@ -130,7 +129,7 @@ public class KaijuActions
         kaijuState.calculateMoveType(); // cache for later
 
         // movePath should be updated by the above, so we should be good to go
-        for( PathNode node : movePath.getWaypoints() )
+        for( XYCoord node : movePath.getWaypoints() )
         {
           if( kaijuState.movePower < 1 )
             break; // Go only until we run out of move
@@ -151,10 +150,9 @@ public class KaijuActions
       }
       return crush;
     }
-    public static void enqueueSingleTileEvents(GameMap gameMap, int startingMP, UnitContext kaijuState, PathNode node, CrushResult crush)
+    public static void enqueueSingleTileEvents(GameMap gameMap, int startingMP, UnitContext kaijuState, XYCoord destCoord, CrushResult crush)
     {
       KaijuUnitModel stomperType = (KaijuUnitModel) kaijuState.model;
-      final XYCoord destCoord = node.GetCoordinates();
       MapLocation location = gameMap.getLocation(destCoord);
 
       String tileToast = null; // Default to no popup

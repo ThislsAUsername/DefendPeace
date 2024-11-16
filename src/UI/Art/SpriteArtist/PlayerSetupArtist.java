@@ -82,7 +82,7 @@ public class PlayerSetupArtist
     int readyAreaWidth = (int)(readyButton.getWidth() * 1.5);
 
     /////////////////// Player Panels ///////////////////////
-    int numCOs = mapInfo.getNumCos();
+    int numCOs = mapInfo.getNumPlayers();
     int highlightedPlayer = myControl.getHighlightedPlayer();
 
     // Calculate the vertical space each player panel will consume.

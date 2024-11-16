@@ -140,6 +140,8 @@ public class GameOptionSetupController implements IController
         gameBuilder.isSecurityEnabled = securityOption.getSelectedObject();
         if( null == coSelectMenu )
           coSelectMenu = new PlayerSetupController(gameBuilder, initialPicksMap, changesMade);
+        else
+          coSelectMenu.enforceFlySolo();
         isInSubmenu = true;
         break;
       case BACK:

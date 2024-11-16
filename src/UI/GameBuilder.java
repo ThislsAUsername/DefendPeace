@@ -49,8 +49,8 @@ public class GameBuilder
     }
 
     // Create all of the armies.
-    Army[] armies = new Army[mapInfo.getNumCos()];
-    for(int i = 0; i < mapInfo.getNumCos(); ++i)
+    Army[] armies = new Army[mapInfo.getNumPlayers()];
+    for(int i = 0; i < mapInfo.getNumPlayers(); ++i)
     {
       armies[i] = new Army(scenario);
       armies[i].cos = playerInfos[i].makeCommanders(scenario.rules);

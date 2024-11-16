@@ -211,7 +211,7 @@ public abstract class BattleLifecycle
       int defenderHealthLoss = summary.defender.getPreciseHealthDamage();
       // output any damage done, with the color of the one dealing the damage
       if( attackerHealthLoss > 0 )
-        output.add(new DamagePopup(movePath.getWaypoint(0).GetCoordinates(), defender.CO.myColor, attackerHealthLoss + "%"));
+        output.add(new DamagePopup(movePath.getWaypoint(0), defender.CO.myColor, attackerHealthLoss + "%"));
       if( defenderHealthLoss > 0 )
         output.add(new DamagePopup(attackLocation, attacker.CO.myColor, defenderHealthLoss + "%"));
 

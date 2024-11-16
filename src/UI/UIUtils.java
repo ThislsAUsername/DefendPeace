@@ -86,6 +86,7 @@ public class UIUtils
       mapUnitColorPalettes.put(CYAN, new ColorPalette(cyanMapUnitColors));
       mapUnitColorPalettes.put(ORANGE, new ColorPalette(orangeMapUnitColors));
       mapUnitColorPalettes.put(VIOLET, new ColorPalette(purpleMapUnitColors));
+      mapUnitColorPalettes.put(Color.LIGHT_GRAY, new ColorPalette(defaultMapColors));
 
       // Throw some color names in there for the defaults
       // toString() is not user-friendly
@@ -219,6 +220,8 @@ public class UIUtils
 
   public static String getCanonicalFactionName(COSpriteSpec spec)
   {
+    if( Color.LIGHT_GRAY.equals(spec.color) )
+      return "MISC";
     return getCanonicalFactionName(getPaletteName(spec.color), spec.faction.name);
   }
   public static String getCanonicalFactionName(String palette, String faction)
@@ -281,7 +284,7 @@ public class UIUtils
     {
       if( paletteNames.containsKey(color) )
         return getCanonicalFactionName(this);
-      return color.toString() + " " + faction.name;
+      return faction.name;
     }
 
     /**
