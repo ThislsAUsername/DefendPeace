@@ -84,10 +84,10 @@ public class Tasha extends AWBWCommander
     private static final long serialVersionUID = 1L;
     UnitTypeFilter moveMod;
 
-    TashaAbility(Commander commander, CostBasis basis, String name, int cost, int rangeBoost)
+    TashaAbility(Commander commander, CostBasis basis, String name, int cost, int moveBoost)
     {
       super(commander, name, cost, basis);
-      moveMod = new UnitTypeFilter(new UnitMovementModifier(2));
+      moveMod = new UnitTypeFilter(new UnitMovementModifier(moveBoost));
       moveMod.oneOf = BOOST_MASK_ANY;
     }
 
