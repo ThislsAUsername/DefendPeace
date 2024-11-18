@@ -333,9 +333,9 @@ public class UIUtils
   public static final COSpriteSpec AR = COSpriteSpec.fromDisk("Acid"  , "Rain");
   public static final COSpriteSpec WN = COSpriteSpec.fromDisk("White" , "Nova");
 
-  public static final COSpriteSpec BW = COSpriteSpec.fromDisk("Brenner's"     , "Wolves");
-  public static final COSpriteSpec NW = COSpriteSpec.fromDisk("New Rubinelle" , "Wolves");
-  public static final COSpriteSpec LA = COSpriteSpec.fromDisk("Lazurian"      , "Army");
+  public static final COSpriteSpec BW  = COSpriteSpec.fromDisk("Brenner's"     , "Wolves");
+  public static final COSpriteSpec NRA = COSpriteSpec.fromDisk("New Rubinelle" , "Wolves");
+  public static final COSpriteSpec LA  = COSpriteSpec.fromDisk("Lazurian"      , "Army");
   public static final COSpriteSpec IDS = COSpriteSpec.fromDisk("IDS"          , "Army");
 
   public static COSpriteSpec[] CANON_FACTIONS;
@@ -365,7 +365,7 @@ public class UIUtils
           // Custom
           RF, GS, BD, AB, JS, CI, PC, TG, PL, AR, WN, RT, CO, IDS, MISC,
           // DoR
-          BW, NW, LA, };
+          BW, NRA, LA, };
       // In order of CO name discriminator resolution
       PORTRAIT_CHOICE_ORDER = new SourceGames[]
         {

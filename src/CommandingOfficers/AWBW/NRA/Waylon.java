@@ -29,7 +29,7 @@ public class Waylon extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Waylon", UIUtils.SourceGames.AWBW, UIUtils.NW);
+      super("Waylon", UIUtils.SourceGames.AWBW, UIUtils.NRA);
       infoPages.add(new InfoPage(
             "Waylon (AWBW)\n"
           + "Air units gain +20/30 stats\n"));
