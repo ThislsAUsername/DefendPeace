@@ -32,7 +32,7 @@ public class Tasha extends AWBWCommander
       super("Tasha", UIUtils.SourceGames.AWBW, UIUtils.LA);
       infoPages.add(new InfoPage(
             "Tasha (AWBW)\n"
-          + "Air units gain +40/15 stats\n"));
+          + "Air units gain +40/20 stats\n"));
       infoPages.add(new InfoPage(FoxOne(null, null),
             "Air units +2 move.\n"
           + "+10 attack and defense.\n"));
@@ -76,7 +76,7 @@ public class Tasha extends AWBWCommander
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
     if( params.defender.model.isAny(BOOST_MASK_ANY) )
-      params.defenseSubtraction += 15;
+      params.defenseSubtraction += 20;
   }
 
   private static class TashaAbility extends AWBWAbility
