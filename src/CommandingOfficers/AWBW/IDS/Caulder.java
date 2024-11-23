@@ -33,9 +33,9 @@ public class Caulder extends AWBWCommander
       super("Caulder", UIUtils.SourceGames.AWBW, UIUtils.IDS);
       infoPages.add(new InfoPage(
             "Caulder (AWBW)\n"
-          + "Repair your units by 2 HP.\n"));
+          + "Repair your units by +2 HP every turn.\n"));
       infoPages.add(new InfoPage(new SupremeBoost(null, null),
-            "+50/35 (160/145) stats, and repair another 3 HP.\n"
+            "+50/35 (160/145) stats, and repair another +3 HP (watch your funds!).\n"
           + "+10 attack and defense.\n"));
       infoPages.add(AWBW_MECHANICS_BLURB);
     }
