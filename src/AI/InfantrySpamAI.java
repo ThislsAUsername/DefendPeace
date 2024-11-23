@@ -50,13 +50,13 @@ public class InfantrySpamAI implements AIController
     }
   }
   public static final AIMaker info = new instantiator();
-  
+
   @Override
   public AIMaker getAIInfo()
   {
     return info;
   }
-  
+
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
 
   private Army myArmy = null;
@@ -81,7 +81,7 @@ public class InfantrySpamAI implements AIController
 
     // Make sure we don't have any hang-ons from last time.
     actions.clear();
-    
+
     // Create a list of every property we don't own, but want to.
     unownedProperties = AIUtils.findNonAlliedProperties(myArmy, gameMap);
     capturingProperties = new ArrayList<XYCoord>();
@@ -146,7 +146,7 @@ public class InfantrySpamAI implements AIController
             foundAction = true;
             break;
           }
-          
+
           // Otherwise, see if we have the option to capture.
           if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE )
           {
@@ -206,7 +206,7 @@ public class InfantrySpamAI implements AIController
     {
       AIUtils.queueCromulentAbility(actions, myArmy, CommanderAbility.PHASE_BUY);
     }
-    
+
     // Finally, build more infantry. We will add all build commands at once, since they can't conflict.
     if( actions.isEmpty() )
     {
