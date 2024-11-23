@@ -211,11 +211,14 @@ public class InfantrySpamAI implements AIController
     if( actions.isEmpty() )
     {
       int budget = myArmy.money;
+      int currentUnitCount = myArmy.getUnits().size();
       // Create a list of actions to build infantry on every open factory, then return these actions until done.
       for( int i = 0; i < gameMap.mapWidth; i++ )
       {
         for( int j = 0; j < gameMap.mapHeight; j++)
         {
+          if( myArmy.gameRules.unitCap <= currentUnitCount + actions.size() )
+            break; // Don't build too many mans
           MapLocation loc = gameMap.getLocation(i, j);
           Commander buyer = loc.getOwner();
           if(null == buyer)
