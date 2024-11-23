@@ -703,6 +703,9 @@ public class Muriel implements AIController
 
   private void queueUnitProductionActions(GameMap gameMap)
   {
+    int currentUnitCount = myArmy.getUnits().size();
+    int unitCap = myArmy.gameRules.unitCap;
+    int shoppingCartMax = unitCap - currentUnitCount;
     int budget = myArmy.money;
     log("Evaluating Production needs");
     log("Budget: " + budget);
@@ -811,7 +814,8 @@ public class Muriel implements AIController
       // If we ever collect more than twice our income in funds, we just aren't spending fast enough. Fix that.
       int incomePerTurn = myArmy.getIncomePerTurn();
       boolean useDamageRatio = (myArmy.money > (incomePerTurn*2)); // Rich people can afford to think differently.
-      if(useDamageRatio) log("  High funds - sorting units by damage ratio instead of cost effectiveness.");
+      useDamageRatio |= shoppingCartMax >= shoppingCart.size() + CPI.availableProperties.size();
+      if(useDamageRatio) log("  High funds/unit count - sorting units by damage ratio instead of cost effectiveness.");
 
       // If we are low on grunts, make sure we save money to build more.
       final UnitModel infModel = myArmy.cos[0].getUnitModel(UnitModel.TROOP);
@@ -826,7 +830,8 @@ public class Muriel implements AIController
         int gruntsWanted = (int)Math.ceil(myArmy.getUnits().size() * INFANTRY_PROPORTION);
         int gruntFacilities = CPI.getNumFacilitiesFor(infModel)-1; // The -1 assumes we are about to build from a factory. Possibly untrue.
         if( gruntFacilities < 0 ) gruntFacilities = 0;
-        costBuffer = (int)Math.min(gruntFacilities, gruntsWanted) * CPI.getAverageCostFor(infModel);
+        gruntFacilities = Math.min(gruntFacilities, shoppingCartMax - CPI.availableProperties.size());
+        costBuffer = (int) Math.min(gruntFacilities, gruntsWanted) * CPI.getAverageCostFor(infModel);
         log(String.format("  Low on Infantry: witholding %s for possible extra grunts", costBuffer));
       }
 
@@ -943,6 +948,8 @@ public class Muriel implements AIController
         // Figure out if we can afford the desired unit type.
         int maxBuildable = CPI.getNumFacilitiesFor(idealCounter);
         log(String.format("    Facilities available: %s", maxBuildable));
+        maxBuildable = Math.min(maxBuildable, shoppingCartMax - shoppingCart.size());
+
         MapLocation loc = CPI.getLocationToBuild(idealCounter);
         int cost = myArmy.getBuyCost(idealCounter.um, loc.getCoordinates());
         if( cost <= (budget - costBuffer))
@@ -974,7 +981,7 @@ public class Muriel implements AIController
     int infCost = Integer.MAX_VALUE;
     if( null != loc && null != loc.getOwner() )
       infCost = loc.getOwner().getCost(infModel);
-    while ((budget >= infCost) &&
+    while ((budget >= infCost) && (shoppingCartMax > shoppingCart.size()) &&
         null != loc && (CPI.availableUnitModels.contains(new ModelForCO(loc.getOwner(), infModel))))
     {
       shoppingCart.add(new PurchaseOrder(loc, loc.getOwner(), infModel));
