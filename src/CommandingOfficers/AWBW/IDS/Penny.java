@@ -1,11 +1,9 @@
 package CommandingOfficers.AWBW.IDS;
 
-import java.util.ArrayList;
-
 import CommandingOfficers.Commander;
+import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
-import CommandingOfficers.DeployableCommander;
-import CommandingOfficers.AW4.RuinedCommander;
+import CommandingOfficers.AWBW.AWBWCommander;
 import Engine.GameScenario;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.GlobalWeatherEvent;
@@ -13,10 +11,9 @@ import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 import UI.UIUtils;
-import Units.Unit;
 import Units.UnitContext;
 
-public class Penny extends RuinedCommander
+public class Penny extends AWBWCommander
 {
   private static final long serialVersionUID = 1L;
 
@@ -26,18 +23,17 @@ public class Penny extends RuinedCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Penny", UIUtils.SourceGames.AW4, UIUtils.IDS);
+      super("Penny", UIUtils.SourceGames.AWBW, UIUtils.IDS);
       infoPages.add(new InfoPage(
-          "The youngest child of Dr. Caulder. Numerous experiments have left her mind permanently shattered.\n"));
-      infoPages.add(new InfoPage(
-          "Base Zone: 3\n"
-        + "Units are unaffected by weather. This applies even when not in the CO Zone.\n"));
-      infoPages.add(new InfoPage(new Stormfront(null),
-          "Randomly changes the weather to Sleet (-1 move), Smoke (Fog of War), or Sirocco (-30 attack). The weather lasts for 3 days.\n"
-        + "Won't roll the weather active on the COU's tile.\n"
-        + "If Sleet or Sirocco is rolled, disables temporary fog.\n"));
-      infoPages.add(DeployableCommander.COU_MECHANICS_BLURB);
-      infoPages.add(RuinedCommander.DOR_MECHANICS_BLURB);
+          "Penny (AWBW)\n"
+        + "Units are unaffected by weather.\n"));
+      infoPages.add(new InfoPage(new Enigma(null, null),
+          "Summons Snow. Disables temporary fog.\n"
+        + "+10 attack and defense.\n"));
+      infoPages.add(new InfoPage(new Stormfront(null, null),
+          "Summons Rain for 3 days. Disables temporary fog.\n"
+        + "+10 attack and defense.\n"));
+      infoPages.add(AWBWCommander.AWBW_MECHANICS_BLURB);
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -45,18 +41,17 @@ public class Penny extends RuinedCommander
       return new Penny(rules);
     }
   }
-  public static final int RADIUS  = 3;
-  public static final int POWER   = 0;
-  public static final int DEFENSE = 0;
 
   public Penny(GameScenario.GameRules rules)
   {
-    super(RADIUS, POWER, DEFENSE, coInfo, rules);
+    super(coInfo, rules);
     immuneToCold   = true;
     immuneToClouds = true;
     immuneToSand   = true;
 
-    addCommanderAbility(new Stormfront(this));
+    CommanderAbility.CostBasis cb = getGameBasis();
+    addCommanderAbility(new Enigma(this, cb));
+    addCommanderAbility(new Stormfront(this, cb));
   }
 
   @Override
@@ -74,29 +69,45 @@ public class Penny extends RuinedCommander
     return coInfo;
   }
 
-  private static class Stormfront extends RuinedAbility
+  private static class Enigma extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
-    private static final String NAME = "Stormfront";
+    private static final String NAME = "Enigma";
+    private static final int COST = 2;
 
-    Stormfront(Penny commander)
+    Enigma(Penny commander, CostBasis basis)
     {
-      super(commander, NAME);
+      super(commander, NAME, COST, basis);
     }
 
     @Override
     public GameEventQueue getEvents(MapMaster map)
     {
-      ArrayList<Weathers> candidates = new ArrayList<>();
-      candidates.add(Weathers.SLEET);
-      candidates.add(Weathers.SMOKE);
-      candidates.add(Weathers.SIROCCO);
-      for( Unit u : COcast.COUs ) // Don't roll the same weather that's currently active
-        candidates.remove(map.getEnvironment(u.x, u.y).weatherType);
-      int rand = map.game.getRN(candidates.size());
+      GlobalWeatherEvent weather = new GlobalWeatherEvent(Weathers.SNOW, 1);
+      weather.canCancelFog = true;
 
-      Weathers chosen = candidates.get(rand);
-      GlobalWeatherEvent weather = new GlobalWeatherEvent(chosen, 3);
+      GameEventQueue events = super.getEvents(map);
+      events.add(weather);
+
+      return events;
+    }
+  }
+
+  private static class Stormfront extends AWBWAbility
+  {
+    private static final long serialVersionUID = 1L;
+    private static final String NAME = "Stormfront";
+    private static final int COST = 6;
+
+    Stormfront(Penny commander, CostBasis basis)
+    {
+      super(commander, NAME, COST, basis);
+    }
+
+    @Override
+    public GameEventQueue getEvents(MapMaster map)
+    {
+      GlobalWeatherEvent weather = new GlobalWeatherEvent(Weathers.RAIN, 3);
       weather.canCancelFog = true;
 
       GameEventQueue events = super.getEvents(map);
