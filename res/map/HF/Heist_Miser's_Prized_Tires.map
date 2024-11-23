@@ -16,6 +16,7 @@
   RD  RD  MT  FC  GR  GR  FR  RV  BR  PI  GR  FR  GR 1LB  BK  RD  SH  SE  SH  GR  FR
   CT  RD  RD  RD  GR  GR  GR  RV  RD  CT  GR  GR  GR  GR  GR  RD  SP  GR  MT  AP  MT
   FR  GR  MT  GR  GR  CT  RD  BR  RD  GR  GR  GR  CT  GR  FR  GR  GR  GR  GR  FR  MT
+team, unit type, x, y
 1, INFANTRY, 20, 4
 6, INFANTRY, 2, 3
 6, INFANTRY, 0, 13

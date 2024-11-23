@@ -22,6 +22,7 @@
   GR  MT  RD  GR  GR  RD  GR  GR  GR  RD  RD  GR  FR  FR  GR  GR  GR  CT  RD  FR
   GR  CT  BR  FR  GR  RD  RD  GR  CT  MT  RD  RD  GR  GR12FC  GR  RD  RD  RD  MT
   MT  GR  RD  GR  GR  CT  RD  FR  GR  GR  TW  RD  RD  RD  RD  RD  RD  MT  MT  MT
+team, unit type, x, y
 10, INFANTRY, 3, 13
 12, INFANTRY, 16, 10
 12, INFANTRY, 14, 22

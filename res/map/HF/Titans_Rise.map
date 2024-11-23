@@ -17,6 +17,7 @@
   SE  SH  MT  MT  BK  FR  BK  GR  GR  SH  SH  AP  SE  SH  PI  GR  GR  MT  CT  MT  GR  GR  SE  SE
   SE  SE  SH  GR  FR  FR  FR  GR  PI  SH  SE  SE  SH  PI  PI  GR  FR  FR  GR  MT  SH  SE  SE  RF
   SE  RF  SE  SE  SH  CT  FR  FR  PI  PI  SH  SH  PI  PI  GR  CT  GR  SH  SE  SE  SE  SE  SE  SE
+team, unit type, x, y
 8, INFANTRY, 8, 16
 8, INFANTRY, 18, 17
 8, BBOAT, 15, 14
