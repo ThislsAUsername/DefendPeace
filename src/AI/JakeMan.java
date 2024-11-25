@@ -398,6 +398,13 @@ public class JakeMan extends ModularAI
     @Override
     public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap gameMap)
     {
+      int currentUnitCount = myArmy.getUnits().size();
+      if( myArmy.gameRules.unitCap <= currentUnitCount )
+      {
+        builds = null;
+        return null;
+      }
+
       if( null == builds )
         builds = ai.queueUnitProductionActions(gameMap);
 
