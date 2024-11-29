@@ -120,6 +120,7 @@ public class Colin extends AWBWCommander
       uc.costRatio += 100;
     return uc.getCostTotal();
   }
+  @Override
   public GameEventQueue receiveMoveEvent(Unit unit, GamePath unitPath)
   {
     if( !unitsToDouble.contains(unit) )
@@ -127,16 +128,28 @@ public class Colin extends AWBWCommander
     if( unitPath.getPathLength() < 2 )
       return null; // If the unit didn't move, we can't use its starting space.
 
+    return spawnClone(unit, unitPath.getWaypoint(0));
+  }
+  @Override
+  public GameEventQueue receiveUnitDieEvent(Unit victim, XYCoord grave, Integer healthBeforeDeath)
+  {
+    if( !unitsToDouble.contains(victim) )
+      return null;
+
+    return spawnClone(victim, grave);
+  }
+  private GameEventQueue spawnClone(Unit unit, XYCoord spawnXYC)
+  {
     unitsToDouble.remove(unit);
     boolean unitIsReady = true;
     boolean allowStomping = false;
-    XYCoord spawnXYC = unitPath.getWaypoint(0);
     var freeSpawn = new CreateUnitEvent(this, unit.model, spawnXYC, AnimationStyle.NONE, unitIsReady, allowStomping);
     spawnedUnits.add(freeSpawn.myNewUnit);
     var events = new GameEventQueue();
     events.add(freeSpawn);
     return events;
   }
+
 
   private static class GoldRush extends AWBWAbility
   {
