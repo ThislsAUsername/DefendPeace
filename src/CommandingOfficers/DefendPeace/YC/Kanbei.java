@@ -34,7 +34,7 @@ public class Kanbei extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Kanbei", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.YC, "FEW");
+      super("Kanbei", UIUtils.SourceGames.VARIANTS, UIUtils.YC, "FEW");
       infoPages.add(new InfoPage(
             "Kanbei (reduced unit count)\n"
           + "DS Kanbei, with AWBW rules and normal prices.\n"

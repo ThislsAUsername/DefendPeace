@@ -36,7 +36,7 @@ public class Qis extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Qis", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.MISC);
+      super("Qis", UIUtils.SourceGames.VARIANTS, UIUtils.MISC);
       infoPages.add(new InfoPage(
           "Commander Qis (pronounced 'keese') has spent his adult life fleeing cold weather, and failing to escape it.\n" +
           "Whether the cause is simply incredible misfortune or some sort of curse is unclear... he is quite curt on the subject.\n" +

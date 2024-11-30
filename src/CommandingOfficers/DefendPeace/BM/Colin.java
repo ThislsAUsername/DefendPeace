@@ -35,7 +35,7 @@ public class Colin extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Colin", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.BM, "SWM");
+      super("Colin", UIUtils.SourceGames.VARIANTS, UIUtils.BM, "SWM");
       infoPages.add(new InfoPage(
             "Colin (swarm)\n"
           + "AWBW Colin, but with more dudes instead of cheaper dudes.\n"

@@ -34,7 +34,7 @@ public class Eagle extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Eagle", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.GE, "ZAP");
+      super("Eagle", UIUtils.SourceGames.VARIANTS, UIUtils.GE, "ZAP");
       infoPages.add(new InfoPage(
             "Eagle (nyoom)\n"
           + "AWBW Eagle, but with lightning air.\n"

@@ -28,7 +28,7 @@ public class Sasha extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sasha", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.BM, "CAP");
+      super("Sasha", UIUtils.SourceGames.VARIANTS, UIUtils.BM, "CAP");
       infoPages.add(new InfoPage(
             "Sasha (CAP)\n"
           + "Receives +100 funds per property that grants funds and she owns. (Note: labs, comtowers, and 0 Funds games do not get additional income).\n"

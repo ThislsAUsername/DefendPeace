@@ -36,7 +36,7 @@ public class Jess extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Jess", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.GE, "ZAP");
+      super("Jess", UIUtils.SourceGames.VARIANTS, UIUtils.GE, "ZAP");
       infoPages.add(new InfoPage(
           "Jess (nyoom)\n"
         + "AWBW Jess, but with lightning tanks.\n"

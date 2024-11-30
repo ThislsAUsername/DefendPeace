@@ -39,7 +39,7 @@ public class Sami extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sami", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.OS, "VM");
+      super("Sami", UIUtils.SourceGames.VARIANTS, UIUtils.OS, "VM");
       infoPages.add(new InfoPage(
             "Sami (victory)\n"
           + "AW1 Sami, but with instant captures and AWBW rules.\n"
