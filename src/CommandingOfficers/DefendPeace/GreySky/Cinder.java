@@ -1,6 +1,7 @@
 package CommandingOfficers.DefendPeace.GreySky;
 
 import java.awt.Color;
+import java.util.ArrayList;
 
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
@@ -15,10 +16,13 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.StateTrackers.BuildCountsTracker;
 import Engine.StateTrackers.CountManager;
 import Engine.StateTrackers.StateTracker;
+import Engine.UnitMods.UnitFightStatModifier;
+import Engine.UnitMods.UnitModifier;
 import Terrain.MapMaster;
 import UI.UIUtils;
 import Units.Unit;
 import Units.UnitContext;
+import Units.UnitModel;
 
 /*
  * Cinder is based on getting an edge in the action economy, at the cost of unit health.
@@ -45,11 +49,14 @@ public class Cinder extends Commander
           SearAbility.SEAR_NAME+" ("+SearAbility.SEAR_COST+"):\n" +
           "Remove "+SearAbility.SEAR_WOUND+" HP from each of Cinder's units.\n" +
           "Reactivate all units.\n" +
-          "Resupply units that had not yet acted.\n"));
+          "Resupply units that had not yet acted.\n" +
+          "Does not increase in activation cost." +
+          "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(
           WitchFireAbility.WITCHFIRE_NAME+" ("+WitchFireAbility.WITCHFIRE_COST+"):\n" +
           "After any unit attacks, it will be reactivated; this costs 1 HP per attack made by that unit so far.\n" +
-          "This may be done repeatedly, but it can kill Cinder's own units.\n"));
+          "This may be done repeatedly, but it can kill Cinder's own units.\n" +
+          "+10 attack and defense.\n"));
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -66,8 +73,8 @@ public class Cinder extends Commander
   {
     super(coInfo, rules);
 
-    CommanderAbility ab = addCommanderAbility(new SearAbility(this));
-    addCommanderAbility(new WitchFireAbility(this, ab.costBasis));
+    addCommanderAbility(new SearAbility(this));
+    addCommanderAbility(new WitchFireAbility(this));
   }
 
   @Override
@@ -102,9 +109,11 @@ public class Cinder extends Commander
    * the cost of units increases for repeated purchases from a single property.
    */
   @Override
-  public void modifyCost(UnitContext uc)
+  public int getBuyCost(UnitModel um, XYCoord coord)
   {
+    UnitContext uc = getCostContext(um, coord);
     uc.costShift += buildCounts.getCountFor(this, uc.coord) * PREMIUM_PER_BUILD;
+    return uc.getCostTotal();
   }
 
   @Override
@@ -136,13 +145,21 @@ public class Cinder extends Commander
   {
     private static final long serialVersionUID = 1L;
     private static final String SEAR_NAME = "Sear";
-    private static final int SEAR_COST = 5;
+    private static final int SEAR_COST = 6;
     private static final int SEAR_WOUND = -10;
+    UnitModifier statMod = new UnitFightStatModifier(10);
 
     SearAbility(Cinder cinder)
     {
       super(cinder, SEAR_NAME, SEAR_COST);
       AIFlags = PHASE_TURN_END;
+    }
+
+    @Override
+    public int getCost()
+    {
+      // Override default cost-increase behavior
+      return SEAR_COST * CHARGERATIO_FUNDS;
     }
 
     @Override
@@ -158,21 +175,27 @@ public class Cinder extends Commander
         unit.isTurnOver = false;
       }
     }
+    @Override
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    {
+      modList.add(statMod);
+    }
   }
 
   /*
-   * Witchfire causes Cinder's troops to automatically refresh after attacking, at the cost of 1 HP
+   * Witchfire causes Cinder's troops to automatically refresh after attacking, at the cost of scaling HP
    */
   private static class WitchFireAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String WITCHFIRE_NAME = "Witchfire";
-    private static final int WITCHFIRE_COST = 9;
+    private static final int WITCHFIRE_COST = 7;
     private WitchFireTracker tracker;
+    UnitModifier statMod = new UnitFightStatModifier(10);
 
-    WitchFireAbility(Cinder cinder, CostBasis basis)
+    WitchFireAbility(Cinder cinder)
     {
-      super(cinder, WITCHFIRE_NAME, WITCHFIRE_COST, basis);
+      super(cinder, WITCHFIRE_NAME, WITCHFIRE_COST);
     }
     @Override
     public void initForGame(GameInstance game)
@@ -184,6 +207,11 @@ public class Cinder extends Commander
     protected void perform(MapMaster gameMap)
     {
       tracker.startTracking(myCommander.army);
+    }
+    @Override
+    public void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
+    {
+      modList.add(statMod);
     }
 
     @Override
