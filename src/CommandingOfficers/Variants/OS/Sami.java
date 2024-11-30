@@ -1,4 +1,4 @@
-package CommandingOfficers.DefendPeace.OS;
+package CommandingOfficers.Variants.OS;
 
 import java.util.ArrayList;
 

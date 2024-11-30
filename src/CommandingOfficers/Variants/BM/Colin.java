@@ -1,4 +1,4 @@
-package CommandingOfficers.DefendPeace.BM;
+package CommandingOfficers.Variants.BM;
 
 import java.util.ArrayList;
 import CommandingOfficers.*;

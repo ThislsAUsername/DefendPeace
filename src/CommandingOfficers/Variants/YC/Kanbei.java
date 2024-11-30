@@ -1,4 +1,4 @@
-package CommandingOfficers.DefendPeace.YC;
+package CommandingOfficers.Variants.YC;
 
 import java.util.ArrayList;
 import java.util.HashMap;

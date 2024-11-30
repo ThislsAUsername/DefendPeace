@@ -1,4 +1,4 @@
-package CommandingOfficers.DefendPeace.GE;
+package CommandingOfficers.Variants.GE;
 
 import java.util.ArrayList;
 import CommandingOfficers.*;
