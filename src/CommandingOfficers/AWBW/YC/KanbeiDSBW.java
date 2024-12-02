@@ -32,7 +32,6 @@ public class KanbeiDSBW extends AWBWCommander
       super("Kanbei", UIUtils.SourceGames.AWBW, UIUtils.YC, "3BW");
       infoPages.add(new InfoPage(
             "AWDS Kanbei for AWBW\n"
-          + "Kanbei with a weaker D2D, which might be under T0 more often.\n"
           + "+20/20 stats for 1.2x prices\n"));
       infoPages.add(new InfoPage(new MoraleBoost(null, null),
             "Increases firepower for all units.\n"
