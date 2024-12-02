@@ -22,7 +22,7 @@
   SE  SE  SH  SE  SE  SE  FR  GR  RD  RD  RD  GR  GR  GR  GR  GR  RD  FR  GR  FR  SE  SE
   SE  SE  TW  SE  SE  SE  SE  AP  GR  GR  GR  MT  MT  GR  MT  MT  RD  RD  RD  SE  SE  SE
   SH  CT  GR  GR  SH  SE  SE  SE  GR  CT  GR  GR  MT  MT  MT  GR  GR  GR  TW  SE  SE  SE
-
+team, unit type, x, y
 0, INFANTRY, 5, 16
 1, INFANTRY, 8, 3
 1, INFANTRY, 16, 7
