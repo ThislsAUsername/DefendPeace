@@ -1,4 +1,4 @@
-package CommandingOfficers.DefendPeace.misc;
+package CommandingOfficers.Variants.BH;
 
 import java.util.ArrayList;
 
@@ -36,7 +36,7 @@ public class Qis extends Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Qis", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.MISC);
+      super("Qis", UIUtils.SourceGames.VARIANTS, UIUtils.BH, "");
       infoPages.add(new InfoPage(
           "Commander Qis (pronounced 'keese') has spent his adult life fleeing cold weather, and failing to escape it.\n" +
           "Whether the cause is simply incredible misfortune or some sort of curse is unclear... he is quite curt on the subject.\n" +
@@ -189,8 +189,8 @@ public class Qis extends Commander
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Trail of Chill";
     private static final int COST = 5;
-    private static final int BUFF = 3;
-    private static final int DURATION = 3;
+    private static final int BUFF = 2;
+    private static final int DURATION = 5;
 
     TrailOfChill(Qis commander, CostBasis basis)
     {

@@ -350,7 +350,8 @@ public class UIUtils
     AW3(GE,  "3"),
     AW4(IDS, ""),
     DEFEND_PEACE(RT, ""),
-    AWBW(CO, "BW"); // More? :v
+    AWBW(CO, "BW"),
+    VARIANTS(MISC, "VAR");
 
     public final COSpriteSpec uiColorSpec;
     public final String discriminator;

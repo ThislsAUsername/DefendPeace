@@ -16,7 +16,6 @@ import Engine.Utils.SearchNode;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.MapInfo;
-import Terrain.MapLibrary;
 import Terrain.MapMaster;
 import Terrain.Maps.MapReader;
 import Units.Unit;

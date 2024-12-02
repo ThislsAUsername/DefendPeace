@@ -129,7 +129,7 @@ public class Sami extends AW3Commander
     {
       modList.add(moveMod);
       modList.add(footAtkMod);
-      modList.add(footAtkMod);
+      modList.add(capMod);
     }
   }
 }
