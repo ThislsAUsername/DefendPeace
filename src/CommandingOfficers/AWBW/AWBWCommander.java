@@ -7,7 +7,7 @@ import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.GameScenario;
-import Engine.UnitMods.UnitDamageModifier;
+import Engine.UnitMods.UnitFightStatModifier;
 import Engine.UnitMods.UnitModifier;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -61,21 +61,18 @@ public abstract class AWBWCommander extends Commander
   protected abstract static class AWBWAbility extends CommanderAbility
   {
     private static final long serialVersionUID = 1L;
-    UnitModifier genericAttack;
-    UnitModifier genericDefense;
+    UnitModifier statMod;
 
     protected AWBWAbility(Commander commander, String name, int cost, CostBasis basis)
     {
       super(commander, name, cost, basis);
-      genericAttack  = new UnitDamageModifier(10);
-      genericDefense = new UnitDamageModifier(10);
+      statMod = new UnitFightStatModifier(10);
     }
 
     @Override
     public final void enqueueUnitMods(MapMaster gameMap, ArrayList<UnitModifier> modList)
     {
-      modList.add(genericAttack);
-      modList.add(genericDefense);
+      modList.add(statMod);
       enqueueMods(gameMap, modList);
     }
     // Extra function to allow for stat mods so the above can be final.

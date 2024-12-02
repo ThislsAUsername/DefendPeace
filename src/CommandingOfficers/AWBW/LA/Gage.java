@@ -74,7 +74,7 @@ public class Gage extends AWBWCommander
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    if( params.attacker.model.isAny(BOOST_MASK_ANY) )
+    if( params.defender.model.isAny(BOOST_MASK_ANY) )
       params.defenseSubtraction += 10;
   }
 
