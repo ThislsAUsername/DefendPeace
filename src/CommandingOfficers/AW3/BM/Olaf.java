@@ -69,6 +69,8 @@ public class Olaf extends AW3Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
+    if( null == params.attacker.env )
+      return;
     if( params.attacker.env.weatherType.isCold )
       params.attackPower += 20;
   }
