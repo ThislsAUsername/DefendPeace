@@ -35,7 +35,8 @@ public class Sturm extends AWBWCommander
       super("Sturm", UIUtils.SourceGames.AWBW, UIUtils.BH);
       infoPages.add(new InfoPage(
             "Sturm (AWBW)\n"
-          + "Movement cost over all terrain is reduced to 1, except in cold weather. Units lose -20% attack and gain +20% defense.\n"));
+          + "Movement cost over all terrain is reduced to 1, except in cold weather.\n"
+          + "Units lose -20% attack and gain +20% defense.\n"));
       infoPages.add(new InfoPage(
           METEOR_NAME+" ("+METEOR_COST+"):\n"
         + "A 2-range missile deals "+METEOR_POWER+"HP damage. The missile targets an enemy unit located at the greatest accumulation of unit value.\n"

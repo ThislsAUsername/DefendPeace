@@ -35,7 +35,7 @@ public class SturmGrimmBW extends AWBWCommander
       super("Sturm", UIUtils.SourceGames.AWBW, UIUtils.BH, "GBW");
       infoPages.add(new InfoPage(
             "Sturm (Grimm BW)\n"
-          + "AWBW Sturm, but with Grimm's stats (matching AW1's D2D).\n"
+          + "AWBW Sturm with a weaker D2D (inspired by AW1).\n"
           + "Movement cost over all terrain is reduced to 1, except in cold weather.\n"
           + "Units gain +30/-20 stats.\n"));
       infoPages.add(new InfoPage(
