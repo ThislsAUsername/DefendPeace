@@ -48,6 +48,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.Variants.BM.Sasha.getInfo() );
     commanderList.add( CommandingOfficers.Variants.GE.Jess.getInfo() );
     commanderList.add( CommandingOfficers.Variants.GE.Eagle.getInfo() );
+    commanderList.add( CommandingOfficers.Variants.YC.Sensei.getInfo() );
     commanderList.add( CommandingOfficers.Variants.YC.Kanbei.getInfo() );
     commanderList.add( CommandingOfficers.AW4.BrennerWolves.Will.getInfo() );
     commanderList.add( CommandingOfficers.AW4.BrennerWolves.Lin.getInfo() );
