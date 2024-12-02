@@ -346,13 +346,10 @@ public class PlayerSetupCommanderArtist
     {
       spriteSpec = outerSpec;
       Color[] outerPalette = UIUtils.defaultMapColors;
-      canonName = (!sortByGameThenFaction)? " " : "MISC"; // Faction name is handled by the inner title
-      if( Color.LIGHT_GRAY != outerSpec.color )
-      {
-        outerPalette = UIUtils.getMapUnitColors(outerSpec.color).paletteColors;
-        if( sortByGameThenFaction ) // Our outer category is games, so just pull the hardcoded faction name
-          canonName = outerSpec.faction.name;
-      }
+      canonName = " "; // Faction name is handled by the inner title
+      outerPalette = UIUtils.getMapUnitColors(outerSpec.color).paletteColors;
+      if( sortByGameThenFaction ) // Our outer category is games, so just pull the hardcoded faction name
+        canonName = outerSpec.faction.name;
       border = outerPalette[3];
       fill = outerPalette[5];
       panels = new ArrayList<>();
@@ -419,12 +416,9 @@ public class PlayerSetupCommanderArtist
 
       palette = UIUtils.getMapUnitColors(spriteSpec.color).paletteColors;
       canonName = "MISC";
-      if( Color.LIGHT_GRAY != spriteSpec.color )
-      {
-        canonName = UIUtils.getCanonicalFactionName(spriteSpec);
-        if( null != postColon )
-          canonName += ": " + postColon;
-      }
+      canonName = UIUtils.getCanonicalFactionName(spriteSpec);
+      if( null != postColon )
+        canonName += ": " + postColon;
       border = palette[3];
       fill = palette[5];
     }
