@@ -50,13 +50,13 @@ public class InfantrySpamAI implements AIController
     }
   }
   public static final AIMaker info = new instantiator();
-  
+
   @Override
   public AIMaker getAIInfo()
   {
     return info;
   }
-  
+
   Queue<GameAction> actions = new ArrayDeque<GameAction>();
 
   private Army myArmy = null;
@@ -81,7 +81,7 @@ public class InfantrySpamAI implements AIController
 
     // Make sure we don't have any hang-ons from last time.
     actions.clear();
-    
+
     // Create a list of every property we don't own, but want to.
     unownedProperties = AIUtils.findNonAlliedProperties(myArmy, gameMap);
     capturingProperties = new ArrayList<XYCoord>();
@@ -146,7 +146,7 @@ public class InfantrySpamAI implements AIController
             foundAction = true;
             break;
           }
-          
+
           // Otherwise, see if we have the option to capture.
           if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE )
           {
@@ -206,16 +206,19 @@ public class InfantrySpamAI implements AIController
     {
       AIUtils.queueCromulentAbility(actions, myArmy, CommanderAbility.PHASE_BUY);
     }
-    
+
     // Finally, build more infantry. We will add all build commands at once, since they can't conflict.
     if( actions.isEmpty() )
     {
       int budget = myArmy.money;
+      int currentUnitCount = myArmy.getUnits().size();
       // Create a list of actions to build infantry on every open factory, then return these actions until done.
       for( int i = 0; i < gameMap.mapWidth; i++ )
       {
         for( int j = 0; j < gameMap.mapHeight; j++)
         {
+          if( myArmy.gameRules.unitCap <= currentUnitCount + actions.size() )
+            break; // Don't build too many mans
           MapLocation loc = gameMap.getLocation(i, j);
           Commander buyer = loc.getOwner();
           if(null == buyer)

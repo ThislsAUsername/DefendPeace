@@ -292,6 +292,7 @@ public class SpenderAI implements AIController
       // We will add all build commands at once, since they can't conflict.
       if( actions.isEmpty() && !stateChange )
       {
+        int currentUnitCount = myArmy.getUnits().size();
         Map<MapLocation, ArrayList<UnitModel>> shoppingLists = new HashMap<>();
         for( XYCoord xyc : myArmy.getOwnedProperties() )
         {
@@ -358,6 +359,8 @@ public class SpenderAI implements AIController
         // once we're satisfied with all our selections, put in the orders
         for( Entry<MapLocation, UnitModel> lineItem : purchases.entrySet() )
         {
+          if( myArmy.gameRules.unitCap <= currentUnitCount + actions.size() )
+            break; // Don't build too many mans
           GameAction action = new GameAction.UnitProductionAction(lineItem.getKey().getOwner(), lineItem.getValue(),
               lineItem.getKey().getCoordinates());
           actions.offer(action);

@@ -1042,10 +1042,16 @@ public class WallyAI extends ModularAI
     @Override
     public GameAction getNextAction(PriorityQueue<Unit> unitQueue, GameMap gameMap)
     {
+      int currentUnitCount = myArmy.getUnits().size();
+      int unitCap          = myArmy.gameRules.unitCap;
+      int buildCount       = 0;
+
       Map<XYCoord, UnitModel> builds = ai.queueUnitProduction(gameMap);
 
       for( XYCoord coord : new ArrayList<XYCoord>(builds.keySet()) )
       {
+        if( unitCap <= currentUnitCount + buildCount )
+          break;
         ai.log(String.format("Attempting to build %s at %s", builds.get(coord), coord));
         MapLocation loc = gameMap.getLocation(coord);
         Commander buyer = loc.getOwner();
@@ -1063,6 +1069,7 @@ public class WallyAI extends ModularAI
           UnitContext fakeContext = new UnitContext(fakeUnit);
           fakeContext.path = GamePath.stayPut(fakeUnit);
           ai.updatePlan(this, 2500 + buyCost / 2, fakeContext, buyAction, false, 0);
+          ++buildCount;
         }
         else
         {

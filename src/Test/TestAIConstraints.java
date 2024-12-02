@@ -5,8 +5,12 @@ import java.util.ArrayList;
 import AI.*;
 import CommandingOfficers.*;
 import Engine.*;
+import Engine.GameScenario.FogMode;
+import Engine.GameScenario.TagMode;
 import Terrain.*;
 import Terrain.Maps.MapReader;
+import Terrain.Maps.TestRange;
+import Units.AWBWUnits;
 import Units.Unit;
 
 public class TestAIConstraints extends TestCase
@@ -14,9 +18,8 @@ public class TestAIConstraints extends TestCase
   private static MapMaster testMap;
   private static GameInstance testGame;
 
-  private void setupTest(MapInfo mapInfo, AIMaker ai)
+  private void setupTest(MapInfo mapInfo, AIMaker ai, GameScenario scn)
   {
-    GameScenario scn = new GameScenario();
     Army[] armies = new Army[mapInfo.getNumPlayers()];
     for( int i = 0; i < armies.length; ++i )
       armies[i] = new Army(scn, CommanderLibrary.NotACO.getInfo().create(scn.rules));
@@ -47,6 +50,7 @@ public class TestAIConstraints extends TestCase
     for( AIMaker ai : aiList )
     {
       testPassed &= validate(testUnmovedFriend(ai), "  "+ai.getName()+" moves units it doesn't own.");
+      testPassed &= validate(testBuildTooManyMans(ai), "  "+ai.getName()+" tries to build units while at the cap.");
     }
 
     return testPassed;
@@ -55,12 +59,8 @@ public class TestAIConstraints extends TestCase
   /** Confirm AIs don't move their friends' units. */
   private boolean testUnmovedFriend(AIMaker ai)
   {
-    setupTest(MapReader.readSingleMap("src/Test/TestUnmovedFriend.map"), ai);
+    setupTest(MapReader.readSingleMap("src/Test/TestUnmovedFriend.map"), ai, new GameScenario());
     final Army armyOne = testGame.armies[0];
-    armyOne.team = 9;
-    testGame.armies[1].team = armyOne.team;
-    // Run through a round of init-turns so that our allies are ready-to-act
-    day(testGame);
 
     GameAction act = null;
     boolean testPassed = true;
@@ -76,6 +76,33 @@ public class TestAIConstraints extends TestCase
         testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
       }
     } while( null != act && testPassed );
+
+    // Clean up
+    cleanupTest();
+
+    return testPassed;
+  }
+
+  private boolean testBuildTooManyMans(AIMaker ai)
+  {
+    final int unitCap = 1;
+    setupTest(TestRange.getMapInfo(), ai, new GameScenario(new AWBWUnits(), 1000, 1000, unitCap, FogMode.OFF_DOR, TagMode.OFF));
+    final Army armyOne = testGame.armies[0];
+    armyOne.team = 9;
+    testGame.armies[1].team = armyOne.team; // In case we want to test caps > 1; you build up unit count faster when there's no fighting.
+    // Run through a round of init-turns so that our allies are ready-to-act
+    day(testGame);
+
+    GameAction act = null;
+    boolean testPassed = true;
+    do
+    {
+      act = armyOne.getNextAIAction(testMap);
+      if( null != act )
+        testPassed &= validate(performGameAction(act, testGame), "    "+ai.getName()+" generated a bad action!");
+    } while( null != act && testPassed );
+
+    testPassed &= validate(armyOne.cos[0].units.size() == unitCap, "    "+ai.getName()+" built over the unit cap!");
 
     // Clean up
     cleanupTest();
