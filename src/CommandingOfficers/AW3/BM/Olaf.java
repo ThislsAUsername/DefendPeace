@@ -38,11 +38,11 @@ public class Olaf extends AW3Commander
           + "Winter weather poses no problem for Olaf or his troops. Snow causes his firepower to rise, and his troops can move with no penalty.\n"
           + "(Normal movement and +20 attack in cold weather.)"));
       infoPages.add(new InfoPage(new Blizzard(null, null),
-            "Causes cold weather (doubled fuel consumption) for two days.\n"
+            "Causes chill (doubled fuel consumption) for two days.\n"
           + "Disables temporary fog, if it's active.\n"
           + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(new WinterFury(null, null),
-            "A mighty blizzard causes two HP of damage to all enemy troops. The cold weather also persists for two days.\n"
+            "A mighty blizzard causes two HP of damage to all enemy troops. The chill also persists for two days.\n"
           + "Disables temporary fog, if it's active.\n"
           + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(
