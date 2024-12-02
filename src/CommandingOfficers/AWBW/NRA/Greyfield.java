@@ -36,7 +36,7 @@ public class Greyfield extends AWBWCommander
       super("Greyfield", UIUtils.SourceGames.AWBW, UIUtils.NRA, discriminator);
       infoPages.add(new InfoPage(
             "Greyfield (Sneak By Web)\n"
-          + "Alternative Greyfield port for the case that the Seaplane-converting one isn't accepted.\n"
+          + "Alternative Greyfield port that doesn't require adding seaplanes to the unit set.\n"
           + "+10/40 stats for naval units, copters, and multirole attack planes (Stealths/Seaplanes)\n"));
       addSharedPages();
     }

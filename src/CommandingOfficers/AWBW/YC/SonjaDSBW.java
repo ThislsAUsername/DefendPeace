@@ -34,7 +34,7 @@ public class SonjaDSBW extends AWBWCommander
       infoPages.add(new InfoPage(
             "AWDS Sonja for AWBW\n"
           + "DS Sonja is much more offense-focused than AW2's, and would likely add variety to T2.\n"
-          + "Also, this is a version of DS Sonja that doesn't mess with combat she isn't a party to.\n"
+          + "Also, this Sonja only negates terrain stars in fights with her units.\n"
           + "+1 vision, -1 terrain star to enemies, 5 bad luck\n"
           + "Calculation order vs Lash SCOP: combat initiator applies first.\n"));
       infoPages.add(new InfoPage(new EnhancedVision(null, new CostBasis(CHARGERATIO_FUNDS)),
