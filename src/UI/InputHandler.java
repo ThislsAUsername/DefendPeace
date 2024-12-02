@@ -27,8 +27,8 @@ public class InputHandler implements IController
   static ArrayList<Integer> downDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_DOWN, KeyEvent.VK_S));
   static ArrayList<Integer> leftDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_LEFT, KeyEvent.VK_A));
   static ArrayList<Integer> rightDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_RIGHT, KeyEvent.VK_D));
-  static ArrayList<Integer> selectDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_ENTER, KeyEvent.VK_SPACE));
-  static ArrayList<Integer> backDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_ESCAPE, KeyEvent.VK_BACK_SPACE));
+  static ArrayList<Integer> selectDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_ENTER, KeyEvent.VK_SPACE, KeyEvent.VK_X));
+  static ArrayList<Integer> backDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_ESCAPE, KeyEvent.VK_BACK_SPACE, KeyEvent.VK_Z));
   static ArrayList<Integer> seekDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_Q));
   static ArrayList<Integer> viewModeDefaultKeyCodes = new ArrayList<Integer>(Arrays.asList(KeyEvent.VK_E));
 
