@@ -341,7 +341,7 @@ public class KaijuWarsWeapons
       TerrainType atkEnv = TerrainType.METEOR;
       if( null != params.attacker.env )
         atkEnv = params.attacker.env.terrainType;
-      int attackBoost = getAttackBoost(params.attacker, params.map, params.attacker.coord, atkEnv, params.targetCoord);
+      int attackBoost = getAttackBoost(params.attacker, params.map, atkEnv, params.targetCoord);
 
       // Assume we're shooting terrain, since the base damage will get overwritten later
       params.baseDamage = getDamage(attack, attackBoost, TERRAIN_DURABILITY);
@@ -363,7 +363,7 @@ public class KaijuWarsWeapons
       int counterPower = defModel.kaijuCounter;
       counterPower += counterBoost;
 
-      int attackBoost = getAttackBoost(params.attacker, params.map, params.attacker.coord, atkEnv, params.defender.coord);
+      int attackBoost = getAttackBoost(params.attacker, params.map, atkEnv, params.defender.coord);
       int attack = deriveAttack(gun, defModel);
 
       if( defModel.isKaiju )
@@ -419,8 +419,9 @@ public class KaijuWarsWeapons
   /**
    * Gets any situational attack power boost from unit mechanics or assumed-enabled tactics/techs
    */
-  public static int getAttackBoost(UnitContext attacker, GameMap map, XYCoord atkCoord, TerrainType atkEnv, XYCoord targetCoord)
+  public static int getAttackBoost(UnitContext attacker, GameMap map, TerrainType atkEnv, XYCoord targetCoord)
   {
+    XYCoord atkCoord            = attacker.coord;
     KaijuWarsUnitModel atkModel = (KaijuWarsUnitModel) attacker.model;
     int attackBoost = 0;
     // Rangefinders boost - these units are pretty stally, so why not?
@@ -435,6 +436,8 @@ public class KaijuWarsWeapons
       if( tracker.stoodStill(attacker.unit, atkCoord) )
         attackBoost += STATIC_ROCKET_BONUS;
     }
+    if( null == atkCoord )
+      return attackBoost;
     // Apply copter/Sky Carrier adjacency boost
     for( XYCoord xyc : Utils.findLocationsInRange(map, atkCoord, 1, 1) )
     {
