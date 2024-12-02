@@ -61,10 +61,6 @@ public class TestAIConstraints extends TestCase
   {
     setupTest(MapReader.readSingleMap("src/Test/TestUnmovedFriend.map"), ai, new GameScenario());
     final Army armyOne = testGame.armies[0];
-    armyOne.team = 9;
-    testGame.armies[1].team = armyOne.team;
-    // Run through a round of init-turns so that our allies are ready-to-act
-    day(testGame);
 
     GameAction act = null;
     boolean testPassed = true;
