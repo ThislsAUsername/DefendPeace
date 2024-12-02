@@ -2,8 +2,7 @@ package CommandingOfficers.AWBW.BH;
 
 import java.util.ArrayList;
 import CommandingOfficers.*;
-import CommandingOfficers.AW3.AW3Commander;
-import CommandingOfficers.CommanderAbility.CostBasis;
+import CommandingOfficers.AWBW.AWBWCommander;
 import CommandingOfficers.AW2.BH.Lash.DoubleTerrainModifier;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
@@ -16,7 +15,7 @@ import Terrain.MapMaster;
 import Terrain.TerrainType;
 import Terrain.Environment.Weathers;
 
-public class LashDSBW extends AW3Commander
+public class LashDSBW extends AWBWCommander
 {
   private static final long serialVersionUID = 1L;
 
@@ -30,22 +29,18 @@ public class LashDSBW extends AW3Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Lash", UIUtils.SourceGames.AW3, UIUtils.BH);
+      super("Lash", UIUtils.SourceGames.AWBW, UIUtils.BH, "3BW");
       infoPages.add(new InfoPage(
-            "Lash (AW3)\n"
-          + "The wunderkind of the Black Hole forces. She's short, but fierce. Invented most of Black Hole's weapons.\n"
-          + "Skilled at taking advantage of terrain features. Can turn terrain effects into firepower bonuses.\n"
-          + "(+5 attack per terrain star for non-air units)"));
-      infoPages.add(new InfoPage(new TerrainTactics(null, new CostBasis(CHARGERATIO_AW3)),
-            "In addition to using terrain effects to increase firepower, drops movement cost for all units to 1 (in all weather).\n"
+            "AWDS Lash for AWBW\n"
+          + "Lash version with a weaker D2D, that isn't slowed by snow during powers.\n"
+          + "+5 attack per terrain star for non-air units"));
+      infoPages.add(new InfoPage(new TerrainTactics(null, null),
+            "Drops movement cost for all units to 1 (in all weather).\n"
           + "+10 attack and defense.\n"));
-      infoPages.add(new InfoPage(new PrimeTactics(null, new CostBasis(CHARGERATIO_AW3)),
-            "Terrain effects are doubled and are used to increase attack strength. Additionally, movement cost for all units drops to 1 (in all weather).\n"
+      infoPages.add(new InfoPage(new PrimeTactics(null, null),
+            "Terrain effects are doubled. Additionally, movement cost for all units drops to 1 (in all weather).\n"
           + "+10 attack and defense.\n"));
-      infoPages.add(new InfoPage(
-            "Hit: Getting her way\n"
-          + "Miss: Not getting it"));
-      infoPages.add(AW3_MECHANICS_BLURB);
+      infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -87,7 +82,7 @@ public class LashDSBW extends AW3Commander
       }
     }
   }
-  private static class TerrainTactics extends AW3Ability
+  private static class TerrainTactics extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Terrain Tactics";
@@ -108,7 +103,7 @@ public class LashDSBW extends AW3Commander
     }
   }
 
-  private static class PrimeTactics extends AW3Ability
+  private static class PrimeTactics extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Prime Tactics";

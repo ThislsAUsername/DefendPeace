@@ -3,7 +3,7 @@ package CommandingOfficers.AWBW.YC;
 import java.util.ArrayList;
 
 import CommandingOfficers.*;
-import CommandingOfficers.AW3.AW3Commander;
+import CommandingOfficers.AWBW.AWBWCommander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
@@ -15,7 +15,7 @@ import UI.UIUtils;
 import Terrain.MapMaster;
 import Units.UnitContext;
 
-public class KanbeiDSBW extends AW3Commander
+public class KanbeiDSBW extends AWBWCommander
 {
   private static final long serialVersionUID = 1L;
 
@@ -29,22 +29,18 @@ public class KanbeiDSBW extends AW3Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Kanbei", UIUtils.SourceGames.AW3, UIUtils.YC);
+      super("Kanbei", UIUtils.SourceGames.AWBW, UIUtils.YC, "3BW");
       infoPages.add(new InfoPage(
-            "Kanbei (AWDS)\n"
-          + "The emperor of Yellow Comet. A skilled CO who has a soft spot for his daughter.\n"
-          + "All units have high offensive and defensive abilities, but are expensive to deploy.\n"
-          + "(+20/20 stats for 1.2x prices)\n"));
+            "AWDS Kanbei for AWBW\n"
+          + "Kanbei with a weaker D2D, which might be under T0 more often.\n"
+          + "+20/20 stats for 1.2x prices\n"));
       infoPages.add(new InfoPage(new MoraleBoost(null, null),
             "Increases firepower for all units.\n"
           + "(+40/10 stats, total 160/130)\n"));
       infoPages.add(new InfoPage(new SamuraiSpirit(null, null),
             "Greatly strengthens offensive and defensive abilities of all units. Firepower doubles when inflicting damage in counterattacks.\n"
           + "(+40/40 stats, total 160/160; 2.0x damage on counterattack)\n"));
-      infoPages.add(new InfoPage(
-            "Hit: Sonja\n"
-          + "Miss: Computers"));
-      infoPages.add(AW3_MECHANICS_BLURB);
+      infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -77,7 +73,7 @@ public class KanbeiDSBW extends AW3Commander
     uc.costRatio += 20;
   }
 
-  private static class MoraleBoost extends AW3Ability
+  private static class MoraleBoost extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Morale Boost";
@@ -96,7 +92,7 @@ public class KanbeiDSBW extends AW3Commander
     }
   }
 
-  private static class SamuraiSpirit extends AW3Ability
+  private static class SamuraiSpirit extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Samurai Spirit";

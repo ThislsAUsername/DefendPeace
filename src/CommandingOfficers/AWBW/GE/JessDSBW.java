@@ -3,7 +3,7 @@ package CommandingOfficers.AWBW.GE;
 import java.util.ArrayList;
 import CommandingOfficers.*;
 import CommandingOfficers.CommanderAbility.CostBasis;
-import CommandingOfficers.AW3.AW3Commander;
+import CommandingOfficers.AWBW.AWBWCommander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.UnitMods.UnitDamageModifier;
@@ -15,7 +15,7 @@ import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitModel;
 
-public class JessDSBW extends AW3Commander
+public class JessDSBW extends AWBWCommander
 {
   private static final long serialVersionUID = 1L;
 
@@ -29,10 +29,10 @@ public class JessDSBW extends AW3Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Jess", UIUtils.SourceGames.AW3, UIUtils.GE);
+      super("Jess", UIUtils.SourceGames.AWBW, UIUtils.GE, "3BW");
       infoPages.add(new InfoPage(
-            "Jess (AW3)\n"
-          + "A gallant tank-driving CO who excels at analysing information. A hero of the last war.\n"
+            "AWDS Jess for AWBW\n"
+          + "Jess, but less terrible.\n"
           + "Vehicular (land) units have superior firepower (+20). Air and naval units are comparatively weak (-10).\n"));
       infoPages.add(new InfoPage(TurboCharge(null, null),
             "Movement of vehicular (land) units goes up by one space. Attack increases (+20, 150 total), and fuel and ammo supplies are also replenished.\n"
@@ -40,10 +40,7 @@ public class JessDSBW extends AW3Commander
     infoPages.add(new InfoPage(Overdrive(null, null),
             "Movement of vehicular (land) units goes up by two spaces. Attack dramatically increases (+40, 170 total), and fuel and ammo supplies are also replenished.\n"
           + "+10 attack and defense. Also restores materials.\n"));
-      infoPages.add(new InfoPage(
-            "Hit: Dandelions\n"
-          + "Miss: Unfit COs"));
-      infoPages.add(AW3_MECHANICS_BLURB);
+      infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -81,7 +78,7 @@ public class JessDSBW extends AW3Commander
   }
 
 
-  private static class JessAbility extends AW3Ability
+  private static class JessAbility extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
     UnitTypeFilter moveMod, attMod;

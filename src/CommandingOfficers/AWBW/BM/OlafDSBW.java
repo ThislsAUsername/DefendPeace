@@ -3,7 +3,7 @@ package CommandingOfficers.AWBW.BM;
 import java.util.ArrayList;
 
 import CommandingOfficers.*;
-import CommandingOfficers.AW3.AW3Commander;
+import CommandingOfficers.AWBW.AWBWCommander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEvent;
@@ -17,7 +17,7 @@ import Terrain.Environment.Weathers;
 import Units.Unit;
 import Units.UnitContext;
 
-public class OlafDSBW extends AW3Commander
+public class OlafDSBW extends AWBWCommander
 {
   private static final long serialVersionUID = 1L;
 
@@ -31,24 +31,20 @@ public class OlafDSBW extends AW3Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Olaf", UIUtils.SourceGames.AW3, UIUtils.BM);
+      super("Olaf", UIUtils.SourceGames.AWBW, UIUtils.BM, "3BW");
       infoPages.add(new InfoPage(
-            "Olaf (AW3)\n"
-          + "A pompous braggart, but his tactical prowess has earned him the respect of his peers.\n"
-          + "Winter weather poses no problem for Olaf or his troops. Snow causes his firepower to rise, and his troops can move with no penalty.\n"
-          + "(Normal movement and +20 attack in cold weather.)"));
+            "AWDS Olaf for AWBW\n"
+          + "Olaf version that gets +attack for 2 turns instead of slowing people for his powers.\n"
+          + "Normal movement and +20 attack in cold weather."));
       infoPages.add(new InfoPage(new Blizzard(null, null),
-            "Causes cold weather (doubled fuel consumption) for two days.\n"
+            "Causes chill (doubled fuel consumption) for two days.\n"
           + "Disables temporary fog, if it's active.\n"
           + "+10 attack and defense.\n"));
       infoPages.add(new InfoPage(new WinterFury(null, null),
-            "A mighty blizzard causes two HP of damage to all enemy troops. The cold weather also persists for two days.\n"
+            "A mighty blizzard causes two HP of damage to all enemy troops. The chill also persists for two days.\n"
           + "Disables temporary fog, if it's active.\n"
           + "+10 attack and defense.\n"));
-      infoPages.add(new InfoPage(
-            "Hit: Warm Boots\n"
-          + "Miss: Rain Clouds"));
-      infoPages.add(AW3_MECHANICS_BLURB);
+      infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
@@ -82,7 +78,7 @@ public class OlafDSBW extends AW3Commander
     }
   }
 
-  private static class Blizzard extends AW3Ability
+  private static class Blizzard extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Blizzard";
@@ -107,7 +103,7 @@ public class OlafDSBW extends AW3Commander
     }
   }
 
-  private static class WinterFury extends AW3Ability
+  private static class WinterFury extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Winter Fury";
