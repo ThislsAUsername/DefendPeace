@@ -159,7 +159,12 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.LA.Gage.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.LA.Tasha.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.LA.Forsythe.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.NRA.Waylon.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.NRA.Greyfield.SeaplaneAbsolutist.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.NRA.Greyfield.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.IDS.Penny.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.IDS.TabithaBW.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.IDS.Caulder.getInfo() );
   }
 
   public static class NotACO extends Commander

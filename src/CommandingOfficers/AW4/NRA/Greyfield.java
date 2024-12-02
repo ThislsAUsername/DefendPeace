@@ -20,7 +20,7 @@ public class Greyfield extends RuinedCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Greyfield", UIUtils.SourceGames.AW4, UIUtils.NW);
+      super("Greyfield", UIUtils.SourceGames.AW4, UIUtils.NRA);
       infoPages.add(new InfoPage(
           "Ambitious and power hungry, he wants to destroy the Lazurian Army and rule the world as its new king.\n"));
       infoPages.add(new InfoPage(

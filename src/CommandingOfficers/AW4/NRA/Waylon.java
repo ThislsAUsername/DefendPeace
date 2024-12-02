@@ -24,7 +24,7 @@ public class Waylon extends RuinedCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Waylon", UIUtils.SourceGames.AW4, UIUtils.NW);
+      super("Waylon", UIUtils.SourceGames.AW4, UIUtils.NRA);
       infoPages.add(new InfoPage(
           "A member of the Rubinelle Army who seeks only to fulfill his own pleasures and desires.\n"));
       infoPages.add(new InfoPage(
