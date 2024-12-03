@@ -18,7 +18,7 @@ import Units.UnitContext;
 import Terrain.GameMap;
 import Terrain.MapMaster;
 
-public class Sturm extends AWBWCommander
+public class SturmGrimmBW extends AWBWCommander
 {
   private static final long serialVersionUID = 1L;
 
@@ -32,11 +32,12 @@ public class Sturm extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sturm", UIUtils.SourceGames.AWBW, UIUtils.BH);
+      super("Sturm", UIUtils.SourceGames.AWBW, UIUtils.BH, "GBW");
       infoPages.add(new InfoPage(
-            "Sturm (AWBW)\n"
+            "Sturm (Grimm BW)\n"
+          + "AWBW Sturm with a weaker D2D (inspired by AW1).\n"
           + "Movement cost over all terrain is reduced to 1, except in cold weather.\n"
-          + "Units lose -20% attack and gain +20% defense.\n"));
+          + "Units gain +30/-20 stats.\n"));
       infoPages.add(new InfoPage(
           METEOR_NAME+" ("+METEOR_COST+"):\n"
         + "A 2-range missile deals "+METEOR_POWER+"HP damage. The missile targets an enemy unit located at the greatest accumulation of unit value.\n"
@@ -50,7 +51,7 @@ public class Sturm extends AWBWCommander
     @Override
     public Commander create(GameScenario.GameRules rules)
     {
-      return new Sturm(rules);
+      return new SturmGrimmBW(rules);
     }
   }
 
@@ -63,7 +64,7 @@ public class Sturm extends AWBWCommander
   private static final int MEATIER_POWER =  8;
   private static final int MEATIER_FLAGS =  CommanderAbility.PHASE_TURN_START | CommanderAbility.PHASE_TURN_END;
 
-  public Sturm(GameScenario.GameRules rules)
+  public SturmGrimmBW(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
 
@@ -74,12 +75,12 @@ public class Sturm extends AWBWCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    params.attackPower -= 20;
+    params.attackPower += 30;
   }
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    params.defenseSubtraction += 20;
+    params.defenseSubtraction -= 20;
   }
   @Override
   public void modifyMoveType(UnitContext uc)
@@ -93,7 +94,7 @@ public class Sturm extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public final int power;
 
-    MeteorStrike(Sturm commander, String name, int cost, int power, int flags, CostBasis basis)
+    MeteorStrike(SturmGrimmBW commander, String name, int cost, int power, int flags, CostBasis basis)
     {
       super(commander, name, cost, basis);
       AIFlags = flags;

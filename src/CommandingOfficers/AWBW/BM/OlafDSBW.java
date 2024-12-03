@@ -1,9 +1,9 @@
-package CommandingOfficers.AW3.BM;
+package CommandingOfficers.AWBW.BM;
 
 import java.util.ArrayList;
 
 import CommandingOfficers.*;
-import CommandingOfficers.AW3.AW3Commander;
+import CommandingOfficers.AWBW.AWBWCommander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
 import Engine.GameEvents.GameEvent;
@@ -17,7 +17,7 @@ import Terrain.Environment.Weathers;
 import Units.Unit;
 import Units.UnitContext;
 
-public class Olaf extends AW3Commander
+public class OlafDSBW extends AWBWCommander
 {
   private static final long serialVersionUID = 1L;
 
@@ -31,12 +31,11 @@ public class Olaf extends AW3Commander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Olaf", UIUtils.SourceGames.AW3, UIUtils.BM);
+      super("Olaf", UIUtils.SourceGames.AWBW, UIUtils.BM, "3BW");
       infoPages.add(new InfoPage(
-            "Olaf (AW3)\n"
-          + "A pompous braggart, but his tactical prowess has earned him the respect of his peers.\n"
-          + "Winter weather poses no problem for Olaf or his troops. Snow causes his firepower to rise, and his troops can move with no penalty.\n"
-          + "(Normal movement and +20 attack in cold weather.)"));
+            "AWDS Olaf for AWBW\n"
+          + "VS AW2: Can't slow people; gets +attack for 2 turns instead\n"
+          + "Normal movement and +20 attack in cold weather."));
       infoPages.add(new InfoPage(new Blizzard(null, null),
             "Causes chill (doubled fuel consumption) for two days.\n"
           + "Disables temporary fog, if it's active.\n"
@@ -45,19 +44,16 @@ public class Olaf extends AW3Commander
             "A mighty blizzard causes two HP of damage to all enemy troops. The chill also persists for two days.\n"
           + "Disables temporary fog, if it's active.\n"
           + "+10 attack and defense.\n"));
-      infoPages.add(new InfoPage(
-            "Hit: Warm Boots\n"
-          + "Miss: Rain Clouds"));
-      infoPages.add(AW3_MECHANICS_BLURB);
+      infoPages.add(AWBW_MECHANICS_BLURB);
     }
     @Override
     public Commander create(GameScenario.GameRules rules)
     {
-      return new Olaf(rules);
+      return new OlafDSBW(rules);
     }
   }
 
-  public Olaf(GameScenario.GameRules rules)
+  public OlafDSBW(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
     immuneToCold = true;
@@ -84,13 +80,13 @@ public class Olaf extends AW3Commander
     }
   }
 
-  private static class Blizzard extends AW3Ability
+  private static class Blizzard extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Blizzard";
     private static final int COST = 3;
 
-    Blizzard(Olaf commander, CostBasis cb)
+    Blizzard(OlafDSBW commander, CostBasis cb)
     {
       super(commander, NAME, COST, cb);
       AIFlags = 0; // This would be an interesting power if SCOP only did 1 damage
@@ -109,13 +105,13 @@ public class Olaf extends AW3Commander
     }
   }
 
-  private static class WinterFury extends AW3Ability
+  private static class WinterFury extends AWBWAbility
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Winter Fury";
     private static final int COST = 7;
 
-    WinterFury(Olaf commander, CostBasis cb)
+    WinterFury(OlafDSBW commander, CostBasis cb)
     {
       super(commander, NAME, COST, cb);
       AIFlags = PHASE_TURN_START | PHASE_TURN_END;
