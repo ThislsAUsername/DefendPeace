@@ -32,7 +32,7 @@ public class LashDSBW extends AWBWCommander
       super("Lash", UIUtils.SourceGames.AWBW, UIUtils.BH, "3BW");
       infoPages.add(new InfoPage(
             "AWDS Lash for AWBW\n"
-          + "Lash version with a weaker D2D, that isn't slowed by snow during powers.\n"
+          + "VS AW2: Weaker D2D; not slowed by snow during powers.\n"
           + "+5 attack per terrain star for non-air units"));
       infoPages.add(new InfoPage(new TerrainTactics(null, null),
             "Drops movement cost for all units to 1 (in all weather).\n"

@@ -34,6 +34,7 @@ public class OlafDSBW extends AWBWCommander
       super("Olaf", UIUtils.SourceGames.AWBW, UIUtils.BM, "3BW");
       infoPages.add(new InfoPage(
             "AWDS Olaf for AWBW\n"
+          + "VS AW2: Can't slow people; gets +attack for 2 turns instead\n"
           + "Normal movement and +20 attack in cold weather."));
       infoPages.add(new InfoPage(new Blizzard(null, null),
             "Causes chill (doubled fuel consumption) for two days.\n"

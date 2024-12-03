@@ -32,6 +32,7 @@ public class JessDSBW extends AWBWCommander
       super("Jess", UIUtils.SourceGames.AWBW, UIUtils.GE, "3BW");
       infoPages.add(new InfoPage(
             "AWDS Jess for AWBW\n"
+          + "VS AW2: +10 attack to foot/tanks; more tank attack on powers\n"
           + "Vehicular (land) units have superior firepower (+20). Air and naval units are comparatively weak (-10).\n"));
       infoPages.add(new InfoPage(TurboCharge(null, null),
             "Movement of vehicular (land) units goes up by one space. Attack increases (+20, 150 total), and fuel and ammo supplies are also replenished.\n"
