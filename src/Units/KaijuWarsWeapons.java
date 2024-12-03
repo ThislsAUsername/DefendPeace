@@ -338,8 +338,10 @@ public class KaijuWarsWeapons
       KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.weapon;
       int attack = gun.vsLand;
 
-      final TerrainType atkEnv = params.attacker.env.terrainType;
-      int attackBoost = getAttackBoost(params.attacker.unit, params.map, params.attacker.coord, atkEnv, params.targetCoord);
+      TerrainType atkEnv = TerrainType.METEOR;
+      if( null != params.attacker.env )
+        atkEnv = params.attacker.env.terrainType;
+      int attackBoost = getAttackBoost(params.attacker, params.map, atkEnv, params.targetCoord);
 
       // Assume we're shooting terrain, since the base damage will get overwritten later
       params.baseDamage = getDamage(attack, attackBoost, TERRAIN_DURABILITY);
@@ -350,14 +352,18 @@ public class KaijuWarsWeapons
     {
       KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.weapon;
       KaijuWarsUnitModel defModel = (KaijuWarsUnitModel) params.defender.model;
-      final TerrainType atkEnv = params.attacker.env.terrainType;
-      final TerrainType defEnv = params.defender.env.terrainType;
+      TerrainType atkEnv = TerrainType.METEOR;
+      TerrainType defEnv = TerrainType.METEOR;
+      if( null != params.attacker.env )
+        atkEnv = params.attacker.env.terrainType;
+      if( null != params.defender.env )
+        defEnv = params.defender.env.terrainType;
 
       int counterBoost = getCounterBoost(params.defender, params.map, defEnv);
       int counterPower = defModel.kaijuCounter;
       counterPower += counterBoost;
 
-      int attackBoost = getAttackBoost(params.attacker.unit, params.map, params.attacker.coord, atkEnv, params.defender.coord);
+      int attackBoost = getAttackBoost(params.attacker, params.map, atkEnv, params.defender.coord);
       int attack = deriveAttack(gun, defModel);
 
       if( defModel.isKaiju )
@@ -413,12 +419,13 @@ public class KaijuWarsWeapons
   /**
    * Gets any situational attack power boost from unit mechanics or assumed-enabled tactics/techs
    */
-  public static int getAttackBoost(Unit attacker, GameMap map, XYCoord atkCoord, TerrainType atkEnv, XYCoord targetCoord)
+  public static int getAttackBoost(UnitContext attacker, GameMap map, TerrainType atkEnv, XYCoord targetCoord)
   {
+    XYCoord atkCoord            = attacker.coord;
     KaijuWarsUnitModel atkModel = (KaijuWarsUnitModel) attacker.model;
     int attackBoost = 0;
     // Rangefinders boost - these units are pretty stally, so why not?
-    if( attacker.model.isLandUnit() &&
+    if( atkModel.isLandUnit() &&
         atkEnv == TerrainType.MOUNTAIN )
       attackBoost += RANGEFINDERS_BONUS;
     // Missiles boost
@@ -426,14 +433,16 @@ public class KaijuWarsWeapons
     {
       // This is a bit smelly, but better than the alternative?
       UnitTurnPositionTracker tracker = StateTracker.instance(map.game, UnitTurnPositionTracker.class);
-      if( tracker.stoodStill(attacker, atkCoord) )
+      if( tracker.stoodStill(attacker.unit, atkCoord) )
         attackBoost += STATIC_ROCKET_BONUS;
     }
+    if( null == atkCoord )
+      return attackBoost;
     // Apply copter/Sky Carrier adjacency boost
     for( XYCoord xyc : Utils.findLocationsInRange(map, atkCoord, 1, 1) )
     {
       Unit resident = map.getResident(xyc);
-      if( null != resident && resident != attacker && !attacker.CO.isEnemy(resident.CO) )
+      if( null != resident && resident != attacker.unit && !attacker.CO.isEnemy(resident.CO) )
       {
         KaijuWarsUnitModel resModel = (KaijuWarsUnitModel) resident.model;
         if( null != resModel && resModel.boostsAllies )
@@ -444,7 +453,7 @@ public class KaijuWarsWeapons
     for( XYCoord xyc : Utils.findLocationsInRange(map, targetCoord, 1, 1) )
     {
       Unit resident = map.getResident(xyc);
-      if( null != resident && resident != attacker && !attacker.CO.isEnemy(resident.CO) )
+      if( null != resident && resident != attacker.unit && !attacker.CO.isEnemy(resident.CO) )
       {
         KaijuWarsUnitModel resModel = (KaijuWarsUnitModel) resident.model;
         if( null != resModel && resModel.boostSurround )
