@@ -1,4 +1,4 @@
-package CommandingOfficers.AWBW.OS;
+package CommandingOfficers.AWBW.BH;
 
 import CommandingOfficers.*;
 import CommandingOfficers.CommanderAbility.CostBasis;
@@ -24,7 +24,7 @@ public class AndyClone extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Andy", UIUtils.SourceGames.AWBW, UIUtils.OS, "T4");
+      super("Andy", UIUtils.SourceGames.AWBW, UIUtils.BH, "BH");
       infoPages.add(new InfoPage(
             "Andy (Clone)\n"
           + "A port of the ReBoot-Camp CO.\n"

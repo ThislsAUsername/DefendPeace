@@ -130,7 +130,6 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.OS.Sami.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Nell.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Hachi.getInfo() );
-    commanderList.add( CommandingOfficers.AWBW.OS.AndyClone.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BM.Colin.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BM.Sasha.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BM.Grit.getInfo() );
@@ -158,6 +157,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.BH.VonBolt.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.SturmGrimmBW.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BH.LashDSBW.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.BH.AndyClone.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BW.Will.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BW.Isabella.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BW.Lin.getInfo() );
