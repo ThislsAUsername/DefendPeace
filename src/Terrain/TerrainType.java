@@ -105,12 +105,12 @@ public class TerrainType implements Serializable
   private static final String CITY_NAME = "CITY";
   public static final TerrainType CITY = new TerrainType( CITY_FLAGS, CITY_DEFENSE, CITY_NAME, GRASS );
 
-  private static final int DS_TOWER_FLAGS = LAND | CAPTURABLE | PROVIDES_COVER;
+  private static final int DS_TOWER_FLAGS = LAND | CAPTURABLE;
   private static final int DS_TOWER_DEFENSE = 3;
   private static final String DS_TOWER_NAME = "DS_TOWER";
   public static final TerrainType DS_TOWER = new TerrainType(DS_TOWER_FLAGS, DS_TOWER_DEFENSE, DS_TOWER_NAME, GRASS);
 
-  private static final int DOR_TOWER_FLAGS = LAND | CAPTURABLE | PROVIDES_COVER | PROFITABLE;
+  private static final int DOR_TOWER_FLAGS = LAND | CAPTURABLE | PROFITABLE;
   private static final int DOR_TOWER_DEFENSE = 3;
   private static final String DOR_TOWER_NAME = "DOR_TOWER";
   public static final TerrainType DOR_TOWER = new TerrainType(DOR_TOWER_FLAGS, DOR_TOWER_DEFENSE, DOR_TOWER_NAME, GRASS);
