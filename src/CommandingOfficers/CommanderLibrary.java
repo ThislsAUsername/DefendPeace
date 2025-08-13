@@ -129,6 +129,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.OS.Max.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Sami.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Nell.getInfo() );
+    commanderList.add( CommandingOfficers.AWBW.OS.NellWarCrimes.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.OS.Hachi.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BM.Colin.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.BM.Sasha.getInfo() );
