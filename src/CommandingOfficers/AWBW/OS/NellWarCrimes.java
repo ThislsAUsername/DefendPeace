@@ -29,6 +29,7 @@ public class NellWarCrimes extends AWBWCommander
       super("Nell", UIUtils.SourceGames.AWBW, UIUtils.OS, "crime");
       infoPages.add(new InfoPage(
             "Nell (warcrimes)\n"
+          + "Nell, but she always rolls max luck.\n"
           + "Luck on attacks is +19%.\n"));
       infoPages.add(new InfoPage(
             "Lucky Star (3):\n"
