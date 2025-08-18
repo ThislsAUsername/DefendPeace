@@ -47,7 +47,11 @@ def convertAPI(mapID):
 		req.connect()
 		req.request("GET", "/api/map/map_info.php?maps_id=" + mapID)
 		response = req.getresponse()
+		if 200 != response.getcode():
+			raise Exception(f'Got response code {response.getcode()}')
 		responseData = response.read()
+		if not responseData:
+			raise Exception('API response was empty.')
 		jsonData = json.loads(responseData)
 		req.close()
 		mapName = jsonData["Name"]
@@ -143,6 +147,8 @@ def countryCodeToPlayerID(x):
 		'wn': 15,
 		'aa': 16,
 		'ne': 17,
+		'sc': 18,
+		'uw': 19,
 	}.get(x, 0)
 
 def unitIDToString(x):
