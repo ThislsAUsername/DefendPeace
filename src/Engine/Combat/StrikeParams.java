@@ -6,6 +6,7 @@ import java.util.List;
 import Engine.XYCoord;
 import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
+import UI.UIUtils.SourceGames;
 import Terrain.Environment.Weathers;
 import Units.ITargetable;
 import Units.UnitContext;
@@ -86,6 +87,13 @@ public class StrikeParams
    * Relevant link: https://forums.warsworldnews.com/viewtopic.php?p=417292&sid=a877b0305a8af6d63956bb893d11cc88#p417292
    */
   public final boolean aw1Luck;
+  /**
+   * For *some* reason, HP scaling is the final step in AW2's damage calc.
+   * "Colin 8hp tank does 44% min damage to plain art (63x0.9=56 and 56x0.8=44) whereas it would be 45% if target defenses were factored after HP (63x0.8=50 and 50x0.9=45)"
+   * -- Fidel from WWN
+   * I have verified that this math applies to AW2 Sami as well, but AW1 and AWDS have 45% displayed damage in this case.
+   */
+  public final boolean aw2Combat;
 
   // Multiplier that scales your attack bonus as well; only multiply/divide this quantity.
   public int attackerDamageMultiplier = 100;
@@ -117,6 +125,7 @@ public class StrikeParams
     aw1Luck = attacker.CO.aw1Combat;
     if( aw1Luck && isCounter ) // Intended special case; AW1 counters don't round HP and don't get luck damage.
       this.attackerHealth = attacker.health;
+    aw2Combat = attacker.CO.coInfo.game == SourceGames.AW2;
 
     this.targetCoord = target;
 
@@ -137,6 +146,7 @@ public class StrikeParams
     this.luckRolledBad = other.luckRolledBad;
     this.isCounter = other.isCounter;
     aw1Luck = attacker.CO.aw1Combat;
+    aw2Combat = attacker.CO.coInfo.game == SourceGames.AW2;
     this.attackerDamageMultiplier = other.attackerDamageMultiplier;
     this.defenderDamageMultiplier = other.defenderDamageMultiplier;
 
@@ -149,9 +159,6 @@ public class StrikeParams
     if( aw1Luck && isCounter ) // AW1 cannot counterattack with luck.
       luckDamage = 0;
     final int rawDamage = (baseDamage * attackPower / 100) * attackerDamageMultiplier / 100;
-    int hpScalingDamage = rawDamage;
-    if( !aw1Luck ) // AW1 luck isn't scaled with HP.
-      hpScalingDamage += luckDamage;
 
     // Apply terrain defense to the correct defense number
     int finalDefenseSubtraction = defenseSubtraction;
@@ -162,12 +169,19 @@ public class StrikeParams
       finalDefenseDivision    += terrainStars * defenderHealth / 10;
     final int subtractionMultiplier = 200 - finalDefenseSubtraction;
 
-    int overallPower = hpScalingDamage * attackerHealth / 100;
+    int overallPower = rawDamage;
+    if( !aw1Luck ) // AW1 luck isn't scaled with HP.
+      overallPower += luckDamage;
+    if( !aw2Combat )
+      overallPower = overallPower * attackerHealth / 100;
     overallPower = overallPower * defenderDamageMultiplier / 100;
     if( aw1Luck && overallPower > 0 ) // AW1 luck can be negated but not reduced by CO-based defense.
       overallPower += luckDamage;
+
     overallPower = overallPower * subtractionMultiplier /        100;
     overallPower = overallPower *          100          / finalDefenseDivision;
+    if( aw2Combat )
+      overallPower = overallPower * attackerHealth / 100;
 
     return overallPower; // % damage
   }
