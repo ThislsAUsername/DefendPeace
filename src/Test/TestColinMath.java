@@ -25,11 +25,43 @@ public class TestColinMath extends TestCase
   @Override
   public boolean runTest()
   {
-
     boolean testPassed = true;
 
+    testPassed &= validate(testCombatOOO(), "  Order of Operations test failed!");
     testPassed &= validate(testPowerOfMoney() , "  Power of Money test failed!");
 
+    return testPassed;
+  }
+
+  private boolean testCombatOOO() // Order of Operations
+  {
+    MapInfo mapInfo = Terrain.Maps.FiringRange.getMapInfo();
+    GameScenario scn = new GameScenario();
+
+    Army[] armies = new Army[mapInfo.getNumPlayers()];
+    armies[0] = new Army(scn, CommandingOfficers.AW2.BM.Colin.getInfo().create(scn.rules));
+    armies[1] = new Army(scn, CommandingOfficers.AW2.BM.Colin.getInfo().create(scn.rules));
+
+    Commander colin0 = armies[1].cos[0];
+    Commander colin1 = armies[0].cos[0];
+
+    map  = new MapMaster(armies, mapInfo);
+    game = new GameInstance(armies, map);
+
+    turn(game);
+
+    boolean testPassed = true;
+    UnitContext tank = new UnitContext(colin0, colin0.getUnitModel(UnitModel.ASSAULT, false));
+    tank.alterHealth(-20);
+    UnitContext arty = new UnitContext(colin1, colin1.getUnitModel(UnitModel.INDIRECT, false));
+    arty.terrainStars = 1;
+
+    BattleParams shot = new CombatContext(game, map, tank, arty, 1, CalcType.NO_LUCK).applyModifiers().getAttack();
+
+    int hit = shot.calculateDamage();
+    testPassed &= validate(hit == 44,     "    Colin 8 HP tank damage vs plains arty is wrong");
+
+    game.endGame();
     return testPassed;
   }
 
