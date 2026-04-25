@@ -16,6 +16,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import Test.TestMain;
+import UI.AudioEngine;
 import UI.InputHandler;
 import UI.MainUIController;
 import UI.Art.SpriteArtist.SpriteEngine;
@@ -42,6 +43,8 @@ public class Driver implements ActionListener, KeyListener
 
   private Driver()
   {
+    AudioEngine.initialize(); // SpriteEngine will use stuff from this, so do this first.
+
     // At game startup, we are at the main menu. Set up controller/viewer
     MainUIController mc = new MainUIController();
     gameGraphics = new SpriteEngine(); // Choose graphics engine based on config file, etc?

@@ -22,6 +22,7 @@ public class SpriteEngine implements GraphicsEngine
   public IView getMainUIView(MainUIController control)
   {
     PlayerSetupColorFactionArtist.startSpritePreloader("Infantry");
+    AudioOptionsArtist.initialize();
     return new MainUIView(control);
   }
 

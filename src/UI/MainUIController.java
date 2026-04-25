@@ -14,8 +14,8 @@ import Engine.SerializationUtils;
 
 public class MainUIController implements IController
 {
-  public enum SubMenu { MAIN, SAVE_SELECT, GAME_SETUP, OPTIONS_SELECT, GRAPHICS_OPTIONS, SET_KEYBINDS, CONTROL_OPTIONS };
-  private static List<SubMenu> optionsSubMenus = Arrays.asList(SubMenu.GRAPHICS_OPTIONS, SubMenu.SET_KEYBINDS, SubMenu.CONTROL_OPTIONS);
+  public enum SubMenu { MAIN, SAVE_SELECT, GAME_SETUP, OPTIONS_SELECT, GRAPHICS_OPTIONS, AUDIO_OPTIONS, SET_KEYBINDS, CONTROL_OPTIONS };
+  private static List<SubMenu> optionsSubMenus = Arrays.asList(SubMenu.GRAPHICS_OPTIONS, SubMenu.AUDIO_OPTIONS, SubMenu.SET_KEYBINDS, SubMenu.CONTROL_OPTIONS);
   private SubMenu currentSubMenuType = SubMenu.MAIN;
 
   // NOTE: This list of menu options is mirrored by the Sprite of option images we get from SpriteLibrary.
@@ -63,7 +63,7 @@ public class MainUIController implements IController
       case GAME_SETUP:
         // Pass the input action along to the active sub-handler.
         exitGame = gameSetup.handleInput(action);
-        if(exitGame)
+        if( exitGame )
         {
           // If the subMenu was not MAIN, we go back to MAIN.
           currentSubMenuType = SubMenu.MAIN;
@@ -85,7 +85,17 @@ public class MainUIController implements IController
         //   the user inputs to the graphics engine directly.
         exitGame = Driver.getInstance().gameGraphics.handleOptionsInput(action);
 
-        if(exitGame)
+        if( exitGame )
+        {
+          // If the subMenu was not MAIN, we go back to MAIN.
+          currentSubMenuType = SubMenu.MAIN;
+          exitGame = false;
+        }
+        break;
+      case AUDIO_OPTIONS:
+        exitGame = AudioEngine.handleOptionsInput(action);
+
+        if( exitGame )
         {
           // If the subMenu was not MAIN, we go back to MAIN.
           currentSubMenuType = SubMenu.MAIN;

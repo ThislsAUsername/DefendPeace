@@ -1,0 +1,10 @@
+A clone of Advance Wars built in Java.
+Its mechanics are very close to cart-accurate, and it includes all of the COs from each version of Advance Wars.
+Prior art used:
+Advance Wars (just about everything)
+Sound support: https://github.com/Trilarion/java-vorbis-support
+Syntactic sugar: https://projectlombok.org/
+Music files: https://greasyfork.org/en/scripts/518170-improved-awbw-music-player
+
+The devs build the project with Eclipse, and haven't tested other solutions.
+To build the project, you'll need to install the Lombok plugin, which you can do by running the Lombok .jar in `src/`.
