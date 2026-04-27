@@ -11,6 +11,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import Engine.ConfigUtils;
+import Engine.GameInstance;
 import Engine.OptionSelector;
 import UI.AudioUtils.LoopMusic;
 import lombok.var;
@@ -56,6 +57,12 @@ public class AudioEngine
 
     if( !soundDeviceOption.getSelectedObject().equals("None") )
       soundThread = new SoundThread(soundDeviceOption.getSelectedObject());
+  }
+
+  private static GameInstance activeGame = null;
+  public static void setActiveGame(GameInstance gi)
+  {
+    activeGame = gi;
   }
 
   public static boolean handleOptionsInput(InputHandler.InputAction action)
@@ -262,8 +269,12 @@ public class AudioEngine
         int failedReadCombo = 0; // The stream reader API arbitrarily returns -1 even when the song isn't over, so I guess we just play the odds here.
         while (!killThread)
         {
-          var newLoop = AudioUtils.loadMenuTheme(); // TODO: do CO selection
-          if (newLoop != loopAudio)
+          LoopMusic newLoop = null;
+          if( null == activeGame || null == activeGame.activeArmy )
+            newLoop = AudioUtils.loadMenuTheme();
+          else
+            newLoop = AudioUtils.loadCommanderTheme(activeGame.activeArmy.cos[0]);
+          if( newLoop != loopAudio )
           {
             loopAudio = newLoop;
             loopState = LoopState.INTRO;

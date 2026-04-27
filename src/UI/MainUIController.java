@@ -235,6 +235,7 @@ public class MainUIController implements IController
           // Set up the game to run...
           MapView mv = Driver.getInstance().gameGraphics.createMapView(oldGame);
           MapController mapController = new MapController(oldGame, mv);
+          AudioEngine.setActiveGame(oldGame);
 
           // Mash the big red button and start the game.
           Driver.getInstance().changeGameState(mapController, mv);

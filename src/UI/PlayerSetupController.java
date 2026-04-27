@@ -154,6 +154,7 @@ public class PlayerSetupController implements IController
 
             MapView mv = Driver.getInstance().gameGraphics.createMapView(newGame);
             MapController mapController = new MapController(newGame, mv);
+            AudioEngine.setActiveGame(newGame);
 
             // Mash the big red button and start the game.
             Driver.getInstance().changeGameState(mapController, mv);
