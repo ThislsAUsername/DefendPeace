@@ -21,7 +21,6 @@ import Engine.GameEvents.TurnInitEvent;
 import Engine.StateTrackers.StateTracker;
 import Terrain.Environment;
 import Terrain.Environment.Weathers;
-import UI.AudioEngine;
 import Units.Unit;
 import Terrain.MapLocation;
 import Terrain.MapMaster;
@@ -312,7 +311,6 @@ public class GameInstance implements Serializable
     {
       army.deInitForGame(this);
     }
-    AudioEngine.setActiveGame(null);
   }
 
   /**
