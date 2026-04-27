@@ -1,21 +1,18 @@
 package UI;
 
-import java.io.File;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.Arrays;
-
 import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.UnsupportedAudioFileException;
-
 import Engine.ConfigUtils;
 import Engine.OptionSelector;
+import UI.AudioUtils.LoopMusic;
 import lombok.var;
 
 public class AudioEngine
@@ -36,30 +33,21 @@ public class AudioEngine
     soundDeviceOption.optionList.clear();
     for (var opt : DEFAULT_SOUND_DEVICES)
       soundDeviceOption.optionList.add(opt);
-    try
-    {
-      AudioInputStream in = AudioSystem.getAudioInputStream(new File(Engine.Driver.JAR_DIR + "res/music/t-hachi.ogg"));
-      AudioFormat baseFormat = in.getFormat();
-      AudioFormat targetFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
-            baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
+    AudioFormat baseFormat = AudioUtils.loadMenuTheme().af;
+    AudioFormat targetFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
+          baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
 
-      // get a line from a mixer in the system with the wanted format
-      DataLine.Info info = new DataLine.Info(SourceDataLine.class, targetFormat);
-      Mixer.Info[] mixers = AudioSystem.getMixerInfo();
-      for( var m : mixers )
-      {
-        var mix = AudioSystem.getMixer(m);
-        String name = m.getName();
-        //System.out.println("Got " + name);
-        if (! mix.isLineSupported(info))
-          continue;
-        soundDeviceOption.optionList.add(name);
-      }
-    }
-    catch (UnsupportedAudioFileException | IOException e)
+    // get a line from a mixer in the system with the wanted format
+    DataLine.Info info = new DataLine.Info(SourceDataLine.class, targetFormat);
+    Mixer.Info[] mixers = AudioSystem.getMixerInfo();
+    for( var m : mixers )
     {
-      // failed
-      e.printStackTrace();
+      var mix = AudioSystem.getMixer(m);
+      String name = m.getName();
+      //System.out.println("Got " + name);
+      if (! mix.isLineSupported(info))
+        continue;
+      soundDeviceOption.optionList.add(name);
     }
     soundDeviceOption.reset(soundDeviceOption.optionList.size()); // Allow selecting the new options
 
@@ -164,6 +152,10 @@ public class AudioEngine
     private Thread myThread;
     private String mixerName;
     private boolean killThread = false;
+    private static enum LoopState { INTRO, PRELOOP, LOOP };
+    private LoopMusic loopAudio = null;
+    private LoopState loopState = LoopState.INTRO;
+    private BufferedInputStream loopStream = null;
 
     public SoundThread(String pMixerName)
     {
@@ -172,26 +164,72 @@ public class AudioEngine
       mixerName = pMixerName;
     }
 
+    private void setStream(boolean increment) throws IOException
+    {
+      // System.out.println("setStream " + loopState + " inc? " + increment);
+      if( increment )
+      {
+        if( LoopState.LOOP == loopState )
+        {
+          loopStream.reset();
+          return;
+        }
+        if( LoopState.PRELOOP == loopState )
+          loopState = LoopState.LOOP;
+        if( LoopState.INTRO == loopState )
+          loopState = LoopState.PRELOOP;
+      }
+      switch (loopState)
+      {
+        case INTRO:
+        {
+          var newStream = loopAudio.intro;
+          if (null != newStream && newStream != loopStream)
+          {
+            // System.out.println("Starting intro");
+            loopStream = newStream;
+            loopStream.reset();
+            break;
+          }
+        } // FALLTHROUGH
+        case PRELOOP:
+        {
+          var newStream = loopAudio.preloop;
+          if (null != newStream && newStream != loopStream)
+          {
+            // System.out.println("Starting preloop");
+            loopStream = newStream;
+            loopStream.reset();
+            break;
+          }
+        } // FALLTHROUGH
+        case LOOP:
+        {
+          var newStream = loopAudio.loop;
+          if (null != newStream && newStream != loopStream)
+          {
+            // System.out.println("Starting loop");
+            loopStream = newStream;
+            loopStream.reset();
+          }
+          break;
+        }
+      }
+    }
+
     @Override
     public void run()
     {
+      byte[] buffer = new byte[4096];
       try // credit: https://github.com/Trilarion/java-vorbis-support/blob/master/README.md
       {
-        AudioInputStream in = AudioSystem.getAudioInputStream(new File(Engine.Driver.JAR_DIR + "res/music/t-hachi.ogg"));
-        if( null == in )
-          return;
-
-        AudioFormat baseFormat = in.getFormat();
-
-        AudioFormat targetFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
-            baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
-
-        AudioInputStream dataIn = AudioSystem.getAudioInputStream(targetFormat, in);
-
-        byte[] buffer = new byte[4096];
+        // Always start with the menu theme 'cause why not?
+        loopAudio = AudioUtils.loadMenuTheme();
+        loopState = LoopState.INTRO;
+        setStream(false);
 
         // get a line from a mixer in the system with the wanted format
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, targetFormat);
+        DataLine.Info info = new DataLine.Info(SourceDataLine.class, loopAudio.af);
         Mixer.Info[] mixers = AudioSystem.getMixerInfo();
         Mixer mix = null;
         for( var m : mixers )
@@ -221,8 +259,17 @@ public class AudioEngine
         line.start();
         @SuppressWarnings("unused")
         int nBytesRead = 0, nBytesWritten = 0;
-        while (nBytesRead != -1 && !killThread)
+        int failedReadCombo = 0; // The stream reader API arbitrarily returns -1 even when the song isn't over, so I guess we just play the odds here.
+        while (!killThread)
         {
+          var newLoop = AudioUtils.loadMenuTheme(); // TODO: do CO selection
+          if (newLoop != loopAudio)
+          {
+            loopAudio = newLoop;
+            loopState = LoopState.INTRO;
+            setStream(false);
+          }
+
           if( null != volumeKnob )
           {
             double volume = Math.pow(volumeOption.getSelectedObject() / 100.0, 2); // Square the ratio for finer adjustments at lower volume.
@@ -230,13 +277,23 @@ public class AudioEngine
             var setting   = volume * range + volumeKnob.getMinimum();
             volumeKnob.setValue((float) setting);
           }
+
           if( line.available() >= buffer.length ) // Avoid blocking on write calls
           {
-            nBytesRead = dataIn.read(buffer, 0, buffer.length);
+            nBytesRead = loopStream.read(buffer, 0, buffer.length);
             if( nBytesRead != -1 )
             {
+              failedReadCombo = 0;
               nBytesWritten = line.write(buffer, 0, nBytesRead);
             }
+            else
+              ++failedReadCombo;
+          }
+
+          if (nBytesRead == -1 && failedReadCombo > 9)
+          {
+            failedReadCombo = 0;
+            setStream(true); // Current audio file is done, so increment
           }
         }
 
@@ -244,12 +301,9 @@ public class AudioEngine
         line.stop();
         line.close();
 
-        dataIn.close();
-
-        in.close();
         // playback finished
       }
-      catch (UnsupportedAudioFileException | IOException | LineUnavailableException e)
+      catch (IOException | LineUnavailableException e)
       {
         // failed
         e.printStackTrace();
