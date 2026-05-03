@@ -740,7 +740,7 @@ public class GBAFEWeapons
     private static final long serialVersionUID = 1L;
 
     @Override
-    public void changeCombatContext(CombatContext cc)
+    public void changeCombatContext(CombatContext cc, UnitContext buffOwner)
     {
       GBAFEWeapon startGun = (GBAFEWeapon) cc.attacker.weapon;
       GBAFEWeapon endGun   = (GBAFEWeapon) cc.defender.weapon;

@@ -84,7 +84,7 @@ public class GBAFEActions
     }
     private void experiencize(UnitDelta attacker, UnitDelta defender)
     {
-      if( defender.deltaPreciseHP > -0.1 )
+      if( defender.deltaPreciseHealth >= 0 )
       {
         addExperience(attacker.unit, 1);
         return; // No damage? Count it as a whiff

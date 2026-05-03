@@ -2,6 +2,7 @@ package Units;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import Engine.GameInstance;
 import Engine.UnitActionFactory;
@@ -11,6 +12,9 @@ import Terrain.TerrainType;
 import Units.GBAFEActions.GBAFEExperienceTracker;
 import Units.GBAFEActions.SummonTracker;
 import Units.MoveTypes.*;
+import lombok.Builder;
+import lombok.var;
+import lombok.experimental.SuperBuilder;
 
 public class GBAFEUnits extends UnitModelScheme
 {
@@ -44,39 +48,42 @@ public class GBAFEUnits extends UnitModelScheme
     ArrayList<UnitModel> extras = new ArrayList<>();
 
     // Define everything we can build from a Factory.
-    factoryModels.add(new Soldier());
-    Brigand brigand = new Brigand();
+    factoryModels.add(Soldier());
+    var brigand = Brigand();
     factoryModels.add(brigand);
-    factoryModels.add(new Myrmidon());
-    factoryModels.add(new Thief());
-    factoryModels.add(new Axeman());
-    factoryModels.add(new Mercenary());
-    Priest priest = new Priest();
+    factoryModels.add(Myrmidon());
+    factoryModels.add(Thief());
+    factoryModels.add(Axeman());
+    factoryModels.add(Mercenary());
+    var priest = Priest();
     factoryModels.add(priest);
-    factoryModels.add(new Troubadour());
-    factoryModels.add(new Mage());
-    factoryModels.add(new Shaman());
-    Monk monk = new Monk();
+    factoryModels.add(Troubadour());
+    factoryModels.add(Mage());
+    factoryModels.add(Shaman());
+    var monk = Monk();
     factoryModels.add(monk);
-    factoryModels.add(new Nomad());
-    factoryModels.add(new Archer());
-    factoryModels.add(new ArmorKnight());
-    factoryModels.add(new Cavalier());
-    factoryModels.add(new GreatKnight());
-    factoryModels.add(new Bard());
+    factoryModels.add(Nomad());
+    factoryModels.add(Archer.buildModel());
+    factoryModels.add(ArmorKnight());
+    factoryModels.add(Cavalier());
+    factoryModels.add(GreatKnight());
+    factoryModels.add(Bard());
 
     // Inscribe those war machines obtainable from an Airport.
-    airportModels.add(new PegKnight());
-    airportModels.add(new WyvernRider());
-    airportModels.add(new WyvernKnight());
-    airportModels.add(new Summoner());
+    airportModels.add(PegKnight());
+    airportModels.add(WyvernRider());
+    airportModels.add(WyvernKnight());
+    airportModels.add(Summoner.buildModel());
 
     // Record those units we can get from a Seaport.
-    Pirate pirate = new Pirate();
+    var pirate = Pirate();
+    var fleet = Fleet();
+    var siegeBoat = SiegeBoat();
+    var cloister = CloisterBoat();
     shipModels.add(pirate);
-    shipModels.add(new Fleet());
-    shipModels.add(new SiegeBoat());
-    shipModels.add(new CloisterBoat());
+    shipModels.add(fleet);
+    shipModels.add(siegeBoat);
+    shipModels.add(cloister);
 
     // Dump these lists into a hashmap for easy reference later.
     feModels.shoppingList.put(TerrainType.FACTORY, factoryModels);
@@ -101,6 +108,24 @@ public class GBAFEUnits extends UnitModelScheme
     priest.baseActions.add(new GBAFEActions.PromotionFactory(priest.promotesTo));
     pirate.promotesTo = brigand.promotesTo;
     pirate.baseActions.add(new GBAFEActions.PromotionFactory(pirate.promotesTo));
+
+    UnitModel fleetPack = FleetPack();
+    fleet.baseActions.add(new TransformLifecycle.TransformFactory(fleetPack, "PACK"));
+    fleetPack.baseActions.add(new TransformLifecycle.TransformFactory(fleet, "UNPACK"));
+    feModels.unitModels.add(fleetPack);
+    feModels.shoppingList.get(TerrainType.SEAPORT).add(fleetPack);
+
+    UnitModel siegeBoatPack = SiegeBoatPack();
+    siegeBoat.baseActions.add(new TransformLifecycle.TransformFactory(siegeBoatPack, "PACK"));
+    siegeBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(siegeBoat, "UNPACK"));
+    feModels.unitModels.add(siegeBoatPack);
+    feModels.shoppingList.get(TerrainType.SEAPORT).add(siegeBoatPack);
+
+    UnitModel cloisterBoatPack = CloisterBoatPack();
+    cloister.baseActions.add(new TransformLifecycle.TransformFactory(cloisterBoatPack, "PACK"));
+    cloisterBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(cloister, "UNPACK"));
+    feModels.unitModels.add(cloisterBoatPack);
+    feModels.shoppingList.get(TerrainType.SEAPORT).add(cloisterBoatPack);
 
     return feModels;
   }
@@ -136,7 +161,7 @@ public class GBAFEUnits extends UnitModelScheme
     public int growthLck = 0;
     public int growthDef = 0;
     public int growthRes = 0;
-    
+
     public GBAFEStats build(int levels)
     {
       return build(false, levels);
@@ -170,6 +195,7 @@ public class GBAFEUnits extends UnitModelScheme
         stats.Def += growthDef*levels/100;
         stats.Res += growthRes*levels/100;
       }
+      stats.growths = this;
       return stats;
     }
   }
@@ -191,6 +217,7 @@ public class GBAFEUnits extends UnitModelScheme
     public int Def = 0;
     public int Res = 0;
     public int level = 0;
+    public ClassStatsBuilder growths;
     public int calcAvoid()
     {
       return Spd*2 + Lck;
@@ -211,55 +238,19 @@ public class GBAFEUnits extends UnitModelScheme
     }
   }
 
+
+  @SuperBuilder(toBuilder = true)
   public static class GBAFEUnitModel extends UnitModel
   {
     private static final long serialVersionUID = 1L;
     public final GBAFEStats stats;
-    public int baseXP = 0;
-    public boolean reducedPromoKillBonus = false;
-    public int classRelativePower = 3; // "Weaker" classes level faster, and "stronger" classes grant more experience
-    public UnitModel promotesTo = null;
+    @Builder.Default public int baseXP = 0;
+    @Builder.Default public boolean reducedPromoKillBonus = false;
+    @Builder.Default public int classRelativePower = 3; // "Weaker" classes level faster, and "stronger" classes grant more experience
+    @Builder.Default public UnitModel promotesTo = null;
 
-    public boolean isArmor   = false;
-    public boolean isHorse   = false;
-
-    public GBAFEUnitModel(String pName, GBAFEStats stats, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, UnitActionFactory[] actions, WeaponModel[] WEAPONS, double starValue)
-    {
-      super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, WEAPONS, starValue);
-      this.stats = stats;
-      baseXP = stats.level*100;
-      fuelBurnPerTile = 0;
-      needsMaterials = false;
-      addUnitModifier(new GBAFEWeapons.GBAFEFightMod());
-    }
-    public GBAFEUnitModel(String pName, GBAFEStats stats, long pRole, int cost, int pAmmoMax, int pFuelMax, int pIdleFuelBurn, int pVision,
-        int pMovePower, MoveType pPropulsion, ArrayList<UnitActionFactory> actions, ArrayList<WeaponModel> WEAPONS, double starValue)
-    {
-      super(pName, pRole, cost, pAmmoMax, pFuelMax, pIdleFuelBurn, pVision, pMovePower, pPropulsion, actions, WEAPONS, starValue);
-      this.stats = stats;
-      baseXP = stats.level*100;
-      fuelBurnPerTile = 0;
-      needsMaterials = false;
-      addUnitModifier(new GBAFEWeapons.GBAFEFightMod());
-    }
-
-    @Override
-    public UnitModel clone()
-    {
-      // Create a new model with the given attributes.
-      GBAFEUnitModel newModel = new GBAFEUnitModel(name, stats, role, costBase, maxAmmo, maxFuel, fuelBurnIdle, visionRange, baseMovePower,
-          baseMoveType.clone(), baseActions, weapons, abilityPowerValue);
-
-      newModel.copyValues(this);
-      return newModel;
-    }
-    public void copyValues(GBAFEUnitModel other)
-    {
-      super.copyValues(other);
-      baseXP     = other.baseXP;
-      promotesTo = other.promotesTo;
-    }
+    @Builder.Default public boolean isArmor   = false;
+    @Builder.Default public boolean isHorse   = false;
 
     @Override
     public int getDamageRedirect(WeaponModel wm)
@@ -269,6 +260,8 @@ public class GBAFEUnits extends UnitModelScheme
 
     public void addVariants(GameReadyModels feModels, int yourIndex)
     {
+      if( hidden )
+        return;
       if( null != this.promotesTo )
       {
         if( SORT_PROMOTED_UNITS_LAST )
@@ -277,67 +270,15 @@ public class GBAFEUnits extends UnitModelScheme
           feModels.unitModels.add(yourIndex + 1, this.promotesTo);
         this.baseActions.add(new GBAFEActions.PromotionFactory(this.promotesTo));
       }
-    }
-  }
-
-  public abstract static class FootUnit extends GBAFEUnitModel
-  {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = TROOP | LAND;
-
-    private static final int MAX_AMMO = -1;
-    private static final int VISION_RANGE = VISION_NORMAL;
-
-    private static final MoveType moveType = foot;
-    private static final UnitActionFactory[] actions = UnitActionFactory.FOOTSOLDIER_ACTIONS;
-
-    public FootUnit(String name, GBAFEStats stats, int cost, int move, WeaponModel[] weapons, double starVal)
-    {
-      super(name, stats, ROLE, cost, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, move,
-          moveType, actions, weapons, starVal);
-    }
-  }
-  public abstract static class HorseUnit extends GBAFEUnitModel
-  {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = TANK | LAND;
-
-    private static final int MAX_AMMO = -1;
-    private static final int VISION_RANGE = VISION_NORMAL;
-
-    private static final MoveType moveType = hoof;
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-
-    public HorseUnit(String name, GBAFEStats stats, int cost, int move, WeaponModel[] weapons, double starVal)
-    {
-      super(name, stats, ROLE, cost, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, move,
-          moveType, actions, weapons, starVal);
-      baseCargoCapacity = 1;
-      carryableMask = 0; // The RESCUE action will be used instead of LOAD
-      isHorse = true;
-      baseActions.add(1, GBAFEActions.DropUnitFactory.instance);
-      baseActions.add(2, GBAFEActions.GiveUnitFactory.instance);
-      baseActions.add(3, GBAFEActions.TakeUnitFactory.instance);
-      baseActions.add(4, GBAFEActions.RescueUnitFactory.instance);
-    }
-  }
-  public abstract static class FlierUnit extends GBAFEUnitModel
-  {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = HOVER | AIR_LOW;
-
-    private static final int MAX_AMMO = -1;
-    private static final int VISION_RANGE = VISION_NORMAL;
-
-    private static final MoveType moveType = wing;
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_VEHICLE_ACTIONS;
-
-    public FlierUnit(String name, GBAFEStats stats, int cost, int move, WeaponModel[] weapons, double starVal)
-    {
-      super(name, stats, ROLE, cost, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, move,
-          moveType, actions, weapons, starVal);
-      baseCargoCapacity = 1;
-      carryableMask = 0; // The RESCUE action will be used instead of LOAD
+      if( this.weapons.size() > 1 && this.weapons.get(1).rangeMax > 1 )
+      {
+        var rangedOnly = this.toBuilder();
+        rangedOnly.hidden(true); // for visual distinctiveness
+        ArrayList<WeaponModel> weapons = new ArrayList<>(this.weapons);
+        weapons.remove(0);
+        rangedOnly.weapons(weapons);
+        feModels.unitModels.add(yourIndex+1, rangedOnly.build());
+      }
     }
   }
 
@@ -345,7 +286,7 @@ public class GBAFEUnits extends UnitModelScheme
   private static final MoveType wheel      = new FEMoveTypes.FEWheel();
   private static final MoveType boat       = new FEMoveTypes.FEBoat();
   private static final MoveType foot       = new FEMoveTypes.FEFoot();
-  private static final MoveType footPlus   = new FEMoveTypes.FEFootPlus();
+  private static final MoveType footPromo  = new FEMoveTypes.FEFootPlus();
   private static final MoveType footAxe    = new FEMoveTypes.FEFootAxe();
   private static final MoveType footMage   = new FEMoveTypes.FEFootMage();
   private static final MoveType footArmor  = new FEMoveTypes.FEFootArmor();
@@ -354,748 +295,679 @@ public class GBAFEUnits extends UnitModelScheme
   private static final MoveType hoofPromo  = new FEMoveTypes.FEHoofPromoted();
   private static final MoveType hoofN      = new FEMoveTypes.FEHoofNomad();
   private static final MoveType hoofNPromo = new FEMoveTypes.FEHoofNomadPromoted();
-  private static final int MAX_FUEL = 99;
+  private static final int MAX_AMMO       = -1;
+  private static final int MAX_FUEL       = 99;
   private static final int IDLE_FUEL_BURN = 0;
-  public static final int VISION_NORMAL = 3;
-  public static final int VISION_THIEF  = 8;
+  public static final int VISION_NORMAL   = 3;
+  public static final int VISION_THIEF    = 8;
 
-  public static class Soldier extends FootUnit
+  public static GBAFEUnitModel.GBAFEUnitModelBuilder<?, ?> FootUnit()
   {
-    private static final long serialVersionUID = 1L;
+    var b = GBAFEUnitModel.builder();
+    b.role(UnitModel.TROOP | UnitModel.LAND);
+    b.baseMoveType(foot);
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.FOOTSOLDIER_ACTIONS)));
 
-    private static final int UNIT_COST = 500;
-    private static final double STAR_VALUE = 0.2;
-    private static final int MOVE_POWER = 5;
+    b.maxFuel(MAX_FUEL);
+    b.fuelBurnIdle(IDLE_FUEL_BURN);
+    b.fuelBurnPerTile(0);
+    b.maxAmmo(MAX_AMMO);
+    b.visionRange(VISION_NORMAL);
+    b.baseMovePower(5);
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronLance(static_stats) };
-
-    public Soldier()
-    {
-      super("Soldier", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new Halberdier();
-      classRelativePower = 2;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 20;
-      bases.baseStr =  3;
-      bases.baseSkl =  0;
-      bases.baseSpd =  1;
-      bases.baseDef =  0;
-      bases.baseRes =  0;
-      bases.growthHP  =  80;
-      bases.growthStr =  50;
-      bases.growthSkl =  30;
-      bases.growthSpd =  20;
-      bases.growthLck =  12; // 25 in 7/8
-      bases.growthDef =  10; // 12 in 7/8
-      bases.growthRes =  25; // 15 in 7/8
-      return bases.build(4);
-    }
+    return b;
   }
-  public static class Halberdier extends FootUnit
+  public static GBAFEUnitModel.GBAFEUnitModelBuilder<?, ?> PromoFootUnit()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.baseMoveType(footPromo);
+    b.baseMovePower(6);
+    return b;
+  }
+  public static GBAFEUnitModel.GBAFEUnitModelBuilder<?, ?> HorseUnit()
+  {
+    var b = FootUnit();
+    b.role(UnitModel.TANK | UnitModel.LAND);
+    b.baseMoveType(hoof);
+    var actions = new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS));
+    actions.add(1, GBAFEActions.DropUnitFactory.instance);
+    actions.add(2, GBAFEActions.GiveUnitFactory.instance);
+    actions.add(3, GBAFEActions.TakeUnitFactory.instance);
+    actions.add(4, GBAFEActions.RescueUnitFactory.instance);
+    b.baseActions(actions);
+    b.isHorse(true);
+    b.carryableMask(0); // The RESCUE action will be used instead of LOAD
+    b.baseCargoCapacity(1);
+    b.baseMovePower(7);
 
-    private static final int UNIT_COST = 22000;
-    private static final double STAR_VALUE = 2.2;
-    private static final int MOVE_POWER = 6; // PoR standardizes on 7; might be amusing
+    return b;
+  }
+  public static GBAFEUnitModel.GBAFEUnitModelBuilder<?, ?> PromoHorseUnit()
+  {
+    var b = HorseUnit();
+    b.baseMoveType(hoofPromo);
+    b.baseMovePower(8);
+    return b;
+  }
+  public static GBAFEUnitModel.GBAFEUnitModelBuilder<?, ?> FlierUnit()
+  {
+    var b = FootUnit();
+    b.role(UnitModel.HOVER | UnitModel.AIR);
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
+    b.baseMoveType(wing);
+    b.baseMovePower(7);
+    b.isHorse(false);
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronLance(static_stats), new GBAFEWeapons.Javelin(static_stats) };
+    return b;
+  }
+  public static GBAFEUnitModel.GBAFEUnitModelBuilder<?, ?> PromoFlierUnit()
+  {
+    var b = FlierUnit();
+    b.baseMovePower(8);
+    return b;
+  }
+  public static GBAFEUnitModel.GBAFEUnitModelBuilder<?, ?> BoatUnit()
+  {
+    var b = GBAFEUnitModel.builder();
+    b.baseMoveType(boat);
 
-    public Halberdier()
-    {
-      super("Halberdier", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.critBoost = true; // based on fangames/Radiant Dawn
-      // Stats are: PoR// + FE8 zerker - PoR zerker
-      bases.baseHP  = 24;// + 24 - 28;
-      bases.baseStr =  6;// + 7 - 8;
-      bases.baseSkl =  6;// + 5 + 6;
-      bases.baseSpd =  6;
-      bases.baseDef =  6;
-      bases.baseRes =  2;
-      bases.growthHP  =  75;// + 75 - 80;
-      bases.growthStr =  45;// + 50 - 60;
-      bases.growthSkl =  45;// + 35 - 25;
-      bases.growthSpd =  40;// + 25 - 40;
-      bases.growthLck =  25;// + 15 - 25;
-      bases.growthDef =  45;// + 10 - 35;
-      bases.growthRes =  40;// + 13 - 15;
-      return bases.build(true, 0);
-    }
+    b.maxFuel(MAX_FUEL);
+    b.fuelBurnIdle(IDLE_FUEL_BURN);
+    b.maxAmmo(MAX_AMMO);
+    b.visionRange(VISION_NORMAL);
 
-    @Override
-    public void addVariants(GameReadyModels feModels, int yourIndex)
-    {
-      if( !hidden )
-      {
-        super.addVariants(feModels, yourIndex);
-        UnitModel javelineer = new Halberdier();
-        javelineer.weapons.remove(0);
-        javelineer.hidden = true; // for visual distinctiveness
-        feModels.unitModels.add(yourIndex+1, javelineer);
-      }
-    }
+    b.baseCargoCapacity(2);
+    b.carryableMask(UnitModel.TROOP | UnitModel.TANK | UnitModel.HOVER);
+
+    return b;
   }
 
-  public static class Brigand extends FootUnit
+  public static GBAFEUnitModel Soldier()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.costBase(500);
+    b.abilityPowerValue(2);
 
-    private static final int UNIT_COST = 500;
-    private static final double STAR_VALUE = 0.4;
-    private static final int MOVE_POWER = 5;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 20;
+    bases.baseStr =  3;
+    bases.baseSkl =  0;
+    bases.baseSpd =  1;
+    bases.baseDef =  0;
+    bases.baseRes =  0;
+    bases.growthHP  =  80;
+    bases.growthStr =  50;
+    bases.growthSkl =  30;
+    bases.growthSpd =  20;
+    bases.growthLck =  12; // 25 in 7/8
+    bases.growthDef =  10; // 12 in 7/8
+    bases.growthRes =  25; // 15 in 7/8
+    var static_stats = bases.build(4);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronLance(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronAxe(static_stats) };
-
-    public Brigand()
-    {
-      super("Brigand", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new Berserker();
-      baseMoveType = footAxe; // Peaks don't exist
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 20;
-      bases.baseStr =  5;
-      bases.baseSkl =  1;
-      bases.baseSpd =  5;
-      bases.baseDef =  3;
-      bases.baseRes =  0;
-      bases.growthHP  =  82;
-      bases.growthStr =  50;
-      bases.growthSkl =  30;
-      bases.growthSpd =  20;
-      bases.growthLck =  15;
-      bases.growthDef =  10;
-      bases.growthRes =  10; // 13 in 7/8
-      return bases.build(0);
-    }
+    b.name("Soldier");
+    b.promotesTo(Halberdier());
+    return b.build();
   }
-  public static class Berserker extends FootUnit
+  public static GBAFEUnitModel Halberdier()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoFootUnit(); // PoR standardizes on 7 move; might be amusing
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(22000);
+    b.abilityPowerValue(22);
 
-    private static final int UNIT_COST = 11000;
-    private static final double STAR_VALUE = 1.2;
-    private static final int MOVE_POWER = 6;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.critBoost = true; // based on fangames/Radiant Dawn
+    // Stats are: PoR// + FE8 zerker - PoR zerker
+    bases.baseHP  = 24;// + 24 - 28;
+    bases.baseStr =  6;// + 7 - 8;
+    bases.baseSkl =  6;// + 5 + 6;
+    bases.baseSpd =  6;
+    bases.baseDef =  6;
+    bases.baseRes =  2;
+    bases.growthHP  =  75;// + 75 - 80;
+    bases.growthStr =  45;// + 50 - 60;
+    bases.growthSkl =  45;// + 35 - 25;
+    bases.growthSpd =  40;// + 25 - 40;
+    bases.growthLck =  25;// + 15 - 25;
+    bases.growthDef =  45;// + 10 - 35;
+    bases.growthRes =  40;// + 13 - 15;
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronLance(static_stats), new GBAFEWeapons.Javelin(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.KillerAxe(static_stats), new GBAFEWeapons.HandAxe(static_stats) };
-
-    public Berserker()
-    {
-      super("Berserker", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = footPirate;
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.critBoost = true;
-      bases.baseHP  = 24;
-      bases.baseStr =  7;
-      bases.baseSkl =  6;
-      bases.baseSpd =  7;
-      bases.baseDef =  6;
-      bases.baseRes =  0;
-      bases.growthHP  =  75; // 58 in 6
-      bases.growthStr =  50; // 35 in 6
-      bases.growthSkl =  35; // 25 in 6
-      bases.growthSpd =  25; // 12 in 6
-      bases.growthLck =  15;
-      bases.growthDef =  10;
-      bases.growthRes =  13; // 10 in 6
-      return bases.build(true, 0);
-    }
-
-    @Override
-    public void addVariants(GameReadyModels feModels, int yourIndex)
-    {
-      if( !hidden )
-      {
-        super.addVariants(feModels, yourIndex);
-        UnitModel rangedOnly = new Berserker();
-        rangedOnly.weapons.remove(0);
-        rangedOnly.hidden = true; // for visual distinctiveness
-        feModels.unitModels.add(yourIndex + 1, rangedOnly);
-      }
-    }
+    b.name("Halberdier");
+    return b.build();
   }
 
-  public static class Myrmidon extends FootUnit
+  public static GBAFEUnitModel Brigand()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.costBase(500);
+    b.abilityPowerValue(4);
+    b.baseMoveType(footAxe); // Peaks don't exist
 
-    private static final int UNIT_COST = 2500;
-    private static final double STAR_VALUE = 0.6;
-    private static final int MOVE_POWER = 5;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 20;
+    bases.baseStr =  5;
+    bases.baseSkl =  1;
+    bases.baseSpd =  5;
+    bases.baseDef =  3;
+    bases.baseRes =  0;
+    bases.growthHP  =  82;
+    bases.growthStr =  50;
+    bases.growthSkl =  30;
+    bases.growthSpd =  20;
+    bases.growthLck =  15;
+    bases.growthDef =  10;
+    bases.growthRes =  10; // 13 in 7/8
+    var static_stats = bases.build(0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronAxe(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronSword(static_stats) };
-
-    public Myrmidon()
-    {
-      super("Myrmidon", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new Swordmaster();
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 16;
-      bases.baseStr =  4;
-      bases.baseSkl =  9;
-      bases.baseSpd =  9;
-      bases.baseDef =  2;
-      bases.baseRes =  0;
-      bases.growthHP  =  70;
-      bases.growthStr =  35;
-      bases.growthSkl =  40;
-      bases.growthSpd =  40;
-      bases.growthLck =  30;
-      bases.growthDef =  15;
-      bases.growthRes =  20; // 17 in 6
-      return bases.build(4);
-    }
+    b.name("Brigand");
+    b.promotesTo(Berserker());
+    return b.build();
   }
-  public static class Swordmaster extends FootUnit
+  public static GBAFEUnitModel Berserker()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoFootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(11000);
+    b.abilityPowerValue(12);
+    b.baseMoveType(footPirate); // Peaks don't exist
 
-    private static final int UNIT_COST = 13000;
-    private static final double STAR_VALUE = 1.0;
-    private static final int MOVE_POWER = 6;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.critBoost = true;
+    bases.baseHP  = 24;
+    bases.baseStr =  7;
+    bases.baseSkl =  6;
+    bases.baseSpd =  7;
+    bases.baseDef =  6;
+    bases.baseRes =  0;
+    bases.growthHP  =  75; // 58 in 6
+    bases.growthStr =  50; // 35 in 6
+    bases.growthSkl =  35; // 25 in 6
+    bases.growthSpd =  25; // 12 in 6
+    bases.growthLck =  15;
+    bases.growthDef =  10;
+    bases.growthRes =  13; // 10 in 6
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.KillerAxe(static_stats), new GBAFEWeapons.HandAxe(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.KillingEdge(static_stats) };
-
-    public Swordmaster()
-    {
-      super("Swordmaster", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      role |= ASSAULT;
-      baseMoveType = footPlus;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.critBoost = true;
-      bases.baseHP  = 21; // 19 female
-      bases.baseStr =  6;
-      bases.baseSkl = 11;
-      bases.baseSpd = 10; // 12 female
-      bases.baseDef =  5; // 4 female
-      bases.baseRes =  2; // 3 female
-      bases.growthHP  =  65;
-      bases.growthStr =  25; // 20 male in 6
-      bases.growthSkl =  30;
-      bases.growthSpd =  30;
-      bases.growthLck =  25; // 15 in 6
-      bases.growthDef =  15; // 12 in 6
-      bases.growthRes =  22; // 25 in 6
-      return bases.build(true, 0);
-    }
+    b.name("Berserker");
+    return b.build();
   }
 
-  public static class Thief extends FootUnit
+  public static GBAFEUnitModel Myrmidon()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.costBase(2500);
+    b.abilityPowerValue(6);
 
-    private static final int UNIT_COST = 2500;
-    private static final double STAR_VALUE = 0.6;
-    private static final int MOVE_POWER = 6;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 16;
+    bases.baseStr =  4;
+    bases.baseSkl =  9;
+    bases.baseSpd =  9;
+    bases.baseDef =  2;
+    bases.baseRes =  0;
+    bases.growthHP  =  70;
+    bases.growthStr =  35;
+    bases.growthSkl =  40;
+    bases.growthSpd =  40;
+    bases.growthLck =  30;
+    bases.growthDef =  15;
+    bases.growthRes =  20; // 17 in 6
+    var static_stats = bases.build(4);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronSword(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronSword(static_stats) };
-
-    public Thief()
-    {
-      super("Thief", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new Assassin();
-      baseMoveType = footPlus;
-      visionRange = VISION_THIEF;
-      classRelativePower = 2;
-      role |= RECON;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 16;
-      bases.baseStr =  3;
-      bases.baseSkl =  1;
-      bases.baseSpd =  9;
-      bases.baseDef =  2;
-      bases.baseRes =  0;
-      bases.growthHP  =  50;
-      bases.growthStr =   5;
-      bases.growthSkl =  45;
-      bases.growthSpd =  40;
-      bases.growthLck =  40;
-      bases.growthDef =   5;
-      bases.growthRes =  20;
-      return bases.build(6);
-    }
+    b.name("Myrmidon");
+    b.promotesTo(Swordmaster());
+    return b.build();
   }
-  public static class Assassin extends FootUnit
+  public static GBAFEUnitModel Swordmaster()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoFootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(13000);
+    b.abilityPowerValue(10);
 
-    private static final int UNIT_COST = 13000;
-    private static final double STAR_VALUE = 1.0;
-    private static final int MOVE_POWER = 6;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.critBoost = true;
+    bases.baseHP  = 21; // 19 female
+    bases.baseStr =  6;
+    bases.baseSkl = 11;
+    bases.baseSpd = 10; // 12 female
+    bases.baseDef =  5; // 4 female
+    bases.baseRes =  2; // 3 female
+    bases.growthHP  =  65;
+    bases.growthStr =  25; // 20 male in 6
+    bases.growthSkl =  30;
+    bases.growthSpd =  30;
+    bases.growthLck =  25; // 15 in 6
+    bases.growthDef =  15; // 12 in 6
+    bases.growthRes =  22; // 25 in 6
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.KillingEdge(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.KillingEdge(static_stats) };
+    b.name("Swordmaster");
+    return b.build();
+  }
 
-    public Assassin()
-    {
-      super("Assassin", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = footPlus;
-      visionRange = VISION_THIEF;
-      reducedPromoKillBonus = true;
-      role |= ASSAULT | RECON;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.lethality = true;
-      bases.baseHP  = 16;
-      bases.baseStr =  3;
-      bases.baseSkl =  1;
-      bases.baseSpd =  9;
-      bases.baseDef =  2;
-      bases.baseRes =  0;
-      bases.growthHP  =  50;
-      bases.growthStr =   5;
-      bases.growthSkl =  45;
-      bases.growthSpd =  40;
-      bases.growthLck =  40;
-      bases.growthDef =   5;
-      bases.growthRes =  20;
-      return bases.build(true, 19); // Blatant favoritism, and barely enough
-    }
+  public static GBAFEUnitModel Thief()
+  {
+    var b = FootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.RECON);
+    b.costBase(2500);
+    b.baseMovePower(6);
+    b.baseMoveType(footPromo);
+    b.abilityPowerValue(6);
+    b.visionRange(VISION_THIEF);
+    b.classRelativePower(2);
+
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 16;
+    bases.baseStr =  3;
+    bases.baseSkl =  1;
+    bases.baseSpd =  9;
+    bases.baseDef =  2;
+    bases.baseRes =  0;
+    bases.growthHP  =  50;
+    bases.growthStr =   5;
+    bases.growthSkl =  45;
+    bases.growthSpd =  40;
+    bases.growthLck =  40;
+    bases.growthDef =   5;
+    bases.growthRes =  20;
+    var static_stats = bases.build(6);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronSword(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
+
+    b.name("Thief");
+    b.promotesTo(Assassin());
+    return b.build();
+  }
+  public static GBAFEUnitModel Assassin()
+  {
+    var b = PromoFootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.RECON | UnitModel.ASSAULT);
+    b.costBase(13000);
+    b.abilityPowerValue(10);
+    b.visionRange(VISION_THIEF);
+    b.reducedPromoKillBonus(true);
+
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.lethality = true;
+    bases.baseHP  = 16 + 2; // Adding Marisa's promo gains since the class has Thief bases
+    bases.baseStr =  3 + 1;
+    bases.baseSkl =  1 + 1;
+    bases.baseSpd =  9 + 1;
+    bases.baseDef =  2 + 2;
+    bases.baseRes =  0 + 1;
+    bases.growthHP  =  50;
+    bases.growthStr =   5;
+    bases.growthSkl =  45;
+    bases.growthSpd =  40;
+    bases.growthLck =  40;
+    bases.growthDef =   5;
+    bases.growthRes =  20;
+    var static_stats = bases.build(true, 19); // Blatant favoritism, and barely enough
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.KillingEdge(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
+
+    b.name("Assassin");
+    return b.build();
   }
 
   // "Fighter" means something different here...
-  public static class Axeman extends FootUnit
+  public static GBAFEUnitModel Axeman()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.MECH | UnitModel.ASSAULT);
+    b.costBase(4000);
+    b.abilityPowerValue(8);
+    b.baseMoveType(footAxe);
 
-    private static final int UNIT_COST = 4000;
-    private static final double STAR_VALUE = 0.8;
-    private static final int MOVE_POWER = 5;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 20;
+    bases.baseStr =  5;
+    bases.baseSkl =  2;
+    bases.baseSpd =  4;
+    bases.baseDef =  2;
+    bases.baseRes =  0;
+    bases.growthHP  =  85;
+    bases.growthStr =  55; // 35 in 7
+    bases.growthSkl =  35; // 30 in 7
+    bases.growthSpd =  30; // 20 in 7
+    bases.growthLck =  15;
+    bases.growthDef =  15;
+    bases.growthRes =  15; // 10 in 6
+    var static_stats = bases.build(6);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.Hammer(static_stats), new GBAFEWeapons.IronAxe(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Hammer(static_stats), new GBAFEWeapons.IronAxe(static_stats) };
-
-    public Axeman()
-    {
-      super("Axeman", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new Warrior();
-      baseMoveType = footAxe;
-      role |= ASSAULT | MECH;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 20;
-      bases.baseStr =  5;
-      bases.baseSkl =  2;
-      bases.baseSpd =  4;
-      bases.baseDef =  2;
-      bases.baseRes =  0;
-      bases.growthHP  =  85;
-      bases.growthStr =  55; // 35 in 7
-      bases.growthSkl =  35; // 30 in 7
-      bases.growthSpd =  30; // 20 in 7
-      bases.growthLck =  15;
-      bases.growthDef =  15;
-      bases.growthRes =  15; // 10 in 6
-      return bases.build(6);
-    }
+    b.name("Axeman");
+    b.promotesTo(Warrior());
+    return b.build();
   }
-  public static class Warrior extends FootUnit
+  public static GBAFEUnitModel Warrior()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoFootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.MECH | UnitModel.ASSAULT);
+    b.costBase(12000);
+    b.abilityPowerValue(10);
+    b.baseMoveType(footAxe);
 
-    private static final int UNIT_COST = 12000;
-    private static final double STAR_VALUE = 1.0;
-    private static final int MOVE_POWER = 6;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 28;
+    bases.baseStr =  8;
+    bases.baseSkl =  5;
+    bases.baseSpd =  6;
+    bases.baseDef =  5;
+    bases.baseRes =  0;
+    bases.growthHP  =  80;
+    bases.growthStr =  45;
+    bases.growthSkl =  25;
+    bases.growthSpd =  20;
+    bases.growthLck =  15;
+    bases.growthDef =  16;
+    bases.growthRes =  17; // 7 in 6
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.Hammer(static_stats), new GBAFEWeapons.IronBow(static_stats), new GBAFEWeapons.IronAxe(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Hammer(static_stats), new GBAFEWeapons.IronBow(static_stats) };
-
-    public Warrior()
-    {
-      super("Warrior", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = footAxe;
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 28;
-      bases.baseStr =  8;
-      bases.baseSkl =  5;
-      bases.baseSpd =  6;
-      bases.baseDef =  5;
-      bases.baseRes =  0;
-      bases.growthHP  =  80;
-      bases.growthStr =  45;
-      bases.growthSkl =  25;
-      bases.growthSpd =  20;
-      bases.growthLck =  15;
-      bases.growthDef =  16;
-      bases.growthRes =  17; // 7 in 6
-      return bases.build(true, 0);
-    }
-
-    @Override
-    public void addVariants(GameReadyModels feModels, int yourIndex)
-    {
-      if( !hidden )
-      {
-        super.addVariants(feModels, yourIndex);
-        UnitModel rangedOnly = new Warrior();
-        rangedOnly.weapons.remove(0);
-        rangedOnly.hidden = true; // for visual distinctiveness
-        feModels.unitModels.add(yourIndex + 1, rangedOnly);
-      }
-    }
+    b.name("Warrior");
+    return b.build();
   }
 
-  public static class Mercenary extends FootUnit
+  public static GBAFEUnitModel Mercenary()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(6000);
+    b.abilityPowerValue(8);
 
-    private static final int UNIT_COST = 6000;
-    private static final double STAR_VALUE = 0.8;
-    private static final int MOVE_POWER = 5;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 18;
+    bases.baseStr =  4;
+    bases.baseSkl =  8;
+    bases.baseSpd =  8;
+    bases.baseDef =  4;
+    bases.baseRes =  0;
+    bases.growthHP  =  80;
+    bases.growthStr =  40;
+    bases.growthSkl =  40;
+    bases.growthSpd =  32;
+    bases.growthLck =  30;
+    bases.growthDef =  18;
+    bases.growthRes =  20; // 15 in 6, 30 female
+    var static_stats = bases.build(9);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronSword(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronSword(static_stats) };
-
-    public Mercenary()
-    {
-      super("Mercenary", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new Hero();
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 18;
-      bases.baseStr =  4;
-      bases.baseSkl =  8;
-      bases.baseSpd =  8;
-      bases.baseDef =  4;
-      bases.baseRes =  0;
-      bases.growthHP  =  80;
-      bases.growthStr =  40;
-      bases.growthSkl =  40;
-      bases.growthSpd =  32;
-      bases.growthLck =  30;
-      bases.growthDef =  18;
-      bases.growthRes =  20; // 15 in 6, 30 female
-      return bases.build(9);
-    }
+    b.name("Mercenary");
+    b.promotesTo(Hero());
+    return b.build();
   }
-  public static class Hero extends FootUnit
+  public static GBAFEUnitModel Hero()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoFootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(16000);
+    b.abilityPowerValue(16);
 
-    private static final int UNIT_COST = 16000;
-    private static final double STAR_VALUE = 1.6;
-    private static final int MOVE_POWER = 6;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 22;
+    bases.baseStr =  6;
+    bases.baseSkl =  9;
+    bases.baseSpd = 10;
+    bases.baseDef =  8;
+    bases.baseRes =  2;
+    bases.growthHP  =  75;
+    bases.growthStr =  30;
+    bases.growthSkl =  30;
+    bases.growthSpd =  20;
+    bases.growthLck =  25;
+    bases.growthDef =  20;
+    bases.growthRes =  20; // 10 in 6
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronHero(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronHero(static_stats) };
-
-    public Hero()
-    {
-      super("Hero", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = footPlus;
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 22;
-      bases.baseStr =  6;
-      bases.baseSkl =  9;
-      bases.baseSpd = 10;
-      bases.baseDef =  8;
-      bases.baseRes =  2;
-      bases.growthHP  =  75;
-      bases.growthStr =  30;
-      bases.growthSkl =  30;
-      bases.growthSpd =  20;
-      bases.growthLck =  25;
-      bases.growthDef =  20;
-      bases.growthRes =  20; // 10 in 6
-      return bases.build(true, 0);
-    }
+    b.name("Hero");
+    return b.build();
   }
 
-  public static class ArmorKnight extends FootUnit
+  public static GBAFEUnitModel ArmorKnight()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.MECH);
+    b.costBase(8000);
+    b.abilityPowerValue(12);
+    b.baseMoveType(footArmor);
+    b.baseMovePower(4);
+    b.isArmor(true);
 
-    private static final int UNIT_COST = 8000;
-    private static final double STAR_VALUE = 1.2;
-    private static final int MOVE_POWER = 4;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 17;
+    bases.baseStr =  5;
+    bases.baseSkl =  2;
+    bases.baseSpd =  0;
+    bases.baseDef =  9;
+    bases.baseRes =  0;
+    bases.growthHP  =  80;
+    bases.growthStr =  40;
+    bases.growthSkl =  30; // 35 in 6
+    bases.growthSpd =  15;
+    bases.growthLck =  25;
+    bases.growthDef =  28;
+    bases.growthRes =  20; // 5 in 6
+    var static_stats = bases.build(9);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.Horseslayer(static_stats), new GBAFEWeapons.IronLance(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Horseslayer(static_stats), new GBAFEWeapons.IronLance(static_stats) };
-
-    public ArmorKnight()
-    {
-      super("Armor Knight", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new General();
-      isArmor = true;
-      baseMoveType = footArmor;
-      role |= MECH;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 17;
-      bases.baseStr =  5;
-      bases.baseSkl =  2;
-      bases.baseSpd =  0;
-      bases.baseDef =  9;
-      bases.baseRes =  0;
-      bases.growthHP  =  80;
-      bases.growthStr =  40;
-      bases.growthSkl =  30; // 35 in 6
-      bases.growthSpd =  15;
-      bases.growthLck =  25;
-      bases.growthDef =  28;
-      bases.growthRes =  20; // 5 in 6
-      return bases.build(9);
-    }
+    b.name("Armor Knight");
+    b.promotesTo(General());
+    return b.build();
   }
-  public static class General extends FootUnit
+  public static GBAFEUnitModel General()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoFootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.MECH | UnitModel.ASSAULT);
+    b.costBase(16000);
+    b.abilityPowerValue(10);
+    b.baseMoveType(footArmor);
+    b.baseMovePower(5);
+    b.isArmor(true);
 
-    private static final int UNIT_COST = 16000;
-    private static final double STAR_VALUE = 1.0;
-    private static final int MOVE_POWER = 5;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.pavise = true;
+    bases.baseHP  = 21;
+    bases.baseStr =  8;
+    bases.baseSkl =  4;
+    bases.baseSpd =  3;
+    bases.baseDef = 13;
+    bases.baseRes =  3;
+    bases.growthHP  =  75;
+    bases.growthStr =  30;
+    bases.growthSkl =  20; // 25/35 in 6, 25 female
+    bases.growthSpd =  10;
+    bases.growthLck =  20;
+    bases.growthDef =  23;
+    bases.growthRes =  25; // 15 in 6
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.GeneralWeapons(static_stats), new GBAFEWeapons.Javelina(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.GeneralWeapons(static_stats), new GBAFEWeapons.Javelina(static_stats) };
-
-    public General()
-    {
-      super("General", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      isArmor = true;
-      baseMoveType = footArmor;
-      role |= ASSAULT | MECH;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.pavise = true;
-      bases.baseHP  = 21;
-      bases.baseStr =  8;
-      bases.baseSkl =  4;
-      bases.baseSpd =  3;
-      bases.baseDef = 13;
-      bases.baseRes =  3;
-      bases.growthHP  =  75;
-      bases.growthStr =  30;
-      bases.growthSkl =  20; // 25/35 in 6, 25 female
-      bases.growthSpd =  10;
-      bases.growthLck =  20;
-      bases.growthDef =  23;
-      bases.growthRes =  25; // 15 in 6
-      return bases.build(true, 0);
-    }
-
-    @Override
-    public void addVariants(GameReadyModels feModels, int yourIndex)
-    {
-      if( !hidden )
-      {
-        super.addVariants(feModels, yourIndex);
-        UnitModel rangedOnly = new General();
-        rangedOnly.weapons.remove(0);
-        rangedOnly.hidden = true; // for visual distinctiveness
-        feModels.unitModels.add(yourIndex + 1, rangedOnly);
-      }
-    }
+    b.name("General");
+    return b.build();
   }
 
-  public static class GreatKnight extends HorseUnit
+  public static GBAFEUnitModel GreatKnight()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoHorseUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(22000);
+    b.abilityPowerValue(10);
+    b.baseMovePower(6);
+    b.isArmor(true);
 
-    private static final int UNIT_COST = 22000;
-    private static final double STAR_VALUE = 1.0;
-    private static final int MOVE_POWER = 6;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 21;
+    bases.baseStr =  8;
+    bases.baseSkl =  4;
+    bases.baseSpd =  6;
+    bases.baseDef = 11;
+    bases.baseRes =  3;
+    bases.growthHP  =  70;
+    bases.growthStr =  30;
+    bases.growthSkl =  20;
+    bases.growthSpd =  15;
+    bases.growthLck =  20;
+    bases.growthDef =  21;
+    bases.growthRes =  20;
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronTriangle(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronTriangle(static_stats) };
-
-    public GreatKnight()
-    {
-      super("Great Knight", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = hoofPromo;
-      isArmor = true;
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 21;
-      bases.baseStr =  8;
-      bases.baseSkl =  4;
-      bases.baseSpd =  6;
-      bases.baseDef = 11;
-      bases.baseRes =  3;
-      bases.growthHP  =  70;
-      bases.growthStr =  30;
-      bases.growthSkl =  20;
-      bases.growthSpd =  15;
-      bases.growthLck =  20;
-      bases.growthDef =  21;
-      bases.growthRes =  20;
-      return bases.build(true, 0);
-    }
+    b.name("Great Knight");
+    return b.build();
   }
 
-  public static class Nomad extends HorseUnit
+  public static GBAFEUnitModel Nomad()
   {
-    private static final long serialVersionUID = 1L;
+    var b = HorseUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.SURFACE_TO_AIR);
+    b.costBase(4000);
+    b.abilityPowerValue(12);
+    b.baseMoveType(hoofN);
 
-    private static final int UNIT_COST = 4000;
-    private static final double STAR_VALUE = 1.2;
-    private static final int MOVE_POWER = 7;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 16;
+    bases.baseStr =  5;
+    bases.baseSkl =  4;
+    bases.baseSpd =  5;
+    bases.baseDef =  4;
+    bases.baseRes =  0;
+    bases.growthHP  =  65;
+    bases.growthStr =  30;
+    bases.growthSkl =  40;
+    bases.growthSpd =  45;
+    bases.growthLck =  30;
+    bases.growthDef =  12;
+    bases.growthRes =  15;
+    var static_stats = bases.build(2);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronBow(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronBow(static_stats) };
-
-    public Nomad()
-    {
-      super("Nomad", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new NomadTrooper();
-      baseMoveType = hoofN;
-      role |= SURFACE_TO_AIR;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 16;
-      bases.baseStr =  5;
-      bases.baseSkl =  4;
-      bases.baseSpd =  5;
-      bases.baseDef =  4;
-      bases.baseRes =  0;
-      bases.growthHP  =  65;
-      bases.growthStr =  30;
-      bases.growthSkl =  40;
-      bases.growthSpd =  45;
-      bases.growthLck =  30;
-      bases.growthDef =  12;
-      bases.growthRes =  15;
-      return bases.build(2);
-    }
+    b.name("Nomad");
+    b.promotesTo(NomadTrooper());
+    return b.build();
   }
-  public static class NomadTrooper extends HorseUnit
+  public static GBAFEUnitModel NomadTrooper()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoHorseUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT | UnitModel.SURFACE_TO_AIR);
+    b.costBase(10000);
+    b.abilityPowerValue(10);
+    b.baseMoveType(hoofNPromo);
 
-    private static final int UNIT_COST = 10000;
-    private static final double STAR_VALUE = 1.0;
-    private static final int MOVE_POWER = 8;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 21;
+    bases.baseStr =  7;
+    bases.baseSkl =  6;
+    bases.baseSpd =  7;
+    bases.baseDef =  6;
+    bases.baseRes =  3;
+    bases.growthHP  =  60;
+    bases.growthStr =  25;
+    bases.growthSkl =  30;
+    bases.growthSpd =  35;
+    bases.growthLck =  25;
+    bases.growthDef =  15;
+    bases.growthRes =  15; // 10 in 6, 20 female in 7
+    var static_stats = bases.build(true, 0); // The idea is "promo gains and killer weapons only"
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.KillingEdge(static_stats), new GBAFEWeapons.KillerBow(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.KillingEdge(static_stats), new GBAFEWeapons.KillerBow(static_stats) };
-
-    public NomadTrooper()
-    {
-      super("Nomad Trooper", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = hoofNPromo;
-      role |= ASSAULT | SURFACE_TO_AIR;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 21;
-      bases.baseStr =  7;
-      bases.baseSkl =  6;
-      bases.baseSpd =  7;
-      bases.baseDef =  6;
-      bases.baseRes =  3;
-      bases.growthHP  =  60;
-      bases.growthStr =  25;
-      bases.growthSkl =  30;
-      bases.growthSpd =  35;
-      bases.growthLck =  25;
-      bases.growthDef =  15;
-      bases.growthRes =  15; // 10 in 6, 20 female in 7
-      return bases.build(true, 0); // The idea is "promo gains and killer weapons only"
-    }
-
-    @Override
-    public void addVariants(GameReadyModels feModels, int yourIndex)
-    {
-      if( !hidden )
-      {
-        super.addVariants(feModels, yourIndex);
-        UnitModel rangedOnly = new NomadTrooper();
-        rangedOnly.weapons.remove(0);
-        rangedOnly.hidden = true; // for visual distinctiveness
-        feModels.unitModels.add(yourIndex + 1, rangedOnly);
-      }
-    }
+    b.name("Nomad Trooper");
+    return b.build();
   }
 
-  public static class ArcherInBallista extends FootUnit
+  public static GBAFEUnitModel ArcherInBallista()
   {
-    private static final long serialVersionUID = 1L;
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Ballista(Archer.static_stats) };
+    var b = FootUnit();
+    b.role(UnitModel.TANK | UnitModel.LAND | UnitModel.SURFACE_TO_AIR);
+    b.costBase(6000);
+    b.abilityPowerValue(6);
+    b.baseMoveType(wheel);
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
 
-    public ArcherInBallista()
-    {
-      super("Ballista", Archer.static_stats, Archer.UNIT_COST, Archer.MOVE_POWER, weapons, Archer.STAR_VALUE);
-      baseActions.clear();
-      for( UnitActionFactory action : UnitActionFactory.COMBAT_VEHICLE_ACTIONS )
-        baseActions.add(action);
-      maxAmmo = 5;
-      role = TANK | LAND | SURFACE_TO_AIR;
-      healableHabs.clear(); // No free resupplies for you
-      baseMoveType = wheel;
-    }
+    var static_stats = Archer.buildStats();
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.Ballista(static_stats) };
+    b.maxAmmo(5);
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
+
+    b.name("Ballista");
+    GBAFEUnitModel model = b.build();
+    model.healableHabs.clear(); // No free resupplies for you
+    return model;
   }
-  public static class Archer extends FootUnit
+  @SuperBuilder(toBuilder = true)
+  public static class Archer extends GBAFEUnitModel
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 6000;
-    private static final double STAR_VALUE = 0.8;
-    private static final int MOVE_POWER = 5;
-
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronBow(static_stats), new GBAFEWeapons.Longbow(static_stats) };
-
-    public Archer()
+    public static GBAFEUnitModel buildModel()
     {
-      super("Archer", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new Sniper();
-      role |= SURFACE_TO_AIR;
+      var b = Archer.builder();
+      b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.SURFACE_TO_AIR);
+      b.baseMoveType(foot);
+      b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.FOOTSOLDIER_ACTIONS)));
+
+      b.maxFuel(MAX_FUEL);
+      b.fuelBurnIdle(IDLE_FUEL_BURN);
+      b.maxAmmo(MAX_AMMO);
+      b.visionRange(VISION_NORMAL);
+      b.baseMovePower(5);
+
+      b.costBase(6000);
+      b.abilityPowerValue(8);
+
+      var static_stats = Archer.buildStats();
+      b.stats(static_stats);
+      WeaponModel[] weapons = { new GBAFEWeapons.IronBow(static_stats), new GBAFEWeapons.Longbow(static_stats) };
+      b.weapons(new ArrayList<>(Arrays.asList(weapons)));
+
+      b.name("Archer");
+      b.promotesTo(Sniper.buildModel());
+      return b.build();
     }
-    private static GBAFEStats buildStats()
+
+    public static GBAFEStats buildStats()
     {
       ClassStatsBuilder bases = new ClassStatsBuilder();
       bases.baseHP  = 18;
@@ -1120,52 +992,63 @@ public class GBAFEUnits extends UnitModelScheme
       if( !hidden )
       {
         super.addVariants(feModels, yourIndex);
-        UnitModel rangedOnly = new Archer();
-        rangedOnly.weapons.remove(0);
-        rangedOnly.hidden = true; // for visual distinctiveness
-        feModels.unitModels.add(yourIndex + 1, rangedOnly);
-
-        UnitModel ballista = new ArcherInBallista();
+        UnitModel ballista = ArcherInBallista();
         baseActions.add(new GBAFEActions.PromotionFactory(ballista, GBAFEActions.BALLISTA_COST));
         ballista.baseActions.add(new TransformLifecycle.TransformFactory(this, "DISMOUNT"));
         feModels.unitModels.add(yourIndex + 2, ballista);
       }
     }
   }
-  public static class SniperInBallista extends FootUnit
+  public static GBAFEUnitModel SniperInBallista()
   {
-    private static final long serialVersionUID = 1L;
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.KillerBallista(Sniper.static_stats) };
+    var b = PromoFootUnit();
+    b.role(UnitModel.TANK | UnitModel.LAND | UnitModel.SURFACE_TO_AIR);
+    b.costBase(12000);
+    b.abilityPowerValue(6);
+    b.baseMoveType(wheel);
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
 
-    public SniperInBallista()
-    {
-      super("Killer Ballista", Sniper.static_stats, Sniper.UNIT_COST, Sniper.MOVE_POWER, weapons, Sniper.STAR_VALUE);
-      baseActions.clear();
-      for( UnitActionFactory action : UnitActionFactory.COMBAT_VEHICLE_ACTIONS )
-        baseActions.add(action);
-      maxAmmo = 5;
-      role = TANK | LAND | SURFACE_TO_AIR;
-      healableHabs.clear(); // No free resupplies for you
-      baseMoveType = wheel;
-    }
+    var static_stats = Sniper.buildStats();
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.KillerBallista(static_stats) };
+    b.maxAmmo(5);
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
+
+    b.name("Killer Ballista");
+    GBAFEUnitModel model = b.build();
+    model.healableHabs.clear(); // No free resupplies for you
+    return model;
   }
-  public static class Sniper extends FootUnit
+  @SuperBuilder(toBuilder = true)
+  public static class Sniper extends GBAFEUnitModel
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 12000;
-    private static final double STAR_VALUE = 1.0;
-    private static final int MOVE_POWER = 6;
-
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.KillerBow(static_stats), new GBAFEWeapons.Longbow(static_stats) };
-
-    public Sniper()
+    public static GBAFEUnitModel buildModel()
     {
-      super("Sniper", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = footPlus;
-      role |= SURFACE_TO_AIR;
+      var b = Sniper.builder();
+      b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.SURFACE_TO_AIR);
+      b.baseMoveType(footPromo);
+      b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.FOOTSOLDIER_ACTIONS)));
+
+      b.maxFuel(MAX_FUEL);
+      b.fuelBurnIdle(IDLE_FUEL_BURN);
+      b.maxAmmo(MAX_AMMO);
+      b.visionRange(VISION_NORMAL);
+      b.baseMovePower(6);
+
+      b.costBase(12000);
+      b.abilityPowerValue(10);
+
+      var static_stats = Sniper.buildStats();
+      b.stats(static_stats);
+      WeaponModel[] weapons = { new GBAFEWeapons.KillerBow(static_stats), new GBAFEWeapons.Longbow(static_stats) };
+      b.weapons(new ArrayList<>(Arrays.asList(weapons)));
+
+      b.name("Sniper");
+      return b.build();
     }
+
     private static GBAFEStats buildStats()
     {
       ClassStatsBuilder bases = new ClassStatsBuilder();
@@ -1192,12 +1075,7 @@ public class GBAFEUnits extends UnitModelScheme
       if( !hidden )
       {
         super.addVariants(feModels, yourIndex);
-        UnitModel rangedOnly = new Sniper();
-        rangedOnly.weapons.remove(0);
-        rangedOnly.hidden = true; // for visual distinctiveness
-        feModels.unitModels.add(yourIndex + 1, rangedOnly);
-
-        UnitModel killerBallista = new SniperInBallista();
+        UnitModel killerBallista = SniperInBallista();
         baseActions.add(new GBAFEActions.PromotionFactory(killerBallista, GBAFEActions.KILLER_BALLISTA_COST));
         killerBallista   .baseActions.add(new TransformLifecycle.TransformFactory(this, "DISMOUNT"));
         feModels.unitModels.add(yourIndex + 2, killerBallista);
@@ -1205,685 +1083,572 @@ public class GBAFEUnits extends UnitModelScheme
     }
   }
 
-  public static class Priest extends FootUnit
+  public static GBAFEUnitModel Priest()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.costBase(2000);
+    b.abilityPowerValue(8);
+    b.baseMoveType(footMage);
+    b.classRelativePower(2);
 
-    private static final int UNIT_COST = 2000;
-    private static final double STAR_VALUE = 0.8;
-    private static final int MOVE_POWER = 5;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 18;
+    bases.baseStr =  1;
+    bases.baseSkl =  1;
+    bases.baseSpd =  2;
+    bases.baseDef =  1;
+    bases.baseRes =  5;
+    bases.growthHP  =  50;
+    bases.growthStr =  30;
+    bases.growthSkl =  35;
+    bases.growthSpd =  32;
+    bases.growthLck =  45;
+    bases.growthDef =   8;
+    bases.growthRes =  50;
+    var static_stats = bases.build(6);
+    b.stats(static_stats);
+    WeaponModel[] weapons = {};
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-
-    public Priest()
-    {
-      super("Priest", static_stats, UNIT_COST, MOVE_POWER, new WeaponModel[0], STAR_VALUE);
-      // Promotion is set by the caller
-      baseMoveType = footMage;
-      baseActions.add(0, new GBAFEActions.HealStaffFactory("HEAL (3)", 3, 1));
-      classRelativePower = 2;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 18;
-      bases.baseStr =  1;
-      bases.baseSkl =  1;
-      bases.baseSpd =  2;
-      bases.baseDef =  1;
-      bases.baseRes =  5;
-      bases.growthHP  =  50;
-      bases.growthStr =  30;
-      bases.growthSkl =  35;
-      bases.growthSpd =  32;
-      bases.growthLck =  45;
-      bases.growthDef =   8;
-      bases.growthRes =  50;
-      return bases.build(6);
-    }
+    b.name("Priest");
+    GBAFEUnitModel model = b.build();
+    model.baseActions.add(0, new GBAFEActions.HealStaffFactory("HEAL (3)", 3, 1));
+    return model;
   }
 
-  public static class Troubadour extends HorseUnit
+  public static GBAFEUnitModel Troubadour()
   {
-    private static final long serialVersionUID = 1L;
+    var b = HorseUnit();
+    b.costBase(4000);
+    b.abilityPowerValue(8);
+    b.baseMoveType(footMage);
+    b.classRelativePower(2);
 
-    private static final int UNIT_COST = 4000;
-    private static final double STAR_VALUE = 0.8;
-    private static final int MOVE_POWER = 7;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 15;
+    bases.baseStr =  1;
+    bases.baseSkl =  1;
+    bases.baseSpd =  3;
+    bases.baseDef =  2;
+    bases.baseRes =  5;
+    bases.growthHP  =  50;
+    bases.growthStr =  25;
+    bases.growthSkl =  35;
+    bases.growthSpd =  55;
+    bases.growthLck =  45; // 12 in 6
+    bases.growthDef =  12; // 30 in 6
+    bases.growthRes =  40; // 45 in 6
+    var static_stats = bases.build(9);
+    b.stats(static_stats);
+    WeaponModel[] weapons = {};
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-
-    public Troubadour()
-    {
-      super("Troubadour", static_stats, UNIT_COST, MOVE_POWER, new WeaponModel[0], STAR_VALUE);
-      promotesTo = new Valkyrie();
-      baseActions.add(0, new GBAFEActions.HealStaffFactory("HEAL (5)", 5, 1));
-      classRelativePower = 2;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 15;
-      bases.baseStr =  1;
-      bases.baseSkl =  1;
-      bases.baseSpd =  3;
-      bases.baseDef =  2;
-      bases.baseRes =  5;
-      bases.growthHP  =  50;
-      bases.growthStr =  25;
-      bases.growthSkl =  35;
-      bases.growthSpd =  55;
-      bases.growthLck =  45; // 12 in 6
-      bases.growthDef =  12; // 30 in 6
-      bases.growthRes =  40; // 45 in 6
-      return bases.build(9);
-    }
+    b.name("Troubadour");
+    b.promotesTo(Valkyrie());
+    GBAFEUnitModel model = b.build();
+    model.baseActions.add(0, new GBAFEActions.HealStaffFactory("HEAL (5)", 5, 1));
+    return model;
   }
-  public static class Valkyrie extends HorseUnit
+  public static GBAFEUnitModel Valkyrie()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoHorseUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(11000);
+    b.abilityPowerValue(20);
+    b.reducedPromoKillBonus(true);
 
-    private static final int UNIT_COST = 11000;
-    private static final double STAR_VALUE = 2.0;
-    private static final int MOVE_POWER = 8;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 19;
+    bases.baseStr =  4;
+    bases.baseSkl =  3;
+    bases.baseSpd =  5;
+    bases.baseDef =  4;
+    bases.baseRes =  8;
+    bases.growthHP  =  45;
+    bases.growthStr =  35;
+    bases.growthSkl =  25;
+    bases.growthSpd =  45;
+    bases.growthLck =  40;
+    bases.growthDef =  10;
+    bases.growthRes =  40; // 20 in 6, but 8's uses light, so IDK
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.Fire(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Fire(static_stats) };
-
-    public Valkyrie()
-    {
-      super("Valkyrie", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseActions.add(1, new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
-      reducedPromoKillBonus = true;
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 19;
-      bases.baseStr =  4;
-      bases.baseSkl =  3;
-      bases.baseSpd =  5;
-      bases.baseDef =  4;
-      bases.baseRes =  8;
-      bases.growthHP  =  45;
-      bases.growthStr =  35;
-      bases.growthSkl =  25;
-      bases.growthSpd =  45;
-      bases.growthLck =  40;
-      bases.growthDef =  10;
-      bases.growthRes =  40; // 20 in 6, but 8's uses light, so IDK
-      return bases.build(true, 0);
-    }
+    b.name("Valkyrie");
+    GBAFEUnitModel model = b.build();
+    model.baseActions.add(0, new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
+    return model;
   }
 
-  public static class Mage extends FootUnit
+  public static GBAFEUnitModel Mage()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.costBase(2000);
+    b.abilityPowerValue(6);
+    b.baseMoveType(footMage);
 
-    private static final int UNIT_COST = 2000;
-    private static final double STAR_VALUE = 0.6;
-    private static final int MOVE_POWER = 5;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 16;
+    bases.baseStr =  1;
+    bases.baseSkl =  2;
+    bases.baseSpd =  3;
+    bases.baseDef =  3;
+    bases.baseRes =  3;
+    bases.growthHP  =  55;
+    bases.growthStr =  55;
+    bases.growthSkl =  40;
+    bases.growthSpd =  35;
+    bases.growthLck =  20;
+    bases.growthDef =   5;
+    bases.growthRes =  30; // 35 in 6, 40 female
+    var static_stats = bases.build(3);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.Fire(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Fire(static_stats) };
-
-    public Mage()
-    {
-      super("Mage", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new Sage();
-      baseMoveType = footMage;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 16;
-      bases.baseStr =  1;
-      bases.baseSkl =  2;
-      bases.baseSpd =  3;
-      bases.baseDef =  3;
-      bases.baseRes =  3;
-      bases.growthHP  =  55;
-      bases.growthStr =  55;
-      bases.growthSkl =  40;
-      bases.growthSpd =  35;
-      bases.growthLck =  20;
-      bases.growthDef =   5;
-      bases.growthRes =  30; // 35 in 6, 40 female
-      return bases.build(3);
-    }
+    b.name("Mage");
+    b.promotesTo(Sage());
+    return b.build();
   }
-  public static class Sage extends FootUnit
+  public static GBAFEUnitModel Sage()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoFootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(30000);
+    b.abilityPowerValue(30);
+    b.baseMoveType(footMage);
 
-    private static final int UNIT_COST = 30000;
-    private static final double STAR_VALUE = 3.0;
-    private static final int MOVE_POWER = 6;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 20;
+    bases.baseStr =  5;
+    bases.baseSkl =  4;
+    bases.baseSpd =  4;
+    bases.baseDef =  5;
+    bases.baseRes =  5;
+    bases.growthHP  =  45;
+    bases.growthStr =  45;
+    bases.growthSkl =  30;
+    bases.growthSpd =  25;
+    bases.growthLck =  15;
+    bases.growthDef =  10;
+    bases.growthRes =  40; // 25 in 6
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.Fire(static_stats), new GBAFEWeapons.Bolting(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Fire(static_stats), new GBAFEWeapons.Bolting(static_stats) };
-
-    public Sage()
-    {
-      super("Sage", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = footMage;
-      baseActions.add(1, new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 20;
-      bases.baseStr =  5;
-      bases.baseSkl =  4;
-      bases.baseSpd =  4;
-      bases.baseDef =  5;
-      bases.baseRes =  5;
-      bases.growthHP  =  45;
-      bases.growthStr =  45;
-      bases.growthSkl =  30;
-      bases.growthSpd =  25;
-      bases.growthLck =  15;
-      bases.growthDef =  10;
-      bases.growthRes =  40; // 25 in 6
-      return bases.build(true, 0);
-    }
-
-    @Override
-    public void addVariants(GameReadyModels feModels, int yourIndex)
-    {
-      if( !hidden )
-      {
-        super.addVariants(feModels, yourIndex);
-        UnitModel rangedOnly = new Sage();
-        rangedOnly.weapons.remove(0);
-        rangedOnly.hidden = true; // for visual distinctiveness
-        feModels.unitModels.add(yourIndex + 1, rangedOnly);
-      }
-    }
+    b.name("Sage");
+    GBAFEUnitModel model = b.build();
+    model.baseActions.add(0, new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
+    return model;
   }
 
-  public static class Shaman extends FootUnit
+  public static GBAFEUnitModel Shaman()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(5000);
+    b.abilityPowerValue(8);
+    b.baseMoveType(footMage);
 
-    private static final int UNIT_COST = 5000;
-    private static final double STAR_VALUE = 0.8;
-    private static final int MOVE_POWER = 5;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 16;
+    bases.baseStr =  2;
+    bases.baseSkl =  1;
+    bases.baseSpd =  2;
+    bases.baseDef =  2;
+    bases.baseRes =  4;
+    bases.growthHP  =  50;
+    bases.growthStr =  50; // 45 female
+    bases.growthSkl =  32;
+    bases.growthSpd =  30;
+    bases.growthLck =  20;
+    bases.growthDef =  10;
+    bases.growthRes =  30; // 37 in 6, 40 female
+    var static_stats = bases.build(7);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.Flux(static_stats), new GBAFEWeapons.Luna(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Flux(static_stats), new GBAFEWeapons.Luna(static_stats) };
-
-    public Shaman()
-    {
-      super("Shaman", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new Druid();
-      baseMoveType = footMage;
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 16;
-      bases.baseStr =  2;
-      bases.baseSkl =  1;
-      bases.baseSpd =  2;
-      bases.baseDef =  2;
-      bases.baseRes =  4;
-      bases.growthHP  =  50;
-      bases.growthStr =  50; // 45 female
-      bases.growthSkl =  32;
-      bases.growthSpd =  30;
-      bases.growthLck =  20;
-      bases.growthDef =  10;
-      bases.growthRes =  30; // 37 in 6, 40 female
-      return bases.build(7);
-    }
+    b.name("Shaman");
+    b.promotesTo(Druid());
+    return b.build();
   }
-  public static class Druid extends FootUnit
+  public static GBAFEUnitModel Druid()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoFootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(16000);
+    b.abilityPowerValue(16);
+    b.baseMoveType(footMage);
 
-    private static final int UNIT_COST = 16000;
-    private static final double STAR_VALUE = 1.6;
-    private static final int MOVE_POWER = 6;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 19;
+    bases.baseStr =  6;
+    bases.baseSkl =  3;
+    bases.baseSpd =  4;
+    bases.baseDef =  4;
+    bases.baseRes =  6;
+    bases.growthHP  =  45;
+    bases.growthStr =  55;
+    bases.growthSkl =  30;
+    bases.growthSpd =  25;
+    bases.growthLck =  20;
+    bases.growthDef =  10;
+    bases.growthRes =  35; // 37 in 6
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.Flux(static_stats), new GBAFEWeapons.Luna(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Flux(static_stats), new GBAFEWeapons.Luna(static_stats) };
-
-    public Druid()
-    {
-      super("Druid", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = footMage;
-      baseActions.add(1, new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 19;
-      bases.baseStr =  6;
-      bases.baseSkl =  3;
-      bases.baseSpd =  4;
-      bases.baseDef =  4;
-      bases.baseRes =  6;
-      bases.growthHP  =  45;
-      bases.growthStr =  55;
-      bases.growthSkl =  30;
-      bases.growthSpd =  25;
-      bases.growthLck =  20;
-      bases.growthDef =  10;
-      bases.growthRes =  35; // 37 in 6
-      return bases.build(true, 0);
-    }
+    b.name("Druid");
+    GBAFEUnitModel model = b.build();
+    model.baseActions.add(0, new GBAFEActions.HealStaffFactory("HEAL (7)", 7, 1));
+    return model;
   }
 
-  public static class Monk extends FootUnit
+  public static GBAFEUnitModel Monk()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.costBase(6000);
+    b.abilityPowerValue(8);
+    b.baseMoveType(footMage);
 
-    private static final int UNIT_COST = 6000;
-    private static final double STAR_VALUE = 0.8;
-    private static final int MOVE_POWER = 5;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 18;
+    bases.baseStr =  1;
+    bases.baseSkl =  1;
+    bases.baseSpd =  2;
+    bases.baseDef =  1;
+    bases.baseRes =  5;
+    bases.growthHP  =  50;
+    bases.growthStr =  30;
+    bases.growthSkl =  35;
+    bases.growthSpd =  32;
+    bases.growthLck =  45;
+    bases.growthDef =   8;
+    bases.growthRes =  40;
+    var static_stats = bases.build(9);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.Lightning(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Lightning(static_stats) };
-
-    public Monk()
-    {
-      super("Monk", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new Bishop();
-      baseMoveType = footMage;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 18;
-      bases.baseStr =  1;
-      bases.baseSkl =  1;
-      bases.baseSpd =  2;
-      bases.baseDef =  1;
-      bases.baseRes =  5;
-      bases.growthHP  =  50;
-      bases.growthStr =  30;
-      bases.growthSkl =  35;
-      bases.growthSpd =  32;
-      bases.growthLck =  45;
-      bases.growthDef =   8;
-      bases.growthRes =  40;
-      return bases.build(9);
-    }
+    b.name("Monk");
+    b.promotesTo(Bishop());
+    return b.build();
   }
-  public static class Bishop extends FootUnit
+  public static GBAFEUnitModel Bishop()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoFootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(13000);
+    b.abilityPowerValue(30);
+    b.baseMoveType(footMage);
 
-    private static final int UNIT_COST = 13000;
-    private static final double STAR_VALUE = 3.0;
-    private static final int MOVE_POWER = 6;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 21;
+    bases.baseStr =  4;
+    bases.baseSkl =  4;
+    bases.baseSpd =  4;
+    bases.baseDef =  3;
+    bases.baseRes =  8;
+    bases.growthHP  =  45;
+    bases.growthStr =  35;
+    bases.growthSkl =  25;
+    bases.growthSpd =  22;
+    bases.growthLck =  40;
+    bases.growthDef =   8;
+    bases.growthRes =  40;
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.Lightning(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Lightning(static_stats) };
-
-    public Bishop()
-    {
-      super("Bishop", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = footMage;
-      baseActions.add(1, new GBAFEActions.HealStaffFactory("PHYSIC (7)", 7, 5));
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 21;
-      bases.baseStr =  4;
-      bases.baseSkl =  4;
-      bases.baseSpd =  4;
-      bases.baseDef =  3;
-      bases.baseRes =  8;
-      bases.growthHP  =  45;
-      bases.growthStr =  35;
-      bases.growthSkl =  25;
-      bases.growthSpd =  22;
-      bases.growthLck =  40;
-      bases.growthDef =   8;
-      bases.growthRes =  40;
-      return bases.build(true, 0);
-    }
+    b.name("Bishop");
+    GBAFEUnitModel model = b.build();
+    model.baseActions.add(1, new GBAFEActions.HealStaffFactory("PHYSIC (7)", 7, 5));
+    return model;
   }
 
-  public static class Cavalier extends HorseUnit
+  public static GBAFEUnitModel Cavalier()
   {
-    private static final long serialVersionUID = 1L;
+    var b = HorseUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(10000);
+    b.abilityPowerValue(12);
 
-    private static final int UNIT_COST = 10000;
-    private static final double STAR_VALUE = 1.2;
-    private static final int MOVE_POWER = 7;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 20;
+    bases.baseStr =  5;
+    bases.baseSkl =  2;
+    bases.baseSpd =  5;
+    bases.baseDef =  6;
+    bases.baseRes =  0;
+    bases.growthHP  =  75;
+    bases.growthStr =  35;
+    bases.growthSkl =  40;
+    bases.growthSpd =  28;
+    bases.growthLck =  30;
+    bases.growthDef =  15;
+    bases.growthRes =  12; // 15 in 7/8
+    var static_stats = bases.build(9);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronCav(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronCav(static_stats) };
-
-    public Cavalier()
-    {
-      super("Cavalier", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new Paladin();
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 20;
-      bases.baseStr =  5;
-      bases.baseSkl =  2;
-      bases.baseSpd =  5;
-      bases.baseDef =  6;
-      bases.baseRes =  0;
-      bases.growthHP  =  75;
-      bases.growthStr =  35;
-      bases.growthSkl =  40;
-      bases.growthSpd =  28;
-      bases.growthLck =  30;
-      bases.growthDef =  15;
-      bases.growthRes =  12; // 15 in 7/8
-      return bases.build(9);
-    }
+    b.name("Cavalier");
+    b.promotesTo(Paladin());
+    return b.build();
   }
-  public static class Paladin extends HorseUnit
+  public static GBAFEUnitModel Paladin()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoHorseUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(16000);
+    b.abilityPowerValue(10);
 
-    private static final int UNIT_COST = 16000;
-    private static final double STAR_VALUE = 1.0;
-    private static final int MOVE_POWER = 8;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 23;
+    bases.baseStr =  7; // Female paladins are bizarrely good? -1 Str/Def for 2 Skl, 4 Spd, 3 Res
+    bases.baseSkl =  4;
+    bases.baseSpd =  7;
+    bases.baseDef =  8;
+    bases.baseRes =  3;
+    bases.growthHP  =  70;
+    bases.growthStr =  25;
+    bases.growthSkl =  30; // 35 for female
+    bases.growthSpd =  18; // 25 for female
+    bases.growthLck =  25;
+    bases.growthDef =  12;
+    bases.growthRes =  20; // 17 in 6, 25 for female
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronCav(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronCav(static_stats) };
-
-    public Paladin()
-    {
-      super("Paladin", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = hoofPromo;
-      role |= ASSAULT;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 23;
-      bases.baseStr =  7; // Female paladins are bizarrely good? -1 Str/Def for 2 Skl, 4 Spd, 3 Res
-      bases.baseSkl =  4;
-      bases.baseSpd =  7;
-      bases.baseDef =  8;
-      bases.baseRes =  3;
-      bases.growthHP  =  70;
-      bases.growthStr =  25;
-      bases.growthSkl =  30; // 35 for female
-      bases.growthSpd =  18; // 25 for female
-      bases.growthLck =  25;
-      bases.growthDef =  12;
-      bases.growthRes =  20; // 17 in 6, 25 for female
-      return bases.build(true, 0);
-    }
+    b.name("Paladin");
+    GBAFEUnitModel model = b.build();
+    return model;
   }
 
-  public static class Bard extends FootUnit
+  public static GBAFEUnitModel Bard()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(13000);
+    b.abilityPowerValue(20);
+    b.classRelativePower(2);
 
-    private static final int UNIT_COST = 13000;
-    private static final double STAR_VALUE = 2.0;
-    private static final int MOVE_POWER = 5;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 14;
+    bases.baseStr =  1;
+    bases.baseSkl =  2;
+    bases.baseSpd =  7;
+    bases.baseDef =  1;
+    bases.baseRes =  0;
+    bases.growthHP  =  45;
+    bases.growthStr =  45;
+    bases.growthSkl =  30;
+    bases.growthSpd =  60;
+    bases.growthLck =  70;
+    bases.growthDef =   0;
+    bases.growthRes =  13; // 3 in 6
+    var static_stats = bases.build(9);
+    b.stats(static_stats);
 
-    private static final GBAFEStats static_stats = buildStats();
-
-    public Bard()
-    {
-      super("Bard", static_stats, UNIT_COST, MOVE_POWER, new WeaponModel[0], STAR_VALUE);
-      baseActions.add(0, new GBAFEActions.ReactivateUnitFactory("PLAY"));
-      classRelativePower = 2;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 14;
-      bases.baseStr =  1;
-      bases.baseSkl =  2;
-      bases.baseSpd =  7;
-      bases.baseDef =  1;
-      bases.baseRes =  0;
-      bases.growthHP  =  45;
-      bases.growthStr =  45;
-      bases.growthSkl =  30;
-      bases.growthSpd =  60;
-      bases.growthLck =  70;
-      bases.growthDef =   0;
-      bases.growthRes =  13; // 3 in 6
-      return bases.build(9);
-    }
+    b.name("Bard");
+    GBAFEUnitModel model = b.build();
+    model.baseActions.add(0, new GBAFEActions.ReactivateUnitFactory("PLAY"));
+    return model;
   }
 
-  public static class PegKnight extends FlierUnit
+  public static GBAFEUnitModel PegKnight()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FlierUnit();
+    b.costBase(4000);
+    b.abilityPowerValue(10);
 
-    private static final int UNIT_COST = 4000;
-    private static final double STAR_VALUE = 1.0;
-    private static final int MOVE_POWER = 7;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 14;
+    bases.baseStr =  4;
+    bases.baseSkl =  5;
+    bases.baseSpd =  5;
+    bases.baseDef =  3;
+    bases.baseRes =  2;
+    bases.growthHP  =  65;
+    bases.growthStr =  35;
+    bases.growthSkl =  40;
+    bases.growthSpd =  40;
+    bases.growthLck =  35; // 12 in FE6
+    bases.growthDef =  12; // 25 in FE6
+    bases.growthRes =  35;
+    var static_stats = bases.build(3);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronLance(static_stats), new GBAFEWeapons.Javelin(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronLance(static_stats), new GBAFEWeapons.Javelin(static_stats) };
-
-    public PegKnight()
-    {
-      super("Pegasus Knight", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new FalcoKnight();
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 14;
-      bases.baseStr =  4;
-      bases.baseSkl =  5;
-      bases.baseSpd =  5;
-      bases.baseDef =  3;
-      bases.baseRes =  2;
-      bases.growthHP  =  65;
-      bases.growthStr =  35;
-      bases.growthSkl =  40;
-      bases.growthSpd =  40;
-      bases.growthLck =  35; // 12 in FE6
-      bases.growthDef =  12; // 25 in FE6
-      bases.growthRes =  35;
-      return bases.build(3);
-    }
-
-    @Override
-    public void addVariants(GameReadyModels feModels, int yourIndex)
-    {
-      if( !hidden )
-      {
-        super.addVariants(feModels, yourIndex);
-        UnitModel rangedOnly = new PegKnight();
-        rangedOnly.weapons.remove(0);
-        rangedOnly.hidden = true; // for visual distinctiveness
-        feModels.unitModels.add(yourIndex + 1, rangedOnly);
-      }
-    }
+    b.name("Pegasus Knight");
+    b.promotesTo(FalcoKnight());
+    return b.build();
   }
-  public static class FalcoKnight extends FlierUnit
+  public static GBAFEUnitModel FalcoKnight()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoFlierUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT | UnitModel.AIR_TO_AIR | UnitModel.AIR_TO_SURFACE);
+    b.costBase(12000);
+    b.abilityPowerValue(12);
 
-    private static final int UNIT_COST = 12000;
-    private static final double STAR_VALUE = 1.2;
-    private static final int MOVE_POWER = 8;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 20;
+    bases.baseStr =  6;
+    bases.baseSkl =  7;
+    bases.baseSpd =  7;
+    bases.baseDef =  5;
+    bases.baseRes =  4;
+    bases.growthHP  =  60;
+    bases.growthStr =  30;
+    bases.growthSkl =  30;
+    bases.growthSpd =  30;
+    bases.growthLck =  30;
+    bases.growthDef =  12;
+    bases.growthRes =  30; // 20 in FE6
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronCav(static_stats), new GBAFEWeapons.Javelin(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronCav(static_stats), new GBAFEWeapons.Javelin(static_stats) };
-
-    public FalcoKnight()
-    {
-      super("Falco Knight", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      role |= ASSAULT | AIR_TO_AIR | AIR_TO_SURFACE;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 20;
-      bases.baseStr =  6;
-      bases.baseSkl =  7;
-      bases.baseSpd =  7;
-      bases.baseDef =  5;
-      bases.baseRes =  4;
-      bases.growthHP  =  60;
-      bases.growthStr =  30;
-      bases.growthSkl =  30;
-      bases.growthSpd =  30;
-      bases.growthLck =  30;
-      bases.growthDef =  12;
-      bases.growthRes =  30; // 20 in FE6
-      return bases.build(true, 0);
-    }
-
-    @Override
-    public void addVariants(GameReadyModels feModels, int yourIndex)
-    {
-      if( !hidden )
-      {
-        super.addVariants(feModels, yourIndex);
-        UnitModel rangedOnly = new FalcoKnight();
-        rangedOnly.weapons.remove(0);
-        rangedOnly.hidden = true; // for visual distinctiveness
-        feModels.unitModels.add(yourIndex + 1, rangedOnly);
-      }
-    }
+    b.name("Falco Knight");
+    GBAFEUnitModel model = b.build();
+    return model;
   }
 
-  public static class WyvernRider extends FlierUnit
+  public static GBAFEUnitModel WyvernRider()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FlierUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT | UnitModel.AIR_TO_AIR | UnitModel.AIR_TO_SURFACE);
+    b.costBase(7000);
+    b.abilityPowerValue(10);
 
-    private static final int UNIT_COST = 7000;
-    private static final double STAR_VALUE = 1.0;
-    private static final int MOVE_POWER = 7;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 20;
+    bases.baseStr =  7;
+    bases.baseSkl =  3;
+    bases.baseSpd =  5;
+    bases.baseDef =  8;
+    bases.baseRes =  0;
+    bases.growthHP  =  80; // 75 in 7
+    bases.growthStr =  45; // 40 in 7
+    bases.growthSkl =  35; // 30 in 7
+    bases.growthSpd =  30; // 20 in 7
+    bases.growthLck =  25; // 20 in 7
+    bases.growthDef =  25; // 20 in 7
+    bases.growthRes =  15; // 10/17/15/17 in 6/7/8/female 8
+    var static_stats = bases.build(6);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronLance(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronLance(static_stats) };
-
-    public WyvernRider()
-    {
-      super("Wyvern Rider", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      promotesTo = new WyvernLord();
-      role |= ASSAULT | AIR_TO_AIR | AIR_TO_SURFACE;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 20;
-      bases.baseStr =  7;
-      bases.baseSkl =  3;
-      bases.baseSpd =  5;
-      bases.baseDef =  8;
-      bases.baseRes =  0;
-      bases.growthHP  =  80; // 75 in 7
-      bases.growthStr =  45; // 40 in 7
-      bases.growthSkl =  35; // 30 in 7
-      bases.growthSpd =  30; // 20 in 7
-      bases.growthLck =  25; // 20 in 7
-      bases.growthDef =  25; // 20 in 7
-      bases.growthRes =  15; // 10/17/15/17 in 6/7/8/female 8
-      return bases.build(6);
-    }
+    b.name("Wyvern Rider");
+    b.promotesTo(WyvernLord());
+    return b.build();
   }
-  public static class WyvernLord extends FlierUnit
+  public static GBAFEUnitModel WyvernLord()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoFlierUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT | UnitModel.AIR_TO_AIR | UnitModel.AIR_TO_SURFACE);
+    b.costBase(12000);
+    b.abilityPowerValue(12);
 
-    private static final int UNIT_COST = 12000;
-    private static final double STAR_VALUE = 1.2;
-    private static final int MOVE_POWER = 8;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 25;
+    bases.baseStr =  9;
+    bases.baseSkl =  5;
+    bases.baseSpd =  7;
+    bases.baseDef = 10;
+    bases.baseRes =  1;
+    bases.growthHP  =  75;
+    bases.growthStr =  40;
+    bases.growthSkl =  30;
+    bases.growthSpd =  20;
+    bases.growthLck =  20;
+    bases.growthDef =  20;
+    bases.growthRes =  17; // 7 in FE6
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronCav(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronCav(static_stats) };
-
-    public WyvernLord()
-    {
-      super("Wyvern Lord", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      role |= ASSAULT | AIR_TO_AIR | AIR_TO_SURFACE;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 25;
-      bases.baseStr =  9;
-      bases.baseSkl =  5;
-      bases.baseSpd =  7;
-      bases.baseDef = 10;
-      bases.baseRes =  1;
-      bases.growthHP  =  75;
-      bases.growthStr =  40;
-      bases.growthSkl =  30;
-      bases.growthSpd =  20;
-      bases.growthLck =  20;
-      bases.growthDef =  20;
-      bases.growthRes =  17; // 7 in FE6
-      return bases.build(true, 0);
-    }
+    b.name("Wyvern Lord");
+    GBAFEUnitModel model = b.build();
+    return model;
   }
 
-  public static class WyvernKnight extends FlierUnit
+  public static GBAFEUnitModel WyvernKnight()
   {
-    private static final long serialVersionUID = 1L;
+    var b = PromoFlierUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT | UnitModel.AIR_TO_AIR | UnitModel.AIR_TO_SURFACE);
+    b.costBase(18000);
+    b.abilityPowerValue(16);
 
-    private static final int UNIT_COST = 18000;
-    private static final double STAR_VALUE = 1.6;
-    private static final int MOVE_POWER = 8;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.pierce = true;
+    bases.baseHP  = 20;
+    bases.baseStr =  7;
+    bases.baseSkl =  7;
+    bases.baseSpd =  8;
+    bases.baseDef =  7;
+    bases.baseRes =  1;
+    bases.growthHP  =  65;
+    bases.growthStr =  35;
+    bases.growthSkl =  30;
+    bases.growthSpd =  30;
+    bases.growthLck =  25;
+    bases.growthDef =  15;
+    bases.growthRes =  17;
+    var static_stats = bases.build(true, 0);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronLance(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronCav(static_stats) };
-
-    public WyvernKnight()
-    {
-      super("Wyvern Knight", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      role |= ASSAULT | AIR_TO_AIR | AIR_TO_SURFACE;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.pierce = true;
-      bases.baseHP  = 20;
-      bases.baseStr =  7;
-      bases.baseSkl =  7;
-      bases.baseSpd =  8;
-      bases.baseDef =  7;
-      bases.baseRes =  1;
-      bases.growthHP  =  65;
-      bases.growthStr =  35;
-      bases.growthSkl =  30;
-      bases.growthSpd =  30;
-      bases.growthLck =  25;
-      bases.growthDef =  15;
-      bases.growthRes =  17;
-      return bases.build(true, 0);
-    }
+    b.name("Wyvern Knight");
+    GBAFEUnitModel model = b.build();
+    return model;
   }
 
-  public static class Summoner extends FootUnit
+  @SuperBuilder(toBuilder = true)
+  public static class Summoner extends GBAFEUnitModel
   {
     private static final long serialVersionUID = 1L;
 
-    private static final int UNIT_COST = 22000;
-    private static final double STAR_VALUE = 2.6;
-    private static final int MOVE_POWER = 6;
-
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Flux(static_stats) };
-
-    public Summoner()
+    public static GBAFEUnitModel buildModel()
     {
-      super("Summoner", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = footMage;
-      baseActions.add(1, new GBAFEActions.HealStaffFactory("HEAL (5)", 5, 1));
+      var b = Summoner.builder();
+      b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+      b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.FOOTSOLDIER_ACTIONS)));
+
+      b.maxFuel(MAX_FUEL);
+      b.fuelBurnIdle(IDLE_FUEL_BURN);
+      b.maxAmmo(MAX_AMMO);
+      b.visionRange(VISION_NORMAL);
+      b.baseMovePower(6);
+
+      b.costBase(22000);
+      b.abilityPowerValue(26);
+      b.baseMoveType(footMage);
+
+      var static_stats = Summoner.buildStats();
+      b.stats(static_stats);
+      WeaponModel[] weapons = { new GBAFEWeapons.Flux(static_stats) };
+      b.weapons(new ArrayList<>(Arrays.asList(weapons)));
+
+      b.name("Summoner");
+      GBAFEUnitModel model = b.build();
+      model.baseActions.add(1, new GBAFEActions.HealStaffFactory("HEAL (5)", 5, 1));
+      return model;
     }
+
     private static GBAFEStats buildStats()
     {
       ClassStatsBuilder bases = new ClassStatsBuilder();
@@ -1907,312 +1672,212 @@ public class GBAFEUnits extends UnitModelScheme
     public void addVariants(GameReadyModels feModels, int yourIndex)
     {
       super.addVariants(feModels, yourIndex);
-      UnitModel summon = new Phantom();
+      UnitModel summon = Phantom();
       baseActions.add(1, new GBAFEActions.SummonPhantomFactory(summon));
       feModels.unitModels.add(yourIndex + 1, summon);
     }
   }
-  public static class Phantom extends FootUnit
+  public static GBAFEUnitModel Phantom()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(0);
+    b.abilityPowerValue(0);
+    b.baseMoveType(wing);
+    // Phantoms shouldn't capture. That's... not kosher.
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
 
-    private static final int UNIT_COST = 0;
-    private static final double STAR_VALUE = 0;
-    private static final int MOVE_POWER = 5;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    // Lyon's phantom stats
+    bases.baseHP  =  1;
+    bases.baseStr =  8;
+    bases.baseSkl =  4;
+    bases.baseSpd =  7;
+    bases.baseLck = 20; // !?
+    bases.baseDef =  0;
+    bases.baseRes =  0;
+    bases.growthStr =  60;
+    bases.growthSkl =  45;
+    bases.growthSpd =  30;
+    bases.growthLck =  60;
+    bases.growthDef =  0; // Funnily enough, the Phantom *class* has a 15% Def/Res growth.
+    bases.growthRes =  0;
+    var static_stats = bases.build(4);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronAxe(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronAxe(static_stats) };
-
-    public Phantom()
-    {
-      super("Phantom", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      baseMoveType = wing;
-      healableHabs.clear();
-      baseActions.clear(); // Phantoms shouldn't capture. That's... not kosher.
-      for( UnitActionFactory action : UnitActionFactory.COMBAT_VEHICLE_ACTIONS )
-        baseActions.add(action);
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      // Lyon's phantom stats
-      bases.baseHP  =  1;
-      bases.baseStr =  8;
-      bases.baseSkl =  4;
-      bases.baseSpd =  7;
-      bases.baseLck = 20; // !?
-      bases.baseDef =  0;
-      bases.baseRes =  0;
-      bases.growthStr =  60;
-      bases.growthSkl =  45;
-      bases.growthSpd =  30;
-      bases.growthLck =  60;
-      bases.growthDef =  0; // Funnily enough, the Phantom *class* has a 15% Def/Res growth.
-      bases.growthRes =  0;
-      return bases.build(4);
-    }
+    b.name("Phantom");
+    GBAFEUnitModel model = b.build();
+    model.healableHabs.clear();
+    return model;
   }
 
-  public static class Pirate extends FootUnit
+  public static GBAFEUnitModel Pirate()
   {
-    private static final long serialVersionUID = 1L;
+    var b = FootUnit();
+    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.costBase(5000);
+    b.abilityPowerValue(10);
+    b.baseMoveType(footPirate);
 
-    private static final int UNIT_COST = 5000;
-    private static final double STAR_VALUE = 1.0;
-    private static final int MOVE_POWER = 5;
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 19;
+    bases.baseStr =  4;
+    bases.baseSkl =  2;
+    bases.baseSpd =  6;
+    bases.baseDef =  3;
+    bases.baseRes =  0;
+    bases.growthHP  =  75;
+    bases.growthStr =  50;
+    bases.growthSkl =  35;
+    bases.growthSpd =  25;
+    bases.growthLck =  10; // 15 in 7/8
+    bases.growthDef =  10;
+    bases.growthRes =  15; // 13 in 7/8
+    var static_stats = bases.build(5);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.IronAxe(static_stats), new GBAFEWeapons.HandAxe(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
 
-    private static final GBAFEStats static_stats = buildStats();
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.IronAxe(static_stats), new GBAFEWeapons.HandAxe(static_stats) };
-
-    public Pirate()
-    {
-      super("Pirate", static_stats, UNIT_COST, MOVE_POWER, weapons, STAR_VALUE);
-      // Promotion is set by the caller
-      baseMoveType = footPirate;
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 19;
-      bases.baseStr =  4;
-      bases.baseSkl =  2;
-      bases.baseSpd =  6;
-      bases.baseDef =  3;
-      bases.baseRes =  0;
-      bases.growthHP  =  75;
-      bases.growthStr =  50;
-      bases.growthSkl =  35;
-      bases.growthSpd =  25;
-      bases.growthLck =  10; // 15 in 7/8
-      bases.growthDef =  10;
-      bases.growthRes =  15; // 13 in 7/8
-      return bases.build(5);
-    }
-
-    @Override
-    public void addVariants(GameReadyModels feModels, int yourIndex)
-    {
-      if( !hidden )
-      {
-        super.addVariants(feModels, yourIndex);
-        UnitModel rangedOnly = new Pirate();
-        rangedOnly.weapons.remove(0);
-        rangedOnly.hidden = true; // for visual distinctiveness
-        feModels.unitModels.add(yourIndex + 1, rangedOnly);
-      }
-    }
+    b.name("Pirate");
+    // Promotion is set by the caller
+    return b.build();
   }
 
-  public static class FleetPack extends GBAFEUnitModel
+  public static GBAFEUnitModel FleetPack()
   {
-    private static final long serialVersionUID = 1L;
-    private static final int MOVE_POWER = 20;
-    private static final UnitActionFactory[] actions = UnitActionFactory.TRANSPORT_ACTIONS;
+    var b = BoatUnit();
+    b.role(UnitModel.SHIP | UnitModel.SEA | UnitModel.SURFACE_TO_AIR);
+    b.costBase(8000);
+    b.abilityPowerValue(18);
+    b.baseMovePower(20);
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.TRANSPORT_ACTIONS)));
 
-    public FleetPack()
-    {
-      super("Fleet pack", Fleet.static_stats, Fleet.ROLE, Fleet.UNIT_COST, Fleet.MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, Fleet.VISION_RANGE, MOVE_POWER,
-          Fleet.moveType, actions, new WeaponModel[0], Fleet.STAR_VALUE);
-      baseCargoCapacity = 2;
-      carryableMask = TROOP | TANK | HOVER;
-      baseActions.add(0, UnitActionFactory.LAUNCH);
-    }
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 19;
+    bases.baseStr =  1;
+    bases.baseSkl =  1;
+    bases.baseSpd =  2;
+    bases.baseDef =  5;
+    bases.baseRes =  0;
+    bases.growthHP  =  75;
+    bases.growthStr =  35;
+    bases.growthSkl =  40;
+    bases.growthSpd =  32;
+    bases.growthLck =  15;
+    bases.growthDef =  15;
+    bases.growthRes =  15;
+    var static_stats = bases.build(9);
+    b.stats(static_stats);
+    b.maxAmmo(5);
+
+    b.name("Fleet Pack");
+    GBAFEUnitModel model = b.build();
+    model.baseActions.add(0, UnitActionFactory.LAUNCH);
+    return model;
   }
-  public static class Fleet extends GBAFEUnitModel
+  public static GBAFEUnitModel Fleet()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = SHIP | SEA | SURFACE_TO_AIR;
+    var b = FleetPack().toBuilder();
+    b.name("Fleet");
+    b.baseMovePower(3);
 
-    private static final int UNIT_COST = 8000;
-    private static final double STAR_VALUE = 1.8;
-    private static final int MAX_AMMO = 5;
-    private static final int VISION_RANGE = VISION_NORMAL;
-    private static final int MOVE_POWER = 3;
-
-    private static final GBAFEStats static_stats = buildStats();
-    private static final MoveType moveType = boat;
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Ballista(static_stats) };
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
-
-    public Fleet()
-    {
-      super("Fleet", static_stats, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-      baseCargoCapacity = 2;
-      carryableMask = TROOP | TANK | HOVER;
-      baseActions.add(0, UnitActionFactory.LAUNCH);
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 19;
-      bases.baseStr =  1;
-      bases.baseSkl =  1;
-      bases.baseSpd =  2;
-      bases.baseDef =  5;
-      bases.baseRes =  0;
-      bases.growthHP  =  75;
-      bases.growthStr =  35;
-      bases.growthSkl =  40;
-      bases.growthSpd =  32;
-      bases.growthLck =  15;
-      bases.growthDef =  15;
-      bases.growthRes =  15;
-      return bases.build(9);
-    }
-
-    @Override
-    public void addVariants(GameReadyModels feModels, int yourIndex)
-    {
-      super.addVariants(feModels, yourIndex);
-      UnitModel fleetPack = new FleetPack();
-      baseActions.add(new TransformLifecycle.TransformFactory(fleetPack, "PACK"));
-      fleetPack.baseActions.add(new TransformLifecycle.TransformFactory(this, "UNPACK"));
-      feModels.unitModels.add(yourIndex + 1, fleetPack);
-      feModels.shoppingList.get(TerrainType.SEAPORT).add(fleetPack);
-    }
+    GBAFEUnitModel model = b.build();
+    var static_stats = model.stats;
+    model.weapons.add(new GBAFEWeapons.Ballista(static_stats));
+    model.baseActions.add(1, UnitActionFactory.ATTACK);
+    return model;
   }
 
-  public static class SiegeBoatPack extends GBAFEUnitModel
+  public static GBAFEUnitModel SiegeBoatPack()
   {
-    private static final long serialVersionUID = 1L;
-    private static final int MOVE_POWER = 20;
-    private static final UnitActionFactory[] actions = UnitActionFactory.TRANSPORT_ACTIONS;
+    var b = BoatUnit();
+    b.role(UnitModel.SHIP | UnitModel.SEA);
+    b.costBase(13000);
+    b.abilityPowerValue(18);
+    b.baseMovePower(20);
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.TRANSPORT_ACTIONS)));
 
-    public SiegeBoatPack()
-    {
-      super("Siege Boat pack", SiegeBoat.static_stats, SiegeBoat.ROLE, SiegeBoat.UNIT_COST, SiegeBoat.MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, SiegeBoat.VISION_RANGE, MOVE_POWER,
-          SiegeBoat.moveType, actions, new WeaponModel[0], SiegeBoat.STAR_VALUE);
-      baseCargoCapacity = 2;
-      carryableMask = TROOP | TANK | HOVER;
-      baseActions.add(0, UnitActionFactory.LAUNCH);
-    }
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 19;
+    bases.baseStr =  1;
+    bases.baseSkl =  1;
+    bases.baseSpd =  2;
+    bases.baseDef =  8; // Armor boat gooo
+    bases.baseRes =  0;
+    bases.growthHP  =  75;
+    bases.growthStr =  35;
+    bases.growthSkl =  40;
+    bases.growthSpd =  32;
+    bases.growthLck =  15;
+    bases.growthDef =  15;
+    bases.growthRes =  15;
+    var static_stats = bases.build(14);
+    b.stats(static_stats);
+    b.maxAmmo(5);
+
+    b.name("Siege Boat pack");
+    GBAFEUnitModel model = b.build();
+    model.baseActions.add(0, UnitActionFactory.LAUNCH);
+    return model;
   }
-  public static class SiegeBoat extends GBAFEUnitModel
+  public static GBAFEUnitModel SiegeBoat()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = SHIP | SEA;
+    var b = SiegeBoatPack().toBuilder();
+    b.name("Siege Boat");
+    b.baseMovePower(3);
 
-    private static final int UNIT_COST = 13000;
-    private static final double STAR_VALUE = 1.8;
-    private static final int MAX_AMMO = 5;
-    private static final int VISION_RANGE = VISION_NORMAL;
-    private static final int MOVE_POWER = 3;
-
-    private static final GBAFEStats static_stats = buildStats();
-    private static final MoveType moveType = boat;
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Trebuchet(static_stats) };
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
-
-    public SiegeBoat()
-    {
-      super("Siege Boat", static_stats, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-      baseCargoCapacity = 2;
-      carryableMask = TROOP | TANK | HOVER;
-      baseActions.add(0, UnitActionFactory.LAUNCH);
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 19;
-      bases.baseStr =  1;
-      bases.baseSkl =  1;
-      bases.baseSpd =  2;
-      bases.baseDef =  8; // Armor boat gooo
-      bases.baseRes =  0;
-      bases.growthHP  =  75;
-      bases.growthStr =  35;
-      bases.growthSkl =  40;
-      bases.growthSpd =  32;
-      bases.growthLck =  15;
-      bases.growthDef =  15;
-      bases.growthRes =  15;
-      return bases.build(14);
-    }
-
-    @Override
-    public void addVariants(GameReadyModels feModels, int yourIndex)
-    {
-      super.addVariants(feModels, yourIndex);
-      UnitModel siegeBoatPack = new SiegeBoatPack();
-      baseActions.add(new TransformLifecycle.TransformFactory(siegeBoatPack, "PACK"));
-      siegeBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(this, "UNPACK"));
-      feModels.unitModels.add(yourIndex + 1, siegeBoatPack);
-      feModels.shoppingList.get(TerrainType.SEAPORT).add(siegeBoatPack);
-    }
+    GBAFEUnitModel model = b.build();
+    var static_stats = model.stats;
+    model.weapons.add(new GBAFEWeapons.Trebuchet(static_stats));
+    model.baseActions.add(1, UnitActionFactory.ATTACK);
+    return model;
   }
 
-  public static class CloisterBoatPack extends GBAFEUnitModel
+  public static GBAFEUnitModel CloisterBoatPack()
   {
-    private static final long serialVersionUID = 1L;
-    private static final int MOVE_POWER = 20;
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
+    var b = BoatUnit();
+    b.role(UnitModel.SHIP | UnitModel.SEA);
+    b.costBase(20000);
+    b.abilityPowerValue(18);
+    b.baseMovePower(20);
+    b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_TRANSPORT_ACTIONS)));
 
-    public CloisterBoatPack()
-    {
-      super("Cloister Boat pack", CloisterBoat.static_stats, CloisterBoat.ROLE, CloisterBoat.UNIT_COST, CloisterBoat.MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, CloisterBoat.VISION_RANGE, MOVE_POWER,
-          CloisterBoat.moveType, actions, CloisterBoat.weapons, CloisterBoat.STAR_VALUE);
-      baseCargoCapacity = 2;
-      carryableMask = TROOP | TANK | HOVER;
-      baseActions.add(0, UnitActionFactory.LAUNCH);
-    }
+    ClassStatsBuilder bases = new ClassStatsBuilder();
+    bases.baseHP  = 19;
+    bases.baseStr =  1;
+    bases.baseSkl =  1;
+    bases.baseSpd =  2;
+    bases.baseDef =  5;
+    bases.baseRes =  5; // Mages get Res
+    bases.growthHP  =  75;
+    bases.growthStr =  35;
+    bases.growthSkl =  40;
+    bases.growthSpd =  32;
+    bases.growthLck =  15;
+    bases.growthDef =  15;
+    bases.growthRes =  35; // to match Pegasus Knight
+    var static_stats = bases.build(14);
+    b.stats(static_stats);
+    WeaponModel[] weapons = { new GBAFEWeapons.Fire(static_stats) };
+    b.weapons(new ArrayList<>(Arrays.asList(weapons)));
+
+    b.name("Cloister Boat pack");
+    GBAFEUnitModel model = b.build();
+    model.baseActions.add(0, UnitActionFactory.LAUNCH);
+    return model;
   }
-  public static class CloisterBoat extends GBAFEUnitModel
+  public static GBAFEUnitModel CloisterBoat()
   {
-    private static final long serialVersionUID = 1L;
-    private static final long ROLE = SHIP | SEA | ASSAULT;
+    var b = SiegeBoatPack().toBuilder();
+    b.name("Cloister Boat");
+    b.baseMovePower(5);
 
-    private static final int UNIT_COST = 20000;
-    private static final double STAR_VALUE = 1.8;
-    private static final int MAX_AMMO = -1;
-    private static final int VISION_RANGE = VISION_NORMAL;
-    private static final int MOVE_POWER = 5;
-
-    private static final GBAFEStats static_stats = buildStats();
-    private static final MoveType moveType = boat;
-    private static final WeaponModel[] weapons = { new GBAFEWeapons.Fire(static_stats) };
-    private static final UnitActionFactory[] actions = UnitActionFactory.COMBAT_TRANSPORT_ACTIONS;
-
-    public CloisterBoat()
-    {
-      super("Cloister Boat", static_stats, ROLE, UNIT_COST, MAX_AMMO, MAX_FUEL, IDLE_FUEL_BURN, VISION_RANGE, MOVE_POWER,
-          moveType, actions, weapons, STAR_VALUE);
-      baseCargoCapacity = 2;
-      carryableMask = TROOP | TANK | HOVER;
-      baseActions.add(0, UnitActionFactory.LAUNCH);
-      //                                   attack
-      baseActions.add(2, new GBAFEActions.HealStaffFactory("PHYSIC (7)", 7, 10));
-    }
-    private static GBAFEStats buildStats()
-    {
-      ClassStatsBuilder bases = new ClassStatsBuilder();
-      bases.baseHP  = 19;
-      bases.baseStr =  1;
-      bases.baseSkl =  1;
-      bases.baseSpd =  2;
-      bases.baseDef =  5;
-      bases.baseRes =  5; // Mages get Res
-      bases.growthHP  =  75;
-      bases.growthStr =  35;
-      bases.growthSkl =  40;
-      bases.growthSpd =  32;
-      bases.growthLck =  15;
-      bases.growthDef =  15;
-      bases.growthRes =  35; // to match Pegasus Knight
-      return bases.build(14);
-    }
-
-    @Override
-    public void addVariants(GameReadyModels feModels, int yourIndex)
-    {
-      super.addVariants(feModels, yourIndex);
-      UnitModel cloisterBoatPack = new CloisterBoatPack();
-      baseActions.add(new TransformLifecycle.TransformFactory(cloisterBoatPack, "PACK"));
-      cloisterBoatPack.baseActions.add(new TransformLifecycle.TransformFactory(this, "UNPACK"));
-      feModels.unitModels.add(yourIndex + 1, cloisterBoatPack);
-      feModels.shoppingList.get(TerrainType.SEAPORT).add(cloisterBoatPack);
-    }
+    GBAFEUnitModel model = b.build();
+    //                                        attack
+    model.baseActions.add(2, new GBAFEActions.HealStaffFactory("PHYSIC (7)", 7, 10));
+    return model;
   }
 
 }
