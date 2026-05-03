@@ -158,7 +158,15 @@ public class CommanderOverlayArtist
    */
   public static BufferedImage buildCoPowerBar(Commander co, int[] abilityPoints, int currentPower, boolean leftSide)
   {
-    if( 0 == abilityPoints.length )
+    // Find the most expensive ability so we know how long to draw the bar.
+    int maxAP = 0;
+    for( int i = 0; i < abilityPoints.length; ++i )
+    {
+      maxAP = (maxAP < abilityPoints[i]) ? abilityPoints[i] : maxAP;
+    }
+    final int imageBufferW = 2;
+
+    if( 0 == maxAP )
       return SpriteLibrary.createTransparentSprite(1, 1);
 
     final double pixelsPerStar = 3.0;
@@ -167,14 +175,6 @@ public class CommanderOverlayArtist
     final double pixelsPerPowerPlanck = pixelsPerStar / starCost;
     final int animIndex = getAnimIndex();
     int slowAnimIndex = (animIndex/32) % 2;
-
-    // Find the most expensive ability so we know how long to draw the bar.
-    int maxAP = 1;
-    for( int i = 0; i < abilityPoints.length; ++i )
-    {
-      maxAP = (maxAP < abilityPoints[i]) ? abilityPoints[i] : maxAP;
-    }
-    final int imageBufferW = 2;
 
     // Unfortunately, the power bar is a "some assembly required" kinda deal, so we have to put it together here.
     BufferedImage powerBar = SpriteLibrary.getCoOverlayPowerBar(co, maxAP, currentPower, pixelsPerPowerPlanck);
