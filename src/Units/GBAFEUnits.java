@@ -455,7 +455,9 @@ public class GBAFEUnits extends UnitModelScheme
     var b = FootUnit();
     b.costBase(500);
     b.abilityPowerValue(4);
-    b.baseMoveType(footAxe); // Peaks don't exist
+    MoveType myFoot = footAxe.clone(); // Peaks don't exist
+    myFoot.setMoveCost(TerrainType.RIVER, 5);
+    b.baseMoveType(myFoot);
 
     ClassStatsBuilder bases = new ClassStatsBuilder();
     bases.baseHP  = 20;
@@ -486,7 +488,10 @@ public class GBAFEUnits extends UnitModelScheme
     b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
     b.costBase(11000);
     b.abilityPowerValue(12);
-    b.baseMoveType(footPirate); // Peaks don't exist
+    MoveType myFoot = footPirate.clone();
+    myFoot.setMoveCost(TerrainType.DUNES, 3);
+    myFoot.setMoveCost(TerrainType.MOUNTAIN, 3);
+    b.baseMoveType(myFoot);
 
     ClassStatsBuilder bases = new ClassStatsBuilder();
     bases.critBoost = true;
