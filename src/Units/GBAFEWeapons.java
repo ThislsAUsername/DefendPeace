@@ -1,10 +1,15 @@
 package Units;
 
 import Engine.Combat.CombatContext;
+import Engine.Combat.StrikeParams;
+import Engine.Combat.StrikeParams.BattleParams;
+import Engine.StateTrackers.StateTracker;
 import Engine.UnitMods.UnitModifierWithDefaults;
 import Terrain.TerrainType;
+import Units.GBAFEActions.GBAFEStatsTracker;
 import Units.GBAFEUnits.GBAFEStats;
 import Units.GBAFEUnits.GBAFEUnitModel;
+import lombok.var;
 
 public class GBAFEWeapons
 {
@@ -72,15 +77,15 @@ public class GBAFEWeapons
     public int critAvoid = 0;
     public int avoid     = 0;
     public boolean pavise    = false;
-    public static GBAFECombatStats vsTerrain(GBAFEWeapon wep)
+    public static GBAFECombatStats vsTerrain(GBAFEWeapon wep, GBAFEStats wep_stats)
     {
       GBAFECombatStats result = new GBAFECombatStats();
-      result.attack = wep.stats.Str + wep.might;
+      result.attack = wep_stats.Str + wep.might;
       result.hit    = 100;
       result.hp = TERRAIN_DURABILITY;
       return result;
     }
-    public static GBAFECombatStats build(GBAFEWeapon wep, GBAFEUnitModel defender, GBAFEWeapon defWep)
+    public static GBAFECombatStats build(GBAFEWeapon wep, GBAFEStats wep_stats, GBAFEUnitModel defender, GBAFEWeapon defWep, GBAFEStats def_stats)
     {
       WTATier wta = wep.calcWTA(defWep);
       GBAFECombatStats result = new GBAFECombatStats();
@@ -90,29 +95,29 @@ public class GBAFEWeapons
           || (wep.slaysHorse && defender.isHorse)
           )
         result.attack *= SLAYER_BONUS;
-      result.attack += wep.stats.Str;
-      result.hit    = wep.stats.calcHitFromStats()  + wep.hit + wta.hit;
-      result.crit   = wep.stats.calcCritFromStats() + wep.crit;
-      if( wep.stats.critBoost )
+      result.attack += wep_stats.Str;
+      result.hit    = wep_stats.calcHitFromStats()  + wep.hit + wta.hit;
+      result.crit   = wep_stats.calcCritFromStats() + wep.crit;
+      if( wep_stats.critBoost )
         result.crit += CRIT_BOOST_BONUS;
-      result.sureShot  = wep.stats.sureShot ;
-      result.pierce    = wep.stats.pierce   ;
-      result.lethality = wep.stats.lethality;
+      result.sureShot  = wep_stats.sureShot ;
+      result.pierce    = wep_stats.pierce   ;
+      result.lethality = wep_stats.lethality;
       result.isMagic     = wep.isMagic();
-      if( wep.canCounter && (wep.stats.Spd - defender.stats.Spd) >= PURSUIT_THRESHOLD )
+      if( wep.canCounter && (wep_stats.Spd - def_stats.Spd) >= PURSUIT_THRESHOLD )
         result.hitCount = 2;
-      result.hp        = defender.stats.HP;
+      result.hp        = def_stats.HP;
       // Skip terrain bonuses since AW has its own math for that...
       if( !wep.luna )
       {
         if( wep.isMagic() )
-          result.defense = defender.stats.Res;
+          result.defense = def_stats.Res;
         else
-          result.defense = defender.stats.Def;
+          result.defense = def_stats.Def;
       }
-      result.critAvoid = defender.stats.calcCritAvoidFromStats();
-      result.avoid     = defender.stats.calcAvoid();
-      result.pavise    = defender.stats.pavise;
+      result.critAvoid = def_stats.calcCritAvoidFromStats();
+      result.avoid     = def_stats.calcAvoid();
+      result.pavise    = def_stats.pavise;
       return result;
     }
 
@@ -333,6 +338,10 @@ public class GBAFEWeapons
     @Override
     public int getDamage(GBAFEUnitModel defender)
     {
+      return getDamage(this.stats, defender, defender.stats);
+    }
+    public int getDamage(GBAFEStats wep_stats, GBAFEUnitModel defender, GBAFEStats def_stats)
+    {
       if( !hitsAir && defender.isAirUnit() )
         return 0;
       // To simplify, we will just use the first weapon in the list
@@ -342,16 +351,20 @@ public class GBAFEWeapons
       if(defender.weapons.size() > 0)
         defWep = (GBAFEWeapon) defender.weapons.get(0);
 
-      GBAFECombatStats combat = GBAFECombatStats.build(this, defender, defWep);
+      GBAFECombatStats combat = GBAFECombatStats.build(this, wep_stats, defender, defWep, def_stats);
       return combat.calcDamage();
     }
 
     @Override
     public int getDamage(TerrainType target)
     {
+      return getDamage(this.stats, target);
+    }
+    public int getDamage(GBAFEStats wep_stats, TerrainType target)
+    {
       if( TerrainType.METEOR == target )
       {
-        GBAFECombatStats combat = GBAFECombatStats.vsTerrain(this);
+        GBAFECombatStats combat = GBAFECombatStats.vsTerrain(this, wep_stats);
         return combat.calcDamage();
       }
       return 0;
@@ -751,6 +764,30 @@ public class GBAFEWeapons
         cc.canCounter &= endGun.rangeMax >= cc.battleRange;
         cc.canCounter &= endGun.rangeMin <= cc.battleRange;
       }
+    }
+
+    // Rewrite base damage in both of these functions so we can beat up both terrain and units with leveled stats
+    @Override
+    public void modifyUnitAttack(StrikeParams params)
+    {
+      var gun = (GBAFEWeapon) params.attacker.weapon;
+      GBAFEStatsTracker statTracker = StateTracker.instance(params.map.game, GBAFEStatsTracker.class);
+      var stats = statTracker.getStats(params.attacker.unit);
+
+      // Assume we're shooting terrain, since the base damage will get overwritten later otherwise
+      params.baseDamage = gun.getDamage(stats, params.map.getEnvironment(params.targetCoord).terrainType);
+    }
+
+    @Override
+    public void modifyUnitAttackOnUnit(BattleParams params)
+    {
+      var gun = (GBAFEWeapon) params.attacker.weapon;
+      GBAFEStatsTracker statTracker = StateTracker.instance(params.map.game, GBAFEStatsTracker.class);
+      var stats = statTracker.getStats(params.attacker.unit);
+      var defender = (GBAFEUnitModel) params.defender.model;
+      var def_stats = statTracker.getStats(params.defender.unit);
+
+      params.baseDamage = gun.getDamage(stats, defender, def_stats);
     }
   }
 

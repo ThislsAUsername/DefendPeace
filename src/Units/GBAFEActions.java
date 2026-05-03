@@ -31,7 +31,9 @@ import Terrain.MapLocation;
 import Terrain.MapMaster;
 import UI.MapView;
 import UI.Art.Animation.GameAnimation;
+import Units.GBAFEUnits.GBAFEStats;
 import Units.GBAFEUnits.GBAFEUnitModel;
+import lombok.var;
 
 public class GBAFEActions
 {
@@ -44,7 +46,8 @@ public class GBAFEActions
   public static class GBAFEExperienceTracker extends StateTracker
   {
     private static final long serialVersionUID = 1L;
-    private static final int PROMO_LEVEL_BONUS = 20; // 20 levels before promotion. A real shocker, I know.
+    private static final int PROMO_LEVEL_BONUS = 20;
+    private static final int LEVEL_CAP         = 20;
     // ref https://fireemblemwiki.org/wiki/Class_relative_power
     private static final int BASE_DAMAGE_XP    = 31;
     private static final int BASE_KILL_XP      = 20;
@@ -53,6 +56,13 @@ public class GBAFEActions
     private static final int EXP_MULTIPLIER    =  3; // To make it actually feasible to level units
 
     public HashMap<Unit, Integer> experience = new HashMap<>();
+    public GBAFEStatsTracker statsTracker = null;
+
+    public void promote(Unit profiteer, UnitModel promoType)
+    {
+      experience.put(profiteer, 100);
+      statsTracker.promote(profiteer, promoType);
+    }
 
     public GameEventQueue receiveUnitJoinEvent(JoinLifecycle.JoinEvent event)
     {
@@ -155,16 +165,75 @@ public class GBAFEActions
       }
       int xp = experience.get(profiteer);
       int finalVal = xp + profit*EXP_MULTIPLIER;
-      if( finalVal > PROMO_LEVEL_BONUS*100 )
-        finalVal = PROMO_LEVEL_BONUS*100;
+      if( finalVal > LEVEL_CAP*100 )
+        finalVal = LEVEL_CAP*100;
       experience.put(profiteer, finalVal);
+
+      if( statsTracker.getStats(profiteer).level < finalVal / 100 )
+        statsTracker.grantLevel(profiteer);
+
       return finalVal;
     }
     @Override
     public CustomStatData getCustomStat(Unit unit)
     {
       Color tc = Color.white;
-      int level = getExperience(unit) / 100;
+      int level = getExperience(unit) % 100;
+      String text = "" + level;
+      return new CustomStatData('E', Color.white, tc, text);
+    }
+  }
+
+  public static class GBAFEStatsTracker extends StateTracker
+  {
+    private static final long serialVersionUID = 1L;
+    public HashMap<Unit, GBAFEStats> statsMap = new HashMap<>();
+
+    public GBAFEStats getStats(Unit statted)
+    {
+      if( statsMap.containsKey(statted) )
+        return statsMap.get(statted);
+      return ((GBAFEUnitModel) statted.model).stats;
+    }
+    public void grantLevel(Unit statted)
+    {
+      // If we haven't recorded this unit's stats yet, generate a new copy to mess with.
+      if( !statsMap.containsKey(statted) )
+      {
+        var classStats = ((GBAFEUnitModel) statted.model).stats;
+        statsMap.put(statted, classStats.growths.build(classStats.promoted, classStats.level));
+      }
+      var stats = statsMap.get(statted);
+      var growths = stats.growths;
+      if( game.getRN(100) < growths.growthHP  ) stats.HP  += 1;
+      if( game.getRN(100) < growths.growthStr ) stats.Str += 1;
+      if( game.getRN(100) < growths.growthSkl ) stats.Skl += 1;
+      if( game.getRN(100) < growths.growthSpd ) stats.Spd += 1;
+      if( game.getRN(100) < growths.growthLck ) stats.Lck += 1;
+      if( game.getRN(100) < growths.growthDef ) stats.Def += 1;
+      if( game.getRN(100) < growths.growthRes ) stats.Res += 1;
+      stats.level += 1;
+    }
+    public void promote(Unit statted, UnitModel promoType)
+    {
+      var stats = getStats(statted);
+      var growths = stats.growths;
+      var newGrowths = ((GBAFEUnitModel) statted.model).stats.growths;
+      stats.HP  += newGrowths.baseHP  - growths.baseHP ;
+      stats.Str += newGrowths.baseStr - growths.baseStr;
+      stats.Skl += newGrowths.baseSkl - growths.baseSkl;
+      stats.Spd += newGrowths.baseSpd - growths.baseSpd;
+      stats.Lck += newGrowths.baseLck - growths.baseLck;
+      stats.Def += newGrowths.baseDef - growths.baseDef;
+      stats.Res += newGrowths.baseRes - growths.baseRes;
+      // Don't replace the growths, since we only promote once and the unit really had the old growth.
+    }
+
+    @Override
+    public CustomStatData getCustomStat(Unit unit)
+    {
+      Color tc = Color.white;
+      int level = getStats(unit).level;
       String text = "" + level;
       if( level >= 10 && null != ((GBAFEUnitModel) unit.model).promotesTo )
         tc = Color.green; // If we have a promotion available, do fancy text
@@ -246,6 +315,7 @@ public class GBAFEActions
         if( moveEvent.getEndPoint().equals(getMoveLocation()) ) // make sure we shouldn't be pre-empted
         {
           transformEvents.add(new ModifyFundsEvent(actor.CO.army, -1 * type.getPromoCost(actor)));
+          transformEvents.add(new PromoteStatsEvent(actor, type.destType));
           transformEvents.add(new TransformEvent(actor, type.destType));
           transformEvents.add(new HealUnitEvent(actor, 100, null)); // "Free" fullheal included, for tactical spice
           transformEvents.add(new ResupplyEvent(null, actor));     //   and also resupply, since we use this for ballistae
@@ -267,6 +337,29 @@ public class GBAFEActions
       return type;
     }
   } // ~PromotionAction
+
+  public static class PromoteStatsEvent implements GameEvent
+  {
+    private Unit unit;
+    private UnitModel promoType;
+
+    public PromoteStatsEvent(Unit aTarget, UnitModel pPromoType)
+    {
+      unit = aTarget;
+      promoType = pPromoType;
+    }
+
+    @Override
+    public void performEvent(MapMaster gameMap)
+    {
+      StateTracker.instance(gameMap.game, GBAFEExperienceTracker.class).promote(unit, promoType);
+    }
+
+    @Override public GameAnimation getEventAnimation(MapView mapView) { return null; }
+    @Override public GameEventQueue sendToListener(GameEventListener listener) { return null; }
+    @Override public XYCoord getStartPoint() { return new XYCoord(unit.x, unit.y); }
+    @Override public XYCoord getEndPoint() { return new XYCoord(unit.x, unit.y); }
+  }
 
   public static abstract class SupportActionFactory extends UnitActionFactory
   {

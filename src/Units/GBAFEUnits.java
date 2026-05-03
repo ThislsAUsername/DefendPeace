@@ -10,6 +10,7 @@ import Engine.StateTrackers.StateTracker;
 import Engine.UnitActionLifecycles.TransformLifecycle;
 import Terrain.TerrainType;
 import Units.GBAFEActions.GBAFEExperienceTracker;
+import Units.GBAFEActions.GBAFEStatsTracker;
 import Units.GBAFEActions.SummonTracker;
 import Units.MoveTypes.*;
 import lombok.Builder;
@@ -139,8 +140,9 @@ public class GBAFEUnits extends UnitModelScheme
   {
     super.registerStateTrackers(gi);
 
-    StateTracker.instance(gi, GBAFEExperienceTracker.class);
+    var expTracker = StateTracker.instance(gi, GBAFEExperienceTracker.class);
     StateTracker.instance(gi, SummonTracker.class);
+    expTracker.statsTracker = StateTracker.instance(gi, GBAFEStatsTracker.class);
   }
 
   public static class ClassStatsBuilder
