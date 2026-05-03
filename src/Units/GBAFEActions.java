@@ -247,7 +247,7 @@ public class GBAFEActions
         {
           transformEvents.add(new ModifyFundsEvent(actor.CO.army, -1 * type.getPromoCost(actor)));
           transformEvents.add(new TransformEvent(actor, type.destType));
-          transformEvents.add(new HealUnitEvent(actor, 10, null)); // "Free" fullheal included, for tactical spice
+          transformEvents.add(new HealUnitEvent(actor, 100, null)); // "Free" fullheal included, for tactical spice
           transformEvents.add(new ResupplyEvent(null, actor));     //   and also resupply, since we use this for ballistae
         }
       }
@@ -420,7 +420,7 @@ public class GBAFEActions
         if( Utils.enqueueMoveEvent(gameMap, benefactor, movePath, healEvents) )
         {
           // No surprises in the fog.
-          healEvents.add(new HealUnitEvent(beneficiary, type.quantity, null));
+          healEvents.add(new HealUnitEvent(beneficiary, type.quantity*10, null));
           healEvents.add(new AddExperienceEvent(benefactor, 11));
         }
       }
