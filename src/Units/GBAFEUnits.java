@@ -839,7 +839,7 @@ public class GBAFEUnits extends UnitModelScheme
   public static GBAFEUnitModel GreatKnight()
   {
     var b = PromoHorseUnit();
-    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.role(UnitModel.TANK | UnitModel.LAND | UnitModel.ASSAULT);
     b.costBase(22000);
     b.abilityPowerValue(10);
     b.baseMovePower(6);
@@ -871,7 +871,7 @@ public class GBAFEUnits extends UnitModelScheme
   public static GBAFEUnitModel Nomad()
   {
     var b = HorseUnit();
-    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.SURFACE_TO_AIR);
+    b.role(UnitModel.TANK | UnitModel.LAND | UnitModel.SURFACE_TO_AIR);
     b.costBase(4000);
     b.abilityPowerValue(12);
     b.baseMoveType(hoofN);
@@ -902,7 +902,7 @@ public class GBAFEUnits extends UnitModelScheme
   public static GBAFEUnitModel NomadTrooper()
   {
     var b = PromoHorseUnit();
-    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT | UnitModel.SURFACE_TO_AIR);
+    b.role(UnitModel.TANK | UnitModel.LAND | UnitModel.ASSAULT | UnitModel.SURFACE_TO_AIR);
     b.costBase(10000);
     b.abilityPowerValue(10);
     b.baseMoveType(hoofNPromo);
@@ -1170,7 +1170,7 @@ public class GBAFEUnits extends UnitModelScheme
   public static GBAFEUnitModel Valkyrie()
   {
     var b = PromoHorseUnit();
-    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.role(UnitModel.TANK | UnitModel.LAND | UnitModel.ASSAULT);
     b.costBase(11000);
     b.abilityPowerValue(20);
     b.reducedPromoKillBonus(true);
@@ -1393,7 +1393,7 @@ public class GBAFEUnits extends UnitModelScheme
   public static GBAFEUnitModel Cavalier()
   {
     var b = HorseUnit();
-    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.role(UnitModel.TANK | UnitModel.LAND | UnitModel.ASSAULT);
     b.costBase(10000);
     b.abilityPowerValue(12);
 
@@ -1423,7 +1423,7 @@ public class GBAFEUnits extends UnitModelScheme
   public static GBAFEUnitModel Paladin()
   {
     var b = PromoHorseUnit();
-    b.role(UnitModel.TROOP | UnitModel.LAND | UnitModel.ASSAULT);
+    b.role(UnitModel.TANK | UnitModel.LAND | UnitModel.ASSAULT);
     b.costBase(16000);
     b.abilityPowerValue(10);
 
