@@ -43,6 +43,7 @@ public class CommanderLibrary
     commanderList.add( Ave.getInfo() );
     commanderList.add( Qis.getInfo() );
     commanderList.add( Tech.getInfo() );
+    commanderList.add( CommandingOfficers.DefendPeace.misc.Seth.getInfo() );
     commanderList.add( CommandingOfficers.Variants.OS.Sami.getInfo() );
     commanderList.add( CommandingOfficers.Variants.BM.Colin.getInfo() );
     commanderList.add( CommandingOfficers.Variants.BM.Sasha.getInfo() );

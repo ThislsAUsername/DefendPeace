@@ -203,7 +203,7 @@ public class GBAFEWeapons
         int chanceOfOneCrit = chanceOfAny(SKILL_ACTIVATION_PERCENT * feGUIcrit/100, hitCount);
         chanceOfKill = extraChance(chanceOfKill, chanceOfOneCrit, pierceDamage*3);
       }
-      if( pavise ) // Pavise/Great Shield takes priority over sources of ordinary damage, but cannot stop Silencer/Lethality
+      if( pavise ) // Pavise/Great Shield takes priority over sources of ordinary damage, but cannot stop iencer/Lethality
       {
         int shieldFailChance = 100 - SKILL_ACTIVATION_PERCENT;
         for( int i = 0; i < hitCount; i++ )
@@ -671,6 +671,49 @@ public class GBAFEWeapons
     {
       // 80 hit in FE6
       super(stats, 9, 75, 30, MIN_RANGE, MAX_RANGE);
+      slaysAir = true;
+    }
+  }
+
+  public static class SilverLance extends GBAFEWeapon
+  {
+    private static final long serialVersionUID = 1L;
+    public SilverLance(GBAFEStats stats)
+    {
+      // 65 hit in FE6
+      super(stats, 14, 75, 0);
+      lance = true;
+    }
+  }
+  public static class SilverSword extends GBAFEWeapon
+  {
+    private static final long serialVersionUID = 1L;
+    public SilverSword(GBAFEStats stats)
+    {
+      // 75 hit in FE6
+      super(stats, 13, 80, 0);
+      sword = true;
+    }
+  }
+  public static class SilverAxe extends GBAFEWeapon
+  {
+    private static final long serialVersionUID = 1L;
+    public SilverAxe(GBAFEStats stats)
+    {
+      // 55 hit in FE6
+      super(stats, 15, 70, 0);
+      axe = true;
+    }
+  }
+  public static class SilverBow extends GBAFEWeapon
+  {
+    private static final long serialVersionUID = 1L;
+    private static final int MIN_RANGE = 2;
+    private static final int MAX_RANGE = 2;
+    public SilverBow(GBAFEStats stats)
+    {
+      // 70 hit in FE6
+      super(stats, 13, 75, 0, MIN_RANGE, MAX_RANGE);
       slaysAir = true;
     }
   }
