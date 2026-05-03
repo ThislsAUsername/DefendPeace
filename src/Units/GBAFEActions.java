@@ -99,7 +99,7 @@ public class GBAFEActions
       int profit = calcDamageXP(attacker, defender);
       if(isLethal)
         profit += calcKillXP(attacker, defender);
-      addExperience(profiteer, attacker.baseXP, profit);
+      addExperience(profiteer, profit);
     }
     private static int calcDamageXP(GBAFEUnitModel unit, GBAFEUnitModel target)
     {
@@ -144,18 +144,15 @@ public class GBAFEActions
     {
       if( experience.containsKey(profiteer) )
         return experience.get(profiteer);
-      GBAFEUnitModel profiteerType = (GBAFEUnitModel) profiteer.model;
-      return addExperience(profiteer, profiteerType.baseXP, 0);
+      return addExperience(profiteer, 0);
     }
-    public int addExperience(Unit profiteer, int profit)
-    {
-      GBAFEUnitModel profiteerType = (GBAFEUnitModel) profiteer.model;
-      return addExperience(profiteer, profiteerType.baseXP, profit);
-    }
-    private int addExperience(Unit profiteer, int base, int profit)
+    private int addExperience(Unit profiteer, int profit)
     {
       if( !experience.containsKey(profiteer) )
-        experience.put(profiteer, base);
+      {
+        GBAFEUnitModel profiteerType = (GBAFEUnitModel) profiteer.model;
+        experience.put(profiteer, profiteerType.stats.level * 100);
+      }
       int xp = experience.get(profiteer);
       int finalVal = xp + profit*EXP_MULTIPLIER;
       if( finalVal > PROMO_LEVEL_BONUS*100 )

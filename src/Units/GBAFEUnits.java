@@ -127,6 +127,11 @@ public class GBAFEUnits extends UnitModelScheme
     feModels.unitModels.add(cloisterBoatPack);
     feModels.shoppingList.get(TerrainType.SEAPORT).add(cloisterBoatPack);
 
+    // Make sure the combat modifier's on there
+    var fightMod = new GBAFEWeapons.GBAFEFightMod();
+    for( UnitModel um : feModels.unitModels )
+      um.addUnitModifier(fightMod);
+
     return feModels;
   }
 
@@ -244,7 +249,6 @@ public class GBAFEUnits extends UnitModelScheme
   {
     private static final long serialVersionUID = 1L;
     public final GBAFEStats stats;
-    @Builder.Default public int baseXP = 0;
     @Builder.Default public boolean reducedPromoKillBonus = false;
     @Builder.Default public int classRelativePower = 3; // "Weaker" classes level faster, and "stronger" classes grant more experience
     @Builder.Default public UnitModel promotesTo = null;
@@ -311,6 +315,7 @@ public class GBAFEUnits extends UnitModelScheme
     b.maxFuel(MAX_FUEL);
     b.fuelBurnIdle(IDLE_FUEL_BURN);
     b.fuelBurnPerTile(0);
+    b.needsMaterials(false);
     b.maxAmmo(MAX_AMMO);
     b.visionRange(VISION_NORMAL);
     b.baseMovePower(5);
@@ -373,6 +378,8 @@ public class GBAFEUnits extends UnitModelScheme
 
     b.maxFuel(MAX_FUEL);
     b.fuelBurnIdle(IDLE_FUEL_BURN);
+    b.fuelBurnPerTile(0);
+    b.needsMaterials(false);
     b.maxAmmo(MAX_AMMO);
     b.visionRange(VISION_NORMAL);
 
@@ -950,6 +957,8 @@ public class GBAFEUnits extends UnitModelScheme
 
       b.maxFuel(MAX_FUEL);
       b.fuelBurnIdle(IDLE_FUEL_BURN);
+      b.fuelBurnPerTile(0);
+      b.needsMaterials(false);
       b.maxAmmo(MAX_AMMO);
       b.visionRange(VISION_NORMAL);
       b.baseMovePower(5);
@@ -1033,6 +1042,8 @@ public class GBAFEUnits extends UnitModelScheme
 
       b.maxFuel(MAX_FUEL);
       b.fuelBurnIdle(IDLE_FUEL_BURN);
+      b.fuelBurnPerTile(0);
+      b.needsMaterials(false);
       b.maxAmmo(MAX_AMMO);
       b.visionRange(VISION_NORMAL);
       b.baseMovePower(6);
