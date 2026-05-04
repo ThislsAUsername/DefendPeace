@@ -145,8 +145,9 @@ public class GBAFEUnits extends UnitModelScheme
     expTracker.statsTracker = StateTracker.instance(gi, GBAFEStatsTracker.class);
   }
 
-  public static class ClassStatsBuilder
+  public static class ClassStatsBuilder implements Serializable
   {
+    private static final long serialVersionUID = 1L;
     public boolean critBoost = false;
     public boolean sureShot  = false;
     public boolean pierce    = false;
