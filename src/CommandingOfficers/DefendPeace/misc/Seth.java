@@ -5,6 +5,7 @@ import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import Engine.GameInstance;
 import Engine.GameScenario;
+import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
@@ -36,13 +37,15 @@ public class Seth extends Commander
     public instantiator()
     {
       super("Seth", UIUtils.SourceGames.DEFEND_PEACE, UIUtils.MISC);
-      infoPages.add(new InfoPage("Your first cavalier becomes Seth."));
+      infoPages.add(new InfoPage(
+          "Your first cavalier becomes Seth.\n" +
+          "Only works in GBA Emblem."));
       infoPages.add(new InfoPage(
           "Vulnerary (3 uses):\n" +
           "Seth heals 3 HP."));
       infoPages.add(new InfoPage(
           "Silver Lance (20 uses):\n" +
-          "yeet."));
+          "Seth equips a Silver Lance. Each combat consumes a use, but activation does not."));
       infoPages.add(new InfoPage(
           "Concept credit:\n" +
           "@sum_buddy Discord ID 927387040478285824"));
@@ -85,7 +88,16 @@ public class Seth extends Commander
     return coInfo;
   }
 
-  // Transform the first cav
+  // Transform the first cav, and buy it for free
+  @Override
+  public int getBuyCost(UnitModel um, XYCoord coord)
+  {
+    if( null != COU )
+      return super.getBuyCost(um, coord);
+    if( um != cav )
+      return super.getBuyCost(um, coord);
+    return 0;
+  }
   @Override
   public GameEventQueue receiveCreateUnitEvent(Unit unit)
   {
