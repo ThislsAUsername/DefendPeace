@@ -330,7 +330,7 @@ public class AudioEngine
       }
       catch(InterruptedException ie)
       {
-        System.out.println("[InfantrySpritePreloader] Exception! Details:\n  " + ie.toString());
+        System.out.println("[SoundThread] Exception! Details:\n  " + ie.toString());
       }
     }
   }
