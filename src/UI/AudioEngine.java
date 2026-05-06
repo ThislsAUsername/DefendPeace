@@ -283,7 +283,7 @@ public class AudioEngine
 
           if( null != volumeKnob )
           {
-            double volume = Math.pow(volumeOption.getSelectedObject() / 100.0, 2); // Square the ratio for finer adjustments at lower volume.
+            double volume = volumeOption.getSelectedObject() / 100.0;
             double range  = volumeKnob.getMaximum() - volumeKnob.getMinimum();
             var setting   = volume * range + volumeKnob.getMinimum();
             volumeKnob.setValue((float) setting);
