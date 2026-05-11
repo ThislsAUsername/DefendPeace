@@ -18,7 +18,8 @@ import lombok.var;
 
 public class AudioEngine
 {
-  // Define global settings.
+  // Make "default" the first option to try to use the actual default if the user never touches this option.
+  // "None" is a hardcoded option that entirely disables the sound thread, and that also should be at a consistent index.
   private static String[] DEFAULT_SOUND_DEVICES = {"default", "None"};
 
   // Set up configurable options.
@@ -250,7 +251,10 @@ public class AudioEngine
           break;
         }
         if( null == mix )
+        {
+          System.out.println("SoundThread: Selected mixer "+mixerName+" is not available? Bailing.");
           return;
+        }
 
         SourceDataLine line = (SourceDataLine) mix.getLine(info);
 
@@ -258,10 +262,10 @@ public class AudioEngine
           return;
         line.open();
         FloatControl volumeKnob = null;
-        if (line.isControlSupported(FloatControl.Type.VOLUME))
-          volumeKnob = (FloatControl) line.getControl(FloatControl.Type.VOLUME);
         if (line.isControlSupported(FloatControl.Type.MASTER_GAIN))
           volumeKnob = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
+        else if (line.isControlSupported(FloatControl.Type.VOLUME))
+          volumeKnob = (FloatControl) line.getControl(FloatControl.Type.VOLUME);
 
         line.start();
         @SuppressWarnings("unused")
