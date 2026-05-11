@@ -34,12 +34,12 @@ public class AudioUtils
     allThemes.put(null, allThemes.get(UNKNOWN_CO_FORMAT));
   }
 
-  public static LoopMusic loadMenuTheme()
+  public static LoopMusic getMenuTheme()
   {
     return allThemes.get(MENU_THEME_FORMAT);
   }
 
-  public static LoopMusic loadCommanderTheme(Commander co)
+  public static LoopMusic getCommanderTheme(Commander co)
   {
     if(co.themePathFormats.isEmpty())
       setCommanderThemePathFormats(co);
@@ -136,7 +136,7 @@ public class AudioUtils
       }
     co.themePathFormats.put(null, passiveTheme);
 
-    String allyOrBH = "ally";
+    String allyOrBH = "ally"; // AW2/DS have different power themes for BH and BH's enemies, but not for individual COs.
     if( whichCO.baseFaction.faction.name.equalsIgnoreCase(UIUtils.BH.faction.name) )
       allyOrBH = "bh";
     String genericCOPFormat  = String.format("res/audio/%st-%s-co-power%s.ogg", "%s", allyOrBH, "%s"); // subfolder, song part

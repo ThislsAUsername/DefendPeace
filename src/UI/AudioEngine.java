@@ -35,7 +35,7 @@ public class AudioEngine
     soundDeviceOption.optionList.clear();
     for (var opt : DEFAULT_SOUND_DEVICES)
       soundDeviceOption.optionList.add(opt);
-    AudioFormat baseFormat = AudioUtils.loadMenuTheme().af;
+    AudioFormat baseFormat = AudioUtils.getMenuTheme().af;
     AudioFormat targetFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
           baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
 
@@ -232,7 +232,7 @@ public class AudioEngine
       try // credit: https://github.com/Trilarion/java-vorbis-support/blob/master/README.md
       {
         // Always start with the menu theme 'cause why not?
-        loopAudio = AudioUtils.loadMenuTheme();
+        loopAudio = AudioUtils.getMenuTheme();
         loopState = LoopState.INTRO;
         setStream(false);
 
@@ -275,9 +275,9 @@ public class AudioEngine
         {
           LoopMusic newLoop = null;
           if( null == activeGame || null == activeGame.activeArmy )
-            newLoop = AudioUtils.loadMenuTheme();
+            newLoop = AudioUtils.getMenuTheme();
           else
-            newLoop = AudioUtils.loadCommanderTheme(activeGame.activeArmy.cos[0]);
+            newLoop = AudioUtils.getCommanderTheme(activeGame.activeArmy.cos[0]);
           if( newLoop != loopAudio )
           {
             loopAudio = newLoop;
