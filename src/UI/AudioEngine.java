@@ -20,7 +20,7 @@ public class AudioEngine
 {
   // Make "default" the first option to try to use the actual default if the user never touches this option.
   // "None" is a hardcoded option that entirely disables the sound thread, and that also should be at a consistent index.
-  private static String[] DEFAULT_SOUND_DEVICES = {"default", "None"};
+  private static String[] DEFAULT_SOUND_DEVICES = {"Auto", "None"};
 
   // Set up configurable options.
   public static GameOption<String> soundDeviceOption = new GameOption<String>("Sound Device", DEFAULT_SOUND_DEVICES, 0);
@@ -28,6 +28,28 @@ public class AudioEngine
   public static GameOption<?>[] allOptions = { soundDeviceOption, volumeOption };
   public static OptionSelector highlightedOption = new OptionSelector(allOptions.length);
   public static SlidingValue animHighlightedOption = new SlidingValue(0);
+
+  protected static Mixer findMixer(DataLine.Info info, String mixerName)
+  {
+    Mixer.Info[] mixers = AudioSystem.getMixerInfo();
+    Mixer mix = null;
+    for( var m : mixers )
+    {
+      if( mixerName.startsWith("Auto") )
+      {
+        if( !m.getName().contains("[default]") )
+          continue;
+      }
+      else if( !m.getName().contains(mixerName) )
+        continue;
+      var mixTemp = AudioSystem.getMixer(m);
+      if( !mixTemp.isLineSupported(info) )
+        continue;
+      mix = mixTemp;
+      break;
+    }
+    return mix;
+  }
 
   private static SoundThread soundThread;
   public static void initialize()
@@ -51,6 +73,14 @@ public class AudioEngine
         continue;
       soundDeviceOption.optionList.add(name);
     }
+
+    // figure out what to call the Auto option
+    Mixer mix = findMixer(info, "Auto"); // Seems grabbing the real Mixer and throwing it away is kosher
+    if( null == mix )
+      soundDeviceOption.optionList.set(0, "Auto (not found)");
+    else // seems the name appends " [default]" when it's the default
+      soundDeviceOption.optionList.set(0, "Auto (" + mix.getMixerInfo().getName().replaceFirst("\\s+\\[?default\\]?", "") + ")");
+
     soundDeviceOption.reset(soundDeviceOption.optionList.size()); // Allow selecting the new options
 
     // Load saved settings from disk, if they exist.
@@ -237,18 +267,8 @@ public class AudioEngine
 
         // get a line from a mixer in the system with the wanted format
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, loopAudio.loop.targetFormat); // Seems fair to assume the manu music loops
-        Mixer.Info[] mixers = AudioSystem.getMixerInfo();
-        Mixer mix = null;
-        for( var m : mixers )
-        {
-          if( !m.getName().contains(mixerName) )
-            continue;
-          var mixTemp = AudioSystem.getMixer(m);
-          if( !mixTemp.isLineSupported(info) )
-            continue;
-          mix = mixTemp;
-          break;
-        }
+        Mixer mix = findMixer(info, mixerName);
+
         if( null == mix )
         {
           System.out.println("SoundThread: Selected mixer "+mixerName+" is not available? Bailing.");
