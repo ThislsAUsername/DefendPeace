@@ -35,7 +35,7 @@ public class AudioEngine
     soundDeviceOption.optionList.clear();
     for (var opt : DEFAULT_SOUND_DEVICES)
       soundDeviceOption.optionList.add(opt);
-    AudioFormat baseFormat = AudioUtils.getMenuTheme().af;
+    AudioFormat baseFormat = AudioUtils.getMenuTheme().loop.targetFormat;
     AudioFormat targetFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
           baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
 
@@ -191,7 +191,7 @@ public class AudioEngine
       {
         case INTRO:
         {
-          var newStream = loopAudio.intro;
+          var newStream = loopAudio.intro.bis;
           if (null != newStream && newStream != loopStream)
           {
             // System.out.println("Starting intro");
@@ -202,7 +202,7 @@ public class AudioEngine
         } // FALLTHROUGH
         case PRELOOP:
         {
-          var newStream = loopAudio.preloop;
+          var newStream = loopAudio.preloop.bis;
           if (null != newStream && newStream != loopStream)
           {
             // System.out.println("Starting preloop");
@@ -213,13 +213,12 @@ public class AudioEngine
         } // FALLTHROUGH
         case LOOP:
         {
-          var newStream = loopAudio.loop;
-          if (null != newStream && newStream != loopStream)
-          {
-            // System.out.println("Starting loop");
-            loopStream = newStream;
+          System.out.println("Starting loop");
+          boolean switched = loopStream != loopAudio.loop.bis;
+          // This is unconditional, because we want to just stop playing if there's no loop
+          loopStream = loopAudio.loop.bis;
+          if( null != loopStream && switched )
             loopStream.reset();
-          }
           break;
         }
       }
@@ -237,7 +236,7 @@ public class AudioEngine
         setStream(false);
 
         // get a line from a mixer in the system with the wanted format
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, loopAudio.af);
+        DataLine.Info info = new DataLine.Info(SourceDataLine.class, loopAudio.loop.targetFormat); // Seems fair to assume the manu music loops
         Mixer.Info[] mixers = AudioSystem.getMixerInfo();
         Mixer mix = null;
         for( var m : mixers )
@@ -293,7 +292,7 @@ public class AudioEngine
             volumeKnob.setValue((float) setting);
           }
 
-          if( line.available() >= buffer.length ) // Avoid blocking on write calls
+          if( null != loopStream && line.available() >= buffer.length ) // Avoid blocking on write calls
           {
             nBytesRead = loopStream.read(buffer, 0, buffer.length);
             if( nBytesRead != -1 )
@@ -305,12 +304,12 @@ public class AudioEngine
               ++failedReadCombo;
           }
 
-          if (nBytesRead == -1 && failedReadCombo > 9)
+          if( nBytesRead == -1 && failedReadCombo > 9 )
           {
             failedReadCombo = 0;
             setStream(true); // Current audio file is done, so increment
           }
-        }
+        } // ~while alive
 
         line.drain();
         line.stop();

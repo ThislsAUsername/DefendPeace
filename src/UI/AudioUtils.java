@@ -3,7 +3,6 @@ package UI;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -59,55 +58,56 @@ public class AudioUtils
   //  Code for loading music
   //  Note: as these paths are stored in the savefile, the paths should be relative to the game directory and not absolute.
   ///////////////////////////////////////////////////////////////////
-  static AudioInputStream loadAudioStream(String filePath)
+  public static class WrappedAudioStream
   {
-    AudioInputStream in = null;
-    try
+    AudioInputStream dataIn  = null;
+    AudioFormat targetFormat = null;
+    BufferedInputStream bis  = null;
+    WrappedAudioStream(String filePath)
     {
-      File file = new File(filePath);
-      if( file.canRead() )
-        in = AudioSystem.getAudioInputStream(file);
-      // TODO: Consider rewickering so I can pass file.length() into the BIS constructor.
+      AudioInputStream innerStream = null;
+      long fileSize = 0;
+      try
+      {
+        File file = new File(filePath);
+        if( file.canRead() )
+          innerStream = AudioSystem.getAudioInputStream(file);
+        fileSize = file.length();
+      }
+      catch (UnsupportedAudioFileException | IOException e)
+      {
+        // Oh well, we tried.
+      }
+      if( null == innerStream )
+        return;
+
+      AudioFormat baseFormat = innerStream.getFormat();
+
+      targetFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
+                     baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
+
+      dataIn = AudioSystem.getAudioInputStream(targetFormat, innerStream);
+
+      if( null == dataIn )
+        return;
+      bis = new BufferedInputStream(dataIn, (int) fileSize);
+      bis.mark(Integer.MAX_VALUE); // Mark the start of the stream, and keep it valid for the maximum duration.
     }
-    catch (UnsupportedAudioFileException | IOException e)
-    {
-      // Oh well, we tried.
-    }
-    if( null == in )
-      return null;
-
-    AudioFormat baseFormat = in.getFormat();
-
-    AudioFormat targetFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
-        baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
-
-    AudioInputStream dataIn = AudioSystem.getAudioInputStream(targetFormat, in);
-    return dataIn;
   }
-  static BufferedInputStream wrapInputStream(InputStream is) // I need a BIS so I can reset the audio stream.
-  {
-    if (null == is)
-      return null;
-    var bis = new BufferedInputStream(is);
-    bis.mark(Integer.MAX_VALUE); // Mark the start of the stream, and keep it valid for the maximum duration.
-    return bis;
-  }
+
   public static class LoopMusic
   {
-    public final AudioFormat af;
     public final String path;
-    public final BufferedInputStream intro; // non-loop intro
-    public final BufferedInputStream preloop; // first loop
-    public final BufferedInputStream loop;
+    public final WrappedAudioStream intro; // non-loop intro
+    public final WrappedAudioStream preloop; // first loop
+    public final WrappedAudioStream loop;
 
     public LoopMusic(String nameFormat)
     {
       path    = Engine.Driver.JAR_DIR + String.format(nameFormat, "");
-      var tmp = loadAudioStream(path);
-      af      = tmp.getFormat();
-      intro   = wrapInputStream(loadAudioStream(Engine.Driver.JAR_DIR + String.format(nameFormat, "-intro")));
-      preloop = wrapInputStream(loadAudioStream(Engine.Driver.JAR_DIR + String.format(nameFormat, "-preloop")));
-      loop    = wrapInputStream(tmp);
+      intro   = new WrappedAudioStream(Engine.Driver.JAR_DIR + String.format(nameFormat, "-intro"));
+      preloop = new WrappedAudioStream(Engine.Driver.JAR_DIR + String.format(nameFormat, "-preloop"));
+      loop    = new WrappedAudioStream(path);
     }
   }
   public static boolean canRead(String nameFormat)
