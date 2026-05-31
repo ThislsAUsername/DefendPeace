@@ -243,7 +243,7 @@ public class AudioEngine
         } // FALLTHROUGH
         case LOOP:
         {
-          System.out.println("Starting loop");
+          // System.out.println("Starting loop");
           boolean switched = loopStream != loopAudio.loop.bis;
           // This is unconditional, because we want to just stop playing if there's no loop
           loopStream = loopAudio.loop.bis;
