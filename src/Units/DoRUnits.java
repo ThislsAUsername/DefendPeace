@@ -117,7 +117,12 @@ public class DoRUnits extends UnitModelScheme
     METEOR,
   };
 
-  public static final MoveType DoRFloatHeavy = new MoveTypeFey(new FloatHeavy());
+  // Shared base MoveType objects, so they can be a single HashMap key.
+  public static final MoveType TREAD           = new Tread();
+  public static final MoveType TIRES           = new Tires();
+  public static final MoveType FLIGHT          = new Flight();
+  public static final MoveType FLOAT_LIGHT     = new FloatLight();
+  public static final MoveType DOR_FLOAT_HEAVY = new MoveTypeFey(new FloatHeavy());
 
   @SuperBuilder(toBuilder = true)
   public static class DoRUnitModel extends UnitModel
@@ -217,7 +222,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(5);
     b.baseMovePower(8);
 
-    b.baseMoveType(new Tires());
+    b.baseMoveType(TIRES);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.ReconMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -241,7 +246,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(2);
     b.baseMovePower(5);
 
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.FlareMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -265,7 +270,7 @@ public class DoRUnits extends UnitModelScheme
     b.maxAmmo(6);
     b.visionRange(3);
     b.baseMovePower(6);
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.AntiAirMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -289,7 +294,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(3);
     b.baseMovePower(6);
 
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.TankCannon(), new DoRWeapons.TankMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -313,7 +318,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(2);
     b.baseMovePower(5);
 
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.MDTankCannon(), new DoRWeapons.MDTankMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -337,7 +342,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(2);
     b.baseMovePower(4);
 
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.WarCannon(), new DoRWeapons.WarMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -361,7 +366,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(3);
     b.baseMovePower(5);
 
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.ArtilleryCannon() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -409,7 +414,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(3);
     b.baseMovePower(5);
 
-    b.baseMoveType(new Tires());
+    b.baseMoveType(TIRES);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.RocketRockets() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -433,7 +438,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(5);
     b.baseMovePower(5); // Finally, sigh
 
-    b.baseMoveType(new Tires());
+    b.baseMoveType(TIRES);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.MobileSAMWeapon() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -456,7 +461,7 @@ public class DoRUnits extends UnitModelScheme
     b.maxAmmo(-1);
     b.visionRange(1);
     b.baseMovePower(6);
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.APC_ACTIONS)));
 
     b.name("APC");
@@ -489,7 +494,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(5);
     b.baseMovePower(9);
 
-    b.baseMoveType(new Flight());
+    b.baseMoveType(FLIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.FighterMissiles() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -513,7 +518,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(3);
     b.baseMovePower(7);
 
-    b.baseMoveType(new Flight());
+    b.baseMoveType(FLIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.BomberBombs() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -537,7 +542,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(4);
     b.baseMovePower(7);
 
-    b.baseMoveType(new Flight());
+    b.baseMoveType(FLIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.SeaplaneShots() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -561,7 +566,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(4);
     b.baseMovePower(8);
 
-    b.baseMoveType(new Flight());
+    b.baseMoveType(FLIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.DusterMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -585,7 +590,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(2);
     b.baseMovePower(6);
 
-    b.baseMoveType(new Flight());
+    b.baseMoveType(FLIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.CopterRockets(), new DoRWeapons.CopterMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -609,7 +614,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(1);
     b.baseMovePower(6);
 
-    b.baseMoveType(new Flight());
+    b.baseMoveType(FLIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.TRANSPORT_ACTIONS)));
 
     b.name("T-Copter");
@@ -636,7 +641,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(2);
     b.baseMovePower(7);
 
-    b.baseMoveType(new FloatLight());
+    b.baseMoveType(FLOAT_LIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_TRANSPORT_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.GunBoatGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -664,7 +669,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(5);
     b.baseMovePower(6);
 
-    b.baseMoveType(DoRFloatHeavy);
+    b.baseMoveType(DOR_FLOAT_HEAVY);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_TRANSPORT_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.CruiserTorpedoes(), new DoRWeapons.CruiserMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -693,7 +698,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(5);
     b.baseMovePower(6);
 
-    b.baseMoveType(DoRFloatHeavy);
+    b.baseMoveType(DOR_FLOAT_HEAVY);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.SubTorpedoes() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -728,7 +733,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(4);
     b.baseMovePower(5);
 
-    b.baseMoveType(DoRFloatHeavy);
+    b.baseMoveType(DOR_FLOAT_HEAVY);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.CarrierMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -759,7 +764,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(3);
     b.baseMovePower(5);
 
-    b.baseMoveType(DoRFloatHeavy);
+    b.baseMoveType(DOR_FLOAT_HEAVY);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new DoRWeapons.BattleshipCannon() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -783,7 +788,7 @@ public class DoRUnits extends UnitModelScheme
     b.visionRange(1);
     b.baseMovePower(6);
 
-    b.baseMoveType(new FloatLight());
+    b.baseMoveType(FLOAT_LIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.TRANSPORT_ACTIONS)));
 
     b.name("Lander");
