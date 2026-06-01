@@ -12,6 +12,7 @@ import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.TurnInitEvent;
 import Engine.GameInput.GameInputHandler;
 import Terrain.MapLocation;
+import UI.AudioEngine;
 import UI.CO_InfoController;
 import UI.DamageChartController;
 import UI.GameStatsController;
@@ -106,6 +107,7 @@ public class MapController implements IController, GameInputHandler.StateChanged
     if( exitMap )
     {
       myGame.endGame();
+      AudioEngine.setActiveGame(null);
     }
 
     return exitMap;

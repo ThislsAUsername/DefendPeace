@@ -149,17 +149,17 @@ public class SpriteOptions
   //////////////////////////////////////////////////////////////////////
   //  File utility functions.
   //////////////////////////////////////////////////////////////////////
-  private static final String KEYS_FILENAME = Engine.Driver.JAR_DIR + "res/graphics_options.txt";
+  private static final String OPTIONS_FILENAME = Engine.Driver.JAR_DIR + "res/graphics_options.txt";
 
   private static void saveSettingsToDisk()
   {
-    if( !ConfigUtils.writeConfigs(KEYS_FILENAME, Arrays.asList(allOptions)) )
+    if( !ConfigUtils.writeConfigs(OPTIONS_FILENAME, Arrays.asList(allOptions)) )
       System.out.println("Unable to write graphics options to file.");
   }
 
   private static void loadSettingsFromDisk()
   {
-    boolean allValid = ConfigUtils.readConfigs(KEYS_FILENAME, Arrays.asList(allOptions));
+    boolean allValid = ConfigUtils.readConfigs(OPTIONS_FILENAME, Arrays.asList(allOptions));
     if( !allValid )
       System.out.println("Unable to read all graphics options from file.");
 

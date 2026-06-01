@@ -64,6 +64,9 @@ public class MainUIView implements IView
       case GRAPHICS_OPTIONS:
         SpriteOptions.draw(g);
         break;
+      case AUDIO_OPTIONS:
+        AudioOptionsArtist.draw(g);
+        break;
       case SET_KEYBINDS:
         ControlOptionsSetupArtist.draw(g, controller.getControlOptionsSetupController());
         break;

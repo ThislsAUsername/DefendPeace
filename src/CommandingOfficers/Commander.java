@@ -48,6 +48,8 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
   public Set<XYCoord> ownedProperties;
   public Color myColor;
   public Faction faction;
+  // Owned by AudioEngine; maps D2D (null) and each power to a theme path. NOTE: Assumes power count/identity does not change after game start.
+  public HashMap<CommanderAbility, String> themePathFormats = new HashMap<>();
   public static final int CHARGERATIO_FUNDS = 9000; // quantity of funds damage to equal 1 unit of power charge
   public static final int CHARGERATIO_HP = 100; // Funds value of 10 HP damage dealt, for the purpose of power charge
   public int incomeAdjustment = 0; // Commander subclasses can increase/decrease income if needed.

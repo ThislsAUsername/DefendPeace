@@ -7,5 +7,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="src/lombok.jar"/>
+	<classpathentry kind="lib" path="src/java-vorbis-support-1.2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
