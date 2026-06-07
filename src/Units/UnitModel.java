@@ -274,6 +274,11 @@ public class UnitModel implements Serializable, ITargetable, UnitModList
   {
     return (role & input) == input;
   }
+  public boolean isCargoRole(long type)
+  {
+    return ((carryableMask & type) > 0) &&
+           ((carryableExclusionMask & type) == 0);
+  }
 
   public boolean isSurfaceUnit()
   {
