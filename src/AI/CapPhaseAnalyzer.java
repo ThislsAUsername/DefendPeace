@@ -125,7 +125,7 @@ public class CapPhaseAnalyzer implements Serializable
 
     PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.includeOccupiedSpaces = false;
-    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
+    ArrayList<PathCalcParams.SearchNode> destinations = pcp.findAllPaths();
 
     // If we can get to our destination, go for it
     int goalIndex = destinations.indexOf(goal);

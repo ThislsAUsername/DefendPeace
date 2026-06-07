@@ -14,6 +14,7 @@ import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
 import Engine.PathCalcParams;
+import Engine.PathCalcParams.SearchNode;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.Utils.TravelDistanceCacher;
@@ -55,9 +56,9 @@ public class AIUtils
 
     PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.includeOccupiedSpaces = includeOccupiedDestinations;
-    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
+    ArrayList<SearchNode> destinations = pcp.findAllPaths();
 
-    for( Utils.SearchNode coord : destinations )
+    for( SearchNode coord : destinations )
     {
       // Figure out how to get here.
       GamePath movePath = coord.getMyPath();
@@ -213,7 +214,7 @@ public class AIUtils
     GamePath path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(destination);
     PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.includeOccupiedSpaces = false;
-    ArrayList<Utils.SearchNode> validMoves = pcp.findAllPaths();
+    ArrayList<SearchNode> validMoves = pcp.findAllPaths();
 
     if( null != path && validMoves.size() > 0 ) // Check that the destination is reachable at least in theory.
     {

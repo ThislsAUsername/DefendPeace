@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Queue;
 
-import Engine.Utils.SearchNode;
 import Terrain.GameMap;
 import Units.Unit;
 import Units.UnitContext;
@@ -247,6 +246,52 @@ public class PathCalcParams
         else
           System.out.println("expandSearchNodeWithParents: Somehow, "+next+" is not a new node, a destination, or in the queue. Ehh?");
       }
+    }
+  }
+
+  /**
+   * Utility class used for pathfinding. Optionally holds a
+   *   reference to a parent node for path reconstruction.<p>
+   * Caveat emptor: the SearchNode quacks like an XYCoord for equality checks
+   */
+  public static class SearchNode extends XYCoord
+  {
+    private static final long serialVersionUID = 2637721435469761667L;
+    public SearchNode parent;
+    public HashSet<SearchNode> allParents;
+
+    public SearchNode(int x, int y)
+    {
+      this(x, y, null);
+    }
+
+    public SearchNode(XYCoord coord, SearchNode parent)
+    {
+      this(coord.x, coord.y, parent);
+    }
+    public SearchNode(int x, int y, SearchNode parent)
+    {
+      super(x, y);
+      this.parent = parent;
+    }
+    public XYCoord getCoordinates()
+    {
+      return this;
+    }
+    public GamePath getMyPath()
+    {
+      GamePath aPath = new GamePath();
+
+      SearchNode currentNode = this;
+      // Add all of the points on the route to our waypoint list.
+      while (currentNode != null)
+      {
+        // Since we're iterating dest->start, each point is the new "first" point.
+        aPath.addWaypoint(0, currentNode.x, currentNode.y);
+        currentNode = currentNode.parent;
+      }
+
+      return aPath;
     }
   }
 
