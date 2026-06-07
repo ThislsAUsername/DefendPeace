@@ -15,8 +15,8 @@ import Units.Unit;
 
 public class TestAIConstraints extends TestCase
 {
-  private static MapMaster testMap;
-  private static GameInstance testGame;
+  private MapMaster testMap;
+  private GameInstance testGame;
 
   private void setupTest(MapInfo mapInfo, AIMaker ai, GameScenario scn)
   {

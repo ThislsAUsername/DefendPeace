@@ -20,10 +20,10 @@ import Units.UnitModel;
 
 public class TestVisionMechanics extends TestCase
 {
-  private static Commander strong = null;
-  private static Commander patch = null;
-  private static MapMaster testMap = null;
-  private static GameInstance testGame;
+  private Commander strong = null;
+  private Commander patch = null;
+  private MapMaster testMap = null;
+  private GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()

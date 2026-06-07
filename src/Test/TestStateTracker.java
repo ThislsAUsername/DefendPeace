@@ -11,10 +11,10 @@ import Terrain.MapMaster;
 
 public class TestStateTracker extends TestCase
 {
-  private static Commander cinder;
-  private static Commander venge;
-  private static MapMaster testMap;
-  private static GameInstance testGame;
+  private Commander cinder;
+  private Commander venge;
+  private MapMaster testMap;
+  private GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
