@@ -18,10 +18,10 @@ import Units.UnitModel;
 
 public class TestTeleport extends TestCase
 {
-  private static Commander testCo1;
-  private static Commander testCo2;
-  private static MapMaster testMap;
-  private static GameInstance testGame;
+  private Commander testCo1;
+  private Commander testCo2;
+  private MapMaster testMap;
+  private GameInstance testGame;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()

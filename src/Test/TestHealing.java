@@ -16,8 +16,8 @@ import Units.UnitState;
 
 public class TestHealing extends TestCase
 {
-  private static Commander testCo1;
-  private static MapMaster testMap;
+  private Commander testCo1;
+  private MapMaster testMap;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()

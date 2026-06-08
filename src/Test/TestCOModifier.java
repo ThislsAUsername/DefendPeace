@@ -18,9 +18,9 @@ import Units.UnitModel;
 
 public class TestCOModifier extends TestCase
 {
-  private static Commander strong = null;
-  private static Commander patch = null;
-  private static MapMaster testMap = null;
+  private Commander strong = null;
+  private Commander patch = null;
+  private MapMaster testMap = null;
 
   @Override
   public boolean runTest()

@@ -18,10 +18,10 @@ import Units.UnitModel;
 
 public class TestSaveLoad extends TestCase
 {
-  private static Commander strong = null;
-  private static Commander patch = null;
-  private static MapMaster testMap = null;
-  private static GameInstance game = null;
+  private Commander strong = null;
+  private Commander patch = null;
+  private MapMaster testMap = null;
+  private GameInstance game = null;
 
   /** Make two COs and a MapMaster to use with this test case. */
   private void setupTest()
