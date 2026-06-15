@@ -371,6 +371,7 @@ public class PathCalcParams
       int firstDist = Math.abs(o1.x - xDest) + Math.abs(o1.y - yDest);
       int secondDist = Math.abs(o2.x - xDest) + Math.abs(o2.y - yDest);
 
+      // Note: These values are not decoded because the encoded values will be in the right order for non-negative movePowers
       int firstPowerEstimate  = powerGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
       int secondPowerEstimate = powerGrid[o2.x][o2.y] - ((hasDestination) ? secondDist : 0);
       return secondPowerEstimate - firstPowerEstimate;
