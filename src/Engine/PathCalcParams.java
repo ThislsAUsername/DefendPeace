@@ -57,11 +57,27 @@ public class PathCalcParams
    */
   public PathCalcParams setTheoretical()
   {
-    maxTurns = Integer.MAX_VALUE;
+    maxTurns = Integer.MAX_VALUE >> 16;
     canTravelThroughEnemies = true;
     return this;
   }
 
+  private int encodeMovePower(int power, int turns)
+  {
+    int result = 0xFFFF & power;
+    result += (maxTurns - turns) << 16; // Fewer turns spent = more move power
+    return result;
+  }
+  private static int decodeMovePower(int overallPower)
+  {
+    if( (0x8000 & overallPower) != 0 ) // The new sign bit matches
+      return -1;
+    return 0xFFFF & overallPower;
+  }
+  private int decodeTurns(int overallPower)
+  {
+    return -1 * ((overallPower >> 16) - maxTurns);
+  }
   public ArrayList<SearchNode> findAllPaths()
   {
     ArrayList<SearchNode> reachableTiles = new ArrayList<>();
@@ -78,15 +94,7 @@ public class PathCalcParams
     {
       for( int j = 0; j < gameMap.mapHeight; j++ )
       {
-        powerGrid[i][j] = -1;
-      }
-    }
-    int[][] turnsGrid = new int[gameMap.mapWidth][gameMap.mapHeight]; // counts up
-    for( int i = 0; i < gameMap.mapWidth; i++ )
-    {
-      for( int j = 0; j < gameMap.mapHeight; j++ )
-      {
-        turnsGrid[i][j] = maxTurns;
+        powerGrid[i][j] = encodeMovePower(-1, maxTurns);
       }
     }
 
@@ -94,8 +102,7 @@ public class PathCalcParams
     SearchNode root = new SearchNode(start.x, start.y, 1);
     if( findAllValidParents )
       root.allParents = new HashSet<>();
-    powerGrid[start.x][start.y] = initialMovePower;
-    turnsGrid[start.x][start.y] = 1;
+    powerGrid[start.x][start.y] = encodeMovePower(initialMovePower, 1);
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid));
     searchQueue.add(root);
     // do search
@@ -109,9 +116,9 @@ public class PathCalcParams
       }
 
       if( findAllValidParents )
-        expandSearchNodeWithParents(currentNode, searchQueue, powerGrid, turnsGrid, reachableTiles);
+        expandSearchNodeWithParents(currentNode, searchQueue, powerGrid, reachableTiles);
       else
-        expandSearchNode(currentNode, searchQueue, powerGrid, turnsGrid);
+        expandSearchNode(currentNode, searchQueue, powerGrid);
 
       currentNode = null;
     }
@@ -145,22 +152,13 @@ public class PathCalcParams
     {
       for( int j = 0; j < gameMap.mapHeight; j++ )
       {
-        powerGrid[i][j] = -1;
-      }
-    }
-    int[][] turnsGrid = new int[gameMap.mapWidth][gameMap.mapHeight]; // counts up
-    for( int i = 0; i < gameMap.mapWidth; i++ )
-    {
-      for( int j = 0; j < gameMap.mapHeight; j++ )
-      {
-        turnsGrid[i][j] = maxTurns;
+        powerGrid[i][j] = encodeMovePower(-1, maxTurns);
       }
     }
 
     // Set up search parameters.
     SearchNode root = new SearchNode(start.x, start.y, 1);
-    powerGrid[start.x][start.y] = initialMovePower;
-    turnsGrid[start.x][start.y] = 1;
+    powerGrid[start.x][start.y] = encodeMovePower(initialMovePower, 1);
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid, x, y));
     searchQueue.add(root);
 
@@ -176,7 +174,7 @@ public class PathCalcParams
       if( currentNode.x == x && currentNode.y == y )
         break; // findShortestPath() is given a particular endpoint already, so it assumes that the mover can stand there
 
-      expandSearchNode(currentNode, searchQueue, powerGrid, turnsGrid);
+      expandSearchNode(currentNode, searchQueue, powerGrid);
 
       currentNode = null;
     }
@@ -191,7 +189,7 @@ public class PathCalcParams
    * Look at the nodes adjacent to currentNode; if there are any we can reach that we haven't found yet, or that we
    * can reach more economically than previously discovered, update the cost grid and enqueue the node.
    */
-  private void expandSearchNode(SearchNode currentNode, Queue<SearchNode> searchQueue, int[][] powerGrid, int[][] turnsGrid)
+  private void expandSearchNode(SearchNode currentNode, Queue<SearchNode> searchQueue, int[][] powerGrid)
   {
     GameMap map = gameMap;
     ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(map, currentNode, 1, 1);
@@ -200,15 +198,15 @@ public class PathCalcParams
     {
       // If we can move more cheaply than previously discovered,
       // then update the power grid and re-queue the next node.
-      if( turnsGrid[next.x][next.y] < turnsGrid[currentNode.x][currentNode.y] )
+      if( decodeTurns(powerGrid[next.x][next.y]) < decodeTurns(powerGrid[currentNode.x][currentNode.y]) )
         continue; // Is from a previous turn
 
       final int transitionCost = mt.getTransitionCost(map, currentNode, next, team, canTravelThroughEnemies);
       if( transitionCost >= MoveType.IMPASSABLE || transitionCost >= initialMovePower )
         continue; // We cannot enter this tile even in principle.
 
-      int oldPower     = powerGrid[currentNode.x][currentNode.y];
-      int oldNextPower = powerGrid[next.x][next.y];
+      int oldPower     = decodeMovePower(powerGrid[currentNode.x][currentNode.y]);
+      int oldNextPower = decodeMovePower(powerGrid[next.x][next.y]);
       int newNextPower = oldPower - transitionCost;
       int newTurns     = currentNode.turn;
       if( newNextPower < 0 && currentNode.turn < maxTurns )
@@ -219,8 +217,7 @@ public class PathCalcParams
 
       if( newNextPower > oldNextPower )
       {
-        powerGrid[next.x][next.y] = newNextPower;
-        turnsGrid[next.x][next.y] = newTurns;
+        powerGrid[next.x][next.y] = encodeMovePower(newNextPower, newTurns);
         // Prevent wrong path generation due to updating the shared powerGrid
         searchQueue.removeIf(node -> next.equals(node));
         searchQueue.add(new SearchNode(next, newTurns, currentNode));
@@ -228,7 +225,7 @@ public class PathCalcParams
     }
   }
 
-  private void expandSearchNodeWithParents(SearchNode currentNode, Queue<SearchNode> searchQueue, int[][] powerGrid, int[][] turnsGrid, ArrayList<SearchNode> reachableTiles)
+  private void expandSearchNodeWithParents(SearchNode currentNode, Queue<SearchNode> searchQueue, int[][] powerGrid, ArrayList<SearchNode> reachableTiles)
   {
     GameMap map = gameMap;
     ArrayList<XYCoord> coordsToCheck = Utils.findLocationsInRange(map, currentNode, 1, 1);
@@ -237,15 +234,15 @@ public class PathCalcParams
     {
       // If we can move more cheaply than previously discovered,
       // then update the power grid and re-queue the next node.
-      if( turnsGrid[next.x][next.y] < turnsGrid[currentNode.x][currentNode.y] )
+      if( decodeTurns(powerGrid[next.x][next.y]) < decodeTurns(powerGrid[currentNode.x][currentNode.y]) )
         continue; // I'm not entirely sure this makes sense, but I also dunno why you would care about tracking the possibility that you could move an extra turn away and then come back.
 
       final int transitionCost = mt.getTransitionCost(map, currentNode, next, team, canTravelThroughEnemies);
       if( transitionCost >= MoveType.IMPASSABLE || transitionCost >= initialMovePower )
         continue; // We cannot enter this tile even in principle.
 
-      int oldPower     = powerGrid[currentNode.x][currentNode.y];
-      int oldNextPower = powerGrid[next.x][next.y];
+      int oldPower     = decodeMovePower(powerGrid[currentNode.x][currentNode.y]);
+      int oldNextPower = decodeMovePower(powerGrid[next.x][next.y]);
       int newNextPower = oldPower - transitionCost;
       int newTurns     = currentNode.turn;
       if( newNextPower < 0 && currentNode.turn < maxTurns )
@@ -268,8 +265,7 @@ public class PathCalcParams
         oldNextOpt = searchQueue.stream().filter(node -> next.equals(node)).findFirst();
         if( newNextPower > oldNextPower )
         {
-          powerGrid[next.x][next.y] = newNextPower;
-          turnsGrid[next.x][next.y] = newTurns;
+          powerGrid[next.x][next.y] = encodeMovePower(newNextPower, newTurns);
 
           SearchNode snNext = new SearchNode(next, newTurns, currentNode);
           snNext.allParents = new HashSet<>();
@@ -375,7 +371,7 @@ public class PathCalcParams
       int firstDist = Math.abs(o1.x - xDest) + Math.abs(o1.y - yDest);
       int secondDist = Math.abs(o2.x - xDest) + Math.abs(o2.y - yDest);
 
-      int firstPowerEstimate = powerGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
+      int firstPowerEstimate  = powerGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
       int secondPowerEstimate = powerGrid[o2.x][o2.y] - ((hasDestination) ? secondDist : 0);
       return secondPowerEstimate - firstPowerEstimate;
     }
