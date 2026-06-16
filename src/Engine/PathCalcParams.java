@@ -40,6 +40,18 @@ public class PathCalcParams
     canTravelThroughEnemies = false;
     findAllValidParents = false;
   }
+  public PathCalcParams(MoveType pMT, int movePower, XYCoord pStart, GameMap gameMap)
+  {
+    this.gameMap = gameMap;
+    start = pStart;
+    moverIdentity = null;
+    team = null;
+    mt = pMT;
+    initialMovePower = movePower;
+    includeOccupiedSpaces = true;
+    canTravelThroughEnemies = false;
+    findAllValidParents = false;
+  }
   /**
    * Tell this to ignore other units and move-power limitations.
    */
