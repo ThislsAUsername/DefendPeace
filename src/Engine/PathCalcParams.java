@@ -64,15 +64,13 @@ public class PathCalcParams
 
   private int encodeMovePower(int power, int turns)
   {
-    int result = 0xFFFF & power;
+    int result = 0xFFFF & (power + 1);
     result += (maxTurns - turns) << 16; // Fewer turns spent = more move power
     return result;
   }
   private static int decodeMovePower(int overallPower)
   {
-    if( (0x8000 & overallPower) != 0 ) // The new sign bit matches
-      return -1;
-    return 0xFFFF & overallPower;
+    return (0xFFFF & overallPower) - 1;
   }
   private int decodeTurns(int overallPower)
   {
@@ -198,8 +196,8 @@ public class PathCalcParams
     {
       // If we can move more cheaply than previously discovered,
       // then update the power grid and re-queue the next node.
-      if( decodeTurns(powerGrid[next.x][next.y]) < decodeTurns(powerGrid[currentNode.x][currentNode.y]) )
-        continue; // Is from a previous turn
+      if( powerGrid[next.x][next.y] >= powerGrid[currentNode.x][currentNode.y] )
+        continue; // Movecosts cannot be negative, so our next power cannot be higher than the current one if it is equal or greater already.
 
       final int transitionCost = mt.getTransitionCost(map, currentNode, next, team, canTravelThroughEnemies);
       if( transitionCost >= MoveType.IMPASSABLE || transitionCost > initialMovePower )
