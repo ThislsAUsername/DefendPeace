@@ -57,25 +57,11 @@ public class PathCalcParams
    */
   public PathCalcParams setTheoretical()
   {
-    maxTurns = Integer.MAX_VALUE >> 16;
+    maxTurns = getMaxMaxTurns();
     canTravelThroughEnemies = true;
     return this;
   }
 
-  private int encodeMovePower(int power, int turns)
-  {
-    int result = 0xFFFF & (power + 1);
-    result += (maxTurns - turns) << 16; // Fewer turns spent = more move power
-    return result;
-  }
-  private static int decodeMovePower(int overallPower)
-  {
-    return (0xFFFF & overallPower) - 1;
-  }
-  private int decodeTurns(int overallPower)
-  {
-    return -1 * ((overallPower >> 16) - maxTurns);
-  }
   public ArrayList<SearchNode> findAllPaths()
   {
     ArrayList<SearchNode> reachableTiles = new ArrayList<>();
@@ -92,7 +78,7 @@ public class PathCalcParams
     {
       for( int j = 0; j < gameMap.mapHeight; j++ )
       {
-        powerGrid[i][j] = encodeMovePower(-1, maxTurns);
+        powerGrid[i][j] = encodeMovePower(-1, maxTurns); // Less than 0 movepower left, and it took all the turns to get there.
       }
     }
 
@@ -207,7 +193,7 @@ public class PathCalcParams
       int oldNextPower = decodeMovePower(powerGrid[next.x][next.y]);
       int newNextPower = oldPower - transitionCost;
       int newTurns     = currentNode.turn;
-      if( newNextPower < 0 && currentNode.turn < maxTurns )
+      if( newNextPower < 0 && currentNode.turn < maxTurns ) // If we ran out of movepower but have another turn, burn it to get over the hill.
       {
         newNextPower = initialMovePower - transitionCost;
         newTurns    += 1;
@@ -286,6 +272,33 @@ public class PathCalcParams
           System.out.println("expandSearchNodeWithParents: Somehow, "+next+" is not a new node, a destination, or in the queue. Ehh?");
       }
     }
+  }
+
+  // Storing remaining movepower and turns as independent values is really expensive (~1.5x+ runtime), however you slice it.
+  // I haven't tried to dig up the really dirty details, but I did measure and the results line up with the theory.
+  // A "struct" is slow, because now our array is of pointers (extra indirection, cache locality dies)
+  // Using two arrays doubles our memory consumption and kills cache locality (I didn't test making the array double width, but ew pls no)
+  // Using shorts didn't save any relevant performance from two arrays.
+  // ∴ the stupid simple solution is to make our own shorts in place. I picked 16 bits because I'm not a barbarian.
+  // Turns go in the high bits because each turn is N movepower.
+  // Movepower is "encoded" by adding 1 because we go down to -1 and want to store unsigned so that the numbers make sense for direct powerGrid comparisons.
+  public static int getMaxMaxTurns()
+  {
+    return Integer.MAX_VALUE >> 16;
+  }
+  private int encodeMovePower(int power, int turns)
+  {
+    int result = 0xFFFF & (power + 1);
+    result += (maxTurns - turns) << 16; // Fewer turns spent = more move power
+    return result;
+  }
+  private static int decodeMovePower(int overallPower)
+  {
+    return (0xFFFF & overallPower) - 1;
+  }
+  private int decodeTurns(int overallPower)
+  {
+    return -1 * ((overallPower >> 16) - maxTurns);
   }
 
   /**
@@ -369,7 +382,6 @@ public class PathCalcParams
       int firstDist = Math.abs(o1.x - xDest) + Math.abs(o1.y - yDest);
       int secondDist = Math.abs(o2.x - xDest) + Math.abs(o2.y - yDest);
 
-      // Note: These values are not decoded because the encoded values will be in the right order for non-negative movePowers
       int firstPowerEstimate  = powerGrid[o1.x][o1.y] - ((hasDestination) ? firstDist : 0);
       int secondPowerEstimate = powerGrid[o2.x][o2.y] - ((hasDestination) ? secondDist : 0);
       return secondPowerEstimate - firstPowerEstimate;
