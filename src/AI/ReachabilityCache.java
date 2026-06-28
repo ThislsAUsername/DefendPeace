@@ -138,7 +138,7 @@ public class ReachabilityCache implements Serializable
             continue;
           if( coordIslandMap.containsKey(mt) )
             continue; // Already part of an island
-          PathCalcParams pcp = new PathCalcParams(mt, 1, xyc, map);
+          PathCalcParams pcp = new PathCalcParams(mt, 3, xyc, map); // Chosen by a fair die roll. Guaranteed to be random.
           pcp.setTheoretical();
           var reachables = pcp.findAllPaths();
 
