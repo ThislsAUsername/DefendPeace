@@ -9,10 +9,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import AI.ReachabilityCache;
+import CommandingOfficers.CommanderLibrary;
+import Engine.Army;
+import Engine.GameInstance;
+import Engine.GameScenario;
+import Engine.XYCoord;
 import Terrain.MapInfo;
+import Terrain.MapMaster;
 import Terrain.MapInfo.MapNode;
 import Terrain.TerrainType;
 import UI.MapSelectController;
+import lombok.var;
 
 public class MapSelectMenuArtist
 {
@@ -205,6 +213,59 @@ public class MapSelectMenuArtist
 
     // Draw the mini map on top.
     SpriteUIUtils.drawImageCenteredOnPoint(g, miniMap, drawScale*miniMapCenterX, drawScale*miniMapCenterY, mmScale);
+
+    // Here be some hacky debug code to visualize calculated map properties (reachability, currently)
+    //// Calculate the size to draw.
+    //int drawWidth  = miniMap.getWidth()  * mmScale;
+    //int drawHeight = miniMap.getHeight() * mmScale;
+    //
+    //// Center over the target location.
+    //int mapLeft = drawScale*miniMapCenterX - drawWidth / 2;
+    //int mapTop  = drawScale*miniMapCenterY - drawHeight / 2;
+    //double visualTileSize = mmScale * (double) (miniMap.getWidth()) / selectedMapInfo.getWidth();
+    //drawReachabilityZones(g, mapLeft, mapTop, selectedMapInfo, visualTileSize);
+  }
+
+  static MapInfo islandMapID = null;
+  static ArrayList<ArrayList<XYCoord>> islandList = new ArrayList<>();
+  public static void drawReachabilityZones(Graphics g, int baseX, int baseY, MapInfo mapInfo, double tileSize)
+  {
+    // Combine all islands contents for each movetype, and cache them.
+    if ( mapInfo != islandMapID )
+    {
+      var scn = new GameScenario();
+      Army[] armies = new Army[mapInfo.getNumPlayers()];
+      for( int i = 0; i < armies.length; ++i )
+        armies[i] = new Army(scn, CommanderLibrary.NotACO.getInfo().create(scn.rules));
+
+      var testMap  = new MapMaster(armies, mapInfo);
+      var testGame = new GameInstance(armies, testMap);
+      ReachabilityCache rc = new ReachabilityCache(testGame);
+      islandList.clear();
+      for( var mt : rc.islandSetsByMoveType.keySet() )
+      {
+        ArrayList<XYCoord> superIsland = new ArrayList<>();
+        for( var island : rc.islandSetsByMoveType.get(mt) )
+          superIsland.addAll(island.coords);
+        islandList.add(superIsland);
+      }
+      islandMapID = mapInfo;
+    }
+
+    g.setColor(Color.WHITE);
+    int distance = 0;
+    long thisTime = System.currentTimeMillis();
+    int animIndex = (int) ((thisTime / 1000) & Integer.MAX_VALUE);
+
+    // Do the actual island coordinate marking, scaled with the scaled minimap.
+    ArrayList<XYCoord> is = islandList.get(animIndex % islandList.size());
+    for( XYCoord coord : is )
+    {
+      int x = (int) (baseX + coord.x * tileSize - distance);
+      int y = (int) (baseY + coord.y * tileSize - distance);
+      int s = (int) (tileSize + distance * 2);
+      g.drawRect(x, y, s, s);
+    }
   }
 
   private static void countCapturables(MapInfo mapInfo, Map<TerrainType, Integer> propCounts)
