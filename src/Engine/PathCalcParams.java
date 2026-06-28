@@ -186,7 +186,7 @@ public class PathCalcParams
         continue; // Movecosts cannot be negative, so our next power cannot be higher than the current one if it is equal or greater already.
 
       final int transitionCost = mt.getTransitionCost(map, currentNode, next, team, canTravelThroughEnemies);
-      if( transitionCost >= MoveType.IMPASSABLE || transitionCost > initialMovePower )
+      if( transitionCost >= MoveType.IMPASSABLE )
         continue; // We cannot enter this tile even in principle.
 
       int oldPower     = decodeMovePower(powerGrid[currentNode.x][currentNode.y]);
@@ -222,7 +222,7 @@ public class PathCalcParams
         continue; // I'm not entirely sure this makes sense, but I also dunno why you would care about tracking the possibility that you could move an extra turn away and then come back.
 
       final int transitionCost = mt.getTransitionCost(map, currentNode, next, team, canTravelThroughEnemies);
-      if( transitionCost >= MoveType.IMPASSABLE || transitionCost > initialMovePower )
+      if( transitionCost >= MoveType.IMPASSABLE )
         continue; // We cannot enter this tile even in principle.
 
       int oldPower     = decodeMovePower(powerGrid[currentNode.x][currentNode.y]);
