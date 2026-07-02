@@ -16,6 +16,7 @@ import CommandingOfficers.Commander;
 import Engine.GameAction;
 import Engine.GamePath;
 import Engine.PathCalcParams;
+import Engine.PathCalcParams.SearchNode;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
@@ -78,7 +79,7 @@ public class AICombatUtils
     PathCalcParams pcp = new PathCalcParams(uc, gameMap);
     pcp.start = origin;
     pcp.includeOccupiedSpaces = true; // We assume the enemy knows how to manage positioning within his turn
-    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
+    ArrayList<SearchNode> destinations = pcp.findAllPaths();
     for( WeaponModel wep : unit.model.weapons )
     {
       if( null != target && !unit.canTarget(target) )
@@ -99,7 +100,7 @@ public class AICombatUtils
         continue;
       }
 
-      for( Utils.SearchNode dest : destinations )
+      for( SearchNode dest : destinations )
       {
         uc.setPath(dest.getMyPath());
         for (XYCoord xyc : Utils.findLocationsInRange(gameMap, dest, uc))
@@ -142,8 +143,8 @@ public class AICombatUtils
     PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.start = start;
     pcp.includeOccupiedSpaces = allowEndingOnUnits;
-    ArrayList<Utils.SearchNode> moves = pcp.findAllPaths();
-    for( Utils.SearchNode move : moves )
+    ArrayList<SearchNode> moves = pcp.findAllPaths();
+    for( SearchNode move : moves )
     {
       boolean moved = !move.equals(start);
 

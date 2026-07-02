@@ -14,6 +14,7 @@ import Engine.GameAction;
 import Engine.GameActionSet;
 import Engine.GamePath;
 import Engine.PathCalcParams;
+import Engine.PathCalcParams.SearchNode;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
@@ -165,9 +166,9 @@ public class SpenderAI implements AIController
         // Find the possible destinations.
         PathCalcParams pcp = new PathCalcParams(unit, gameMap);
         pcp.includeOccupiedSpaces = false;
-        ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
+        ArrayList<SearchNode> destinations = pcp.findAllPaths();
 
-        for( Utils.SearchNode coord : destinations )
+        for( SearchNode coord : destinations )
         {
           // Figure out how to get here.
           GamePath movePath = coord.getMyPath();
@@ -218,7 +219,7 @@ public class SpenderAI implements AIController
           // Find the possible destinations.
           PathCalcParams pcp = new PathCalcParams(unit, gameMap);
           pcp.includeOccupiedSpaces = false;
-          ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
+          ArrayList<SearchNode> destinations = pcp.findAllPaths();
 
           if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
           {
@@ -269,7 +270,7 @@ public class SpenderAI implements AIController
               // Sort my currently-reachable move locations by distance from the goal,
               // and build a GameAction to move to the closest one.
               Utils.sortLocationsByDistance(goal, destinations);
-              Utils.SearchNode destination = destinations.get(0);
+              SearchNode destination = destinations.get(0);
               GamePath movePath = destination.getMyPath();
               if( movePath.getPathLength() > 1 ) // We only want to try to travel if we can actually go somewhere
               {

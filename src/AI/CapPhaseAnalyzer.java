@@ -125,7 +125,7 @@ public class CapPhaseAnalyzer implements Serializable
 
     PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.includeOccupiedSpaces = false;
-    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
+    ArrayList<PathCalcParams.SearchNode> destinations = pcp.findAllPaths();
 
     // If we can get to our destination, go for it
     int goalIndex = destinations.indexOf(goal);
@@ -396,7 +396,7 @@ public class CapPhaseAnalyzer implements Serializable
   public static GamePath findFeasiblePath(final Unit unit, final XYCoord destination, final GameMap map)
   {
     PathCalcParams pcp = new PathCalcParams(unit, map);
-    pcp.initialMovePower = unit.getMovePower(map) * (LOOKAHEAD_TURNS);
+    pcp.maxTurns = LOOKAHEAD_TURNS;
     pcp.canTravelThroughEnemies = true;
     return pcp.findShortestPath(destination);
   }

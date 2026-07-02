@@ -5,6 +5,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.DeployableCommander;
 import Engine.*;
+import Engine.PathCalcParams.SearchNode;
 import Engine.UnitActionLifecycles.TransformLifecycle;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.*;
@@ -302,7 +303,7 @@ public class JakeMan extends ModularAI
       boolean includeOccupiedSpaces = true; // Since we know how to shift friendly units out of the way
       PathCalcParams pcp = new PathCalcParams(unit, gameMap);
       pcp.includeOccupiedSpaces = includeOccupiedSpaces;
-      ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
+      ArrayList<SearchNode> destinations = pcp.findAllPaths();
       if( mustMove )
         destinations.remove(new XYCoord(unit.x, unit.y));
       destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, co.army, destinations, !avoidProduction));
@@ -311,7 +312,7 @@ public class JakeMan extends ModularAI
       Collections.reverse(destinations);
       ArrayList<GameAction> freeDudeShots = new ArrayList<>();
 
-      for( Utils.SearchNode moveCoord : destinations )
+      for( SearchNode moveCoord : destinations )
       {
         // Figure out how to get here.
         GamePath movePath = moveCoord.getMyPath();
@@ -608,7 +609,7 @@ public class JakeMan extends ModularAI
     boolean ignoreResident = true;
     PathCalcParams pcp = new PathCalcParams(unit, gameMap);
     pcp.includeOccupiedSpaces = ignoreResident;
-    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
+    ArrayList<SearchNode> destinations = pcp.findAllPaths();
     destinations.removeAll(AIUtils.findAlliedIndustries(gameMap, myArmy, destinations, !avoidProduction));
 
     XYCoord goal = null;
@@ -651,7 +652,7 @@ public class JakeMan extends ModularAI
                           unit.toStringWithLocation(),
                           gameMap.getLocation(goal).getEnvironment().terrainType, goal,
                           pathPoint, mustMove));
-    for( Utils.SearchNode xyc : destinations )
+    for( SearchNode xyc : destinations )
     {
       log(String.format("    is it safe to go to %s?", xyc));
       if( !isDudeFree(gameMap, unit, xyc, false) )
@@ -812,7 +813,7 @@ public class JakeMan extends ModularAI
   {
     public final JakeMan ai;
     public final XYCoord coord;
-    public final ArrayList<Utils.SearchNode> checkTiles;
+    public final ArrayList<SearchNode> checkTiles;
     public int niceMdCount = 0, meanVehCount = 0, niceVehCount = 0;
     public FactoryThreatState(JakeMan ai, XYCoord coord, GameMap map, UnitContext theVeh)
     {

@@ -124,6 +124,13 @@ public class AWBWUnits extends UnitModelScheme
     }
   }
 
+  // Shared base MoveType objects, so they can be a single HashMap key.
+  public static final MoveType TREAD       = new Tread();
+  public static final MoveType TIRES       = new Tires();
+  public static final MoveType FLIGHT      = new Flight();
+  public static final MoveType FLOAT_LIGHT = new FloatLight();
+  public static final MoveType FLOAT_HEAVY = new FloatHeavy();
+
   public AWBWUnitModel InfantryModel()
   {
     var b = AWBWUnitModel.builder();
@@ -184,7 +191,7 @@ public class AWBWUnits extends UnitModelScheme
     b.maxAmmo(-1);
     b.visionRange(1);
     b.baseMovePower(6);
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.APC_ACTIONS)));
 
     b.name("APC");
@@ -208,7 +215,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(5);
     b.baseMovePower(8);
 
-    b.baseMoveType(new Tires());
+    b.baseMoveType(TIRES);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.ReconMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -232,7 +239,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(3);
     b.baseMovePower(6);
 
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.TankCannon(), new AWBWWeapons.TankMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -256,7 +263,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(1);
     b.baseMovePower(5);
 
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.MDTankCannon(), new AWBWWeapons.MDTankMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -280,7 +287,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(1);
     b.baseMovePower(6);
 
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.NeoCannon(), new AWBWWeapons.NeoMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -304,7 +311,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(1);
     b.baseMovePower(4);
 
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.MegaCannon(), new AWBWWeapons.MegaMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -328,7 +335,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(1);
     b.baseMovePower(5);
 
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.ArtilleryCannon() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -352,7 +359,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(1);
     b.baseMovePower(5);
 
-    b.baseMoveType(new Tires());
+    b.baseMoveType(TIRES);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.RocketRockets() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -402,7 +409,7 @@ public class AWBWUnits extends UnitModelScheme
     b.maxAmmo(9);
     b.visionRange(2);
     b.baseMovePower(6);
-    b.baseMoveType(new Tread());
+    b.baseMoveType(TREAD);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.AntiAirMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -426,7 +433,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(5);
     b.baseMovePower(4);
 
-    b.baseMoveType(new Tires());
+    b.baseMoveType(TIRES);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.MobileSAMWeapon() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -452,7 +459,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(2);
     b.baseMovePower(6);
 
-    b.baseMoveType(new Flight());
+    b.baseMoveType(FLIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.TRANSPORT_ACTIONS)));
 
     b.name("T-Copter");
@@ -476,7 +483,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(3);
     b.baseMovePower(6);
 
-    b.baseMoveType(new Flight());
+    b.baseMoveType(FLIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.CopterRockets(), new AWBWWeapons.CopterMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -500,7 +507,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(2);
     b.baseMovePower(7);
 
-    b.baseMoveType(new Flight());
+    b.baseMoveType(FLIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.BomberBombs() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -524,7 +531,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(2);
     b.baseMovePower(9);
 
-    b.baseMoveType(new Flight());
+    b.baseMoveType(FLIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.FighterMissiles() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -548,7 +555,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(4);
     b.baseMovePower(6);
 
-    b.baseMoveType(new Flight());
+    b.baseMoveType(FLIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.StealthShots() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -585,7 +592,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(1);
     b.baseMovePower(9);
 
-    b.baseMoveType(new Flight());
+    b.baseMoveType(FLIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.BASIC_ACTIONS)));
 
     b.name("BBomb");
@@ -610,7 +617,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(1);
     b.baseMovePower(7);
 
-    b.baseMoveType(new FloatLight());
+    b.baseMoveType(FLOAT_LIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.TRANSPORT_ACTIONS)));
 
     b.name("BBoat");
@@ -635,7 +642,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(1);
     b.baseMovePower(6);
 
-    b.baseMoveType(new FloatLight());
+    b.baseMoveType(FLOAT_LIGHT);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.TRANSPORT_ACTIONS)));
 
     b.name("Lander");
@@ -659,7 +666,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(5);
     b.baseMovePower(5);
 
-    b.baseMoveType(new FloatHeavy());
+    b.baseMoveType(FLOAT_HEAVY);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.SubTorpedoes() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -695,7 +702,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(2);
     b.baseMovePower(5);
 
-    b.baseMoveType(new FloatHeavy());
+    b.baseMoveType(FLOAT_HEAVY);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_VEHICLE_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.BattleshipCannon() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -719,7 +726,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(4);
     b.baseMovePower(5);
 
-    b.baseMoveType(new FloatHeavy());
+    b.baseMoveType(FLOAT_HEAVY);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_TRANSPORT_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.CarrierMissiles() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));
@@ -748,7 +755,7 @@ public class AWBWUnits extends UnitModelScheme
     b.visionRange(3);
     b.baseMovePower(6);
 
-    b.baseMoveType(new FloatHeavy());
+    b.baseMoveType(FLOAT_HEAVY);
     b.baseActions(new ArrayList<>(Arrays.asList(UnitActionFactory.COMBAT_TRANSPORT_ACTIONS)));
     WeaponModel[] weapons = { new AWBWWeapons.CruiserTorpedoes(), new AWBWWeapons.CruiserMGun() };
     b.weapons(new ArrayList<>(Arrays.asList(weapons)));

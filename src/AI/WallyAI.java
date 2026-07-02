@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.*;
-import Engine.Utils.SearchNode;
+import Engine.PathCalcParams.SearchNode;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatEngine;
 import Engine.Combat.StrikeParams;
@@ -159,7 +159,7 @@ public class WallyAI extends ModularAI
   {
     UnitContext identity;
     ArrayList<WeaponModel> relevantWeapons = new ArrayList<>();
-    HashSet<Utils.SearchNode> hitFrom = new HashSet<>();
+    HashSet<SearchNode> hitFrom = new HashSet<>();
   }
   /**
    * For each X/Y coordinate, stores the enemies that can threaten this tile and what weapon(s) they can do it with
@@ -895,10 +895,10 @@ public class WallyAI extends ModularAI
     pcp.includeOccupiedSpaces = true;
     pcp.canTravelThroughEnemies = ignoreFriendlyBlockers;
     pcp.findAllValidParents = true;
-    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths(); // Calculate eagerly since arty are rare, and tanks have two weapons
+    ArrayList<SearchNode> destinations = pcp.findAllPaths(); // Calculate eagerly since arty are rare, and tanks have two weapons
     // Throw in a check for all-immobile weapons here to remove the allpaths call??
 
-    for( Utils.SearchNode dest : destinations )
+    for( SearchNode dest : destinations )
     {
       for( WeaponModel wep : threat.model.weapons )
       {
@@ -1306,7 +1306,7 @@ public class WallyAI extends ModularAI
         if( plan != postrequisites.get(0) && plan.action.getType() == UnitActionFactory.WAIT )
         {
           PathCalcParams pcp = new PathCalcParams(plan.actor.unit, map);
-          ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
+          ArrayList<SearchNode> destinations = pcp.findAllPaths();
           bannedTiles.addAll(destinations);
         }
         // Will need to consider UNLOAD here at some point?
@@ -1341,7 +1341,7 @@ public class WallyAI extends ModularAI
     // Find the possible destinations.
     PathCalcParams pcp = new PathCalcParams(unit, predMap);
     pcp.includeOccupiedSpaces = ignoreResident;
-    ArrayList<Utils.SearchNode> destinations = pcp.findAllPaths();
+    ArrayList<SearchNode> destinations = pcp.findAllPaths();
     destinations.removeAll(AIUtils.findAlliedIndustries(ec.map, myArmy, destinations, true));
 
     // TODO: Jump in a transport, if available, or join?
@@ -1393,7 +1393,7 @@ public class WallyAI extends ModularAI
     int minFundsDelta = Math.min(0, -1 * ec.getEvictionValue());
     if( myOldPlan != null )
       minFundsDelta += myOldPlan.score;
-    for( Utils.SearchNode xyc : destinations )
+    for( SearchNode xyc : destinations )
     {
 //      log(String.format("    is it safe to go to %s?", xyc));
 //    log(String.format("    Yes"));

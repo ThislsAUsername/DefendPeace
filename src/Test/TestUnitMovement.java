@@ -10,9 +10,9 @@ import Engine.GameAction;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.PathCalcParams;
+import Engine.PathCalcParams.SearchNode;
 import Engine.GamePath;
 import Engine.Utils;
-import Engine.Utils.SearchNode;
 import Engine.XYCoord;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.MapInfo;
@@ -207,6 +207,9 @@ public class TestUnitMovement extends TestCase
     ArrayList<SearchNode> paths = pcp.findAllPaths();
 
     boolean testPassed = validate(paths.size() == paths.stream().distinct().count(), "    Duplicate destinations exist");
+    if( !testPassed )
+      for( SearchNode sn : paths )
+        System.out.println("(" + sn.x + "," + sn.y + ")");
 
     return testPassed;
   }

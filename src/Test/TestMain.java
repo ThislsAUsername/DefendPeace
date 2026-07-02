@@ -67,6 +67,8 @@ public class TestMain extends TestCase
     testsPassed &= validate(new TestAIConstraints().runTest(), "AI constraint test failed!");
     if( !testsPassed ) return testsPassed;
     testsPassed &= validate(new TestColinMath().runTest(), "Dumb math test failed!");
+    if( !testsPassed ) return testsPassed;
+    testsPassed &= validate(new TestPathfindingPerf().runTest(), "Pathfinding perf test failed!");
     System.out.println("All tests completed.");
     return testsPassed;
   }
