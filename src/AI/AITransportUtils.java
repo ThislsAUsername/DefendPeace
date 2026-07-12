@@ -111,9 +111,9 @@ public class AITransportUtils
     int turnsTransport = 0;
     // We want the cargo to load while the transport has its turn.
     // This means cargo gets +1 turn advantage if equal initiative, +2 if it has TA, or +0 if it's waited and transport is not
-    if( !cargo.isTurnOver )
+    if( !cargo.isTurnOver && null != cargo.unit )
       turnsCargo += 1;
-    if( transport.isTurnOver )
+    if( transport.isTurnOver || null == cargo.unit )
       turnsCargo += 1;
 
     PathCalcParams pcpCargo = new PathCalcParams(cargo, map);
