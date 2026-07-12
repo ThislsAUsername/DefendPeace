@@ -153,4 +153,33 @@ public class AITransportUtils
     return result;
   }
 
+  /**
+   * Calculates the set of paths from a pickup tile to an unload tile that takes the same (minimum) turn count for the transport.
+   */
+  public static HashSet<SearchNode> findShortestUnloadTrips(GameMap map, UnitContext transport, HashMap<XYCoord, InterceptPaths> pickups, HashSet<XYCoord> drops)
+  {
+    var result = new HashSet<SearchNode>();
+
+    PathCalcParams pcp = new PathCalcParams(transport, map);
+    pcp.canTravelThroughEnemies = true;
+    for( var p : pickups.keySet() )
+      pcp.extraStarts.add(pickups.get(p).transport); // It might be relevant to consider the data in the actual SearchNode at some point, in case pickups spans multiple turn options, but this problem is already too hard.
+
+    for( int i = 0; i < 10; ++i )
+    {
+      pcp.maxTurns = 1 + i;
+      ArrayList<SearchNode> destinations = pcp.findAllPaths();
+      for( var dest : destinations )
+      {
+        if( !drops.contains(dest) )
+          continue;
+        result.add(dest);
+      }
+      if( !result.isEmpty() )
+        break;
+    }
+
+    return result;
+  }
+
 }
