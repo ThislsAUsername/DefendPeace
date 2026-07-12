@@ -13,6 +13,7 @@ import Engine.XYCoord;
 import Terrain.Environment;
 import Terrain.GameMap;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModelScheme.GameReadyModels;
 import Units.MoveTypes.MoveType;
 import lombok.var;
@@ -65,6 +66,10 @@ public class ReachabilityCache implements Serializable
     return islandByMoveType.getOrDefault(mt, null);
   }
 
+  public HashSet<Island> getAdjacentIslands(UnitContext uc, GameMap map)
+  {
+    return getAdjacentIslands(uc.model.baseMoveType, uc.coord, map);
+  }
   public HashSet<Island> getAdjacentIslands(MoveType mt, XYCoord xyc, GameMap map)
   {
     HashSet<Island> islands = new HashSet<>();
