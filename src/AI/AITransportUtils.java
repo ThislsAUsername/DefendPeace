@@ -74,7 +74,16 @@ public class AITransportUtils
    * <p>If a UC's unit pointer is not populated, this function will assume the unit is to be built (on the UC coordinate).
    */
   // TODO: Consider enabling PCP to take in a list of start tiles, so less needs to be recalculated on each iteration?
-  public static HashMap<XYCoord, InterceptPaths> findOptimalLoadIntercepts(GameMap map, ReachabilityCache rc, UnitContext transport, UnitContext cargo)
+  // Note that this only finds the soonest pickup locations, which may not optimize the overall trip. For a simple counterexample:
+  // land   land  goal/beach
+  // lander water water
+  // beach  hill  beach
+  // land   land  tank
+  // Let's say tank can get anywhere on its landmass in one turn, but lander moves 2 tiles/turn
+  // Tank can load in the left beach immediately, but this leads to the lander spending more time traveling and a later overall arrival date.
+  // I have no idea how to make such a global optimization computationally tractable, though.
+  // There are a number of potential cost types, too, so it seems like not the realm of a util function unless it gives you a BFS accounting of all optimal options?
+  public static HashMap<XYCoord, InterceptPaths> findFirstLoadIntercepts(GameMap map, ReachabilityCache rc, UnitContext transport, UnitContext cargo)
   {
     HashMap<XYCoord, InterceptPaths> result = new HashMap<>();
     var cargoIslands = rc.getAdjacentIslands(cargo, map);
