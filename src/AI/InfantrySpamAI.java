@@ -2,9 +2,13 @@ package AI;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
 
+import AI.AITransportUtils.InterceptPaths;
+import AI.ReachabilityCache.Island;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.Army;
@@ -14,11 +18,13 @@ import Engine.PathCalcParams;
 import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
+import Engine.PathCalcParams.SearchNode;
 import Engine.UnitActionLifecycles.WaitLifecycle;
 import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Units.Unit;
+import Units.UnitContext;
 import Units.UnitModel;
 
 /**
@@ -66,6 +72,8 @@ public class InfantrySpamAI implements AIController
   private StringBuffer logger = new StringBuffer();
   private boolean shouldLog = true;
   private int turnNum = 0;
+  private ReachabilityCache rc = null;
+  private HashSet<Unit> transportsPicked = new HashSet<>();
 
   public InfantrySpamAI(Army army)
   {
@@ -94,6 +102,10 @@ public class InfantrySpamAI implements AIController
 
     // Check for a turn-kickoff power
     AIUtils.queueCromulentAbility(actions, myArmy, CommanderAbility.PHASE_TURN_START);
+
+    // Temporary?
+    rc = new ReachabilityCache(gameMap.game);
+    transportsPicked.clear();
   }
 
   @Override
@@ -150,6 +162,39 @@ public class InfantrySpamAI implements AIController
       }
       if(foundAction)break; // Only one action per getNextAction() call, to avoid overlap.
 
+      // Otherwise², unload
+      ArrayList<GameAction> unloadActions = unitActionsByType.get(UnitActionFactory.UNLOAD);
+      if( null != unloadActions && !unloadActions.isEmpty() )
+      {
+        for( GameAction action : unloadActions )
+        {
+          // Rather than dig into the unload action's bits, just assume we're dropping off the first cargo unit.
+          XYCoord dropTarget = action.getTargetLocation();
+          Island  dropIsland = rc.getIsland(unit.heldUnits.get(0).model.baseMoveType, dropTarget);
+          for( XYCoord capTarget : dropIsland.capturableCoords )
+            if( unownedProperties.contains(capTarget) )
+            {
+              actions.offer(unloadActions.get(0));
+              foundAction = true;
+              break;
+            }
+          if(foundAction)break; // Only one unload per unit.
+        }
+      }
+      if(foundAction)break; // Only one action per getNextAction() call, to avoid overlap.
+
+      // Otherwise³, see if we have the option to hop in a transport.
+      ArrayList<GameAction> loadActions = unitActionsByType.get(UnitActionFactory.LOAD);
+      if( null != loadActions && !loadActions.isEmpty() )
+      {
+        actions.offer(loadActions.get(0));
+        foundAction = true;
+      }
+      if(foundAction)break; // Only one action per getNextAction() call, to avoid overlap.
+
+      if( unit.hasCargoSpace(UnitModel.TROOP) && unit.heldUnits.isEmpty() )
+        continue; // Don't bother with moving infantry transports around until they're called.
+
       // If no attack/capture actions are available now, just move towards a non-allied building.
       Utils.sortLocationsByTravelTime(unit, unownedProperties, gameMap);
       if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
@@ -169,7 +214,16 @@ public class InfantrySpamAI implements AIController
                       && !capturingProperties.contains(goal)                // We aren't already capturing it.
                       && (path != null));                       // We can reach it.
           log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
+          if( !validTarget )
+          {
+            queueTransitAction(gameMap, unit, goal);
+            validTarget = !actions.isEmpty();
+            log(String.format("      %s at %s via transport? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
+          }
         } while( !validTarget && (index < unownedProperties.size()) );      // Loop until we run out of properties to check.
+
+        if( !actions.isEmpty() )
+          break; // calcTransitAction() can queue actions directly.
 
         if( !validTarget )
         {
@@ -240,4 +294,84 @@ public class InfantrySpamAI implements AIController
     log(String.format("  Action: %s", nextAction));
     return nextAction;
   }
+
+  protected void queueTransitAction(GameMap gameMap, Unit unit, XYCoord goal)
+  {
+    Island goalIsland = rc.getIsland(unit.model.baseMoveType, goal);
+    Island myIsland   = rc.getIsland(unit);
+    if( null == goalIsland )
+      return; // Landlocked boats get to be sad on their own.
+    if( myIsland == goalIsland )
+      return; // Units that can already reach the destination don't need a special ride.
+
+    UnitContext uc = new UnitContext(unit);
+    HashMap<UnitModel, HashSet<XYCoord>> modelTToUnloadPoints = AITransportUtils.findUnloadTiles(gameMap, rc, uc, goal);
+    UnitContext myRide = null;
+    for( Unit possibleTransport : myArmy.getUnits() )
+      if( !transportsPicked.contains(possibleTransport) )
+        if( goalIsland.overlapIslands.contains(rc.getIsland(possibleTransport)) )
+          if( modelTToUnloadPoints.containsKey(possibleTransport.model) // Ignore the possibility of carrying 2 inf. If 2 are available, they can load on the same turn.
+              && possibleTransport.heldUnits.isEmpty() )
+          {
+            // Note that unit order is consistent, so I shouldn't have transports changing their minds too much.
+            myRide = new UnitContext(possibleTransport);
+            transportsPicked.add(myRide.unit);
+            break;
+          }
+    if( modelTToUnloadPoints.isEmpty() )
+      return; // No dropping is possible
+
+    // No transport? That's fine; we can try to buy one.
+    if( null == myRide )
+    {
+      boolean includeFriendlyOccupied = false;
+      CommanderProductionInfo CPI = new CommanderProductionInfo(myArmy, gameMap, includeFriendlyOccupied);
+      for( UnitModel modelT : modelTToUnloadPoints.keySet() )
+      {
+        ArrayList<MapLocation> modelTsources = CPI.getAllFacilitiesFor(modelT);
+        for( MapLocation loc : modelTsources )
+        {
+          XYCoord locXYC = loc.getCoordinates();
+          if( !goalIsland.overlapIslands.contains(rc.getIsland(modelT.baseMoveType, locXYC)) ) // Ignore HQ bboats for simplicity
+            continue;
+          Commander buyer = loc.getOwner();
+          if( buyer.getBuyCost(modelT, locXYC) <= myArmy.money )
+          {
+            actions.offer( new GameAction.UnitProductionAction(buyer, modelT, locXYC) );
+            myRide = new UnitContext(buyer, modelT);
+            myRide.setCoord(locXYC);
+            break; // We can plan the first move action now
+          }
+        }
+      }
+    }
+
+    if( null == myRide )
+      return; // Oh well, give up
+
+    // We have a transport, so figure out the intercept point and move toward it.
+    HashMap<XYCoord, InterceptPaths> loadPoints = AITransportUtils.findFirstLoadIntercepts(gameMap, rc, myRide, uc);
+    HashSet<SearchNode> unloadPaths = AITransportUtils.findShortestUnloadTrips(gameMap, myRide, loadPoints, modelTToUnloadPoints.get(myRide.model));
+
+    for( SearchNode snU : unloadPaths )
+    {
+      GamePath up = snU.getMyPath();
+      XYCoord loadPoint = up.getWaypoint(0);
+      GameAction moveT = null;
+      if( null != myRide.unit && !myRide.unit.isTurnOver )
+        moveT = AIUtils.moveTowardLocation(myRide.unit, loadPoint, gameMap);
+
+      HashSet<XYCoord> exclusions = new HashSet<>();
+      exclusions.add(loadPoint);
+      exclusions.add(new XYCoord(unit));
+      GameAction moveC = AIUtils.moveTowardLocation(unit, goal, gameMap, exclusions);
+      if( null == moveC ) // We need to make sure the cargo moves first, since it might need to vacate loadPoint.
+        continue;
+      if( null != moveT )
+        actions.offer(moveT);
+      actions.offer(moveC);
+      break;
+    }
+  } // ~calcTransitAction
+
 }
