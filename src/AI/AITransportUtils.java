@@ -163,7 +163,10 @@ public class AITransportUtils
     PathCalcParams pcp = new PathCalcParams(transport, map);
     pcp.canTravelThroughEnemies = true;
     for( var p : pickups.keySet() )
+    {
+      pcp.start = p; // Arbitrary; just make sure we don't path from the transport's current position.
       pcp.extraStarts.add(pickups.get(p).transport); // It might be relevant to consider the data in the actual SearchNode at some point, in case pickups spans multiple turn options, but this problem is already too hard.
+    }
 
     for( int i = 0; i < 10; ++i )
     {
