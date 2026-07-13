@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import AI.ReachabilityCache;
+import AI.ReachabilityCache.Island;
 import CommandingOfficers.CommanderLibrary;
 import Engine.Army;
 import Engine.GameInstance;
@@ -227,8 +228,9 @@ public class MapSelectMenuArtist
   }
 
   static MapInfo islandMapID = null;
-  static ArrayList<ArrayList<XYCoord>> islandList = new ArrayList<>();
-  public static void drawReachabilityZones(Graphics g, int baseX, int baseY, MapInfo mapInfo, double tileSize)
+  static ArrayList<ArrayList<Island>> islandListList = new ArrayList<>();
+  @SuppressWarnings("unused")
+  private static void drawReachabilityZones(Graphics g, int baseX, int baseY, MapInfo mapInfo, double tileSize)
   {
     // Combine all islands contents for each movetype, and cache them.
     if ( mapInfo != islandMapID )
@@ -241,31 +243,30 @@ public class MapSelectMenuArtist
       var testMap  = new MapMaster(armies, mapInfo);
       var testGame = new GameInstance(armies, testMap);
       ReachabilityCache rc = new ReachabilityCache(testGame);
-      islandList.clear();
+      islandListList.clear();
       for( var mt : rc.islandSetsByMoveType.keySet() )
-      {
-        ArrayList<XYCoord> superIsland = new ArrayList<>();
-        for( var island : rc.islandSetsByMoveType.get(mt) )
-          superIsland.addAll(island.coords);
-        islandList.add(superIsland);
-      }
+        islandListList.add(rc.islandSetsByMoveType.get(mt));
       islandMapID = mapInfo;
     }
 
-    g.setColor(Color.WHITE);
     int distance = 0;
     long thisTime = System.currentTimeMillis();
     int animIndex = (int) ((thisTime / 1000) & Integer.MAX_VALUE);
 
     // Do the actual island coordinate marking, scaled with the scaled minimap.
-    ArrayList<XYCoord> is = islandList.get(animIndex % islandList.size());
-    for( XYCoord coord : is )
-    {
-      int x = (int) (baseX + coord.x * tileSize - distance);
-      int y = (int) (baseY + coord.y * tileSize - distance);
-      int s = (int) (tileSize + distance * 2);
-      g.drawRect(x, y, s, s);
-    }
+    ArrayList<Island> islandList = islandListList.get(animIndex % islandListList.size());
+    for( Island is : islandList )
+      for( XYCoord coord : is.coords )
+      {
+        if( is.capturableCoords.contains(coord) )
+          g.setColor(Color.RED);
+        else
+          g.setColor(Color.WHITE);
+        int x = (int) (baseX + coord.x * tileSize - distance);
+        int y = (int) (baseY + coord.y * tileSize - distance);
+        int s = (int) (tileSize + distance * 2);
+        g.drawRect(x, y, s, s);
+      }
   }
 
   private static void countCapturables(MapInfo mapInfo, Map<TerrainType, Integer> propCounts)

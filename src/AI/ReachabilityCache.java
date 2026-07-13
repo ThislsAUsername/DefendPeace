@@ -152,7 +152,7 @@ public class ReachabilityCache implements Serializable
           {
             var islandXYC = new XYCoord(reached.x, reached.y); // Drop the extra SearchNode params to save a little memory.
             island.coords.add(islandXYC);
-            if( env.terrainType.isCapturable() )
+            if( map.getEnvironment(islandXYC).terrainType.isCapturable() )
               island.capturableCoords.add(islandXYC);
             coordToIslandByMoveType[islandXYC.x][islandXYC.y].put(mt, island);
           }
