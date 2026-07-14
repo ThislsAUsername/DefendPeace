@@ -9,7 +9,6 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.Army;
 import Engine.GameAction;
-import Engine.GameActionSet;
 import Engine.GamePath;
 import Engine.PathCalcParams;
 import Engine.UnitActionFactory;
@@ -130,33 +129,24 @@ public class InfantrySpamAI implements AIController
         continue; // No actions for units that are stale or out of bounds
       boolean foundAction = false;
 
-      // Find the possible unit actions.
-      Map<XYCoord, ArrayList<GameActionSet> > possibleActions = AIUtils.getAvailableUnitActions(unit, gameMap);
+      boolean includeOccupiedDestinations = false;
+      Map<UnitActionFactory, ArrayList<GameAction>> unitActionsByType = AIUtils.getAvailableUnitActionsByType(unit, gameMap, includeOccupiedDestinations);
 
-      for( XYCoord coord : possibleActions.keySet() )
+      // See if we have the option to attack.
+      ArrayList<GameAction> attackActions = unitActionsByType.get(UnitActionFactory.ATTACK);
+      if( null != attackActions && !attackActions.isEmpty() )
       {
-        // Figure out what I can do here.
-        ArrayList<GameActionSet> actionSets = possibleActions.get(coord);
-        for( GameActionSet actionSet : actionSets )
-        {
-          // See if we have the option to attack.
-          if( actionSet.getSelected().getType() == UnitActionFactory.ATTACK )
-          {
-            actions.offer(actionSet.getSelected() );
-            foundAction = true;
-            break;
-          }
+        actions.offer(attackActions.get(0));
+        foundAction = true;
+      }
+      if(foundAction)break; // Only one action per getNextAction() call, to avoid overlap.
 
-          // Otherwise, see if we have the option to capture.
-          if( actionSet.getSelected().getType() == UnitActionFactory.CAPTURE )
-          {
-            actions.offer(actionSet.getSelected() );
-            capturingProperties.add(coord);
-            foundAction = true;
-            break;
-          }
-        }
-        if(foundAction)break; // Only allow one action per unit.
+      // Otherwise, see if we have the option to capture.
+      ArrayList<GameAction> captureActions = unitActionsByType.get(UnitActionFactory.CAPTURE);
+      if( null != captureActions && !captureActions.isEmpty() )
+      {
+        actions.offer(captureActions.get(0));
+        foundAction = true;
       }
       if(foundAction)break; // Only one action per getNextAction() call, to avoid overlap.
 
