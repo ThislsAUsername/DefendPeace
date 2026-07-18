@@ -210,11 +210,11 @@ public class InfantrySpamAI implements AIController
         {
           goal = unownedProperties.get(index++);
           path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
-          validTarget = (myArmy.isEnemy(gameMap.getLocation(goal).getOwner()) // Property is not allied.
-                      && !capturingProperties.contains(goal)                // We aren't already capturing it.
-                      && (path != null));                       // We can reach it.
+          boolean desirable = myArmy.isEnemy(gameMap.getLocation(goal).getOwner()); // Property is not allied.
+          desirable &= !capturingProperties.contains(goal); // We aren't already capturing it.
+          validTarget = desirable && (path != null); // We can reach it.
           log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
-          if( !validTarget )
+          if( !validTarget && desirable )
           {
             queueTransitAction(gameMap, unit, goal);
             validTarget = !actions.isEmpty();
