@@ -332,8 +332,11 @@ public class InfantrySpamAI implements AIController
         for( MapLocation loc : modelTsources )
         {
           XYCoord locXYC = loc.getCoordinates();
-          if( !goalIsland.overlapIslands.contains(rc.getIsland(modelT.baseMoveType, locXYC)) ) // Ignore HQ bboats for simplicity
-            continue;
+          Island builtTransportIsland = rc.getIsland(modelT.baseMoveType, locXYC);
+          if( !goalIsland.overlapIslands.contains(builtTransportIsland) )
+            continue; // Can't reach the destination.
+          if( !myIsland.overlapIslands.contains(builtTransportIsland) )
+            continue; // Can't load into the transport.
           Commander buyer = loc.getOwner();
           if( buyer.getBuyCost(modelT, locXYC) <= myArmy.money )
           {
