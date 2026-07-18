@@ -346,6 +346,8 @@ public class InfantrySpamAI implements AIController
             break; // We can plan the first move action now
           }
         }
+        if( null != myRide )
+          break; // Buying two transports for one dude is a bit much
       }
     }
 
