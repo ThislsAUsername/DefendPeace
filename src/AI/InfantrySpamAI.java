@@ -176,7 +176,7 @@ public class InfantrySpamAI implements AIController
         continue; // Don't bother with moving infantry transports around until they're called.
 
       // If no attack/capture actions are available now, just move towards a non-allied building.
-      Utils.sortLocationsByTravelTime(unit, unownedProperties, gameMap);
+      Utils.sortLocationsByDistance(new XYCoord(unit), unownedProperties); // Landers want this ordering, and support it for infantry.
       if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
       {
         log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
@@ -289,8 +289,9 @@ public class InfantrySpamAI implements AIController
 
   protected GameAction calcUnloadAction(GameMap gameMap, Unit unit, Map<UnitActionFactory, ArrayList<GameAction>> unitActionsByType, XYCoord goal)
   {
-    Island goalIsland = rc.getIsland(unit.model.baseMoveType, goal);
-    var myIslands = rc.getAdjacentIslands(new UnitContext(unit), gameMap);
+    Unit cargo = unit.heldUnits.get(0);
+    Island goalIsland = rc.getIsland(cargo.model.baseMoveType, goal);
+    var myIslands     = rc.getAdjacentIslands(new UnitContext(unit), gameMap);
     if( null == goalIsland || myIslands.isEmpty() )
       return null; // Ignore HQ bboats
     boolean goalReachable = myIslands.contains(goalIsland);
@@ -305,7 +306,7 @@ public class InfantrySpamAI implements AIController
     ip.cargo     = new SearchNode(unit.x, unit.y, 0);
     ip.transport = new SearchNode(unit.x, unit.y, 0);
     loadPoints.put(new XYCoord(unit), ip);
-    HashMap<UnitModel, HashSet<XYCoord>> modelTToUnloadPoints = AITransportUtils.findUnloadTiles(gameMap, rc, new UnitContext(unit.heldUnits.get(0)), goal);
+    HashMap<UnitModel, HashSet<XYCoord>> modelTToUnloadPoints = AITransportUtils.findUnloadTiles(gameMap, rc, new UnitContext(cargo), goal);
     HashSet<SearchNode> unloadPaths = AITransportUtils.findShortestUnloadTrips(gameMap, new UnitContext(unit), loadPoints, modelTToUnloadPoints.get(unit.model));
 
     ArrayList<GameAction> unloadActions = unitActionsByType.get(UnitActionFactory.UNLOAD);
