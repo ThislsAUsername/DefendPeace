@@ -26,6 +26,7 @@ public class AITransportUtils
     var grms = map.game.rules.unitModelScheme.getGameReadyModels();
     var transportTypes = new ArrayList<UnitModel>();
 
+    // Grab relevant transport types for this cargo.
     for( var modelT : grms.unitModels )
     {
       if( modelT.baseCargoCapacity < 1 )
@@ -35,6 +36,7 @@ public class AITransportUtils
       transportTypes.add(modelT);
     }
 
+    // Figure out the tiles this transport could drop off dudes from.
     for( var modelT : transportTypes )
     {
       var destIsland = rc.getIsland(cargo.model.baseMoveType, dest);
@@ -116,6 +118,7 @@ public class AITransportUtils
     if( transport.isTurnOver || null == cargo.unit )
       turnsCargo += 1;
 
+    // Expand the units' reachable area 1 turn at a time, until they overlap on a loadable tile.
     PathCalcParams pcpCargo = new PathCalcParams(cargo, map);
     PathCalcParams pcpTransport = new PathCalcParams(transport, map);
     // I think accounting for current enemy blocking doesn't make a lot of sense for multi-turn calcs.
@@ -160,6 +163,7 @@ public class AITransportUtils
   {
     var result = new HashSet<SearchNode>();
 
+    // We use extraStarts here because we don't know which load tile will give us the shortest trip, and this allows calculating that in one shot.
     PathCalcParams pcp = new PathCalcParams(transport, map);
     pcp.canTravelThroughEnemies = true;
     for( var p : pickups.keySet() )
@@ -168,6 +172,7 @@ public class AITransportUtils
       pcp.extraStarts.add(pickups.get(p).transport); // It might be relevant to consider the data in the actual SearchNode at some point, in case pickups spans multiple turn options, but this problem is already too hard.
     }
 
+    // Add turns until we reach an unload tile.
     for( int i = 0; i < 10; ++i )
     {
       pcp.maxTurns = 1 + i;

@@ -66,6 +66,10 @@ public class ReachabilityCache implements Serializable
     return islandByMoveType.getOrDefault(mt, null);
   }
 
+  /**
+   * This is usually going to be a set of 1, because your unit is on one island.
+   * <p>The exception to this is if your unit is on a non-traversible tile splitting two islands.
+   */
   public HashSet<Island> getAdjacentIslands(UnitContext uc, GameMap map)
   {
     return getAdjacentIslands(uc.model.baseMoveType, uc.coord, map);
@@ -94,28 +98,13 @@ public class ReachabilityCache implements Serializable
     var ums = gi.rules.unitModelScheme;
     GameReadyModels grms = ums.getGameReadyModels();
 
-    Map<MoveType, HashSet<MoveType>> transporterMovetypesByMoveType = new HashMap<>(); // Don't wanna delete the code that uses this yet
     for( var cargo : grms.unitModels )
     {
       if( islandSetsByMoveType.containsKey(cargo.baseMoveType) )
         continue;
       islandSetsByMoveType.put(cargo.baseMoveType, new ArrayList<>());
-      transporterMovetypesByMoveType.put(cargo.baseMoveType, new HashSet<>());
     }
 
-    for( var modelT : grms.unitModels )
-    {
-      if( modelT.baseCargoCapacity < 1 )
-        continue;
-      for( var cargo : grms.unitModels )
-      {
-        if( !modelT.isCargoRole(cargo.role) )
-          continue;
-        var cargoCarriers = transporterMovetypesByMoveType.get(cargo.baseMoveType);
-        cargoCarriers.add(modelT.baseMoveType);
-        transporterMovetypesByMoveType.put(cargo.baseMoveType, cargoCarriers);
-      }
-    }
     calcIslands(gi.gameMap);
   }
 
@@ -130,6 +119,8 @@ public class ReachabilityCache implements Serializable
       for( int y = 0; y < map.mapHeight; y++ )
         coordToIslandByMoveType[x][y] = new HashMap<>();
 
+    // For each tile, see if it's part of an island for each movetype.
+    // For each island, find the rest of the tiles in the island so we don't have to recalculate all that.
     for( int x = 0; x < map.mapWidth; x++ )
     {
       for( int y = 0; y < map.mapHeight; y++ )
@@ -140,7 +131,7 @@ public class ReachabilityCache implements Serializable
         for( var mt : islandSetsByMoveType.keySet() ) // all unique movetypes
         {
           if( !mt.canStandOn(env) )
-            continue;
+            continue; // This might not look like it accounts for teletiles, but teletiles aren't actually part of any island: they just connect islands.
           if( coordIslandMap.containsKey(mt) )
             continue; // Already part of an island
           PathCalcParams pcp = new PathCalcParams(mt, 3, xyc, map); // Chosen by a fair die roll. Guaranteed to be random.
