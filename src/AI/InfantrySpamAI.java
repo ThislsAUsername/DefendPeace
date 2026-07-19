@@ -403,7 +403,7 @@ public class InfantrySpamAI implements AIController
       HashSet<XYCoord> exclusions = new HashSet<>();
       exclusions.add(loadPoint);
       exclusions.add(new XYCoord(unit));
-      GameAction moveC = AIUtils.moveTowardLocation(unit, goal, gameMap, exclusions);
+      GameAction moveC = AIUtils.moveTowardLocation(unit, loadPoint, gameMap, exclusions);
       if( null == moveC ) // We need to make sure the cargo moves first, since it might need to vacate loadPoint.
         continue;
       if( null != moveT )
