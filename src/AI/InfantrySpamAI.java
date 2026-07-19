@@ -26,6 +26,7 @@ import Terrain.TerrainType;
 import Units.Unit;
 import Units.UnitContext;
 import Units.UnitModel;
+import lombok.var;
 
 /**
  *  Just build tons of Infantry and try to rush the opponent.
@@ -162,28 +163,7 @@ public class InfantrySpamAI implements AIController
       }
       if(foundAction)break; // Only one action per getNextAction() call, to avoid overlap.
 
-      // Otherwise², unload
-      ArrayList<GameAction> unloadActions = unitActionsByType.get(UnitActionFactory.UNLOAD);
-      if( null != unloadActions && !unloadActions.isEmpty() )
-      {
-        for( GameAction action : unloadActions )
-        {
-          // Rather than dig into the unload action's bits, just assume we're dropping off the first cargo unit.
-          XYCoord dropTarget = action.getTargetLocation();
-          Island  dropIsland = rc.getIsland(unit.heldUnits.get(0).model.baseMoveType, dropTarget);
-          for( XYCoord capTarget : dropIsland.capturableCoords )
-            if( unownedProperties.contains(capTarget) )
-            {
-              actions.offer(unloadActions.get(0));
-              foundAction = true;
-              break;
-            }
-          if(foundAction)break; // Only one unload per unit.
-        }
-      }
-      if(foundAction)break; // Only one action per getNextAction() call, to avoid overlap.
-
-      // Otherwise³, see if we have the option to hop in a transport.
+      // Otherwise², see if we have the option to hop in a transport.
       ArrayList<GameAction> loadActions = unitActionsByType.get(UnitActionFactory.LOAD);
       if( null != loadActions && !loadActions.isEmpty() )
       {
@@ -209,21 +189,33 @@ public class InfantrySpamAI implements AIController
         do
         {
           goal = unownedProperties.get(index++);
-          path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
-          boolean desirable = myArmy.isEnemy(gameMap.getLocation(goal).getOwner()); // Property is not allied.
-          desirable &= !capturingProperties.contains(goal); // We aren't already capturing it.
-          validTarget = desirable && (path != null); // We can reach it.
-          log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
-          if( !validTarget && desirable )
+          if( !unit.heldUnits.isEmpty() )
           {
-            queueTransitAction(gameMap, unit, goal);
-            validTarget = !actions.isEmpty();
-            log(String.format("      %s at %s via transport? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
+            GameAction toUnload = calcUnloadAction(gameMap, unit, unitActionsByType, goal);
+            if( null != toUnload )
+            {
+              actions.offer(toUnload);
+              validTarget = true;
+            }
+          }
+          else
+          {
+            path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
+            boolean desirable = myArmy.isEnemy(gameMap.getLocation(goal).getOwner()); // Property is not allied.
+            desirable &= !capturingProperties.contains(goal); // We aren't already capturing it.
+            validTarget = desirable && (path != null); // We can reach it.
+            log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
+            if( !validTarget && desirable )
+            {
+              queueTransitAction(gameMap, unit, goal);
+              validTarget = !actions.isEmpty();
+              log(String.format("      %s at %s via transport? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
+            }
           }
         } while( !validTarget && (index < unownedProperties.size()) );      // Loop until we run out of properties to check.
 
         if( !actions.isEmpty() )
-          break; // calcTransitAction() can queue actions directly.
+          break; // calcTransitAction() and the unload logic can queue actions directly.
 
         if( !validTarget )
         {
@@ -293,6 +285,47 @@ public class InfantrySpamAI implements AIController
     GameAction nextAction = actions.poll();
     log(String.format("  Action: %s", nextAction));
     return nextAction;
+  }
+
+  protected GameAction calcUnloadAction(GameMap gameMap, Unit unit, Map<UnitActionFactory, ArrayList<GameAction>> unitActionsByType, XYCoord goal)
+  {
+    Island goalIsland = rc.getIsland(unit.model.baseMoveType, goal);
+    var myIslands = rc.getAdjacentIslands(new UnitContext(unit), gameMap);
+    if( null == goalIsland || myIslands.isEmpty() )
+      return null; // Ignore HQ bboats
+    boolean goalReachable = myIslands.contains(goalIsland);
+    for (var is : myIslands)
+      goalReachable |= is.overlapIslands.contains(goalIsland);
+    if( !goalReachable )
+      return null;
+
+    // This is a kind of inefficient/wak way of doing this, but I just wanna have something working to PR.
+    var loadPoints = new HashMap<XYCoord, InterceptPaths>();
+    var ip = new InterceptPaths();
+    ip.cargo     = new SearchNode(unit.x, unit.y, 0);
+    ip.transport = new SearchNode(unit.x, unit.y, 0);
+    loadPoints.put(new XYCoord(unit), ip);
+    HashMap<UnitModel, HashSet<XYCoord>> modelTToUnloadPoints = AITransportUtils.findUnloadTiles(gameMap, rc, new UnitContext(unit.heldUnits.get(0)), goal);
+    HashSet<SearchNode> unloadPaths = AITransportUtils.findShortestUnloadTrips(gameMap, new UnitContext(unit), loadPoints, modelTToUnloadPoints.get(unit.model));
+
+    ArrayList<GameAction> unloadActions = unitActionsByType.get(UnitActionFactory.UNLOAD);
+    if( null != unloadActions && !unloadActions.isEmpty() )
+      for( GameAction action : unloadActions )
+      {
+        // Rather than dig into the unload action's bits, just assume we're dropping off the first cargo unit.
+        if( unloadPaths.contains(action.getMoveLocation()) )
+          return action;
+      }
+
+    // If we're not able to unload, just move in the appropriate direction.
+    for( SearchNode snU : unloadPaths )
+    {
+      GameAction move = AIUtils.moveTowardLocation(unit, snU, gameMap);
+      if( null != move )
+        return move;
+    }
+
+    return null;
   }
 
   protected void queueTransitAction(GameMap gameMap, Unit unit, XYCoord goal)
