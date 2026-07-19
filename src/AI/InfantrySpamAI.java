@@ -164,7 +164,7 @@ public class InfantrySpamAI implements AIController
       }
       if(foundAction)break; // Only one action per getNextAction() call, to avoid overlap.
 
-      // Otherwise², see if we have the option to hop in a transport.
+      // Otherwise², see if we have the option to hop in a transport, or capture something underneath it (for softlock prevention).
       ArrayList<GameAction> loadActions = unitActionsByType.get(UnitActionFactory.LOAD);
       if( null != loadActions && !loadActions.isEmpty() )
       {
@@ -213,7 +213,7 @@ public class InfantrySpamAI implements AIController
           goal = unownedProperties.get(index++);
           if( !unit.heldUnits.isEmpty() )
           {
-            GameAction toUnload = calcUnloadAction(gameMap, unit, unitActionsByType, goal);
+            GameAction toUnload = calcUnloadAction(gameMap, unit, unitActionsByType, goal); // Includes approaching the unload zone.
             if( null != toUnload )
             {
               actions.offer(toUnload);
@@ -229,7 +229,7 @@ public class InfantrySpamAI implements AIController
             log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
             if( !validTarget && desirable )
             {
-              queueTransitAction(gameMap, unit, goal);
+              queueTransportEnablerActions(gameMap, unit, goal); // Includes production, which seems fine to prioritize since we have stranded units.
               validTarget = !actions.isEmpty();
               log(String.format("      %s at %s via transport? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
             }
@@ -237,7 +237,7 @@ public class InfantrySpamAI implements AIController
         } while( !validTarget && (index < unownedProperties.size()) );      // Loop until we run out of properties to check.
 
         if( !actions.isEmpty() )
-          break; // calcTransitAction() and the unload logic can queue actions directly.
+          break; // Transport-y logic can queue actions directly.
 
         if( !validTarget )
         {
@@ -311,7 +311,7 @@ public class InfantrySpamAI implements AIController
 
   protected GameAction calcUnloadAction(GameMap gameMap, Unit unit, Map<UnitActionFactory, ArrayList<GameAction>> unitActionsByType, XYCoord goal)
   {
-    Unit cargo = unit.heldUnits.get(0);
+    Unit cargo        = unit.heldUnits.get(0);
     Island goalIsland = rc.getIsland(cargo.model.baseMoveType, goal);
     var myIslands     = rc.getAdjacentIslands(new UnitContext(unit), gameMap);
     if( null == goalIsland || myIslands.isEmpty() )
@@ -323,6 +323,7 @@ public class InfantrySpamAI implements AIController
       return null;
 
     // This is a kind of inefficient/wak way of doing this, but I just wanna have something working to PR.
+    // See the other function for what I designed the API for.
     var loadPoints = new HashMap<XYCoord, InterceptPaths>();
     var ip = new InterceptPaths();
     ip.cargo     = new SearchNode(unit.x, unit.y, 0);
@@ -351,15 +352,16 @@ public class InfantrySpamAI implements AIController
     return null;
   }
 
-  protected void queueTransitAction(GameMap gameMap, Unit unit, XYCoord goal)
+  protected void queueTransportEnablerActions(GameMap gameMap, Unit unit, XYCoord goal)
   {
     Island goalIsland = rc.getIsland(unit.model.baseMoveType, goal);
     Island myIsland   = rc.getIsland(unit);
     if( null == goalIsland )
-      return; // Landlocked boats get to be sad on their own.
+      return; // Unit cannot even reach the goal with help; landlocked boats get to be sad on their own.
     if( myIsland == goalIsland )
       return; // Units that can already reach the destination don't need a special ride.
 
+    // For existing transports: Select the first one that hasn't been scheduled this turn, could unload, and could pick the cargo up.
     UnitContext uc = new UnitContext(unit);
     HashMap<UnitModel, HashSet<XYCoord>> modelTToUnloadPoints = AITransportUtils.findUnloadTiles(gameMap, rc, uc, goal);
     UnitContext myRide = null;
@@ -414,6 +416,8 @@ public class InfantrySpamAI implements AIController
     HashMap<XYCoord, InterceptPaths> loadPoints = AITransportUtils.findFirstLoadIntercepts(gameMap, rc, myRide, uc);
     HashSet<SearchNode> unloadPaths = AITransportUtils.findShortestUnloadTrips(gameMap, myRide, loadPoints, modelTToUnloadPoints.get(myRide.model));
 
+    // Here, we've either found and scheduled a transport, or bought one.
+    // Move the cargo (and transport, if able) towards the rendezvous point.
     for( SearchNode snU : unloadPaths )
     {
       GamePath up = snU.getMyPath();
