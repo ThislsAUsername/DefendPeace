@@ -13,6 +13,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderAbility;
 import Engine.Army;
 import Engine.GameAction;
+import Engine.GameActionSet;
 import Engine.GamePath;
 import Engine.PathCalcParams;
 import Engine.UnitActionFactory;
@@ -167,7 +168,28 @@ public class InfantrySpamAI implements AIController
       ArrayList<GameAction> loadActions = unitActionsByType.get(UnitActionFactory.LOAD);
       if( null != loadActions && !loadActions.isEmpty() )
       {
-        actions.offer(loadActions.get(0));
+        GameAction la = loadActions.get(0);
+        if( unit.hasActionType(UnitActionFactory.CAPTURE) )
+        {
+          XYCoord moveLoc = la.getMoveLocation();
+          var path = new PathCalcParams(unit, gameMap).findShortestPath(moveLoc);
+          boolean ignoreResident = true;
+          GameActionSet potentialCaps = UnitActionFactory.CAPTURE.getPossibleActions(gameMap, path, unit, ignoreResident);
+          var resident = gameMap.getResident(moveLoc); // LOAD requires a transport there.
+          if ( null != potentialCaps && !resident.isTurnOver && resident.CO.army == this.myArmy )
+          {
+            HashSet<XYCoord> exclusions = new HashSet<>();
+            exclusions.add(moveLoc);
+            GameAction moveT = AIUtils.moveTowardLocation(resident, moveLoc, gameMap, exclusions);
+            if( null != moveT )
+            {
+              actions.offer(moveT); // Move the transport so I can get the juicy bits.
+              actions.offer(potentialCaps.getSelected());
+            }
+          }
+        }
+        if( actions.isEmpty() ) // No cap action, so do the boring thing.
+          actions.offer(la);
         foundAction = true;
       }
       if(foundAction)break; // Only one action per getNextAction() call, to avoid overlap.
