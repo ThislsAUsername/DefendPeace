@@ -1,6 +1,7 @@
 package Engine.Combat;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import CommandingOfficers.Commander;
@@ -11,6 +12,7 @@ import Terrain.GameMap;
 import Terrain.MapLocation;
 import Terrain.TerrainType;
 import Units.UnitContext;
+import lombok.var;
 
 /**
  * CombatContext exists to allow COs to modify the fundamental parameters of an instance of combat.
@@ -27,10 +29,29 @@ public class CombatContext
     };
   };
 
+  /**
+   * Since the simple attacker/defender handling logic is inflexible, let's get a real time/initiative system in here.
+   * <p>Damage from attacks will apply at the end of the *next* timepoint, though it could be amusing to have slower/faster attacks.
+   */
+  public static enum InitiativeType
+  {
+    // Negative initiative is dumb
+    COUNTER_BREAK,     // 0: Counter Break
+    WEIRD_1, WEIRD_2,  // 1,2: unused, since they only exist to interact weirdly with Counter Break/init 4
+    FIRSTSTRIKE,       // 3: normal firststrike
+    FIRSTSTRIKE_SIMUL, // 4: simultaneous with normal firststrike, but hits before a normal counterattack fires
+    COUNTER_SIMUL,     // 5: fires after normal firststrike hits, but simultaneous with a normal counterattack
+    COUNTER,           // 6: normal counterattack
+    // 7: "why"
+    // 8+: fires after a normal counterattack hits
+  };
+
   public UnitContext attacker, defender;
+  // We cannot assume that the attacker and defender contexts have a real unit to act as their ID, so we have to just track the attacks separately.
+  // Each UC needs to be an independent clone, so that they can have their HP and ammo counts modified separately
+  public HashMap<Integer, UnitContext> timeStepToAttack = new HashMap<>(), timeStepToCounter = new HashMap<>();
   public final GameInstance gameInstance; // For randomness; only needed when doing true combat calcs
   public final GameMap gameMap; // for reference, not weirdness
-  public boolean canCounter = false;
   public int battleRange;
   public CalcType calcType;
 
@@ -75,10 +96,12 @@ public class CombatContext
       defender.chooseWeapon(attacker.model, battleRange);
     }
 
+    timeStepToAttack.put(InitiativeType.FIRSTSTRIKE.ordinal(), new UnitContext(attacker));
+
     // Only attacks at point-blank range can be countered
     if( (1 == battleRange) && (null != defender.weapon) )
     {
-      canCounter = true;
+      timeStepToCounter.put(InitiativeType.COUNTER.ordinal(), new UnitContext(defender));
     }
   }
   public CombatContext(CombatContext other)
@@ -87,7 +110,10 @@ public class CombatContext
     defender = other.defender;
     gameInstance = other.gameInstance;
     gameMap = other.gameMap;
-    canCounter = other.canCounter;
+    for( var tsToUC : other.timeStepToAttack.entrySet() )
+      timeStepToAttack.put(tsToUC.getKey(), new UnitContext(tsToUC.getValue()));
+    for( var tsToUC : other.timeStepToCounter.entrySet() )
+      timeStepToCounter.put(tsToUC.getKey(), new UnitContext(tsToUC.getValue()));
     battleRange = other.battleRange;
     calcType = other.calcType;
   }
@@ -117,23 +143,6 @@ public class CombatContext
     for( UnitModifier mod : dMods )
       mod.changeCombatContext(this, defender);
     return this;
-  }
-
-  /**
-   * For when you want to confuse who started the fight
-   */
-  public void swapCombatants()
-  {
-    UnitContext minion = defender;
-
-    defender = attacker;
-    attacker = minion;
-
-    // Since we're swapping the combatants, we also need to swap the prediction polarity
-    if( calcType == CalcType.PESSIMISTIC )
-      calcType = CalcType.OPTIMISTIC;
-    else if( calcType == CalcType.OPTIMISTIC )
-      calcType = CalcType.PESSIMISTIC;
   }
 
   public static void setTowerCounts(GameMap map, UnitContext uc)
@@ -168,23 +177,6 @@ public class CombatContext
     UnitContext dClone = new UnitContext(defender);
 
     return buildBattleParams(aClone, dClone, false);
-  }
-
-  public BattleParams getCounterAttack(int damageDealt, boolean isSim)
-  {
-    if( !canCounter )
-      return null;
-
-    UnitContext aClone = new UnitContext(defender);
-    aClone.damageHealth(damageDealt, isSim);
-
-    // If the counterattacker is dead, there's no counterattack
-    if( 1 > aClone.getHealth() )
-      return null;
-
-    UnitContext dClone = new UnitContext(attacker);
-
-    return buildBattleParams(aClone, dClone, true);
   }
 
   private BattleParams buildBattleParams(UnitContext aClone, UnitContext dClone, boolean isCounter)

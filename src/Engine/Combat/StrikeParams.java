@@ -77,7 +77,7 @@ public class StrikeParams
   public int luckBase = 0; // Luck value if you roll 0
   public int luckRolled = 0; // The number we plug into the RNG for luck damage
   public int luckRolledBad = 0; // The number we plug into the RNG for negative luck damage
-  public final boolean isCounter;
+  public final boolean isCounter; // Implies that you did not initiate the attack, not that you've already been shot.
   /**
    * Implies luck doesn't scale down with HP and isn't reduced by CO-based defense.<p>
    * It's worth noting this is based on testing/observation, not reverse engineering.<p>
