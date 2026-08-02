@@ -25,6 +25,7 @@ public class GameOptionSetupController implements IController
   private GameOption<Weathers> weatherOption = new GameOption<Weathers>("Weather", Weathers.values(), 0);
   private GameOption<UnitModelScheme> unitSchemeOption;
   private GameOption<TagMode> tagsOption = new GameOption<TagMode>("Tag Mode", TagMode.values(), 0);
+  private GameOption<Boolean> simulCountersOption = new GameOptionBool("Simulcounters?", false);
   private GameOption<Boolean> securityOption = new GameOptionBool("Protect Turns?", false);
 
   // Get a list of all GameOptions.
@@ -51,8 +52,8 @@ public class GameOptionSetupController implements IController
     for (int i = 0; !unitSchemeOption.getSelectedObject().schemeValid && i < unitSchemeOption.size(); ++i )
       unitSchemeOption.setSelectedOption(i);
 
-    gameOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, unitCapOption, tagsOption, securityOption};
-    saveOrderOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, tagsOption, securityOption, unitCapOption};
+    gameOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, unitCapOption, tagsOption, simulCountersOption, securityOption};
+    saveOrderOptions = new GameOption<?>[] {fowOption, startingFundsOption, incomeOption, weatherOption, unitSchemeOption, tagsOption, securityOption, unitCapOption, simulCountersOption};
     optionSelector = new OptionSelector( gameOptions.length );
 
     // Read in the last settings we used on this map, if available
@@ -139,6 +140,7 @@ public class GameOptionSetupController implements IController
         gameBuilder.defaultWeather = (Weathers)weatherOption.getSelectedObject();
         gameBuilder.unitModelScheme = unitSchemeOption.getSelectedObject();
         gameBuilder.tagMode = (TagMode)tagsOption.getSelectedObject();
+        gameBuilder.simultaneousCounters = simulCountersOption.getSelectedObject();
         gameBuilder.isSecurityEnabled = securityOption.getSelectedObject();
         if( null == coSelectMenu )
           coSelectMenu = new PlayerSetupController(gameBuilder, initialPicksMap, changesMade);
