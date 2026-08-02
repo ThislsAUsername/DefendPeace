@@ -86,7 +86,7 @@ public class TestAIConstraints extends TestCase
   private boolean testBuildTooManyMans(AIMaker ai)
   {
     final int unitCap = 1;
-    setupTest(TestRange.getMapInfo(), ai, new GameScenario(new AWBWUnits(), 1000, 1000, unitCap, FogMode.OFF_DOR, TagMode.OFF));
+    setupTest(TestRange.getMapInfo(), ai, new GameScenario(new AWBWUnits(), 1000, 1000, unitCap, FogMode.OFF_DOR, TagMode.OFF, false));
     final Army armyOne = testGame.armies[0];
     armyOne.team = 9;
     testGame.armies[1].team = armyOne.team; // In case we want to test caps > 1; you build up unit count faster when there's no fighting.
