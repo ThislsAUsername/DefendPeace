@@ -101,7 +101,7 @@ public class Sonja extends AW2Commander
   {
     private static final long serialVersionUID = 1L;
     private static final String NAME = "Counter Break";
-    private static final int COST = 0;
+    private static final int COST = 5;
     UnitModifier sightMod, counterMod;
 
     CounterBreak(Sonja commander, CostBasis basis)
