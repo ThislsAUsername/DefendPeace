@@ -64,7 +64,7 @@ public class Sonja extends AWBWCommander
   public void modifyUnitAttack(StrikeParams params)
   {
     params.luckRolledBad += 10;
-    if( params.isCounter )
+    if( params.isCounter && myActiveAbility != myAbilities.get(1) ) // Counter Break disables the multiplier, on cart.
     {
       // BW Sonja's "1.5x" counter only applies to the D2D stats (i.e. not scaling with COP/Tower bonuses), like BW Kanbei's SCOP
       // D2D times 1.5 (1.0*1.5=1.5)
