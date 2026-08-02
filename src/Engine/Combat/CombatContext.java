@@ -96,7 +96,10 @@ public class CombatContext
       defender.chooseWeapon(attacker.model, battleRange);
     }
 
-    timeStepToAttack.put(InitiativeType.FIRSTSTRIKE.ordinal(), new UnitContext(attacker));
+    int firstShotTime = InitiativeType.FIRSTSTRIKE.ordinal();
+    if( map.game.rules.simultaneousCounters )
+      firstShotTime = InitiativeType.COUNTER.ordinal();
+    timeStepToAttack.put(firstShotTime, new UnitContext(attacker));
 
     // Only attacks at point-blank range can be countered
     if( (1 == battleRange) && (null != defender.weapon) )
