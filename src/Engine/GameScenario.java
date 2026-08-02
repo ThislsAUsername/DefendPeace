@@ -19,11 +19,11 @@ public class GameScenario implements Serializable
 
   public GameScenario()
   {
-    this(new AWBWUnits(), DEFAULT_INCOME, DEFAULT_STARTING_FUNDS, DEFAULT_UNIT_CAP, FogMode.OFF_DOR, TagMode.OFF);
+    this(new AWBWUnits(), DEFAULT_INCOME, DEFAULT_STARTING_FUNDS, DEFAULT_UNIT_CAP, FogMode.OFF_DOR, TagMode.OFF, false);
   }
-  public GameScenario(UnitModelScheme scheme, int income, int startFunds, int units, FogMode fog, TagMode tags)
+  public GameScenario(UnitModelScheme scheme, int income, int startFunds, int units, FogMode fog, TagMode tags, boolean simulCounters)
   {
-    rules = new GameRules(scheme, income, startFunds, units, fog, tags);
+    rules = new GameRules(scheme, income, startFunds, units, fog, tags, simulCounters);
   }
 
   public GameEventQueue initTurn(GameMap map)
@@ -71,15 +71,17 @@ public class GameScenario implements Serializable
     public final int unitCap;
     public final UnitModelScheme unitModelScheme;
     public final TagMode tagMode;
+    public final boolean simultaneousCounters;
     public FogMode fogMode;
 
-    public GameRules(UnitModelScheme ums, int income, int startFunds, int units, FogMode fog, TagMode tags)
+    public GameRules(UnitModelScheme ums, int income, int startFunds, int units, FogMode fog, TagMode tags, boolean simulCounters)
     {
       incomePerCity = income;
       startingFunds = startFunds;
       unitCap = units;
       unitModelScheme = ums;
       tagMode = tags;
+      simultaneousCounters = simulCounters;
       fogMode = fog;
     }
   }

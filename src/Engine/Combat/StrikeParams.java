@@ -146,7 +146,8 @@ public class StrikeParams
   public int calculateDamage()
   {
     int luckDamage = getLuck();
-    if( aw1Luck && isCounter ) // AW1 cannot counterattack with luck.
+    if( aw1Luck && isCounter // AW1 cannot counterattack with luck.
+        && !map.game.rules.simultaneousCounters ) // but SFW does, so be consistent with that in its mode
       luckDamage = 0;
     final int rawDamage = (baseDamage * attackPower / 100) * attackerDamageMultiplier / 100;
     int hpScalingDamage = rawDamage;
