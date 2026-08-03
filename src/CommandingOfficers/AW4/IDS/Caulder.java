@@ -60,6 +60,7 @@ public class Caulder extends RuinedCommander
   @Override
   protected void onTurnInit(MapMaster map, GameEventQueue events)
   {
+    super.onTurnInit(map, events);
     if( COUs.isEmpty() )
       return;
 
