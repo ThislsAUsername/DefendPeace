@@ -19,7 +19,7 @@ public class BillyGates extends YuanDelta
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Billy Gates", UIUtils.SourceGames.SFW, UIUtils.OS);
+      super("Billy Gates", UIUtils.SourceGames.SFW, UIUtils.MISC);
       infoPages.add(new InfoPage(
             "Billy Gates\n"
           + "+10k income.\n"

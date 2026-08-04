@@ -22,7 +22,7 @@ public class Yamamoto extends YuanDelta
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Yamamoto", UIUtils.SourceGames.SFW, UIUtils.OS);
+      super("Yamamoto", UIUtils.SourceGames.SFW, UIUtils.MISC);
       infoPages.add(new InfoPage(
             "Mr. Yamamoto\n"
           + "Units begin at level 2.\n"

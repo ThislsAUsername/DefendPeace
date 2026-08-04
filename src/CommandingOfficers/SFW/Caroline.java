@@ -20,7 +20,7 @@ public class Caroline extends YuanDelta
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Caroline", UIUtils.SourceGames.SFW, UIUtils.OS);
+      super("Caroline", UIUtils.SourceGames.SFW, UIUtils.MISC);
       infoPages.add(new InfoPage(
             "Caroline\n"
           + "+5 luck, and -5% raw damage taken.\n"
