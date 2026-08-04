@@ -92,6 +92,8 @@ public class StrikeParams
   // Multiplier that scales the *enemy's* attack; only multiply/divide this quantity.
   public int defenderDamageMultiplier = 100;
 
+  public int trueDamage = 0; // Added at the end of the damage calc. Raw % damage.
+
   public int defenderHealth = 0;
   public final XYCoord targetCoord;
   public int defenseSubtraction = UnitModel.DEFAULT_STAT_RATIO; // Only add/subtract from this quantity.
@@ -169,7 +171,7 @@ public class StrikeParams
     overallPower = overallPower * subtractionMultiplier /        100;
     overallPower = overallPower *          100          / finalDefenseDivision;
 
-    return overallPower; // % damage
+    return overallPower + trueDamage; // % damage
   }
 
   protected int getLuck()
