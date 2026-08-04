@@ -77,8 +77,9 @@ public class SFWExperienceTracker extends StateTracker
   private void experiencize(UnitDelta attacker, UnitDelta defender)
   {
     int expPerPercent = getExperienceRate(defender);
+    int healthDamage = defender.getPreciseHealthDamage();
 
-    int profit = expPerPercent * defender.getPreciseHealthDamage();
+    int profit = expPerPercent * healthDamage;
     addExperience(attacker.unit, profit);
   }
 
@@ -103,17 +104,11 @@ public class SFWExperienceTracker extends StateTracker
 
   public int getExperience(Unit profiteer)
   {
-    if( experience.containsKey(profiteer) )
-      return experience.get(profiteer);
-    return addExperience(profiteer, 0);
+    return experience.getOrDefault(profiteer, 0);
   }
   public int addExperience(Unit profiteer, int profit)
   {
-    if( !experience.containsKey(profiteer) )
-    {
-      experience.put(profiteer, 0);
-    }
-    int xp = experience.get(profiteer);
+    int xp = experience.getOrDefault(profiteer, 0);
     int finalVal = xp + profit;
     if( finalVal > MAX_EXP )
       finalVal = MAX_EXP;
@@ -124,11 +119,11 @@ public class SFWExperienceTracker extends StateTracker
   @Override
   public CustomStatData getCustomStat(Unit unit)
   {
-    var rank  = getRank(unit);
-    int level = getExperience(unit) - rank.exp; // should be positive
-    level /= 10; // Hide the lowest digit since it would reveal HP digits
-    String text = "" + level;
-    return new CustomStatData('E', Color.white, rank.expColor, text);
+    var rank = getRank(unit);
+    int exp  = getExperience(unit) - rank.exp; // should be positive
+    exp  /= 10; // Hide the lowest digit since it would reveal HP digits
+    String text = "" + exp ;
+    return new CustomStatData('E', rank.expColor, Color.white, text);
   }
 
 }

@@ -52,8 +52,9 @@ public class VonRosso extends AncientCommander
   private void experiencize(UnitDelta attacker, UnitDelta defender)
   {
     int expPerPercent = 6 - vetTracker.getExperienceRate(attacker);
+    int healthDamage = defender.getPreciseHealthDamage();
 
-    int profit = expPerPercent * defender.getPreciseHealthDamage();
+    int profit = expPerPercent * healthDamage;
     vetTracker.addExperience(attacker.unit, profit);
   }
 

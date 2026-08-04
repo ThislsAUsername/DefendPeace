@@ -25,7 +25,7 @@ public class Hetler extends AncientCommander
       super("Hetler", UIUtils.SourceGames.SFW, UIUtils.YC);
       infoPages.add(new InfoPage(
             "Hetler\n"
-          + "When attacked, gain half the EXP of killing the attacker.\n"));
+          + "When attacked, gain the EXP of 5 HP from the attacker.\n"));
       infoPages.add(SFW_MECHANICS_BLURB);
     }
     @Override
@@ -49,10 +49,10 @@ public class Hetler extends AncientCommander
   }
   private void experiencize(UnitDelta attacker, UnitDelta defender)
   {
-    int expPerPercent = vetTracker.getExperienceRate(attacker);
+    int expPerPercent = vetTracker.getExperienceRate(attacker); // the real attacker
 
     int profit = expPerPercent * 50;
-    vetTracker.addExperience(attacker.unit, profit);
+    vetTracker.addExperience(defender.unit, profit); // the real defender is me
   }
 
 }
