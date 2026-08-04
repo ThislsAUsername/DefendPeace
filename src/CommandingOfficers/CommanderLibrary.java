@@ -177,6 +177,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.SFW.VonRosso.getInfo() );
     commanderList.add( CommandingOfficers.SFW.Hetler.getInfo() );
     commanderList.add( CommandingOfficers.SFW.Caroline.getInfo() );
+    commanderList.add( CommandingOfficers.SFW.BillyGates.getInfo() );
     commanderList.add( CommandingOfficers.SFW.Yamamoto.getInfo() );
   }
 
