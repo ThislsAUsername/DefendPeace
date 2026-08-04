@@ -43,7 +43,7 @@ public class SFWExperienceTracker extends StateTracker
   {
     int exp = getExperience(unit);
     for( SFWRank rank : SFWRank.values() )
-      if( exp >= SFWExperienceTracker.MAX_EXP )
+      if( exp >= rank.exp )
         return rank;
     return SFWRank.NONE; // shouldn't be hit
   }
