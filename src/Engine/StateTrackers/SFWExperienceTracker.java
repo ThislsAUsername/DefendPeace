@@ -78,10 +78,11 @@ public class SFWExperienceTracker extends StateTracker
   {
     int expPerPercent = getExperienceRate(defender);
 
-    int profit = expPerPercent * defender.deltaPreciseHealth;
+    int profit = expPerPercent * defender.getPreciseHealthDamage();
     addExperience(attacker.unit, profit);
   }
-  protected int getExperienceRate(UnitDelta defender)
+
+  public int getExperienceRate(UnitDelta defender)
   {
     int defenderCost = defender.CO.getCost(defender.model);
     int expPerPercent = 1;
@@ -106,7 +107,7 @@ public class SFWExperienceTracker extends StateTracker
       return experience.get(profiteer);
     return addExperience(profiteer, 0);
   }
-  private int addExperience(Unit profiteer, int profit)
+  public int addExperience(Unit profiteer, int profit)
   {
     if( !experience.containsKey(profiteer) )
     {
