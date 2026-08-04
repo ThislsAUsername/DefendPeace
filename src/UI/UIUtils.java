@@ -345,6 +345,7 @@ public class UIUtils
   public enum SourceGames
   {
     // In display order, because programming is hard™
+    SFW(YC,  "SFW"),
     AW1(OS,  "1"),
     AW2(BM,  "2"),
     AW3(GE,  "3"),
