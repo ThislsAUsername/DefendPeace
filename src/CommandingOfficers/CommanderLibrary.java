@@ -174,6 +174,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.IDS.Caulder.getInfo() );
     commanderList.add( CommandingOfficers.SFW.Rojenski.getInfo() );
     commanderList.add( CommandingOfficers.SFW.VonRosso.getInfo() );
+    commanderList.add( CommandingOfficers.SFW.Hetler.getInfo() );
   }
 
   public static class NotACO extends Commander
