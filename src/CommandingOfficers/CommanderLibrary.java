@@ -176,6 +176,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.SFW.Rojenski.getInfo() );
     commanderList.add( CommandingOfficers.SFW.VonRosso.getInfo() );
     commanderList.add( CommandingOfficers.SFW.Hetler.getInfo() );
+    commanderList.add( CommandingOfficers.SFW.Yamamoto.getInfo() );
   }
 
   public static class NotACO extends Commander

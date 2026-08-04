@@ -31,13 +31,13 @@ public class YuanDelta extends AncientCommander
     @Override
     public Commander create(GameScenario.GameRules rules)
     {
-      return new YuanDelta(rules);
+      return new YuanDelta(coInfo, rules);
     }
   }
 
-  public YuanDelta(GameScenario.GameRules rules)
+  public YuanDelta(CommanderInfo info, GameScenario.GameRules rules)
   {
-    super(coInfo, rules);
+    super(info, rules);
   }
 
   @Override
