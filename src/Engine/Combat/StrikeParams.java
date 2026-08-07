@@ -171,7 +171,7 @@ public class StrikeParams
     overallPower = overallPower * subtractionMultiplier /        100;
     overallPower = overallPower *          100          / finalDefenseDivision;
 
-    return overallPower + trueDamage; // % damage
+    return Math.max(0, overallPower + trueDamage); // % damage
   }
 
   protected int getLuck()
