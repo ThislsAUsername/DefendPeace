@@ -25,6 +25,7 @@ public class VonRosso extends AncientCommander
       super("Von Rosso", UIUtils.SourceGames.SFW, UIUtils.GE);
       infoPages.add(new InfoPage(
             "Von Rosso\n"
+          + "Attack, Attack, Attack continuously! However, defence suffers.\n"
           + "Adds 6 minus his own unit's EXP/% value to his EXP rate.\n"));
       infoPages.add(SFW_MECHANICS_BLURB);
     }

@@ -22,6 +22,7 @@ public class BillyGates extends YuanDelta
       super("Billy Gates", UIUtils.SourceGames.SFW, UIUtils.MISC);
       infoPages.add(new InfoPage(
             "Billy Gates\n"
+          + "Son of a rich father. He possesses ample war funds and loves to play wargames.\n"
           + "+10k income.\n"
           + "Gains triple experience.\n"));
       infoPages.add(SFW_MECHANICS_BLURB);

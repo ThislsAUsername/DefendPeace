@@ -23,6 +23,7 @@ public class Caroline extends YuanDelta
       super("Caroline", UIUtils.SourceGames.SFW, UIUtils.MISC);
       infoPages.add(new InfoPage(
             "Caroline\n"
+          + "Can attack with great strength for no known reason. She is nicknamed the 'Lucky Girl'.\n"
           + "+5 luck, and -5% raw damage taken.\n"
           + "Gains triple experience.\n"));
       infoPages.add(SFW_MECHANICS_BLURB);

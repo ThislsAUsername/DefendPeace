@@ -22,6 +22,7 @@ public class Rojenski extends AncientCommander
       super("Rojenski", UIUtils.SourceGames.SFW, UIUtils.BM);
       infoPages.add(new InfoPage(
             "Rojenski\n"
+          + "A normal commander, but he often makes a lot of mistakes.\n"
           + "No special effects.\n"));
       infoPages.add(SFW_MECHANICS_BLURB);
     }

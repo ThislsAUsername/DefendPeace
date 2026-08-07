@@ -25,6 +25,7 @@ public class YuanDelta extends AncientCommander
       super("Yuan Delta", UIUtils.SourceGames.SFW, UIUtils.OS);
       infoPages.add(new InfoPage(
             "Yuan Delta\n"
+          + "An expert commander. He's very skilled.\n"
           + "Gains triple experience.\n"));
       infoPages.add(SFW_MECHANICS_BLURB);
     }

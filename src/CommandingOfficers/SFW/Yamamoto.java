@@ -25,6 +25,7 @@ public class Yamamoto extends YuanDelta
       super("Yamamoto", UIUtils.SourceGames.SFW, UIUtils.MISC);
       infoPages.add(new InfoPage(
             "Mr. Yamamoto\n"
+          + "A legendary General. Commands an elite army.\n"
           + "Units begin at level 2.\n"
           + "Gains triple experience.\n"));
       infoPages.add(SFW_MECHANICS_BLURB);
