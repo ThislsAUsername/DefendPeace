@@ -16,6 +16,7 @@ import UI.PlayerSetupTeamController;
 import UI.SlidingValue;
 import UI.UIUtils;
 import UI.UIUtils.Faction;
+import lombok.var;
 
 public class PlayerSetupTeamArtist
 {
@@ -164,6 +165,7 @@ public class PlayerSetupTeamArtist
     // Last known values.
     private int teamNumber = -99;
     private String colorName;
+    private String commanderList = null;
 
     public TeamPanel(PlayerSetupInfo info)
     {
@@ -190,8 +192,13 @@ public class PlayerSetupTeamArtist
             SpriteUIUtils.getNumberAsImage(info.getCurrentTeam()));
         teamFrame.render(g);
       }
-      if( !UIUtils.getPaletteName(info.getCurrentColor()).equals(colorName) )
+      String thisCOlist = "";
+      for( var coInfo : info.getCurrentCOList() )
+        thisCOlist += coInfo.name;
+      if( !thisCOlist.equals(commanderList)
+          || !UIUtils.getPaletteName(info.getCurrentColor()).equals(colorName) )
       {
+        commanderList = thisCOlist;
         colorName = UIUtils.getPaletteName(info.getCurrentColor());
         commanderFrame = new SpriteUIUtils.ImageFrame(1, 1, portraitPx + 2, portraitPx + 2, info.getCurrentColor(),
             info.getCurrentColor(), true, SpriteUIUtils.getCommanderPortraitBlend( info.getCurrentCOList() ));
