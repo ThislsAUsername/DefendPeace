@@ -43,6 +43,7 @@ public class CommanderLibrary
     commanderList.add( Ave.getInfo() );
     commanderList.add( Tech.getInfo() );
     commanderList.add( CommandingOfficers.Variants.OS.Sami.getInfo() );
+    commanderList.add( CommandingOfficers.Variants.OS.SamiLevels.getInfo() );
     commanderList.add( CommandingOfficers.Variants.OS.NellWarCrimes.getInfo() );
     commanderList.add( CommandingOfficers.Variants.BM.OlafDSBW.getInfo() );
     commanderList.add( CommandingOfficers.Variants.BM.Colin.getInfo() );
