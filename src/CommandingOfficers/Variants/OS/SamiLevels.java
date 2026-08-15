@@ -38,10 +38,11 @@ public class SamiLevels extends AW1Commander
             "Sami (leveling)\n"
           + "AW1 Sami, but with veterancy instead of a COP.\n"
           + "Units gain a level on completing a capture or a kill, up to a maximum of 5.\n"
-          + "For each level, units gain 1.2x/0.9x damage dealt/taken and +0.3x capture rate.\n"
+          + "For each level, footsoldiers gain 1.2x/0.9x damage dealt/taken and +0.5x capture rate.\n"
+          + "For each level, non-footsoldiers gain gain 1.1x/0.95x damage dealt/taken.\n"
           + "Max level units gain +1 movement and perfect movement.\n"
-          + "Footsoldiers are built at level 1, and unarmed transports are built at max level.\n"
-          + "-10/0 direct vehicle combat.\n"));
+          + "Unarmed transports are built at max level.\n"
+          + "-10/10 non-footsoldiers.\n"));
       infoPages.add(new InfoPage(
             "Hit: Chocolate\n"
           + "Miss: Cowards"));
@@ -82,8 +83,6 @@ public class SamiLevels extends AW1Commander
   }
   protected void initUnitEXP(Unit unit)
   {
-    if( unit.model.isAny(UnitModel.TROOP) )
-      vetTracker.addExperience(unit, 1);
     if( unit.model.baseCargoCapacity > 0 && unit.model.weapons.isEmpty() )
       vetTracker.addExperience(unit, SamiRank.LEVEL5.exp);
   }
@@ -91,22 +90,29 @@ public class SamiLevels extends AW1Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.battleRange < 2 && params.attacker.model.isNone(UnitModel.TROOP) )
+    boolean isTroop = params.attacker.model.isAny(UnitModel.TROOP);
+    if( !isTroop )
       params.attackPower -= 10;
+    int rankBoost = isTroop ? 120 : 110;
     SamiRank rank = vetTracker.getRank(params.attacker.unit);
     for( int i = 0; i < rank.exp; ++i )
     {
-      params.attackerDamageMultiplier *= 120;
+      params.attackerDamageMultiplier *= rankBoost;
       params.attackerDamageMultiplier /= 100;
     }
   }
   @Override
   public void modifyUnitDefenseAgainstUnit(BattleParams params)
   {
-    SamiRank rank = vetTracker.getRank(params.defender.unit);
+    UnitContext minion = params.defender;
+    boolean isTroop = params.attacker.model.isAny(UnitModel.TROOP);
+    if( !isTroop )
+      params.defenseSubtraction -= 10;
+    int rankBoost = isTroop ? 90 : 95;
+    SamiRank rank = vetTracker.getRank(minion.unit);
     for( int i = 0; i < rank.exp; ++i )
     {
-      params.defenderDamageMultiplier *=  90;
+      params.defenderDamageMultiplier *= rankBoost;
       params.defenderDamageMultiplier /= 100;
     }
   }
@@ -115,7 +121,7 @@ public class SamiLevels extends AW1Commander
   public void modifyCapturePower(UnitContext uc)
   {
     SamiRank rank = vetTracker.getRank(uc.unit);
-    uc.capturePower += 30 * rank.exp;
+    uc.capturePower += 50 * rank.exp;
   }
   @Override
   public void modifyMovePower(UnitContext uc)
