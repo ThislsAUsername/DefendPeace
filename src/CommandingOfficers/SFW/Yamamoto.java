@@ -1,5 +1,6 @@
 package CommandingOfficers.SFW;
 
+import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.GameEvents.GameEventQueue;
 import Engine.StateTrackers.SFWExperienceTracker.SFWRank;
@@ -40,6 +41,14 @@ public class Yamamoto extends YuanDelta
   public Yamamoto(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
+  }
+
+  @Override
+  public void initForGame(GameInstance game)
+  {
+    super.initForGame(game);
+    for( Unit u : units )
+      vetTracker.addExperience(u, SFWRank.LEVEL2.exp + 1);
   }
 
   @Override
