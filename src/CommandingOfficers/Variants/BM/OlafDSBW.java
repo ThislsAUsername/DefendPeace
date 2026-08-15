@@ -1,4 +1,4 @@
-package CommandingOfficers.AWBW.BM;
+package CommandingOfficers.Variants.BM;
 
 import java.util.ArrayList;
 
@@ -31,7 +31,7 @@ public class OlafDSBW extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Olaf", UIUtils.SourceGames.AWBW, UIUtils.BM, "3BW");
+      super("Olaf", UIUtils.SourceGames.VARIANTS, UIUtils.BM, "3BW");
       infoPages.add(new InfoPage(
             "AWDS Olaf for AWBW\n"
           + "VS AW2: Can't slow people; gets +attack for 2 turns instead\n"
