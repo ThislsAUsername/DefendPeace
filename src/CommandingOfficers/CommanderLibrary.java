@@ -58,6 +58,7 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.Variants.BH.AndyClone.getInfo() );
     commanderList.add( CommandingOfficers.Variants.BH.SturmGrimmBW.getInfo() );
     commanderList.add( CommandingOfficers.Variants.BH.LashDSBW.getInfo() );
+    commanderList.add( CommandingOfficers.Variants.BH.AdderD2D.getInfo() );
     commanderList.add( Qis.getInfo() );
     commanderList.add( CommandingOfficers.AW4.BrennerWolves.Will.getInfo() );
     commanderList.add( CommandingOfficers.AW4.BrennerWolves.Lin.getInfo() );
