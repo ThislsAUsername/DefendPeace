@@ -107,7 +107,7 @@ public abstract class CaptureLifecycle
         if( Utils.enqueueMoveEvent(map, actor, movePath, captureEvents))
         {
           // Attempt to capture.
-          CaptureEvent capture = new CaptureEvent(actor, map.getLocation(movePathEnd));
+          CaptureEvent capture = new CaptureEvent(actor, movePath, map);
           captureEvents.add(capture);
 
           if( capture.willCapture() ) // If this will succeed, check if the CO will lose as a result.
@@ -170,16 +170,17 @@ public abstract class CaptureLifecycle
   final int priorCaptureAmount;
   Commander prevOwner;
 
-  public CaptureEvent( Unit u, MapLocation loc )
+  public CaptureEvent( Unit u, GamePath path, MapMaster map )
   {
     unit = u;
-    location = loc;
-    prevOwner = loc.getOwner();
+    location = map.getLocation(path.getEndCoord());
+    prevOwner = location.getOwner();
     XYCoord unitXY = new XYCoord(u.x, u.y);
     if( null != location && location.isCaptureable() && unit.CO.isEnemy(location.getOwner()) )
     {
       priorCaptureAmount = (unitXY.equals(location.getCoordinates()) ? unit.getCaptureProgress() : 0);
       UnitContext uc = new UnitContext(unit);
+      uc.path = path;
       captureAmount = uc.calculateCapturePower();
     }
     else
@@ -221,7 +222,7 @@ public abstract class CaptureLifecycle
         (location.getResident() == unit) &&
         (unit.CO.isEnemy(location.getOwner())) )
     {
-      unit.capture(gameMap);
+      unit.capture(gameMap, captureAmount);
     }
   }
 

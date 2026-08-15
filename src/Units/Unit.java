@@ -71,7 +71,7 @@ public class Unit extends UnitState implements UnitModList
     return new UnitContext(map, this, weapon);
   }
 
-  public boolean capture(MapMaster map)
+  public boolean capture(MapMaster map, int capturePoints)
   {
     boolean success = false;
 
@@ -80,8 +80,7 @@ public class Unit extends UnitState implements UnitModList
       captureTarget = new XYCoord(x, y);
       captureProgress = 0;
     }
-    UnitContext uc = new UnitContext(this);
-    captureProgress += uc.calculateCapturePower();
+    captureProgress += capturePoints;
     int captureThreshold = map.getEnvironment(x, y).terrainType.getCaptureThreshold();
     if( captureProgress >= captureThreshold )
     {

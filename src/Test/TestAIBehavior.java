@@ -373,8 +373,8 @@ public class TestAIBehavior extends TestCase
 
     Unit interrupter = testMap.getResident(2, 1);
     Unit target      = testMap.getResident(5, 1);
-    interrupter.capture(testMap);
-    target     .capture(testMap);
+    interrupter.capture(testMap, 10);
+    target     .capture(testMap, 10);
     turn(testGame);
 
     GameAction act = null;
@@ -417,8 +417,8 @@ public class TestAIBehavior extends TestCase
     Unit shootyTwo   = addUnit(testMap, testCo1, "Infantry", new XYCoord(2, 2));
     // Did nothing wrong
     Unit target      = testMap.getResident(5, 1);
-    cappy .capture(testMap);
-    target.capture(testMap);
+    cappy .capture(testMap, 10);
+    target.capture(testMap, 10);
     turn(testGame);
 
     GameAction act = null;
