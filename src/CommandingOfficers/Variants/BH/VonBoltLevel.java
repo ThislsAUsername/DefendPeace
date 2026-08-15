@@ -26,7 +26,7 @@ public class VonBoltLevel extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Von Bolt", UIUtils.SourceGames.VARIANTS, UIUtils.BH, "lvl");
+      super("Von Bolt", UIUtils.SourceGames.VARIANTS, UIUtils.BH, "LVL");
       infoPages.add(new InfoPage(
             "Von Bolt (level down)\n"
           + "Units gain +25% attack and +25% defense.\n"
