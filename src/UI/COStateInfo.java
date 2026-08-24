@@ -23,6 +23,7 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
   public COStateInfo(GameMap map, Army thisArmy)
   {
     identifier = thisArmy.cos[0].coInfo.getFullName();
+    income     = thisArmy.getIncomePerTurn();
     // Start at 1 so we don't double-add the first one
     for( int i = 1; i < thisArmy.cos.length; ++i )
       identifier += ", " + thisArmy.cos[i].coInfo.getFullName();
@@ -33,11 +34,6 @@ public class COStateInfo // TODO: Consider making this class parse data for all 
       for( int h = 0; h < map.mapHeight; ++h )
       {
         MapLocation loc = map.getLocation(w, h);
-        final Commander owner = loc.getOwner();
-        if( loc.isProfitable() && owner != null && owner.army == thisArmy )
-        {
-          income += owner.gameRules.incomePerCity + owner.incomeAdjustment;
-        }
         Unit resident = loc.getResident();
         if( null != resident && resident.CO.army == thisArmy )
         {
