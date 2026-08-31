@@ -37,9 +37,9 @@ public class AITransportUtils
     }
 
     // Figure out the tiles this transport could drop off dudes from.
+    var destIsland = rc.getIsland(cargo.model.baseMoveType, dest);
     for( var modelT : transportTypes )
     {
-      var destIsland = rc.getIsland(cargo.model.baseMoveType, dest);
       var beaches = new HashSet<XYCoord>();
       for( var connectedIsland : destIsland.overlapIslands )
       {

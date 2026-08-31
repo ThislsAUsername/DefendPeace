@@ -87,7 +87,7 @@ public class Utils
     return targets;
   }
 
-  /** Returns a list of locations at distance 1 from transportLoc that cargo can move on. */
+  /** Returns a list of tiles at distance 1 from moveLoc that cargo can end its turn on. */
   public static ArrayList<XYCoord> findUnloadLocations(GameMap map, Unit transport, XYCoord moveLoc, final MoveType cargoMoveType)
   {
     boolean includeOccupied = false;
@@ -100,7 +100,7 @@ public class Utils
     if( cargoMoveType.canStandOn(map.getEnvironment(moveLoc)) )
       for( XYCoord loc : locations )
       {
-        // Add any location that is empty and supports movement of the cargo unit.
+        // Add suitably-empty locations the cargo unit can end its turn on.
         boolean dropZoneClear = map.isLocationEmpty(loc) || map.getLocation(loc).getResident() == transport;
         if( (dropZoneClear || includeOccupied)
             && cargoMoveType.canStandOn(map.getEnvironment(loc.x, loc.y)) )
