@@ -31,7 +31,7 @@ public class AITransportUtils
     {
       if( modelT.baseCargoCapacity < 1 )
         continue;
-      if( !modelT.isCargoRole(cargo.model.role) )
+      if( !modelT.canTransport(cargo.model.role) )
         continue;
       transportTypes.add(modelT);
     }

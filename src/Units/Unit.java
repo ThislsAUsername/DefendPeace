@@ -214,7 +214,7 @@ public class Unit extends UnitState implements UnitModList
     int capacity = new UnitContext(this).calculateCargoCapacity();
     return (capacity > 0 &&
             heldUnits.size() < capacity &&
-            model.isCargoRole(type));
+            model.canTransport(type));
   }
 
   /** Grant this unit full fuel and ammunition */
