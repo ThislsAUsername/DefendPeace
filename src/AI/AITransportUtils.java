@@ -24,17 +24,7 @@ public class AITransportUtils
   {
     var transportToBeachMap = new HashMap<UnitModel, HashSet<XYCoord>>();
     var grms = map.game.rules.unitModelScheme.getGameReadyModels();
-    var transportTypes = new ArrayList<UnitModel>();
-
-    // Grab relevant transport types for this cargo.
-    for( var modelT : grms.unitModels )
-    {
-      if( modelT.baseCargoCapacity < 1 )
-        continue;
-      if( !modelT.canTransport(cargo.model.role) )
-        continue;
-      transportTypes.add(modelT);
-    }
+    ArrayList<UnitModel> transportTypes = grms.calcTransportTypesFor(cargo);
 
     // Figure out the tiles this transport could drop off dudes from.
     var destIsland = rc.getIsland(cargo.model.baseMoveType, dest);
@@ -64,6 +54,7 @@ public class AITransportUtils
 
     return transportToBeachMap;
   }
+
 
   public static class InterceptPaths
   {
