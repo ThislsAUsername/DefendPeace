@@ -197,8 +197,28 @@ public class InfantrySpamAI implements AIController
       if( unit.hasCargoSpace(UnitModel.TROOP) && unit.heldUnits.isEmpty() )
         continue; // Don't bother with moving infantry transports around until they're called.
 
+      // Unload logic
+      if( !unit.heldUnits.isEmpty() )
+      {
+        // I dunno how to respect Lander travel time and also care about nearby land tiles, so pretend we can fly
+        Utils.sortLocationsByDistance(new XYCoord(unit), unownedProperties);
+
+        log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
+        for( XYCoord goal : unownedProperties )
+        {
+          GameAction toUnload = calcUnloadAction(gameMap, unit, unitActionsByType, goal); // Includes approaching the unload zone.
+          if( null == toUnload )
+            continue;
+          actions.offer(toUnload);
+          foundAction = true;
+          break;
+        }
+      }
+      if(foundAction)break; // Only one action per getNextAction() call, to avoid overlap.
+      // This does mean transports who are loaded but can't unload will chase open ports, but that's fine.
+
       // If no attack/capture actions are available now, just move towards a non-allied building.
-      Utils.sortLocationsByDistance(new XYCoord(unit), unownedProperties); // Landers want this ordering, and support it for infantry.
+      Utils.sortLocationsByTravelTime(unit, unownedProperties, gameMap);
       if( !unownedProperties.isEmpty() ) // Sanity check - it shouldn't be, unless this function is called after we win.
       {
         log(String.format("  Seeking a property to send %s after", unit.toStringWithLocation()));
@@ -211,33 +231,18 @@ public class InfantrySpamAI implements AIController
         do
         {
           goal = unownedProperties.get(index++);
-          if( !unit.heldUnits.isEmpty() )
+          path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
+          boolean desirable = myArmy.isEnemy(gameMap.getLocation(goal).getOwner()); // Property is not allied.
+          desirable &= !capturingProperties.contains(goal); // We aren't already capturing it.
+          validTarget = desirable && (path != null); // We can reach it.
+          log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
+          if( !validTarget && desirable )
           {
-            GameAction toUnload = calcUnloadAction(gameMap, unit, unitActionsByType, goal); // Includes approaching the unload zone.
-            if( null != toUnload )
-            {
-              actions.offer(toUnload);
-              validTarget = true;
-            }
-          }
-          else
-          {
-            path = new PathCalcParams(unit, gameMap).setTheoretical().findShortestPath(goal);
-            boolean desirable = myArmy.isEnemy(gameMap.getLocation(goal).getOwner()); // Property is not allied.
-            desirable &= !capturingProperties.contains(goal); // We aren't already capturing it.
-            validTarget = desirable && (path != null); // We can reach it.
-            log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
-            if( !validTarget && desirable )
-            {
-              queueTransportEnablerActions(gameMap, unit, goal); // Includes production, which seems fine to prioritize since we have stranded units.
-              validTarget = !actions.isEmpty();
-              log(String.format("      %s at %s via transport? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
-            }
+            queueTransportEnablerActions(gameMap, unit, goal); // Includes production, which seems fine to prioritize since we have stranded units.
+            validTarget = !actions.isEmpty();
+            log(String.format("      %s at %s via transport? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (validTarget?"Yes":"No")));
           }
         } while( !validTarget && (index < unownedProperties.size()) );      // Loop until we run out of properties to check.
-
-        if( !actions.isEmpty() )
-          break; // Transport-y logic can queue actions directly.
 
         if( !validTarget )
         {
@@ -319,6 +324,7 @@ public class InfantrySpamAI implements AIController
     boolean goalReachable = myIslands.contains(goalIsland);
     for (var is : myIslands)
       goalReachable |= is.overlapIslands.contains(goalIsland);
+    log(String.format("    %s at %s? %s", gameMap.getLocation(goal).getEnvironment().terrainType, goal, (goalReachable?"Yes":"No")));
     if( !goalReachable )
       return null;
 

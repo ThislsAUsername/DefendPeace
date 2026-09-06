@@ -257,7 +257,7 @@ public class Utils
       pcp.setTheoretical();
       pcp.start = start;
       final GamePath path = pcp.findShortestPath(end);
-      int distance = Integer.MAX_VALUE;
+      int distance = 0xFFFF + xyc.getDistance(start); // Sort unreachable locations by Manhattan distance, to be friendlier to transport calcs
       if( null != path )
         distance = path.getMoveCost(myUnit, myMap);
       distCache.put(xyc, distance);
