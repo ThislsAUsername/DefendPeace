@@ -10,7 +10,7 @@ import Engine.XYCoord;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.StrikeParams.BattleParams;
 import Engine.GameEvents.GameEventQueue;
-import Engine.GameEvents.MassDamageEvent;
+import Engine.GameEvents.ModifyFundsEvent;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitDefenseModifier;
 import Engine.UnitMods.UnitModifier;
@@ -23,7 +23,6 @@ import UI.UIUtils;
 import Units.Unit;
 import Units.UnitContext;
 import Units.UnitModel;
-import lombok.var;
 
 public class Sami extends AWBWCommander
 {
@@ -44,7 +43,7 @@ public class Sami extends AWBWCommander
             "Sami (victory)\n"
           + "AW1 Sami, but with instant captures and AWBW rules.\n"
           + "Footsoldiers +20/10 stats.\n"
-          + "20x capture rate, lose 5 HP on capture.\n"
+          + "Pay half a city's income on capture for 20x capture rate.\n"
           + "Cities do not give income if there is any unit (friendly or not) on them.\n"
           + "Unarmed transports +1 move. -10/0 direct vehicle combat.\n"));
       infoPages.add(new InfoPage(new DoubleTime(null, null),
@@ -66,10 +65,12 @@ public class Sami extends AWBWCommander
   public Sami(GameScenario.GameRules rules)
   {
     super(coInfo, rules);
+    captureCost = gameRules.incomePerCity / 2;
 
     CommanderAbility.CostBasis cb = getGameBasis();
     addCommanderAbility(new DoubleTime(this, cb));
   }
+  final int captureCost;
 
   @Override
   public void modifyUnitAttack(StrikeParams params)
@@ -88,7 +89,8 @@ public class Sami extends AWBWCommander
   @Override
   public void modifyCapturePower(UnitContext uc)
   {
-    uc.capturePower += 1900;
+    if( army.money >= captureCost )
+      uc.capturePower += 1900;
   }
   @Override
   public void modifyMovePower(UnitContext uc)
@@ -102,11 +104,7 @@ public class Sami extends AWBWCommander
   {
     GameEventQueue returnEvents = new GameEventQueue();
     if( unit.CO == this )
-    {
-      var victim = new ArrayList<Unit>();
-      victim.add(unit);
-      returnEvents.add(new MassDamageEvent(this, victim, 50, false));
-    }
+      returnEvents.add(new ModifyFundsEvent(army, -1 * captureCost));
     return returnEvents;
   }
   @Override

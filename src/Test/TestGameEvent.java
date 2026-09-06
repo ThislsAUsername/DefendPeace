@@ -99,16 +99,15 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(infA.getCaptureProgress() == 0, "    Infantry capture progress is not 0.");
 
     // Create a new event, and ensure it does not predict full capture in one turn.
-    CaptureLifecycle.CaptureEvent captureEvent = new CaptureLifecycle.CaptureEvent(infA, city);
+    CaptureLifecycle.CaptureEvent captureEvent = new CaptureLifecycle.CaptureEvent(infA, GamePath.stayPut(infA), testMap);
     testPassed &= validate(captureEvent.willCapture() == false, "    Event incorrectly predicts capture will succeed.");
-    // NOTE: The prediction will be unreliable after performing the event. I'm re-using it here for convenience, but
-    //       GameEvents are really designed to be single-use.
 
     captureEvent.performEvent(testMap);
     testPassed &= validate(infA.getCaptureProgress() == 10, "    Infantry capture progress is not 10.");
 
     // Hurt the unit so he won't capture as fast.
     infA.damageHealth(50);
+    captureEvent = new CaptureLifecycle.CaptureEvent(infA, GamePath.stayPut(infA), testMap);
     captureEvent.performEvent(testMap);
     testPassed &= validate(infA.getCaptureProgress() == 15, "    Infantry capture progress is not 15.");
 
@@ -121,18 +120,21 @@ public class TestGameEvent extends TestCase
     performGameAction(moveAction2, testGame);
 
     // 5, 10, 15
+    captureEvent = new CaptureLifecycle.CaptureEvent(infA, GamePath.stayPut(infA), testMap);
     captureEvent.performEvent(testMap);
     testPassed &= validate(infA.getCaptureProgress() == 5,
         "    Infantry capture progress should be 5, not " + infA.getCaptureProgress() + ".");
+    captureEvent = new CaptureLifecycle.CaptureEvent(infA, GamePath.stayPut(infA), testMap);
     captureEvent.performEvent(testMap);
     testPassed &= validate(infA.getCaptureProgress() == 10,
         "    Infantry capture progress should be 10, not " + infA.getCaptureProgress() + ".");
+    captureEvent = new CaptureLifecycle.CaptureEvent(infA, GamePath.stayPut(infA), testMap);
     captureEvent.performEvent(testMap);
     testPassed &= validate(infA.getCaptureProgress() == 15,
         "    Infantry capture progress should be 15, not " + infA.getCaptureProgress() + ".");
 
     // Recreate the captureEvent so we can check the prediction again.
-    captureEvent = new CaptureLifecycle.CaptureEvent(infA, city);
+    captureEvent = new CaptureLifecycle.CaptureEvent(infA, GamePath.stayPut(infA), testMap);
     testPassed &= validate(captureEvent.willCapture() == true, "    Event incorrectly predicts failure to capture.");
     captureEvent.performEvent(testMap);
     testPassed &= validate(infA.getCaptureProgress() == 0, "    Infantry capture progress should be 0 again.");
