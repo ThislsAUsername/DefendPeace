@@ -43,7 +43,8 @@ public class AITransportUtils
           var env = map.getEnvironment(xyc);
           if( modelT.unloadExclusionTerrain.contains(env.terrainType) )
             continue;
-          ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, null, xyc, cargo.model.baseMoveType);
+          boolean includeOccupied = true; // Since this is a future calc, don't worry about if it's currently blocked.
+          ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, null, xyc, cargo.model.baseMoveType, includeOccupied);
           if( !dropoffLocations.isEmpty() )
             beaches.add(xyc);
         }
