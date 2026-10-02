@@ -2,6 +2,7 @@ package CommandingOfficers.DefendPeace.misc;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,6 +33,7 @@ import Terrain.MapMaster;
 import UI.UIUtils;
 import Units.Unit;
 import Units.UnitContext;
+import lombok.var;
 
 /*
  * Venge enhances counter-attacks of all sorts.
@@ -155,9 +157,11 @@ public class Venge extends Commander
       // If we're swapping, and we can counter, and we're on the defensive, do the swap.
       if( instance.defender == buffOwner )
       {
-        for( int time : instance.timeStepToCounter.keySet() )
+        var tempTSTC = new HashMap<Integer, UnitContext>(instance.timeStepToCounter);
+        instance.timeStepToCounter.clear();
+        for( int time : tempTSTC.keySet() )
         {
-          UnitContext uc = instance.timeStepToCounter.remove(time);
+          UnitContext uc = tempTSTC.get(time);
           int newTime = Math.max(0, time - InitiativeType.COUNTER.ordinal()); // This technically implies a pair of shots at 5,6 would be collapsed to 1 shot, but uh... don't do that.
           instance.timeStepToCounter.put(newTime, uc);
         }
