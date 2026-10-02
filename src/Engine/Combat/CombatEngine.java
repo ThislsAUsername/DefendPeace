@@ -1,7 +1,9 @@
 package Engine.Combat;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import Engine.GamePath;
 import Engine.XYCoord;
 import Engine.Combat.CombatContext.CalcType;
@@ -12,6 +14,8 @@ import Terrain.MapLocation;
 import Terrain.MapMaster;
 import Units.Unit;
 import Units.UnitContext;
+import Units.UnitState;
+import lombok.var;
 
 /**
  * CombatEngine serves as the general-purpose interface into the combat calculation logic.
@@ -69,6 +73,37 @@ public class CombatEngine
     return StrikeParams.buildStrikeParams(uc, target, map, battleRange, targetCoord, false);
   }
 
+  // Add an attack, if the shooter exists and can shoot.
+  protected static void addShot(ArrayList<BattleParams> shooters, CombatContext context, int time, UnitState attackerState, UnitContext defender, boolean isCounter)
+  {
+    UnitContext aMan = null;
+    if( !isCounter )
+      aMan = context.timeStepToAttack .getOrDefault(time, null);
+    else
+      aMan = context.timeStepToCounter.getOrDefault(time, null);
+    if( null == aMan )
+      return;
+
+    var hisGun = aMan.weapon;
+    aMan.copyUnitState(attackerState);
+    if( 1 > aMan.getHealth() )
+      return; // If the attacker is dead, there's no attack
+
+    // If we're outta ammo, figure something out.
+    if( null == hisGun || !hisGun.loaded(aMan) )
+      aMan.chooseWeapon(defender.model);
+    if( null == aMan.weapon )
+      return; // If we can't shoot, oh well.
+
+    shooters.add(StrikeParams.buildBattleParams(aMan, defender, context, isCounter));
+  }
+
+  private static class DamageInFlight
+  {
+    UnitContext target;
+    int time, damage;
+  }
+
   /**
    * Calculate and return the results of a battle.
    * <p>This will not actually apply the damage taken; that is done later in {@link BattleEvent}.
@@ -90,43 +125,70 @@ public class CombatEngine
       context.attacker.alterHealth(0);
       context.defender.alterHealth(0);
     }
-
-    // Provides a simple way to correlate start state and end state of each combatant.
-    // Uses a map to make it easy to pass information coherently between this function's local context
-    //   and the context of the CombatContext (which can be altered in unpredictable ways).
-    Map<UnitContext, UnitContext> unitStateMap = new HashMap<UnitContext, UnitContext>();
-
     // Starting assumption is that nothing changed in the "combat"
-    unitStateMap.put(attacker, new UnitContext(attacker));
-    unitStateMap.put(defender, new UnitContext(defender));
+    var attackerFinal = new UnitContext(attacker);
+    var defenderFinal = new UnitContext(defender);
+    var pendingDamage = new ArrayDeque<DamageInFlight>();
 
-    // From here on in, use context variables only
+    // Figure out which timesteps we're using.
+    var timestepSet = new HashSet<Integer>(); // Simultaneous combat shouldn't happen twice.
+    timestepSet.addAll(context.timeStepToAttack.keySet());
+    timestepSet.addAll(context.timeStepToCounter.keySet());
+    var timesteps = new ArrayList<Integer>();
+    timesteps.addAll(timestepSet);
+    timesteps.sort(Comparator.naturalOrder());
 
-    BattleParams attackInstance = context.getAttack();
-
-    int damage = attackInstance.calculateDamage();
-    if( damage < 0 )
-      damage = 0;
-    unitStateMap.get(context.attacker).fire(context.attacker.weapon);
-    unitStateMap.get(context.defender).damageHealth(damage, isSim);
-
-    // New battle instance with defender counter-attacking.
-    BattleParams defendInstance = context.getCounterAttack(damage, isSim);
-    if( null != defendInstance )
+    // Simulate time until we're done
+    int tsIdx = 0;
+    while (tsIdx < timesteps.size())
     {
-      int counterDamage = defendInstance.calculateDamage();
-      unitStateMap.get(context.defender).fire(context.defender.weapon);
-      unitStateMap.get(context.attacker).damageHealth(counterDamage, isSim);
-    }
+      int time = timesteps.get(tsIdx);
 
-    // Consider throwing in a final hook here for UnitModifiers to change the result post-calculations.
+      var attacks = new ArrayList<BattleParams>();
+      addShot(attacks, context, time, attackerFinal, new UnitContext(defenderFinal), false);
+      addShot(attacks, context, time, defenderFinal, new UnitContext(attackerFinal), true);
+
+      // Get the shots flying
+      for( var attackInstance : attacks )
+      {
+        int damage = attackInstance.calculateDamage();
+        if( damage < 0 )
+          damage = 0;
+        var dif = new DamageInFlight();
+        dif.time   = time + 1; // Hardcoded... for now.
+        dif.damage = damage;
+        if( !attackInstance.isCounter )
+        {
+          dif.target = defenderFinal;
+          attackerFinal.fire(attackInstance.attacker.weapon);
+        }
+        else
+        {
+          dif.target = attackerFinal;
+          defenderFinal.fire(attackInstance.attacker.weapon);
+        }
+        pendingDamage.add(dif);
+      }
+
+      ++tsIdx;
+      int nextTime = Integer.MAX_VALUE;
+      if( tsIdx < timesteps.size() )
+        nextTime = timesteps.get(tsIdx);
+      // Land any shots that land before the next shot.
+      while (!pendingDamage.isEmpty() && pendingDamage.peekFirst().time <= nextTime)
+      {
+        var dif = pendingDamage.pop();
+        dif.target.damageHealth(dif.damage, isSim);
+      }
+      // Consider throwing in a final hook here for UnitModifiers to change the result post-calculations.
+    }
 
     // Calculations complete.
     // Since we are setting up our BattleSummary, use non-CombatContext variables
     //   so consumers of the Summary will see results consistent with the current board/map state
     //   (e.g. the Unit 'attacker' actually belongs to the CO whose turn it currently is)
-    return new BattleSummary(attacker, unitStateMap.get(attacker),
-                             defender, unitStateMap.get(defender));
+    return new BattleSummary(attacker, attackerFinal,
+                             defender, defenderFinal);
   }
 
   public static int calculateOneStrikeDamage( Unit attacker, int battleRange, Unit defender, GameMap map, int terrainStars, boolean attackerMoved )

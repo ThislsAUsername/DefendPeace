@@ -327,7 +327,7 @@ public class KaijuWarsWeapons
       KaijuWarsWeapon gun = (KaijuWarsWeapon) instance.attacker.weapon;
       if( gun.negateCounterBonuses )
       {
-        instance.canCounter = false;
+        instance.timeStepToCounter.clear();
       }
     }
 

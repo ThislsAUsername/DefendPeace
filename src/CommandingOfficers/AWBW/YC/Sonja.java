@@ -64,7 +64,7 @@ public class Sonja extends AWBWCommander
   public void modifyUnitAttack(StrikeParams params)
   {
     params.luckRolledBad += 10;
-    if( params.isCounter )
+    if( params.isCounter && myActiveAbility != myAbilities.get(1) ) // Counter Break disables the multiplier, on cart.
     {
       params.attackerDamageMultiplier *= 150;
       params.attackerDamageMultiplier /= 100;

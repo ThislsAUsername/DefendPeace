@@ -22,6 +22,7 @@ public class GameBuilder
 {
   public MapInfo mapInfo;
   public FogMode fogMode = FogMode.OFF_TRILOGY;
+  public boolean simultaneousCounters = false;
   public int startingFunds = GameScenario.DEFAULT_STARTING_FUNDS;
   public int incomePerCity = GameScenario.DEFAULT_INCOME;
   public int unitCap       = GameScenario.DEFAULT_UNIT_CAP;
@@ -37,7 +38,7 @@ public class GameBuilder
 
   public GameInstance createGame(PlayerSetupInfo[] playerInfos)
   {
-    GameScenario scenario = new GameScenario(unitModelScheme, incomePerCity, startingFunds, unitCap, fogMode, tagMode);
+    GameScenario scenario = new GameScenario(unitModelScheme, incomePerCity, startingFunds, unitCap, fogMode, tagMode, simultaneousCounters);
 
     // Add any CO-specific units into our set of UnitModels
     for( PlayerSetupInfo player : playerInfos )
