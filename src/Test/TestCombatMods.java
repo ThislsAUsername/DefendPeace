@@ -15,6 +15,7 @@ import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.ResupplyEvent;
 import Engine.StateTrackers.DamageDealtToIncomeConverter;
 import Engine.UnitActionLifecycles.BattleLifecycle;
+import Engine.UnitMods.CounterMultiplierModifier;
 import Engine.UnitMods.UnitDamageModifier;
 import Terrain.MapMaster;
 import Units.Unit;
@@ -105,6 +106,10 @@ public class TestCombatMods extends TestCase
     BattleSummary retribAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4, CalcType.NO_LUCK);
     BattleSummary retribBA = CombatEngine.simulateBattleResults(infB, infA, testMap, 7, 4, CalcType.NO_LUCK);
 
+    // Check that prevenge does not grant counterattack bonuses to the attacking opponent.
+    infA.addUnitModifier(new CounterMultiplierModifier(200));
+    BattleSummary nonBoostedAB = CombatEngine.simulateBattleResults(infA, infB, testMap, 7, 4, CalcType.NO_LUCK);
+
     // Check that Venge's Retribution works properly without breaking things (other than balance)
     boolean testPassed = true;
 
@@ -114,6 +119,7 @@ public class TestCombatMods extends TestCase
     testPassed &= validate(retribAB.attacker.unit == infA, "    infA attacked, but isn't the attacker.");
     testPassed &= validate(retribAB.defender.unit == infB, "    infB was attacked, but isn't the defender.");
     testPassed &= validate(retribAB.defender.deltaHealth > retribAB.attacker.deltaHealth, "    Cinder got first strike when Retribution should have stolen it.");
+    testPassed &= validate(retribAB.defender.deltaHealth == nonBoostedAB.defender.deltaHealth, "    Prevenge grants counter boosts to the opponent.");
 
     // Now do B->A
     testPassed &= validate(normalBA.defender.deltaHealth < normalBA.attacker.deltaHealth, "    First strike didn't work properly for Venge.");
