@@ -107,7 +107,7 @@ public class AITransportUtils
     // This means cargo gets +1 turn advantage if equal initiative, +2 if it has TA, or +0 if it's waited and transport is not
     if( !cargo.isTurnOver && null != cargo.unit )
       turnsCargo += 1;
-    if( transport.isTurnOver || null == cargo.unit )
+    if( transport.isTurnOver || null == transport.unit )
       turnsCargo += 1;
 
     // Expand the units' reachable area 1 turn at a time, until they overlap on a loadable tile.
