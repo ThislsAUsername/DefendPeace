@@ -43,7 +43,7 @@ public abstract class UnloadLifecycle
       // TODO: Consider using ignoreResident for dropoff points as well
       for( Unit cargo : actor.heldUnits )
       {
-        ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, actor, moveLocation, cargo);
+        ArrayList<XYCoord> dropoffLocations = Utils.findUnloadLocations(map, actor, moveLocation, cargo.getMoveFunctor());
         for( XYCoord loc : dropoffLocations )
         {
           unloadActions.add(new UnloadAction(actor, movePath, cargo, loc));

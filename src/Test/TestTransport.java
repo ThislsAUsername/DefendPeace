@@ -94,7 +94,7 @@ public class TestTransport extends TestCase
     testPassed &= validate(apc.heldUnits.isEmpty(), "    APC is not empty when it should be.");
 
     // Make sure the unit knows it can unload to its own position.
-    ArrayList<XYCoord> unloadLocs = Utils.findUnloadLocations( testMap, apc, new XYCoord(7, 4), cargo);
+    ArrayList<XYCoord> unloadLocs = Utils.findUnloadLocations( testMap, apc, new XYCoord(7, 4), cargo.getMoveFunctor());
     testPassed &= validate(unloadLocs.contains(new XYCoord(apc.x, apc.y) ), "    APC doesn't know it can unload to its own position.");
 
     // Make sure we can unload a unit on the apc's current location.

@@ -55,7 +55,7 @@ public class AIUtils
     Map<XYCoord, ArrayList<GameActionSet> > actions = new HashMap<XYCoord, ArrayList<GameActionSet> >();
 
     PathCalcParams pcp = new PathCalcParams(unit, gameMap);
-    pcp.includeOccupiedSpaces = includeOccupiedDestinations;
+    pcp.includeOccupiedSpaces = true; // Must be true to allow Load
     ArrayList<SearchNode> destinations = pcp.findAllPaths();
 
     for( SearchNode coord : destinations )

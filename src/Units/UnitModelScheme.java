@@ -8,6 +8,7 @@ import java.util.HashMap;
 import Engine.GameInstance;
 import Engine.UnitMods.UnitModifier;
 import Terrain.TerrainType;
+import lombok.var;
 
 /**
  * Provides the primary interface for the game to get info about game-specific units.
@@ -50,12 +51,28 @@ public abstract class UnitModelScheme implements Serializable
         mod.registerTrackers(gi);
   }
 
-  // Holds the data for a single Commander's unit selection.
+  // Holds the data for a game's unit selection; may be modified by Commanders during init.
   public static class GameReadyModels implements Serializable
   {
     private static final long serialVersionUID = 1L;
     public HashMap<TerrainType, ArrayList<UnitModel>> shoppingList = new HashMap<TerrainType, ArrayList<UnitModel>>();
     public UnitModelList unitModels = new UnitModelList();
+
+    public ArrayList<UnitModel> calcTransportTypesFor(UnitContext cargo)
+    {
+      var transportTypes = new ArrayList<UnitModel>();
+
+      // Grab relevant transport types for this cargo.
+      for( var modelT : unitModels )
+      {
+        if( modelT.baseCargoCapacity < 1 )
+          continue;
+        if( !modelT.canTransport(cargo.model.role) )
+          continue;
+        transportTypes.add(modelT);
+      }
+      return transportTypes;
+    }
   }
   
   public static UnitModel getModelFromString(String pName, Collection<UnitModel> models)
