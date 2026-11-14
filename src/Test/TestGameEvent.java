@@ -58,6 +58,7 @@ public class TestGameEvent extends TestCase
     testPassed &= validate(testUnitDieEvent(), "  UnitDieEvent test failed.");
     testPassed &= validate(testResupplyEvent(), "  Resupply test failed.");
     testPassed &= validate(testUnitJoinEvent(), "  Join test failed.");
+    testPassed &= validate(testInfiniteAmmoJoinEvent(), "  Infinite-ammo join test failed.");
     testPassed &= validate(testCommanderDefeatEvent(), "  ArmyDefeatEvent test failed."); // Put this one last because it alters the map.
 
     return testPassed;
@@ -409,6 +410,35 @@ public class TestGameEvent extends TestCase
 
     // 4) the CO gained funds.
     testPassed &= validate( funds < testCo1.army.money, "    The Commander gained no funds by joining!");
+
+    // Clean up.
+    testMap.removeUnit(recipient);
+    testMap.removeUnit(donor);
+    testCo1.units.remove(recipient);
+    testCo1.units.remove(donor);
+
+    return testPassed;
+  }
+
+  private boolean testInfiniteAmmoJoinEvent()
+  {
+    boolean testPassed = true;
+
+    // Add some units that don't use ammo.
+    Unit recipient = addUnit(testMap, testCo1, UnitModel.TROOP, 1, 4);
+    Unit donor = addUnit(testMap, testCo1, UnitModel.TROOP, 1, 5);
+    recipient.initTurn(testMap);
+    donor.initTurn(testMap);
+    recipient.damageHealth(50);
+    testPassed &= validate(recipient.model.maxAmmo < 0, "    Test unit has finite ammo!");
+
+    // Tell Donor to join Recipient.
+    GameAction joinAction = new JoinLifecycle.JoinAction(testMap, donor, Utils.findShortestPath(donor, new XYCoord(1, 4), testMap));
+    performGameAction(joinAction, testGame);
+
+    // The Recipient should still have infinite ammo, and not need resupply.
+    testPassed &= validate( recipient.ammo == recipient.model.maxAmmo, "    The Recipient's ammo is " + recipient.ammo + " after joining!");
+    testPassed &= validate( recipient.isFullySupplied(), "    The Recipient needs supplies after joining!");
 
     // Clean up.
     testMap.removeUnit(recipient);
