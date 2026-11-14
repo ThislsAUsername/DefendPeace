@@ -66,8 +66,10 @@ public class Sonja extends AWBWCommander
     params.luckRolledBad += 10;
     if( params.isCounter )
     {
-      params.attackerDamageMultiplier *= 150;
-      params.attackerDamageMultiplier /= 100;
+      // BW Sonja's "1.5x" counter only applies to the D2D stats (i.e. not scaling with COP/Tower bonuses), like BW Kanbei's SCOP
+      // D2D times 1.5 (1.0*1.5=1.5)
+      // "final" stat minus D2D (1.5-1.0=0.5)
+      params.attackPower += 50;
     }
   }
 
