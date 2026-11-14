@@ -162,7 +162,7 @@ public class AWBWUnits extends UnitModelScheme
     
     b.costBase(3000);
     b.abilityPowerValue(4);
-    b.maxFuel(99);
+    b.maxFuel(70);
     b.fuelBurnIdle(0);
     b.maxAmmo(3);
     b.visionRange(2);
@@ -429,7 +429,7 @@ public class AWBWUnits extends UnitModelScheme
     b.abilityPowerValue(14);
     b.maxFuel(50);
     b.fuelBurnIdle(0);
-    b.maxAmmo(9);
+    b.maxAmmo(6);
     b.visionRange(5);
     b.baseMovePower(4);
 
@@ -763,7 +763,7 @@ public class AWBWUnits extends UnitModelScheme
     b.name("Cruiser");
     b.type(AWBWUnitEnum.CRUISER);
     b.baseCargoCapacity(2);
-    b.carryableMask(UnitModel.AIR);
+    b.carryableMask(UnitModel.HOVER);
 
     /** Cruisers supply their cargo at the beginning of every turn. Make it so. */
     b.supplyCargo(true);
