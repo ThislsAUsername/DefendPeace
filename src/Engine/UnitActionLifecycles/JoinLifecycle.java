@@ -190,7 +190,8 @@ public abstract class JoinLifecycle
 
         // Add the individuals' resources together
         unitRecipient.alterHealth(donorHealth);
-        unitRecipient.ammo      = Math.min(unitRecipient.model.maxAmmo     , unitRecipient.ammo + unitDonor.ammo);
+        if( unitRecipient.model.maxAmmo >= 0 ) // Infinite ammo (-1) stays as-is
+          unitRecipient.ammo    = Math.min(unitRecipient.model.maxAmmo     , unitRecipient.ammo + unitDonor.ammo);
         unitRecipient.fuel      = Math.min(unitRecipient.model.maxFuel     , unitRecipient.fuel + unitDonor.fuel);
         unitRecipient.materials = Math.min(unitRecipient.model.maxMaterials, unitRecipient.materials + unitDonor.materials);
 
