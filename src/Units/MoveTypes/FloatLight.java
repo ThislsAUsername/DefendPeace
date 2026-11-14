@@ -13,5 +13,6 @@ public class FloatLight extends MoveTypeSea
     setMoveCost(TerrainType.REEF, 2);
 
     setMoveCost(Weathers.SNOW, TerrainType.SEA, 2);
+    setMoveCost(Weathers.SNOW, TerrainType.SEAPORT, 2);
   }
 }

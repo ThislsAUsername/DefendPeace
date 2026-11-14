@@ -57,6 +57,7 @@ public class TestTransport extends TestCase
     boolean testPassed = validate(testLoadUnloadAPC(), "  Transport test failed.");
     testPassed = validate(testJoinLoadedTransports(), "  Transport Join test failed.");
     testPassed = validate(testLoadedTransportDeath(), "  Transport death test failed.");
+    testPassed &= validate(testCruiserCargo(), "  Cruiser cargo test failed.");
     return testPassed;
   }
 
@@ -177,6 +178,29 @@ public class TestTransport extends TestCase
     testPassed &= validate(lander1.heldUnits.size() == 1, "    Lander1 is not holding a unit after failed join.");
     testPassed &= validate(lander2.model.isAll(UnitModel.SEA | UnitModel.TRANSPORT), "    No lander at join location.");
     testPassed &= validate(lander2.heldUnits.size() == 2, "    Lander2 is not holding 2 units after failed join.");
+
+    cleanupTest();
+
+    return testPassed;
+  }
+
+  /** Cruisers carry copters, but not planes. */
+  private boolean testCruiserCargo()
+  {
+    setupTest();
+
+    boolean testPassed = true;
+
+    Unit cruiser = addUnit(testMap, testCo1, "Cruiser", 1, 1);
+    Unit bcopter = addUnit(testMap, testCo1, "B-Copter", 2, 1);
+    Unit tcopter = addUnit(testMap, testCo1, "T-Copter", 3, 1);
+    Unit fighter = addUnit(testMap, testCo1, "Fighter", 4, 1);
+    Unit bomber = addUnit(testMap, testCo1, "Bomber", 5, 1);
+
+    testPassed &= validate(cruiser.hasCargoSpace(bcopter.model.role), "    Cruiser can't carry a B-Copter.");
+    testPassed &= validate(cruiser.hasCargoSpace(tcopter.model.role), "    Cruiser can't carry a T-Copter.");
+    testPassed &= validate(!cruiser.hasCargoSpace(fighter.model.role), "    Cruiser can carry a Fighter.");
+    testPassed &= validate(!cruiser.hasCargoSpace(bomber.model.role), "    Cruiser can carry a Bomber.");
 
     cleanupTest();
 
