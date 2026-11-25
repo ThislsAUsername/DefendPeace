@@ -1,4 +1,4 @@
-package CommandingOfficers.AWBW.OS;
+package CommandingOfficers.Variants.OS;
 
 import java.util.ArrayList;
 
@@ -26,7 +26,7 @@ public class NellWarCrimes extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Nell", UIUtils.SourceGames.AWBW, UIUtils.OS, "crime");
+      super("Nell", UIUtils.SourceGames.VARIANTS, UIUtils.OS, "crime");
       infoPages.add(new InfoPage(
             "Nell (warcrimes)\n"
           + "Nell, but she always rolls max luck.\n"

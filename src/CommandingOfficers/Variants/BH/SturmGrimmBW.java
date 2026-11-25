@@ -1,4 +1,4 @@
-package CommandingOfficers.AWBW.BH;
+package CommandingOfficers.Variants.BH;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,7 +32,7 @@ public class SturmGrimmBW extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sturm", UIUtils.SourceGames.AWBW, UIUtils.BH, "GBW");
+      super("Sturm", UIUtils.SourceGames.VARIANTS, UIUtils.BH, "GBW");
       infoPages.add(new InfoPage(
             "Sturm (Grimm BW)\n"
           + "AWBW Sturm with a weaker D2D (inspired by AW1).\n"

@@ -131,7 +131,7 @@ public class Sami extends AWBWCommander
     {
       modList.add(moveMod);
       modList.add(footAtkMod);
-      modList.add(footAtkMod);
+      modList.add(capMod);
     }
   }
 }

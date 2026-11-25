@@ -26,7 +26,7 @@ public class PlayerSetupCommanderController implements IController
   public PlayerSetupCommanderController(ArrayList<CommanderInfo> infos, PlayerSetupInfo playerInfo, TagMode tagMode)
   {
     cmdrInfos = infos;
-    noCmdr = infos.size() - 1;
+    noCmdr = infos.indexOf(CommandingOfficers.CommanderLibrary.NotACO.getInfo());
     myPlayerInfo = playerInfo;
     shouldSelectMultiCO = tagMode.supportsMultiCmdrSelect;
 

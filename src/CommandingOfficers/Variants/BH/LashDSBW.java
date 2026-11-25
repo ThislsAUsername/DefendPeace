@@ -1,4 +1,4 @@
-package CommandingOfficers.AWBW.BH;
+package CommandingOfficers.Variants.BH;
 
 import java.util.ArrayList;
 import CommandingOfficers.*;
@@ -29,7 +29,7 @@ public class LashDSBW extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Lash", UIUtils.SourceGames.AWBW, UIUtils.BH, "3BW");
+      super("Lash", UIUtils.SourceGames.VARIANTS, UIUtils.BH, "3BW");
       infoPages.add(new InfoPage(
             "AWDS Lash for AWBW\n"
           + "VS AW2: Weaker D2D; not slowed by snow during powers.\n"

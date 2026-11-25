@@ -1,4 +1,4 @@
-package CommandingOfficers.AWBW.YC;
+package CommandingOfficers.Variants.YC;
 
 import java.util.ArrayList;
 
@@ -30,7 +30,7 @@ public class SonjaDSBW extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Sonja", UIUtils.SourceGames.AWBW, UIUtils.YC, "3BW");
+      super("Sonja", UIUtils.SourceGames.VARIANTS, UIUtils.YC, "3BW");
       infoPages.add(new InfoPage(
             "AWDS Sonja for AWBW\n"
           + "VS AW2: Negates terrain stars, less bad luck, no D2D counter boost\n"

@@ -113,6 +113,7 @@ public abstract class TerraformLifecycle
       XYCoord unitXY = new XYCoord(u.x, u.y);
       priorTerraformAmount = (unitXY.equals(loc) ? unit.getCaptureProgress() : 0);
       UnitContext uc = new UnitContext(unit);
+      // TODO: Add a path?
       terraformProgress = uc.calculateCapturePower();
     }
 
@@ -120,7 +121,7 @@ public abstract class TerraformLifecycle
     public void performEvent(MapMaster gameMap)
     {
       // Only attempt to do the action if it is valid to do so.
-      if( unit.capture(gameMap) )
+      if( unit.capture(gameMap, terraformProgress) )
       {
         if( unit.model.needsMaterials )
           unit.materials -= 1;

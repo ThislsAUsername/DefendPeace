@@ -1,4 +1,4 @@
-package CommandingOfficers.AWBW.GE;
+package CommandingOfficers.Variants.GE;
 
 import java.util.ArrayList;
 import CommandingOfficers.*;
@@ -29,7 +29,7 @@ public class JessDSBW extends AWBWCommander
     private static final long serialVersionUID = 1L;
     public instantiator()
     {
-      super("Jess", UIUtils.SourceGames.AWBW, UIUtils.GE, "3BW");
+      super("Jess", UIUtils.SourceGames.VARIANTS, UIUtils.GE, "3BW");
       infoPages.add(new InfoPage(
             "AWDS Jess for AWBW\n"
           + "VS AW2: +10 attack to foot/tanks; more tank attack on powers\n"
