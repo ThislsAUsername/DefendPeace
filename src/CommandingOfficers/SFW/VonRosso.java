@@ -26,7 +26,7 @@ public class VonRosso extends AncientCommander
       infoPages.add(new InfoPage(
             "Von Rosso\n"
           + "Attack, Attack, Attack continuously! However, defence suffers.\n"
-          + "Adds 6 minus his own unit's EXP/% value to his EXP rate.\n"));
+          + "Boosted EXP per damage dealt; bonus is higher for lower cost units (+6 - own EXP/%).\n"));
       infoPages.add(SFW_MECHANICS_BLURB);
     }
     @Override

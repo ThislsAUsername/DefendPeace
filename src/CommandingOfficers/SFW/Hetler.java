@@ -26,7 +26,7 @@ public class Hetler extends AncientCommander
       infoPages.add(new InfoPage(
             "Hetler\n"
           + "'Stand strong for the People' is his motto. Will defend his units, but his attacking tactics are weak.\n"
-          + "When attacked, gain the EXP of 5 HP from the attacker.\n"));
+          + "When attacked, gain extra EXP as if you destroyed 5 HP from the attacker.\n"));
       infoPages.add(SFW_MECHANICS_BLURB);
     }
     @Override
