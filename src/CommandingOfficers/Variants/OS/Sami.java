@@ -103,7 +103,7 @@ public class Sami extends AWBWCommander
   public GameEventQueue receiveCaptureEvent(Unit unit, Commander prevOwner, MapLocation location)
   {
     GameEventQueue returnEvents = new GameEventQueue();
-    if( unit.CO == this )
+    if( unit.CO == this && army.money >= captureCost )
       returnEvents.add(new ModifyFundsEvent(army, -1 * captureCost));
     return returnEvents;
   }
