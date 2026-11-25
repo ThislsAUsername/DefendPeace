@@ -219,7 +219,8 @@ public class PlayerSetupTeamArtist
 
     for( XYCoord coord : mapInfo.playerProps[faction] )
       ownedCoords.add(coord);
-    ownedCoords.addAll(mapInfo.mapUnits.get(faction).keySet());
+    if (faction < mapInfo.mapUnits.size())
+      ownedCoords.addAll(mapInfo.mapUnits.get(faction).keySet());
 
     for( XYCoord coord : ownedCoords )
     {
