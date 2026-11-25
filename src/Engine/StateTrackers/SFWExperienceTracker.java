@@ -10,7 +10,6 @@ import Engine.UnitActionLifecycles.JoinLifecycle.JoinEvent;
 import Units.Unit;
 import Units.UnitDelta;
 import Units.UnitModel;
-import lombok.var;
 
 /**
  * See documentation in AncientCommander
@@ -119,11 +118,24 @@ public class SFWExperienceTracker extends StateTracker
   @Override
   public CustomStatData getCustomStat(Unit unit)
   {
-    var rank = getRank(unit);
-    int exp  = getExperience(unit) - rank.exp; // should be positive
-    exp  /= 10; // Hide the lowest digit since it would reveal HP digits
-    String text = "" + exp ;
-    return new CustomStatData('E', rank.expColor, Color.white, text);
+    SFWRank nextRank = SFWRank.NONE;
+    SFWRank currRank = SFWRank.NONE;
+    int exp = getExperience(unit);
+    for( SFWRank rank : SFWRank.values() )
+      if( exp >= rank.exp )
+      {
+        currRank = rank;
+        break;
+      }
+      else
+        nextRank = rank;
+    if (SFWRank.LEVEL4 == currRank)
+      return new CustomStatData('E', currRank.expColor, currRank.expColor, "!!");
+    int myDelta       = nextRank.exp - exp;
+    int rankDelta     = nextRank.exp - currRank.exp;
+    int toNextPercent = (rankDelta - myDelta) * 100 / rankDelta;
+    String text = "" + toNextPercent;
+    return new CustomStatData('E', currRank.expColor, Color.white, text);
   }
 
 }

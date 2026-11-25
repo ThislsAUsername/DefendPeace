@@ -24,7 +24,7 @@ public abstract class AncientCommander extends Commander
           + "Defense works like AW1.\n"
           + "Veterancy bonuses do not apply if this CO is tagged out, but EXP is always tracked.\n"
           + "\n"
-          + "The levels require a total of 500, 1000, 2000, 4000 EXP.\n"
+          + "The levels require a total of 500, 1000, 2000, 4000 EXP (displayed as a % of the current level).\n"
           + "EXP is gained based on damage dealt, scaled from (originally) 1-5 EXP per % damage.\n"
           + "EXP/% is 1 if cost <=  5k\n"
           + "EXP/% is 2 if cost <=  8k\n"
