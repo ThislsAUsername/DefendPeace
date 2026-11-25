@@ -172,6 +172,13 @@ public class CommanderLibrary
     commanderList.add( CommandingOfficers.AWBW.IDS.Penny.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.IDS.TabithaBW.getInfo() );
     commanderList.add( CommandingOfficers.AWBW.IDS.Caulder.getInfo() );
+    commanderList.add( CommandingOfficers.SFW.YuanDelta.getInfo() );
+    commanderList.add( CommandingOfficers.SFW.Rojenski.getInfo() );
+    commanderList.add( CommandingOfficers.SFW.VonRosso.getInfo() );
+    commanderList.add( CommandingOfficers.SFW.Hetler.getInfo() );
+    commanderList.add( CommandingOfficers.SFW.Caroline.getInfo() );
+    commanderList.add( CommandingOfficers.SFW.BillyGates.getInfo() );
+    commanderList.add( CommandingOfficers.SFW.Yamamoto.getInfo() );
   }
 
   public static class NotACO extends Commander

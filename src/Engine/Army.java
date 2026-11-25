@@ -142,6 +142,9 @@ public class Army implements GameEventListener, Serializable, UnitModList, UnitM
         output.addAll(co.ownedProperties);
     return output;
   }
+  /**
+   * The hook that calculates displayed and actual income.
+   */
   public int getIncomePerTurn()
   {
     int total = 0;
