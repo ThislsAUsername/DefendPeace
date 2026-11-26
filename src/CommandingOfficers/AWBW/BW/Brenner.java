@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import CommandingOfficers.*;
 import CommandingOfficers.AWBW.AWBWCommander;
 import Engine.GameScenario;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassHealEvent;
 import Engine.UnitMods.UnitDefenseModifier;
@@ -57,7 +57,7 @@ public class Brenner extends AWBWCommander
   }
 
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
     params.defenseSubtraction += 10;
   }

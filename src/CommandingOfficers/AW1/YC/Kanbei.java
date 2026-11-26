@@ -6,7 +6,7 @@ import CommandingOfficers.*;
 import CommandingOfficers.AW1.AW1Commander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.DamageMultiplierDefense;
 import Engine.UnitMods.DamageMultiplierOffense;
 import Engine.UnitMods.UnitModifier;
@@ -64,7 +64,7 @@ public class Kanbei extends AW1Commander
     params.attackerDamageMultiplier /= 100;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
     if( null != getActiveAbility() )
       return;

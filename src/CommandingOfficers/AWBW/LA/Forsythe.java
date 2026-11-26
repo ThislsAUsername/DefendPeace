@@ -8,7 +8,7 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.AW4.RuinedCommander.VeteranRank;
 import CommandingOfficers.AWBW.AWBWCommander;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.StateTrackers.KillCountsTracker;
 import Engine.StateTrackers.StateTracker;
 import UI.UIUtils;
@@ -59,14 +59,14 @@ public class Forsythe extends AWBWCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    VeteranRank rank = getRank(params.attacker.unit);
+    VeteranRank rank = getRank(params.shooter.unit);
     params.attackPower += rank.attack;
     params.attackPower += 10;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    VeteranRank rank = getRank(params.defender.unit);
+    VeteranRank rank = getRank(params.targetUnit.unit);
     params.defenseSubtraction += rank.defense;
     params.defenseSubtraction += 10;
   }

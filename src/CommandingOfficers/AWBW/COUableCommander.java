@@ -9,7 +9,7 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.DeployableCommander;
 import CommandingOfficers.AWBW.AWBWCommander.AWBWAbility;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitDefenseModifier;
 import Engine.UnitMods.UnitModifier;
@@ -55,13 +55,13 @@ public abstract class COUableCommander extends DeployableCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( COUs.contains(params.attacker.unit) )
+    if( COUs.contains(params.shooter.unit) )
       params.attackPower += couPow;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    if( COUs.contains(params.defender.unit) )
+    if( COUs.contains(params.targetUnit.unit) )
       params.defenseSubtraction += couDef;
   }
 

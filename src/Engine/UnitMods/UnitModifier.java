@@ -5,7 +5,7 @@ import java.io.Serializable;
 import Engine.GameInstance;
 import Engine.Combat.CombatContext;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Units.UnitContext;
 
 /**
@@ -33,13 +33,13 @@ public interface UnitModifier extends Serializable
    * <p>Applies only when attacking a unit.
    * <p>Should be used only when you need specific information about your target.
    */
-  void modifyUnitAttackOnUnit(BattleParams params);
+  void modifyUnitAttackOnUnit(StrikeUnitParams params);
 
   /**
-   * Called any time your unit is being attacked, after {@link #modifyUnitAttackOnUnit(BattleParams)}
+   * Called any time your unit is being attacked, after {@link #modifyUnitAttackOnUnit(StrikeUnitParams)}
    * <p>Should be used to modify attacks made against your units.
    */
-  void modifyUnitDefenseAgainstUnit(BattleParams params);
+  void modifyUnitDefenseAgainstUnit(StrikeUnitParams params);
 
   /**
    * Should always be called for cost-related calculations

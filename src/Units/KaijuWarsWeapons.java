@@ -7,7 +7,7 @@ import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatContext;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.MassDamageEvent;
@@ -335,35 +335,35 @@ public class KaijuWarsWeapons
     @Override
     public void modifyUnitAttack(StrikeParams params)
     {
-      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.weapon;
+      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.shooter.weapon;
       int attack = gun.vsLand;
 
       TerrainType atkEnv = TerrainType.METEOR;
-      if( null != params.attacker.env )
-        atkEnv = params.attacker.env.terrainType;
-      int attackBoost = getAttackBoost(params.attacker, params.map, atkEnv, params.targetCoord);
+      if( null != params.shooter.env )
+        atkEnv = params.shooter.env.terrainType;
+      int attackBoost = getAttackBoost(params.shooter, params.map, atkEnv, params.targetCoord);
 
       // Assume we're shooting terrain, since the base damage will get overwritten later
       params.baseDamage = getDamage(attack, attackBoost, TERRAIN_DURABILITY);
     }
 
     @Override
-    public void modifyUnitAttackOnUnit(BattleParams params)
+    public void modifyUnitAttackOnUnit(StrikeUnitParams params)
     {
-      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.attacker.weapon;
-      KaijuWarsUnitModel defModel = (KaijuWarsUnitModel) params.defender.model;
+      KaijuWarsWeapon gun = (KaijuWarsWeapon) params.shooter.weapon;
+      KaijuWarsUnitModel defModel = (KaijuWarsUnitModel) params.targetUnit.model;
       TerrainType atkEnv = TerrainType.METEOR;
       TerrainType defEnv = TerrainType.METEOR;
-      if( null != params.attacker.env )
-        atkEnv = params.attacker.env.terrainType;
-      if( null != params.defender.env )
-        defEnv = params.defender.env.terrainType;
+      if( null != params.shooter.env )
+        atkEnv = params.shooter.env.terrainType;
+      if( null != params.targetUnit.env )
+        defEnv = params.targetUnit.env.terrainType;
 
-      int counterBoost = getCounterBoost(params.defender, params.map, defEnv);
+      int counterBoost = getCounterBoost(params.targetUnit, params.map, defEnv);
       int counterPower = defModel.kaijuCounter;
       counterPower += counterBoost;
 
-      int attackBoost = getAttackBoost(params.attacker, params.map, atkEnv, params.defender.coord);
+      int attackBoost = getAttackBoost(params.shooter, params.map, atkEnv, params.targetUnit.coord);
       int attack = deriveAttack(gun, defModel);
 
       if( defModel.isKaiju )

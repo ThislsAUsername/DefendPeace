@@ -59,7 +59,7 @@ public class Will extends AWBWCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAll(BOOST_MASK_ALL) )
+    if( params.shooter.model.isAll(BOOST_MASK_ALL) )
       params.attackPower += 20;
   }
 

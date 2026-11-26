@@ -7,7 +7,7 @@ import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Combat.CombatContext;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.UnitModifier;
 import Engine.Combat.CombatContext.CalcType;
 import Terrain.MapInfo;
@@ -64,20 +64,20 @@ public class TestJavier extends TestCase
     UnitContext infB = new UnitContext(addUnit(map, javierDefend, UnitModel.TROOP, 7, 5));
     ArrayList<UnitModifier> baseMods = new ArrayList<>(infB.mods);
 
-    BattleParams shotNormal = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams artyNormal = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams shotNormal = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams artyNormal = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
 
     infB.mods.clear();
     infB.mods.addAll(baseMods);
     javierDefend.myAbilities.get(0).enqueueUnitMods(map, infB.mods);
-    BattleParams shotOnCOP  = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams artyOnCOP  = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams shotOnCOP  = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams artyOnCOP  = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
 
     infB.mods.clear();
     infB.mods.addAll(baseMods);
     javierDefend.myAbilities.get(1).enqueueUnitMods(map, infB.mods);
-    BattleParams shotOnSCOP = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams artyOnSCOP = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams shotOnSCOP = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams artyOnSCOP = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
 
     testPassed &= validate(100 == shotNormal.defenseDivision,    "    Defense is wrong" );
     testPassed &= validate(100 == shotNormal.defenseSubtraction, "    Defense is wrong" );
@@ -113,20 +113,20 @@ public class TestJavier extends TestCase
     UnitContext infB = new UnitContext(addUnit(map, javierDefend, UnitModel.TROOP, 7, 5));
     ArrayList<UnitModifier> baseMods = new ArrayList<>(infB.mods);
 
-    BattleParams shotNormal = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams artyNormal = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams shotNormal = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams artyNormal = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
 
     infB.mods.clear();
     infB.mods.addAll(baseMods);
     javierDefend.myAbilities.get(0).enqueueUnitMods(map, infB.mods);
-    BattleParams shotOnCOP  = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams artyOnCOP  = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams shotOnCOP  = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams artyOnCOP  = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
 
     infB.mods.clear();
     infB.mods.addAll(baseMods);
     javierDefend.myAbilities.get(1).enqueueUnitMods(map, infB.mods);
-    BattleParams shotOnSCOP = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams artyOnSCOP = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams shotOnSCOP = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams artyOnSCOP = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
 
     testPassed &= validate(110 == shotNormal.defenseDivision,    "    Defense is wrong" );
     testPassed &= validate(100 == shotNormal.defenseSubtraction, "    Defense is wrong" );
@@ -164,20 +164,20 @@ public class TestJavier extends TestCase
     UnitContext infB = new UnitContext(addUnit(map, javierDefend, UnitModel.TROOP, 7, 5));
     ArrayList<UnitModifier> baseMods = new ArrayList<>(infB.mods);
 
-    BattleParams shotNormal = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams artyNormal = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams shotNormal = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams artyNormal = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
 
     infB.mods.clear();
     infB.mods.addAll(baseMods);
     javierDefend.myAbilities.get(0).enqueueUnitMods(map, infB.mods);
-    BattleParams shotOnCOP  = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams artyOnCOP  = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams shotOnCOP  = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams artyOnCOP  = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
 
     infB.mods.clear();
     infB.mods.addAll(baseMods);
     javierDefend.myAbilities.get(1).enqueueUnitMods(map, infB.mods);
-    BattleParams shotOnSCOP = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams artyOnSCOP = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams shotOnSCOP = new CombatContext(game, map, infA, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams artyOnSCOP = new CombatContext(game, map, arty, infB, CalcType.NO_LUCK).applyModifiers().getAttack();
 
     testPassed &= validate(100 == shotNormal.defenseDivision,    "    Defense is wrong" );
     testPassed &= validate(110 == shotNormal.defenseSubtraction, "    Defense is wrong" );

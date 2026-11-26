@@ -69,11 +69,11 @@ public class JessDSBW extends AWBWCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAny(UnitModel.TROOP) )
+    if( params.shooter.model.isAny(UnitModel.TROOP) )
       return;
-    if( params.attacker.model.isAny(UnitModel.LAND) )
+    if( params.shooter.model.isAny(UnitModel.LAND) )
       params.attackPower += 20;
-    if( params.attacker.model.isAny(UnitModel.AIR | UnitModel.SEA) )
+    if( params.shooter.model.isAny(UnitModel.AIR | UnitModel.SEA) )
       params.attackPower -= 10;
   }
 

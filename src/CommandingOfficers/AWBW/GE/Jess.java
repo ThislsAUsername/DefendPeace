@@ -68,7 +68,7 @@ public class Jess extends AWBWCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAny(UnitModel.TANK) )
+    if( params.shooter.model.isAny(UnitModel.TANK) )
       params.attackPower += 10;
     else
       params.attackPower -= 10;

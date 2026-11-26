@@ -7,7 +7,7 @@ import CommandingOfficers.CommanderAbility;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.Modifiers.UnitProductionModifier;
 import Engine.GameScenario;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitDefenseModifier;
 import Engine.UnitMods.UnitModifier;
@@ -94,10 +94,10 @@ public class Strong extends Commander
    * Strong gets a little extra oomph when fighting enemy foot soldiers.
    */
   @Override
-  public void modifyUnitAttackOnUnit(BattleParams params)
+  public void modifyUnitAttackOnUnit(StrikeUnitParams params)
   {
     // Grant a firepower increase if we are attacking and the defender is on foot.
-    if( (params.attacker.CO == this) && params.defender.model.isTroop() )
+    if( (params.shooter.CO == this) && params.targetUnit.model.isTroop() )
     {
       params.attackPower += PASSIVE_ANTI_INF_BUFF;
     }

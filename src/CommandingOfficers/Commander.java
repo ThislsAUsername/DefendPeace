@@ -13,7 +13,7 @@ import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.CommanderAbilityRevertEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -350,13 +350,13 @@ public class Commander implements GameEventListener, Serializable, UnitModifierW
 
   public void applyTowerAttack(StrikeParams params)
   {
-    UnitContext minion = params.attacker;
+    UnitContext minion = params.shooter;
     params.attackPower += minion.towerCountDS * 10;
     params.attackPower += minion.towerCountDoR * 5;
   }
-  public void applyTowerDefense(BattleParams params)
+  public void applyTowerDefense(StrikeUnitParams params)
   {
-    UnitContext minion = params.defender;
+    UnitContext minion = params.targetUnit;
     params.defenseDivision += minion.towerCountDoR * 5;
   }
 

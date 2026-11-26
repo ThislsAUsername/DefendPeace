@@ -1,6 +1,6 @@
 package Engine.UnitMods;
 
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 
 /** Applies subtractive defense */
 public class IndirectDefenseModifier implements UnitModifierWithDefaults
@@ -14,7 +14,7 @@ public class IndirectDefenseModifier implements UnitModifierWithDefaults
   }
 
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
     if( params.battleRange < 2 )
       params.defenseSubtraction += defenseModifier;

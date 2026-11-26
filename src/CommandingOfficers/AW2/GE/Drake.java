@@ -5,7 +5,7 @@ import CommandingOfficers.*;
 import CommandingOfficers.AW2.AW2Commander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.GlobalWeatherEvent;
@@ -67,7 +67,7 @@ public class Drake extends AW2Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAirUnit() )
+    if( params.shooter.model.isAirUnit() )
       params.attackPower -= 30;
   }
   @Override
@@ -77,9 +77,9 @@ public class Drake extends AW2Commander
       uc.movePower += 1;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    if( params.defender.model.isSeaUnit() )
+    if( params.targetUnit.model.isSeaUnit() )
       params.defenseSubtraction += 10;
   }
   @Override

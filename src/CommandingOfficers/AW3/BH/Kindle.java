@@ -64,9 +64,9 @@ public class Kindle extends AW3Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( null == params.attacker.env )
+    if( null == params.shooter.env )
       return;
-    if( params.attacker.env.terrainType.isCapturable() )
+    if( params.shooter.env.terrainType.isCapturable() )
       params.attackPower += 40;
   }
   public static class UrbanHitMod implements UnitModifierWithDefaults
@@ -80,9 +80,9 @@ public class Kindle extends AW3Commander
     @Override
     public void modifyUnitAttack(StrikeParams params)
     {
-      if( null == params.attacker.env )
+      if( null == params.shooter.env )
         return;
-      if( params.attacker.env.terrainType.isCapturable() )
+      if( params.shooter.env.terrainType.isCapturable() )
         params.attackPower += power;
     }
   }

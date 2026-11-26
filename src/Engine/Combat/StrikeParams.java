@@ -18,7 +18,7 @@ import Units.UnitModel;
  */
 public class StrikeParams
 {
-  public static BattleParams buildBattleParams(
+  public static StrikeUnitParams buildBattleParams(
       UnitContext attacker, UnitContext defender,
       CombatContext combatContext,
       boolean isCounter)
@@ -26,7 +26,7 @@ public class StrikeParams
     List<UnitModifier> aMods = new ArrayList<>(attacker.mods);
     List<UnitModifier> dMods = new ArrayList<>(defender.mods);
 
-    BattleParams params = new BattleParams(
+    StrikeUnitParams params = new StrikeUnitParams(
         buildStrikeParams(attacker, defender.model,
                           combatContext.gameMap, combatContext.battleRange,
                           defender.coord,
@@ -64,7 +64,7 @@ public class StrikeParams
   }
 
 
-  public final UnitContext attacker;
+  public final UnitContext shooter;
   public final GameMap map; // for reference, not weirdness
 
   // Stuff inherited for reference from CombatContext
@@ -107,7 +107,7 @@ public class StrikeParams
       int baseDamage,
       boolean isCounter)
   {
-    this.attacker = attacker;
+    this.shooter = attacker;
     this.map = map;
 
     this.battleRange = battleRange;
@@ -126,7 +126,7 @@ public class StrikeParams
   }
   protected StrikeParams(StrikeParams other)
   {
-    this.attacker = other.attacker;
+    this.shooter = other.shooter;
     this.map = other.map;
 
     this.battleRange = other.battleRange;
@@ -138,7 +138,7 @@ public class StrikeParams
     this.luckRolled = other.luckRolled;
     this.luckRolledBad = other.luckRolledBad;
     this.isCounter = other.isCounter;
-    aw1Luck = attacker.CO.aw1Combat;
+    aw1Luck = shooter.CO.aw1Combat;
     this.attackerDamageMultiplier = other.attackerDamageMultiplier;
     this.defenderDamageMultiplier = other.defenderDamageMultiplier;
 
@@ -180,19 +180,19 @@ public class StrikeParams
     return 0;
   }
 
-  public static class BattleParams extends StrikeParams
+  public static class StrikeUnitParams extends StrikeParams
   {
     public final CombatContext combatContext;
-    public final UnitContext defender;
+    public final UnitContext targetUnit;
 
-    protected BattleParams(
+    protected StrikeUnitParams(
         StrikeParams base,
         CombatContext combatContext,
         UnitContext defender)
     {
       super(base);
       this.combatContext = combatContext;
-      this.defender = defender;
+      this.targetUnit = defender;
 
       defenderHealth = defender.getHealth();
       this.terrainStars = defender.terrainStars;

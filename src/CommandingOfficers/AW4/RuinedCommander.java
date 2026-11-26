@@ -21,7 +21,7 @@ import CommandingOfficers.DeployableCommander;
 import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.CommanderAbilityEvent;
 import Engine.GameEvents.CommanderAbilityRevertEvent;
 import Engine.GameEvents.GameEventQueue;
@@ -247,13 +247,13 @@ public abstract class RuinedCommander extends DeployableCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    VeteranRank rank = getRank(params.attacker.unit);
+    VeteranRank rank = getRank(params.shooter.unit);
     params.attackPower += rank.attack;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    VeteranRank rank = getRank(params.defender.unit);
+    VeteranRank rank = getRank(params.targetUnit.unit);
     params.defenseDivision += rank.defense;
     params.terrainGivesSubtraction = false;
   }
@@ -271,20 +271,20 @@ public abstract class RuinedCommander extends DeployableCommander
     @Override
     public void modifyUnitAttack(StrikeParams params)
     {
-      if( zoneSource.isInZone(params.attacker) )
+      if( zoneSource.isInZone(params.shooter) )
       {
         params.attackPower += GENERIC_STAT_BUFF;
-        if( zoneSource.shouldBoost(params.attacker.model) )
+        if( zoneSource.shouldBoost(params.shooter.model) )
           params.attackPower += zoneSource.zonePow;
       }
     }
     @Override
-    public void modifyUnitDefenseAgainstUnit(BattleParams params)
+    public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
     {
-      if( zoneSource.isInZone(params.defender) )
+      if( zoneSource.isInZone(params.targetUnit) )
       {
         params.defenseDivision += GENERIC_STAT_BUFF;
-        if( zoneSource.shouldBoost(params.defender.model) )
+        if( zoneSource.shouldBoost(params.targetUnit.model) )
           params.defenseDivision += zoneSource.zoneDef;
       }
     }

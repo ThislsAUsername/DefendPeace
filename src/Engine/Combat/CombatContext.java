@@ -6,7 +6,7 @@ import java.util.List;
 
 import CommandingOfficers.Commander;
 import Engine.GameInstance;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.UnitModifier;
 import Terrain.GameMap;
 import Terrain.MapLocation;
@@ -174,7 +174,7 @@ public class CombatContext
     }
   }
 
-  public BattleParams getAttack()
+  public StrikeUnitParams getAttack()
   {
     UnitContext aClone = new UnitContext(attacker);
     UnitContext dClone = new UnitContext(defender);
@@ -182,7 +182,7 @@ public class CombatContext
     return buildBattleParams(aClone, dClone, false);
   }
 
-  private BattleParams buildBattleParams(UnitContext aClone, UnitContext dClone, boolean isCounter)
+  private StrikeUnitParams buildBattleParams(UnitContext aClone, UnitContext dClone, boolean isCounter)
   {
     return StrikeParams.buildBattleParams(aClone, dClone, this, isCounter);
   }

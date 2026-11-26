@@ -1,7 +1,7 @@
 package CommandingOfficers.SFW;
 
 import Engine.GameScenario;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import UI.UIUtils;
@@ -42,7 +42,7 @@ public class Caroline extends YuanDelta
   }
 
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
     super.modifyUnitDefenseAgainstUnit(params);
     params.trueDamage -= 5;

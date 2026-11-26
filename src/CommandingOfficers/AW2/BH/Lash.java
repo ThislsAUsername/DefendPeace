@@ -64,9 +64,9 @@ public class Lash extends AW2Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAirUnit() )
+    if( params.shooter.model.isAirUnit() )
       return;
-    final int multiplier = 100 + params.attacker.terrainStars * 10;
+    final int multiplier = 100 + params.shooter.terrainStars * 10;
     params.attackerDamageMultiplier *= multiplier;
     params.attackerDamageMultiplier /= 100;
   }

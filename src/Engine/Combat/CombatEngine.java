@@ -7,7 +7,7 @@ import java.util.HashSet;
 import Engine.GamePath;
 import Engine.XYCoord;
 import Engine.Combat.CombatContext.CalcType;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitActionLifecycles.BattleLifecycle.BattleEvent;
 import Terrain.GameMap;
 import Terrain.MapLocation;
@@ -74,7 +74,7 @@ public class CombatEngine
   }
 
   // Add an attack, if the shooter exists and can shoot.
-  protected static void addShotIfValid(ArrayList<BattleParams> shooters, CombatContext context, int time, UnitState attackerState, UnitContext defender, boolean isCounter)
+  protected static void addShotIfValid(ArrayList<StrikeUnitParams> shooters, CombatContext context, int time, UnitState attackerState, UnitContext defender, boolean isCounter)
   {
     UnitContext aMan = null;
     if( !isCounter )
@@ -144,7 +144,7 @@ public class CombatEngine
     {
       int time = timesteps.get(tsIdx);
 
-      var attacks = new ArrayList<BattleParams>();
+      var attacks = new ArrayList<StrikeUnitParams>();
       addShotIfValid(attacks, context, time, attackerFinal, new UnitContext(defenderFinal), false);
       addShotIfValid(attacks, context, time, defenderFinal, new UnitContext(attackerFinal), true);
 
@@ -160,12 +160,12 @@ public class CombatEngine
         if( !attackInstance.isCounter )
         {
           dif.target = defenderFinal;
-          attackerFinal.fire(attackInstance.attacker.weapon);
+          attackerFinal.fire(attackInstance.shooter.weapon);
         }
         else
         {
           dif.target = attackerFinal;
-          defenderFinal.fire(attackInstance.attacker.weapon);
+          defenderFinal.fire(attackInstance.shooter.weapon);
         }
         pendingDamage.add(dif);
       }

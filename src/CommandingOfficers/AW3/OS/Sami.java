@@ -68,9 +68,9 @@ public class Sami extends AW3Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.battleRange < 2 && params.attacker.model.isNone(UnitModel.TROOP) )
+    if( params.battleRange < 2 && params.shooter.model.isNone(UnitModel.TROOP) )
       params.attackPower -= 10;
-    if( params.attacker.model.isAny(UnitModel.TROOP) )
+    if( params.shooter.model.isAny(UnitModel.TROOP) )
       params.attackPower += 20;
   }
   @Override

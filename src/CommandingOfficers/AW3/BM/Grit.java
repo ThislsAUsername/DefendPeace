@@ -72,7 +72,7 @@ public class Grit extends AW3Commander
   {
     if( params.battleRange > 1 )
       params.attackPower += 20;
-    if( params.attacker.model.isAny(UnitModel.TROOP) )
+    if( params.shooter.model.isAny(UnitModel.TROOP) )
       return;
     if( params.battleRange < 2 )
       params.attackPower -= 20;

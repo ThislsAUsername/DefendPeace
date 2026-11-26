@@ -63,9 +63,9 @@ public class Sensei extends AWBWCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAny(UnitModel.HOVER | UnitModel.TROOP) )
+    if( params.shooter.model.isAny(UnitModel.HOVER | UnitModel.TROOP) )
       params.attackPower += 50;
-    if( params.attacker.model.isNone(UnitModel.AIR) )
+    if( params.shooter.model.isNone(UnitModel.AIR) )
       params.attackPower -= 10;
   }
   @Override

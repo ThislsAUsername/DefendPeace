@@ -2,7 +2,7 @@ package Engine.UnitMods;
 
 import Engine.Combat.CombatContext;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Units.UnitContext;
 
 /**
@@ -32,21 +32,21 @@ public abstract class UnitModFilter implements UnitModifier
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( shouldApplyTo(params.attacker) )
+    if( shouldApplyTo(params.shooter) )
        effect.modifyUnitAttack(params);
   }
 
   @Override
-  public void modifyUnitAttackOnUnit(BattleParams params)
+  public void modifyUnitAttackOnUnit(StrikeUnitParams params)
   {
-    if( shouldApplyTo(params.attacker) )
+    if( shouldApplyTo(params.shooter) )
       effect.modifyUnitAttackOnUnit(params);
   }
 
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    if( shouldApplyTo(params.defender) )
+    if( shouldApplyTo(params.targetUnit) )
       effect.modifyUnitDefenseAgainstUnit(params);
   }
 

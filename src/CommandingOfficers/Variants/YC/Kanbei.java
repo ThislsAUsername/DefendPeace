@@ -9,7 +9,7 @@ import Engine.Army;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitMods.CounterMultiplierModifier;
 import Engine.UnitMods.UnitDamageModifier;
@@ -66,7 +66,7 @@ public class Kanbei extends AWBWCommander
     params.attackPower += 20;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
     params.defenseSubtraction += 20;
   }

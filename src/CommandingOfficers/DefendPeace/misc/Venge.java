@@ -15,7 +15,7 @@ import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.StrikeParams;
 import Engine.Combat.CombatContext.InitiativeType;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatContext;
 import Engine.Combat.DamagePopup;
@@ -97,9 +97,9 @@ public class Venge extends Commander
     params.attackPower -= 10;
   }
   @Override
-  public void modifyUnitAttackOnUnit(BattleParams params)
+  public void modifyUnitAttackOnUnit(StrikeUnitParams params)
   {
-    if( aggressors.contains(params.defender.unit) )
+    if( aggressors.contains(params.targetUnit.unit) )
     {
       // Boost attack if it's time to avenge slights
       params.attackPower += VENGEANCE_BOOST;

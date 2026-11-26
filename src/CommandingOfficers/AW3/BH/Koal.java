@@ -62,9 +62,9 @@ public class Koal extends AW3Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( null == params.attacker.env )
+    if( null == params.shooter.env )
       return;
-    if( params.attacker.env.terrainType == TerrainType.ROAD )
+    if( params.shooter.env.terrainType == TerrainType.ROAD )
       params.attackPower += 10;
   }
   public static class RoadHitMod implements UnitModifierWithDefaults
@@ -78,9 +78,9 @@ public class Koal extends AW3Commander
     @Override
     public void modifyUnitAttack(StrikeParams params)
     {
-      if( null == params.attacker.env )
+      if( null == params.shooter.env )
         return;
-      if( params.attacker.env.terrainType == TerrainType.ROAD )
+      if( params.shooter.env.terrainType == TerrainType.ROAD )
         params.attackPower += power;
     }
   }

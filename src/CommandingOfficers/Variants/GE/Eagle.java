@@ -6,7 +6,7 @@ import CommandingOfficers.AWBW.AWBWCommander;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.GameEventQueue;
 import Engine.StateTrackers.LightningUnitTracker;
 import Engine.StateTrackers.StateTracker;
@@ -84,19 +84,19 @@ public class Eagle extends AWBWCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAirUnit() )
+    if( params.shooter.model.isAirUnit() )
     {
       params.attackPower += 15;
       return;
     }
     params.attackPower -= 20;
-    if( params.attacker.model.isSeaUnit() )
+    if( params.shooter.model.isSeaUnit() )
       params.attackPower -= 30;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    if( params.defender.model.isAirUnit() )
+    if( params.targetUnit.model.isAirUnit() )
       params.defenseSubtraction += 10;
   }
   @Override

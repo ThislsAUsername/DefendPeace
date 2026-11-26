@@ -6,7 +6,7 @@ import CommandingOfficers.CommanderAbility.CostBasis;
 import CommandingOfficers.AW3.AW3Commander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.IndirectDefenseModifier;
 import Engine.UnitMods.TowerCountMultiplier;
 import Engine.UnitMods.UnitModifier;
@@ -71,7 +71,7 @@ public class Javier extends AW3Commander
   }
 
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
     if( params.battleRange < 2 )
       params.defenseSubtraction += 20;
@@ -79,14 +79,14 @@ public class Javier extends AW3Commander
   @Override
   public void applyTowerAttack(StrikeParams params)
   {
-    UnitContext minion = params.attacker;
+    UnitContext minion = params.shooter;
     params.attackPower += minion.towerCountDS  * 10;
     params.attackPower += minion.towerCountDoR * 10;
   }
   @Override
-  public void applyTowerDefense(BattleParams params)
+  public void applyTowerDefense(StrikeUnitParams params)
   {
-    UnitContext minion = params.defender;
+    UnitContext minion = params.targetUnit;
     params.defenseSubtraction += minion.towerCountDS  * 10;
     params.defenseDivision    += minion.towerCountDoR * 10;
   }

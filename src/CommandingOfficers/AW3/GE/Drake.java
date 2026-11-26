@@ -63,9 +63,9 @@ public class Drake extends AW3Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAirUnit() )
+    if( params.shooter.model.isAirUnit() )
       params.attackPower -= 10;
-    if( params.attacker.model.isSeaUnit() )
+    if( params.shooter.model.isSeaUnit() )
       params.attackPower += 20;
   }
 

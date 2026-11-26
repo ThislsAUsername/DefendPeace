@@ -60,9 +60,9 @@ public class LashDSBW extends AWBWCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAirUnit() )
+    if( params.shooter.model.isAirUnit() )
       return;
-    params.attackPower += params.attacker.terrainStars * 5;
+    params.attackPower += params.shooter.terrainStars * 5;
   }
 
   // DS Lash isn't slowed in weather

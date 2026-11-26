@@ -16,7 +16,7 @@ import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventListener;
 import Engine.GameEvents.GameEventQueue;
@@ -176,13 +176,13 @@ public class Ave extends Commander
 
   /** Ave's units take less cover from forests. */
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    if( params.defender.env == null )
+    if( params.targetUnit.env == null )
       return;
     // We are defending, in a FOREST
-    if( (params.defender.env.terrainType == TerrainType.FOREST)
-        && (params.defender.model.isLandUnit()))  // And our unit is actually on the ground.
+    if( (params.targetUnit.env.terrainType == TerrainType.FOREST)
+        && (params.targetUnit.model.isLandUnit()))  // And our unit is actually on the ground.
     {
       params.terrainStars--;
     }

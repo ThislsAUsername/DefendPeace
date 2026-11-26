@@ -66,7 +66,7 @@ public class Max extends AW3Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAny(UnitModel.TROOP) )
+    if( params.shooter.model.isAny(UnitModel.TROOP) )
       return;
     if( params.battleRange < 2 )
       params.attackPower += 20;

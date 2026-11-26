@@ -9,7 +9,7 @@ import Engine.GameScenario;
 import Engine.UnitActionFactory;
 import Engine.GameScenario.GameRules;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import UI.UIUtils;
 import Terrain.MapMaster;
 import Terrain.TerrainType;
@@ -79,15 +79,15 @@ public class Greyfield extends AWBWCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAny(BOOST_MASK_ANY)
-        || buffablePlanes.contains(params.attacker.model) )
+    if( params.shooter.model.isAny(BOOST_MASK_ANY)
+        || buffablePlanes.contains(params.shooter.model) )
       params.attackPower += 10;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    if( params.defender.model.isAny(BOOST_MASK_ANY)
-        || buffablePlanes.contains(params.defender.model) )
+    if( params.targetUnit.model.isAny(BOOST_MASK_ANY)
+        || buffablePlanes.contains(params.targetUnit.model) )
       params.defenseSubtraction += 40;
   }
 
