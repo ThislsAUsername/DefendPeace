@@ -335,7 +335,7 @@ public class InfantrySpamAI implements AIController
     ip.cargo     = new SearchNode(unit.x, unit.y, 0);
     ip.transport = new SearchNode(unit.x, unit.y, 0);
     loadPoints.put(new XYCoord(unit), ip);
-    HashMap<UnitModel, HashSet<XYCoord>> modelTToUnloadPoints = AITransportUtils.findUnloadTiles(gameMap, rc, new UnitContext(cargo), goal);
+    HashMap<UnitModel, HashSet<XYCoord>> modelTToUnloadPoints = AITransportUtils.findDeliveryOptions(gameMap, rc, new UnitContext(cargo), goal);
     HashSet<SearchNode> unloadPaths = AITransportUtils.findShortestUnloadTrips(gameMap, new UnitContext(unit), loadPoints, modelTToUnloadPoints.get(unit.model));
 
     ArrayList<GameAction> unloadActions = unitActionsByType.get(UnitActionFactory.UNLOAD);
@@ -369,7 +369,7 @@ public class InfantrySpamAI implements AIController
 
     // For existing transports: Select the first one that hasn't been scheduled this turn, could unload, and could pick the cargo up.
     UnitContext uc = new UnitContext(unit);
-    HashMap<UnitModel, HashSet<XYCoord>> modelTToUnloadPoints = AITransportUtils.findUnloadTiles(gameMap, rc, uc, goal);
+    HashMap<UnitModel, HashSet<XYCoord>> modelTToUnloadPoints = AITransportUtils.findDeliveryOptions(gameMap, rc, uc, goal);
     UnitContext myRide = null;
     for( Unit possibleTransport : myArmy.getUnits() )
       if( !transportsPicked.contains(possibleTransport) )

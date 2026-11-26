@@ -20,7 +20,7 @@ public class AITransportUtils
    * Note that this only does a 1-ply search from the <b>destination</b>, so a recursive doughnut island would need extra scaffolding.<p>
    * Note also that this will not calc transports with the exact same movetype as the thing they're transporting, since they use the same island.
    */
-  public static HashMap<UnitModel, HashSet<XYCoord>> findUnloadTiles(GameMap map, ReachabilityCache rc, UnitContext cargo, XYCoord dest)
+  public static HashMap<UnitModel, HashSet<XYCoord>> findDeliveryOptions(GameMap map, ReachabilityCache rc, UnitContext cargo, XYCoord dest)
   {
     var transportToBeachMap = new HashMap<UnitModel, HashSet<XYCoord>>();
     var grms = map.game.rules.unitModelScheme.getGameReadyModels();
