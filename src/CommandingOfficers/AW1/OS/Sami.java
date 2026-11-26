@@ -6,7 +6,7 @@ import CommandingOfficers.*;
 import CommandingOfficers.AW1.AW1Commander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.DamageMultiplierDefense;
 import Engine.UnitMods.DamageMultiplierOffense;
 import Engine.UnitMods.UnitModifier;
@@ -68,22 +68,22 @@ public class Sami extends AW1Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.battleRange < 2 && params.attacker.model.isNone(UnitModel.TROOP) )
+    if( params.battleRange < 2 && params.shooter.model.isNone(UnitModel.TROOP) )
       params.attackPower -= 10;
     if( null != getActiveAbility() )
       return;
-    if( params.attacker.model.isAny(UnitModel.TROOP) )
+    if( params.shooter.model.isAny(UnitModel.TROOP) )
     {
       params.attackerDamageMultiplier *= 120;
       params.attackerDamageMultiplier /= 100;
     }
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
     if( null != getActiveAbility() )
       return;
-    if( params.defender.model.isAny(UnitModel.TROOP) )
+    if( params.targetUnit.model.isAny(UnitModel.TROOP) )
     {
       params.defenderDamageMultiplier *=  90;
       params.defenderDamageMultiplier /= 100;

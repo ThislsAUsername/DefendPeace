@@ -6,7 +6,7 @@ import CommandingOfficers.*;
 import CommandingOfficers.AW3.AW3Commander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.CounterMultiplierModifier;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitFightStatModifier;
@@ -67,7 +67,7 @@ public class Kanbei extends AW3Commander
     params.attackPower += 20;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
     params.defenseSubtraction += 20;
   }

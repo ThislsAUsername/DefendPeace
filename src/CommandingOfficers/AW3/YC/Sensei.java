@@ -69,11 +69,11 @@ public class Sensei extends AW3Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAny(UnitModel.HOVER) )
+    if( params.shooter.model.isAny(UnitModel.HOVER) )
       params.attackPower += 50;
-    if( params.attacker.model.isAny(UnitModel.TROOP) )
+    if( params.shooter.model.isAny(UnitModel.TROOP) )
       params.attackPower += 10;
-    if( params.attacker.model.isSeaUnit() )
+    if( params.shooter.model.isSeaUnit() )
       params.attackPower -= 10;
   }
   @Override

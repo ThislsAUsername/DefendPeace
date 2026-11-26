@@ -5,7 +5,7 @@ import CommandingOfficers.*;
 import CommandingOfficers.AWBW.AWBWCommander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitDefenseModifier;
 import Engine.UnitMods.UnitModifier;
@@ -61,15 +61,15 @@ public class Eagle extends AWBWCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAirUnit() )
+    if( params.shooter.model.isAirUnit() )
       params.attackPower += 15;
-    else if( params.attacker.model.isSeaUnit() )
+    else if( params.shooter.model.isSeaUnit() )
       params.attackPower -= 30;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    if( params.defender.model.isAirUnit() )
+    if( params.targetUnit.model.isAirUnit() )
       params.defenseSubtraction += 10;
   }
   @Override

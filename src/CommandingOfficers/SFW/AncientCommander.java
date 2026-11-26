@@ -7,7 +7,7 @@ import CommandingOfficers.Commander;
 import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.CommanderInfo.InfoPage;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.StateTrackers.SFWExperienceTracker;
 import Engine.StateTrackers.SFWExperienceTracker.SFWRank;
 import Engine.StateTrackers.StateTracker;
@@ -55,13 +55,13 @@ public abstract class AncientCommander extends Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    SFWRank rank = vetTracker.getRank(params.attacker.unit);
+    SFWRank rank = vetTracker.getRank(params.shooter.unit);
     params.attackPower += rank.attack;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    SFWRank rank = vetTracker.getRank(params.defender.unit);
+    SFWRank rank = vetTracker.getRank(params.targetUnit.unit);
     params.defenderDamageMultiplier *= (100 - rank.defense);
     params.defenderDamageMultiplier /= 100;
   }

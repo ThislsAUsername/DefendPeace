@@ -1,6 +1,6 @@
 package Engine.UnitMods;
 
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 
 public class UnitDefenseDoRModifier implements UnitModifierWithDefaults
 {
@@ -13,7 +13,7 @@ public class UnitDefenseDoRModifier implements UnitModifierWithDefaults
   }
 
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
     params.defenseDivision += defenseModifier;
   }

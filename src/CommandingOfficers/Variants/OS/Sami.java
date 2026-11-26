@@ -8,7 +8,7 @@ import CommandingOfficers.AWBW.AWBWCommander;
 import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.GameEventQueue;
 import Engine.GameEvents.ModifyFundsEvent;
 import Engine.UnitMods.UnitDamageModifier;
@@ -75,15 +75,15 @@ public class Sami extends AWBWCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.battleRange < 2 && params.attacker.model.isNone(UnitModel.TROOP) )
+    if( params.battleRange < 2 && params.shooter.model.isNone(UnitModel.TROOP) )
       params.attackPower -= 10;
-    if( params.attacker.model.isAny(UnitModel.TROOP) )
+    if( params.shooter.model.isAny(UnitModel.TROOP) )
       params.attackPower += 20;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    if( params.defender.model.isAny(UnitModel.TROOP) )
+    if( params.targetUnit.model.isAny(UnitModel.TROOP) )
       params.defenseSubtraction += 10;
   }
   @Override

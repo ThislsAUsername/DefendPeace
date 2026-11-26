@@ -5,7 +5,7 @@ import CommandingOfficers.CommanderInfo;
 import CommandingOfficers.DeployableCommander;
 import CommandingOfficers.AW4.RuinedCommander;
 import Engine.GameScenario;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.GameEventQueue;
 import UI.UIUtils;
 import Units.*;
@@ -95,10 +95,10 @@ public class DocLight extends RuinedCommander
   }
 
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
     super.modifyUnitDefenseAgainstUnit(params);
-    if( isInZone(params.defender) && !deployedRock )
+    if( isInZone(params.targetUnit) && !deployedRock )
     {
       if( params.battleRange > 1 )
         params.defenseDivision += BLUES_SHIELD;

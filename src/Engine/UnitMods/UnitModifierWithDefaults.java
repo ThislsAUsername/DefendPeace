@@ -2,7 +2,7 @@ package Engine.UnitMods;
 
 import Engine.Combat.CombatContext;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Units.UnitContext;
 
 /**
@@ -21,12 +21,12 @@ public interface UnitModifierWithDefaults extends UnitModifier
   }
 
   @Override
-  default void modifyUnitAttackOnUnit(BattleParams params)
+  default void modifyUnitAttackOnUnit(StrikeUnitParams params)
   {
   }
 
   @Override
-  default void modifyUnitDefenseAgainstUnit(BattleParams params)
+  default void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
   }
 

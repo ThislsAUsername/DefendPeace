@@ -6,7 +6,7 @@ import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.GameEventQueue;
 import Engine.StateTrackers.SamiLevelTracker;
 import Engine.StateTrackers.SamiLevelTracker.SamiRank;
@@ -90,11 +90,11 @@ public class SamiLevels extends AW1Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    boolean isTroop = params.attacker.model.isAny(UnitModel.TROOP);
+    boolean isTroop = params.shooter.model.isAny(UnitModel.TROOP);
     if( !isTroop )
       params.attackPower -= 10;
     int rankBoost = isTroop ? 120 : 110;
-    SamiRank rank = vetTracker.getRank(params.attacker.unit);
+    SamiRank rank = vetTracker.getRank(params.shooter.unit);
     for( int i = 0; i < rank.exp; ++i )
     {
       params.attackerDamageMultiplier *= rankBoost;
@@ -102,10 +102,10 @@ public class SamiLevels extends AW1Commander
     }
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    UnitContext minion = params.defender;
-    boolean isTroop = params.attacker.model.isAny(UnitModel.TROOP);
+    UnitContext minion = params.targetUnit;
+    boolean isTroop = params.shooter.model.isAny(UnitModel.TROOP);
     if( !isTroop )
       params.defenseSubtraction -= 10;
     int rankBoost = isTroop ? 90 : 95;

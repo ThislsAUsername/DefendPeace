@@ -2,6 +2,7 @@ package CommandingOfficers.DefendPeace.misc;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,7 +14,8 @@ import Engine.GameScenario;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.CombatContext.InitiativeType;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.Combat.BattleSummary;
 import Engine.Combat.CombatContext;
 import Engine.Combat.DamagePopup;
@@ -31,6 +33,7 @@ import Terrain.MapMaster;
 import UI.UIUtils;
 import Units.Unit;
 import Units.UnitContext;
+import lombok.var;
 
 /*
  * Venge enhances counter-attacks of all sorts.
@@ -94,9 +97,9 @@ public class Venge extends Commander
     params.attackPower -= 10;
   }
   @Override
-  public void modifyUnitAttackOnUnit(BattleParams params)
+  public void modifyUnitAttackOnUnit(StrikeUnitParams params)
   {
-    if( aggressors.contains(params.defender.unit) )
+    if( aggressors.contains(params.targetUnit.unit) )
     {
       // Boost attack if it's time to avenge slights
       params.attackPower += VENGEANCE_BOOST;
@@ -151,10 +154,17 @@ public class Venge extends Commander
     @Override
     public void changeCombatContext(CombatContext instance, UnitContext buffOwner)
     {
-      // If we're swapping, and we can counter, and we're on the defensive, do the swap.
-      if( instance.canCounter && instance.defender == buffOwner )
+      // If the defender can counter, make it shoot first
+      if( instance.defender == buffOwner )
       {
-        instance.swapCombatants();
+        var tempTSTC = new HashMap<Integer, UnitContext>(instance.timeStepToCounter);
+        instance.timeStepToCounter.clear();
+        for( int time : tempTSTC.keySet() )
+        {
+          UnitContext uc = tempTSTC.get(time);
+          int newTime = Math.max(0, time - InitiativeType.COUNTER.ordinal()); // This technically implies a pair of shots at 5,6 would be collapsed to 1 shot, but uh... don't do that.
+          instance.timeStepToCounter.put(newTime, uc);
+        }
       }
     }
   }

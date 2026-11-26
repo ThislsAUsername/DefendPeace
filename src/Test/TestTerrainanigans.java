@@ -8,7 +8,7 @@ import Engine.GameInstance;
 import Engine.GamePath;
 import Engine.GameScenario;
 import Engine.Combat.CombatContext;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.StateTrackers.DSSonjaDebuffTracker;
 import Engine.StateTrackers.StateTracker;
 import Engine.UnitActionLifecycles.BattleLifecycle;
@@ -78,21 +78,21 @@ public class TestTerrainanigans extends TestCase
     UnitContext infBW   = new UnitContext(addUnit(map, sonjaBW, UnitModel.TROOP, 2, 7)); // On adjacent mountain
     aa.unit.isTurnOver = false;
 
-    BattleParams murderCalc    = new CombatContext(game, map, aa, infCart, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams preMurderCalc = new CombatContext(game, map, aa, infBW,   CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams murderCalc    = new CombatContext(game, map, aa, infCart, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams preMurderCalc = new CombatContext(game, map, aa, infBW,   CalcType.NO_LUCK).applyModifiers().getAttack();
     // Murder; this should make Cart Sonja lose.
     performGameAction(new BattleLifecycle.BattleAction(map, aa.unit, GamePath.stayPut(aa.unit), 1, 6), game);
     testPassed &= validate(0 == infCart.unit.health,  "    Shooting the inf didn't make it dead?");
     testPassed &= validate(sonjaCart.army.isDefeated, "    Cart Sonja didn't lose?");
 
-    BattleParams postMurderCalc = new CombatContext(game, map, aa, infBW, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams postMurderCalc = new CombatContext(game, map, aa, infBW, CalcType.NO_LUCK).applyModifiers().getAttack();
     turn(game);
-    BattleParams postTurnCalc   = new CombatContext(game, map, aa, infBW, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams postTurnCalc   = new CombatContext(game, map, aa, infBW, CalcType.NO_LUCK).applyModifiers().getAttack();
 
-    testPassed &= validate(3 == murderCalc.attacker.terrainStars,     "    Shooting cart Sonja loses me terrain stars to SonjaDSBW?");
-    testPassed &= validate(2 == preMurderCalc.attacker.terrainStars,  "    Shooting SonjaDSBW doesn't lose me an extra terrain star");
-    testPassed &= validate(2 == postMurderCalc.attacker.terrainStars, "    Killing Sonja gets me back my star immediately");
-    testPassed &= validate(3 == postTurnCalc.attacker.terrainStars,   "    Killing Sonja never gets me back my star");
+    testPassed &= validate(3 == murderCalc.shooter.terrainStars,     "    Shooting cart Sonja loses me terrain stars to SonjaDSBW?");
+    testPassed &= validate(2 == preMurderCalc.shooter.terrainStars,  "    Shooting SonjaDSBW doesn't lose me an extra terrain star");
+    testPassed &= validate(2 == postMurderCalc.shooter.terrainStars, "    Killing Sonja gets me back my star immediately");
+    testPassed &= validate(3 == postTurnCalc.shooter.terrainStars,   "    Killing Sonja never gets me back my star");
 
     game.endGame();
     return testPassed;
@@ -116,30 +116,30 @@ public class TestTerrainanigans extends TestCase
     testSubject.myAbilities.get(1).enqueueUnitMods(map, aa.mods); // We can just pretend Prime Tactics is active
     infCart.unit.health = 1; // AA can't push through all that defense to OHKO with no firepower buffs.
 
-    BattleParams murderCalc    = new CombatContext(game, map, aa, infCart, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams preMurderCalc = new CombatContext(game, map, aa, infBW,   CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams preMurderDeth = new CombatContext(game, map, infBW, aa,   CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams murderCalc    = new CombatContext(game, map, aa, infCart, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams preMurderCalc = new CombatContext(game, map, aa, infBW,   CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams preMurderDeth = new CombatContext(game, map, infBW, aa,   CalcType.NO_LUCK).applyModifiers().getAttack();
     // Murder; this should make Cart Sonja lose.
     performGameAction(new BattleLifecycle.BattleAction(map, aa.unit, GamePath.stayPut(aa.unit), 1, 6), game);
     testPassed &= validate(0 == infCart.unit.health,  "    Shooting the inf didn't make it dead?");
     testPassed &= validate(sonjaCart.army.isDefeated, "    Cart Sonja didn't lose?");
 
-    BattleParams postMurderCalc = new CombatContext(game, map, aa, infBW, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams postMurderCalc = new CombatContext(game, map, aa, infBW, CalcType.NO_LUCK).applyModifiers().getAttack();
     turn(game);
-    BattleParams postTurnCalc   = new CombatContext(game, map, aa, infBW, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams postTurnDeth   = new CombatContext(game, map, infBW, aa, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams postTurnCalc   = new CombatContext(game, map, aa, infBW, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams postTurnDeth   = new CombatContext(game, map, infBW, aa, CalcType.NO_LUCK).applyModifiers().getAttack();
 
     // Mountain = 4 stars, SCOP = x2 = 8
     // SCOP = 3, applies first = x2 = -6
-    testPassed &= validate((8 - 6) == murderCalc.attacker.terrainStars,         "    Shooting cart Sonja loses me terrain stars to SonjaDSBW?");
+    testPassed &= validate((8 - 6) == murderCalc.shooter.terrainStars,         "    Shooting cart Sonja loses me terrain stars to SonjaDSBW?");
     // COP = 2, applies second = x1 = -2
-    testPassed &= validate((8 - 6 - 2) == preMurderCalc.attacker.terrainStars,  "    Shooting SonjaDSBW doesn't lose me extra terrain stars");
+    testPassed &= validate((8 - 6 - 2) == preMurderCalc.shooter.terrainStars,  "    Shooting SonjaDSBW doesn't lose me extra terrain stars");
     // COP = 2, applies first = x2 = -4... but it's capped at 0
-    testPassed &= validate((8 - 6 - 2) == preMurderDeth.defender.terrainStars,  "    SonjaDSBW shooting Lash doesn't debuff before SCOP applies");
-    testPassed &= validate((8 - 6 - 2) == postMurderCalc.attacker.terrainStars, "    Killing Sonja gets me back my stars immediately");
-    testPassed &= validate((8 - 2) == postTurnCalc.attacker.terrainStars,       "    Killing Sonja never gets me back my stars");
+    testPassed &= validate((8 - 6 - 2) == preMurderDeth.targetUnit.terrainStars,  "    SonjaDSBW shooting Lash doesn't debuff before SCOP applies");
+    testPassed &= validate((8 - 6 - 2) == postMurderCalc.shooter.terrainStars, "    Killing Sonja gets me back my stars immediately");
+    testPassed &= validate((8 - 2) == postTurnCalc.shooter.terrainStars,       "    Killing Sonja never gets me back my stars");
     // COP = 2, applies first = x2 = -4
-    testPassed &= validate((8 - 4) == postTurnDeth.defender.terrainStars,       "    Killing Sonja never gets me back my stars");
+    testPassed &= validate((8 - 4) == postTurnDeth.targetUnit.terrainStars,       "    Killing Sonja never gets me back my stars");
 
     game.endGame();
     return testPassed;

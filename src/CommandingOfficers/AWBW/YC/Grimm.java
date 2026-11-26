@@ -6,7 +6,7 @@ import CommandingOfficers.*;
 import CommandingOfficers.AWBW.AWBWCommander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.UnitDamageModifier;
 import Engine.UnitMods.UnitModifier;
 import UI.UIUtils;
@@ -59,7 +59,7 @@ public class Grimm extends AWBWCommander
     params.attackPower += 30;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
     params.defenseSubtraction -= 20;
   }

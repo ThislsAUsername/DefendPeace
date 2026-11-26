@@ -6,7 +6,7 @@ import CommandingOfficers.*;
 import CommandingOfficers.AW1.AW1Commander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.DirectDamageModifier;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitMovementModifier;
@@ -62,22 +62,22 @@ public class Max extends AW1Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAny(UnitModel.TROOP) )
+    if( params.shooter.model.isAny(UnitModel.TROOP) )
       return;
     if( params.battleRange < 2 )
       params.attackPower += 50;
-    if( params.attacker.model.isAny(UnitModel.INDIRECT) )
+    if( params.shooter.model.isAny(UnitModel.INDIRECT) )
     {
       params.attackerDamageMultiplier *=  90;
       params.attackerDamageMultiplier /= 100;
     }
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    if( params.attacker.model.isAny(UnitModel.TROOP) )
+    if( params.shooter.model.isAny(UnitModel.TROOP) )
       return;
-    if( params.defender.model.isAny(UnitModel.INDIRECT) )
+    if( params.targetUnit.model.isAny(UnitModel.INDIRECT) )
     {
       params.defenderDamageMultiplier *= 110;
       params.defenderDamageMultiplier /= 100;

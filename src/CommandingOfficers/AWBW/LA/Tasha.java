@@ -7,7 +7,7 @@ import CommandingOfficers.AWBW.AWBWCommander;
 import CommandingOfficers.CommanderAbility.CostBasis;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.UnitModifier;
 import Engine.UnitMods.UnitMovementModifier;
 import Engine.UnitMods.UnitTypeFilter;
@@ -69,13 +69,13 @@ public class Tasha extends AWBWCommander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isAny(BOOST_MASK_ANY) )
+    if( params.shooter.model.isAny(BOOST_MASK_ANY) )
       params.attackPower += 40;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    if( params.defender.model.isAny(BOOST_MASK_ANY) )
+    if( params.targetUnit.model.isAny(BOOST_MASK_ANY) )
       params.defenseSubtraction += 20;
   }
 

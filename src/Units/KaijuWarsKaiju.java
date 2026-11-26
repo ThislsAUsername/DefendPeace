@@ -18,7 +18,7 @@ import Engine.UnitActionFactory;
 import Engine.Utils;
 import Engine.XYCoord;
 import Engine.Combat.BattleSummary;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.CommanderEnergyChangeEvent;
 import Engine.GameEvents.CreateUnitEvent;
 import Engine.GameEvents.GameEventQueue;
@@ -450,11 +450,11 @@ public class KaijuWarsKaiju
     // No active abilities!
 
     @Override
-    public void modifyUnitDefenseAgainstUnit(BattleParams params)
+    public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
     {
       if( null == params.map )
         return;
-      final Unit snek = params.defender.unit;
+      final Unit snek = params.targetUnit.unit;
       KaijuStateTracker kaijuTracker = StateTracker.instance(params.map.game, KaijuStateTracker.class);
       boolean carapaceReady = kaijuTracker.isReady(snek, SnekMod.class);
       carapaceReady &= kaijuTracker.kaijuAbilityTier.get(snek) != KaijuAbilityTier.BASIC;

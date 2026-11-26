@@ -9,7 +9,7 @@ import Engine.GameScenario;
 import Engine.XYCoord;
 import Engine.Combat.DamagePopup;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.GameEvents.GameEvent;
 import Engine.GameEvents.GameEventQueue;
 import Engine.UnitMods.DamageMultiplierDefense;
@@ -72,7 +72,7 @@ public class SturmVS extends AW1Commander
     params.attackerDamageMultiplier /= 100;
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
     if( null != getActiveAbility() )
       return;

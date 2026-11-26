@@ -152,8 +152,9 @@ public class FightClub
 
       for( int gameIndex = 0; gameIndex < params.numGames; ++gameIndex )
       {
+        boolean simulCounters = false;
         GameScenario scenario = new GameScenario(mi.getValidUnitModelSchemes()[0],
-            GameScenario.DEFAULT_INCOME, GameScenario.DEFAULT_STARTING_FUNDS, GameScenario.DEFAULT_UNIT_CAP, FogMode.OFF_DOR, TagMode.OFF);
+            GameScenario.DEFAULT_INCOME, GameScenario.DEFAULT_STARTING_FUNDS, GameScenario.DEFAULT_UNIT_CAP, FogMode.OFF_DOR, TagMode.OFF, simulCounters);
 
         int numCos = mi.getNumPlayers();
 
@@ -191,7 +192,7 @@ public class FightClub
         GameInstance newGame = null;
         if( map.initOK() )
         {
-          newGame = new GameInstance(scenario, combatantArray, map, params.defaultWeather, false);
+          newGame = new GameInstance(scenario, combatantArray, map, params.defaultWeather, simulCounters);
         }
 
         GameResults gameResults = runGame(newGame, defaultOut);

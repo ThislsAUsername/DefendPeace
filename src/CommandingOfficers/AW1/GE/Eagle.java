@@ -5,7 +5,7 @@ import CommandingOfficers.*;
 import CommandingOfficers.AW1.AW1Commander;
 import Engine.GameScenario;
 import Engine.Combat.StrikeParams;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.UnitMods.DamageMultiplierDefense;
 import Engine.UnitMods.DamageMultiplierOffense;
 import Engine.UnitMods.UnitModifier;
@@ -60,18 +60,18 @@ public class Eagle extends AW1Commander
   @Override
   public void modifyUnitAttack(StrikeParams params)
   {
-    if( params.attacker.model.isSeaUnit() )
+    if( params.shooter.model.isSeaUnit() )
       params.attackPower -= 20;
-    if( params.attacker.model.isAirUnit() )
+    if( params.shooter.model.isAirUnit() )
     {
       params.attackerDamageMultiplier *= 115;
       params.attackerDamageMultiplier /= 100;
     }
   }
   @Override
-  public void modifyUnitDefenseAgainstUnit(BattleParams params)
+  public void modifyUnitDefenseAgainstUnit(StrikeUnitParams params)
   {
-    if( params.defender.model.isAirUnit() )
+    if( params.targetUnit.model.isAirUnit() )
     {
       params.defenderDamageMultiplier *= 90;
       params.defenderDamageMultiplier /= 100;

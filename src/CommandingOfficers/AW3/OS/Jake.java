@@ -65,7 +65,7 @@ public class Jake extends AW3Commander
 
   public static void applyPlainsBoost(StrikeParams params, int boost)
   {
-    if( params.attacker.env != null && params.attacker.env.terrainType == TerrainType.GRASS )
+    if( params.shooter.env != null && params.shooter.env.terrainType == TerrainType.GRASS )
       params.attackPower += boost;
   }
   @Override

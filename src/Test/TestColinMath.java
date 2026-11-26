@@ -5,7 +5,7 @@ import Engine.Army;
 import Engine.GameInstance;
 import Engine.GameScenario;
 import Engine.Combat.CombatContext;
-import Engine.Combat.StrikeParams.BattleParams;
+import Engine.Combat.StrikeParams.StrikeUnitParams;
 import Engine.Combat.CombatContext.CalcType;
 import Terrain.MapInfo;
 import Terrain.MapLibrary;
@@ -61,9 +61,9 @@ public class TestColinMath extends TestCase
     UnitContext tank2    = new UnitContext(colin2, colin2.getUnitModel(UnitModel.ASSAULT, false));
     UnitContext tank3    = new UnitContext(colin3, colin3.getUnitModel(UnitModel.ASSAULT, false));
 
-    BattleParams shotBW = new CombatContext(game, map, tankBW, tankOlaf, 1, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams shot2  = new CombatContext(game, map, tank2 , tankOlaf, 1, CalcType.NO_LUCK).applyModifiers().getAttack();
-    BattleParams shot3  = new CombatContext(game, map, tank3 , tankOlaf, 1, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams shotBW = new CombatContext(game, map, tankBW, tankOlaf, 1, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams shot2  = new CombatContext(game, map, tank2 , tankOlaf, 1, CalcType.NO_LUCK).applyModifiers().getAttack();
+    StrikeUnitParams shot3  = new CombatContext(game, map, tank3 , tankOlaf, 1, CalcType.NO_LUCK).applyModifiers().getAttack();
 
     shotBW.attackPower += 10;
     shotBW.attackPower += CommandingOfficers.AWBW.BM.Colin.calcSuperBoost(241700);
