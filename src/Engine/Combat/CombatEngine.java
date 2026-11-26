@@ -74,7 +74,7 @@ public class CombatEngine
   }
 
   // Add an attack, if the shooter exists and can shoot.
-  protected static void addShot(ArrayList<BattleParams> shooters, CombatContext context, int time, UnitState attackerState, UnitContext defender, boolean isCounter)
+  protected static void addShotIfValid(ArrayList<BattleParams> shooters, CombatContext context, int time, UnitState attackerState, UnitContext defender, boolean isCounter)
   {
     UnitContext aMan = null;
     if( !isCounter )
@@ -145,8 +145,8 @@ public class CombatEngine
       int time = timesteps.get(tsIdx);
 
       var attacks = new ArrayList<BattleParams>();
-      addShot(attacks, context, time, attackerFinal, new UnitContext(defenderFinal), false);
-      addShot(attacks, context, time, defenderFinal, new UnitContext(attackerFinal), true);
+      addShotIfValid(attacks, context, time, attackerFinal, new UnitContext(defenderFinal), false);
+      addShotIfValid(attacks, context, time, defenderFinal, new UnitContext(attackerFinal), true);
 
       // Get the shots flying
       for( var attackInstance : attacks )
