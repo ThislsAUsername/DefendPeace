@@ -105,7 +105,8 @@ public class InfantrySpamAI implements AIController
     // Check for a turn-kickoff power
     AIUtils.queueCromulentAbility(actions, myArmy, CommanderAbility.PHASE_TURN_START);
 
-    // Temporary?
+    // Is this init location temporary? Cache invalidation is hard, and properly scoping this data in a StateTracker might also be hard.
+    // At the moment, this call seems pretty cheap, so the simplicity feels like a win.
     rc = new ReachabilityCache(gameMap.game);
     transportsPicked.clear();
   }
