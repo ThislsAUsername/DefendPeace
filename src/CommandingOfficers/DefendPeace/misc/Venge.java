@@ -154,7 +154,7 @@ public class Venge extends Commander
     @Override
     public void changeCombatContext(CombatContext instance, UnitContext buffOwner)
     {
-      // If we're swapping, and we can counter, and we're on the defensive, do the swap.
+      // If the defender can counter, make it shoot first
       if( instance.defender == buffOwner )
       {
         var tempTSTC = new HashMap<Integer, UnitContext>(instance.timeStepToCounter);
