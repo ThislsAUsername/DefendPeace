@@ -10,10 +10,12 @@ import Terrain.GameMap;
 import Units.Unit;
 import Units.UnitContext;
 import Units.MoveTypes.MoveType;
+import lombok.var;
 
 public class PathCalcParams
 {
   public XYCoord start; // Initial location; will usually be in the output set.
+  public HashSet<SearchNode> extraStarts = new HashSet<>(); // Used if you have multiple possible start points; Not validated, and not compatible with findAllValidParents.
   public Unit moverIdentity; // May be null
   public Army team; // The affiliation of the unit moving; may be null to assume everyone's an enemy
   public MoveType mt;
@@ -86,9 +88,17 @@ public class PathCalcParams
     SearchNode root = new SearchNode(start.x, start.y, 1);
     if( findAllValidParents )
       root.allParents = new HashSet<>();
-    powerGrid[start.x][start.y] = encodeMovePower(initialMovePower, 1);
+    int initialPower = encodeMovePower(initialMovePower, 1);
+    powerGrid[start.x][start.y] = initialPower;
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid));
     searchQueue.add(root);
+    for( var extraXYC : extraStarts )
+    {
+      if( extraXYC.equals(start) )
+        continue;
+      powerGrid[extraXYC.x][extraXYC.y] = initialPower;
+      searchQueue.add(new SearchNode(extraXYC.x, extraXYC.y, 1));
+    }
     // do search
     while (!searchQueue.isEmpty())
     {
@@ -142,9 +152,17 @@ public class PathCalcParams
 
     // Set up search parameters.
     SearchNode root = new SearchNode(start.x, start.y, 1);
-    powerGrid[start.x][start.y] = encodeMovePower(initialMovePower, 1);
+    int initialPower = encodeMovePower(initialMovePower, 1);
+    powerGrid[start.x][start.y] = initialPower;
     Queue<SearchNode> searchQueue = new java.util.PriorityQueue<SearchNode>(13, new SearchNodeComparator(powerGrid, x, y));
     searchQueue.add(root);
+    for( var extraXYC : extraStarts )
+    {
+      if( extraXYC.equals(start) )
+        continue;
+      powerGrid[extraXYC.x][extraXYC.y] = initialPower;
+      searchQueue.add(new SearchNode(extraXYC.x, extraXYC.y, 1));
+    }
 
     SearchNode currentNode = null;
 
