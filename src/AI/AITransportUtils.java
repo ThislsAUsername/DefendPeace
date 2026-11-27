@@ -155,6 +155,8 @@ public class AITransportUtils
   public static HashSet<SearchNode> findShortestUnloadTrips(GameMap map, UnitContext transport, HashMap<XYCoord, InterceptPaths> pickups, HashSet<XYCoord> drops)
   {
     var result = new HashSet<SearchNode>();
+    if( null == drops || drops.isEmpty() )
+      return result;
 
     // We use extraStarts here because we don't know which load tile will give us the shortest trip, and this allows calculating that in one shot.
     PathCalcParams pcp = new PathCalcParams(transport, map);
