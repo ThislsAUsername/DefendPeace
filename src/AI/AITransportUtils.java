@@ -50,7 +50,8 @@ public class AITransportUtils
         }
       }
 
-      transportToBeachMap.put(modelT, beaches);
+      if( beaches.size() > 0 )
+        transportToBeachMap.put(modelT, beaches);
     }
 
     return transportToBeachMap;
