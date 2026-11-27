@@ -387,7 +387,7 @@ public class InfantrySpamAI implements AIController
       return; // No dropping is possible
 
     // No transport? That's fine; we can try to buy one.
-    if( null == myRide )
+    if( null == myRide && myArmy.gameRules.unitCap < myArmy.getUnits().size() )
     {
       boolean includeFriendlyOccupied = false;
       CommanderProductionInfo CPI = new CommanderProductionInfo(myArmy, gameMap, includeFriendlyOccupied);
@@ -398,6 +398,8 @@ public class InfantrySpamAI implements AIController
         {
           XYCoord locXYC = loc.getCoordinates();
           Island builtTransportIsland = rc.getIsland(modelT.baseMoveType, locXYC);
+          if( null != loc.getResident() )
+            continue; // Can't build on this tile
           if( !goalIsland.overlapIslands.contains(builtTransportIsland) )
             continue; // Can't reach the destination.
           if( !myIsland.overlapIslands.contains(builtTransportIsland) )
